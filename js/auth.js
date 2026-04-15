@@ -181,9 +181,12 @@ const Auth = {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', async () => {
-        // Guardar inmediatamente antes de cerrar sesión
-        if (window.CAMPUS_USER_ID && App.state) {
-          await Sync.flushNow(window.CAMPUS_USER_ID, App.state);
+        try {
+          if (window.CAMPUS_USER_ID && App.state) {
+            await Sync.flushNow(window.CAMPUS_USER_ID, App.state);
+          }
+        } catch (e) {
+          console.warn('Error al guardar estado antes de logout:', e);
         }
         await this.signOut();
       });
