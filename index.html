@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyCampus ISTQB — Foundation Level v4.0</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ============ AUTH SCREEN ============ -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="auth-logo-icon">🎓</span>
+        <div>
+          <span class="auth-logo-title">MyCampus</span>
+          <span class="auth-logo-sub">ISTQB Foundation Level v4.0</span>
+        </div>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin">Iniciar sesión</button>
+        <button class="auth-tab" id="tabRegister">Registrarse</button>
+      </div>
+
+      <div id="authMessage" class="auth-message" style="display:none"></div>
+
+      <form class="auth-form" id="authForm" autocomplete="on">
+        <div class="auth-field" id="fieldName" style="display:none">
+          <label for="authName">Nombre</label>
+          <input type="text" id="authName" name="name" placeholder="¿Cómo te llamamos?" autocomplete="name" />
+        </div>
+        <div class="auth-field">
+          <label for="authEmail">Email</label>
+          <input type="email" id="authEmail" name="email" placeholder="tu@email.com" autocomplete="email" required />
+        </div>
+        <div class="auth-field">
+          <label for="authPassword">Contraseña</label>
+          <input type="password" id="authPassword" name="password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="auth-btn-primary" id="authSubmit">Iniciar sesión</button>
+      </form>
+
+      <a href="#" class="auth-forgot" id="authForgot">¿Olvidaste tu contraseña?</a>
+
+      <div class="auth-divider"><span>o continuar con</span></div>
+
+      <button class="auth-btn-google" id="authGoogle">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.20443C17.64 8.56625 17.5827 7.95262 17.4764 7.36353H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8196H14.9564C16.6582 14.2527 17.64 11.9455 17.64 9.20443Z" fill="#4285F4"/>
+          <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5614C11.2418 14.1014 10.2109 14.4204 9 14.4204C6.65591 14.4204 4.67182 12.8372 3.96409 10.71H0.957275V13.0418C2.43818 15.9832 5.48182 18 9 18Z" fill="#34A853"/>
+          <path d="M3.96409 10.71C3.78409 10.17 3.68182 9.59319 3.68182 9C3.68182 8.40682 3.78409 7.83 3.96409 7.29V4.95818H0.957275C0.347727 6.17318 0 7.54773 0 9C0 10.4523 0.347727 11.8268 0.957275 13.0418L3.96409 10.71Z" fill="#FBBC05"/>
+          <path d="M9 3.57955C10.3214 3.57955 11.5077 4.03364 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01682 0.957275 4.95818L3.96409 7.29C4.67182 5.16273 6.65591 3.57955 9 3.57955Z" fill="#EA4335"/>
+        </svg>
+        Continuar con Google
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ APP (visible tras login) ============ -->
+  <div id="app-container" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <div>
+          <span class="logo-title">MyCampus</span>
+          <span class="logo-sub">ISTQB FL v4.0</span>
+        </div>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Colapsar menú">&#9776;</button>
+    </div>
+
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">👤</div>
+      <div class="user-info">
+        <span class="user-name" id="userName">Estudiante</span>
+        <span class="user-level" id="userLevel">Nivel 1 · Aprendiz</span>
+      </div>
+      <div class="user-xp">
+        <div class="xp-bar-small">
+          <div class="xp-fill-small" id="xpFillSmall"></div>
+        </div>
+        <span class="xp-text" id="xpText">0 XP</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label" data-i18n="nav_main">Principal</div>
+      <a href="#" class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" data-i18n="nav_dashboard">Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-view="curriculum">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label" data-i18n="nav_curriculum">Curriculum</span>
+        <span class="nav-badge" id="curriculumBadge"></span>
+      </a>
+      <a href="#" class="nav-item" data-view="flashcards">
+        <span class="nav-icon">🃏</span>
+        <span class="nav-label" data-i18n="nav_flashcards">Flashcards</span>
+      </a>
+      <a href="#" class="nav-item" data-view="simulator">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label" data-i18n="nav_simulator">Simulacros</span>
+      </a>
+      <div class="nav-section-label" data-i18n="nav_resources">Recursos</div>
+      <a href="#" class="nav-item" data-view="glossary">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label" data-i18n="nav_glossary">Glosario</span>
+      </a>
+      <a href="#" class="nav-item" data-view="progress">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label" data-i18n="nav_progress">Progreso</span>
+      </a>
+      <a href="#" class="nav-item" data-view="achievements">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label" data-i18n="nav_achievements">Logros</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="streak-widget">
+        <span class="streak-fire">🔥</span>
+        <span class="streak-count" id="streakCount">0</span>
+        <span class="streak-label" data-i18n="streak_label">días seguidos</span>
+      </div>
+      <button class="logout-btn" id="logoutBtn" title="Cerrar sesión">
+        <span class="logout-icon">⏻</span>
+        <span class="logout-label">Salir</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="mainContent">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">&#9776;</button>
+        <h1 class="page-title" id="pageTitle" data-i18n="nav_dashboard">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="globalSearch" placeholder="Buscar..." data-i18n-placeholder="search_placeholder" />
+        </div>
+        <div class="lang-switcher">
+          <button class="lang-btn active" id="btnES" onclick="App.setLang('es')">ES</button>
+          <button class="lang-btn" id="btnEN" onclick="App.setLang('en')">EN</button>
+        </div>
+        <div class="theme-btn" id="themeToggle" title="Cambiar tema">🌙</div>
+      </div>
+    </header>
+
+    <!-- VIEWS CONTAINER -->
+    <div class="views-container" id="viewsContainer">
+
+      <!-- ============ DASHBOARD VIEW ============ -->
+      <div class="view active" id="view-dashboard">
+        <div class="welcome-banner">
+          <div class="welcome-text">
+            <h2 data-i18n="welcome_title">¡Bienvenido a MyCampus ISTQB!</h2>
+            <p data-i18n="welcome_sub">Tu centro de preparación para la certificación ISTQB Foundation Level v4.0</p>
+          </div>
+          <div class="welcome-emoji">🚀</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card" onclick="App.navigate('curriculum')">
+            <div class="stat-icon">📚</div>
+            <div class="stat-value" id="statTopics">0/6</div>
+            <div class="stat-label" data-i18n="stat_chapters">Capítulos</div>
+            <div class="stat-progress">
+              <div class="stat-progress-fill" id="statTopicsFill"></div>
+            </div>
+          </div>
+          <div class="stat-card" onclick="App.navigate('flashcards')">
+            <div class="stat-icon">🃏</div>
+            <div class="stat-value" id="statFlashcards">0</div>
+            <div class="stat-label" data-i18n="stat_flashcards_studied">Flashcards repasadas</div>
+          </div>
+          <div class="stat-card" onclick="App.navigate('simulator')">
+            <div class="stat-icon">📝</div>
+            <div class="stat-value" id="statExams">0</div>
+            <div class="stat-label" data-i18n="stat_exams">Simulacros completados</div>
+          </div>
+          <div class="stat-card" onclick="App.navigate('progress')">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-value" id="statXP">0 XP</div>
+            <div class="stat-label" data-i18n="stat_xp">Experiencia total</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3 data-i18n="continue_studying">Continuar estudiando</h3>
+              <a href="#" class="card-link" onclick="App.navigate('curriculum')" data-i18n="see_all">Ver todo</a>
+            </div>
+            <div id="continueStudying" class="continue-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 data-i18n="daily_challenge">Desafío diario</h3>
+              <span class="badge-pill badge-primary">+20 XP</span>
+            </div>
+            <div id="dailyChallenge" class="daily-challenge-content"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 data-i18n="exam_readiness">Preparación para el examen</h3>
+            </div>
+            <div class="readiness-chart">
+              <div class="readiness-circle">
+                <svg viewBox="0 0 100 100" class="circular-chart">
+                  <circle class="circle-bg" cx="50" cy="50" r="40"/>
+                  <circle class="circle-fill" cx="50" cy="50" r="40" id="readinessCircle" stroke-dasharray="0 251.2"/>
+                </svg>
+                <div class="readiness-percent" id="readinessPercent">0%</div>
+              </div>
+              <div class="readiness-info">
+                <div class="readiness-item">
+                  <span class="r-dot r-dot-done"></span>
+                  <span data-i18n="chapters_completed">Capítulos completados</span>
+                  <strong id="rChapters">0/6</strong>
+                </div>
+                <div class="readiness-item">
+                  <span class="r-dot r-dot-mid"></span>
+                  <span data-i18n="avg_score">Promedio en exámenes</span>
+                  <strong id="rScore">-</strong>
+                </div>
+                <div class="readiness-item">
+                  <span class="r-dot r-dot-low"></span>
+                  <span data-i18n="flashcards_mastered">Flashcards dominadas</span>
+                  <strong id="rFlash">0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 data-i18n="recent_achievements">Logros recientes</h3>
+              <a href="#" class="card-link" onclick="App.navigate('achievements')" data-i18n="see_all">Ver todo</a>
+            </div>
+            <div id="recentAchievements" class="achievements-mini"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ CURRICULUM VIEW ============ -->
+      <div class="view" id="view-curriculum">
+        <div class="curriculum-header">
+          <h2 data-i18n="curriculum_title">Plan de Estudio ISTQB FL v4.0</h2>
+          <p data-i18n="curriculum_sub">Basado en el Syllabus oficial ISTQB CTFL v4.0.1 — 6 capítulos · 1135 minutos de estudio</p>
+        </div>
+        <div class="chapters-grid" id="chaptersGrid"></div>
+      </div>
+
+      <!-- ============ LESSON VIEW ============ -->
+      <div class="view" id="view-lesson">
+        <div class="lesson-nav">
+          <button class="btn btn-ghost" onclick="App.navigate('curriculum')">← <span data-i18n="back_curriculum">Volver al curriculum</span></button>
+          <div class="lesson-progress-bar">
+            <div class="lesson-progress-fill" id="lessonProgressFill"></div>
+          </div>
+          <span id="lessonProgressText" class="lesson-progress-text">0%</span>
+        </div>
+        <div class="lesson-container" id="lessonContainer"></div>
+      </div>
+
+      <!-- ============ FLASHCARDS VIEW ============ -->
+      <div class="view" id="view-flashcards">
+        <div class="flashcards-header">
+          <h2 data-i18n="flashcards_title">Flashcards</h2>
+          <p data-i18n="flashcards_sub">Repasa conceptos clave con tarjetas de memoria interactivas</p>
+        </div>
+        <div class="flashcards-controls">
+          <select class="select-input" id="flashcardDeck">
+            <option value="all" data-i18n="all_decks">Todos los mazos</option>
+            <option value="0" data-i18n="ch1_short">Cap. 1 · Fundamentos</option>
+            <option value="1" data-i18n="ch2_short">Cap. 2 · SDLC</option>
+            <option value="2" data-i18n="ch3_short">Cap. 3 · Testing Estático</option>
+            <option value="3" data-i18n="ch4_short">Cap. 4 · Técnicas</option>
+            <option value="4" data-i18n="ch5_short">Cap. 5 · Gestión</option>
+            <option value="5" data-i18n="ch6_short">Cap. 6 · Herramientas</option>
+          </select>
+          <button class="btn btn-primary" id="shuffleBtn" data-i18n="shuffle">Mezclar</button>
+          <span class="card-counter" id="cardCounter">1/1</span>
+        </div>
+        <div class="flashcard-arena">
+          <button class="fc-arrow fc-prev" id="fcPrev">&#8592;</button>
+          <div class="flashcard" id="flashcard">
+            <div class="flashcard-inner" id="flashcardInner">
+              <div class="flashcard-front">
+                <div class="fc-chapter-tag" id="fcTag"></div>
+                <div class="fc-question" id="fcQuestion"></div>
+                <div class="fc-hint" data-i18n="click_to_flip">Haz clic para ver la respuesta</div>
+              </div>
+              <div class="flashcard-back">
+                <div class="fc-answer" id="fcAnswer"></div>
+              </div>
+            </div>
+          </div>
+          <button class="fc-arrow fc-next" id="fcNext">&#8594;</button>
+        </div>
+        <div class="flashcard-rating" id="flashcardRating">
+          <p data-i18n="rate_card">¿Qué tan bien lo sabías?</p>
+          <div class="rating-btns">
+            <button class="rating-btn rating-hard" data-rating="hard" data-i18n="rating_hard">Difícil</button>
+            <button class="rating-btn rating-ok" data-rating="ok" data-i18n="rating_ok">Regular</button>
+            <button class="rating-btn rating-easy" data-rating="easy" data-i18n="rating_easy">Fácil</button>
+          </div>
+        </div>
+        <div class="flashcard-stats-row">
+          <div class="fc-stat">🔴 <span id="fcHard">0</span> <span data-i18n="rating_hard">Difícil</span></div>
+          <div class="fc-stat">🟡 <span id="fcOk">0</span> <span data-i18n="rating_ok">Regular</span></div>
+          <div class="fc-stat">🟢 <span id="fcEasy">0</span> <span data-i18n="rating_easy">Fácil</span></div>
+        </div>
+      </div>
+
+      <!-- ============ SIMULATOR VIEW ============ -->
+      <div class="view" id="view-simulator">
+        <div id="simMenu">
+          <div class="sim-header">
+            <h2 data-i18n="simulator_title">Simulacros de Examen</h2>
+            <p data-i18n="simulator_sub">Practica con preguntas tipo ISTQB Foundation Level v4.0</p>
+          </div>
+          <div class="sim-cards" id="simCards"></div>
+          <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+              <h3 data-i18n="exam_history">Historial de simulacros</h3>
+            </div>
+            <div id="examHistory" class="exam-history"></div>
+          </div>
+        </div>
+
+        <!-- CHAPTER SELECTOR MODAL -->
+        <div id="chapterSelector" class="chapter-selector" style="display:none;">
+          <h3 data-i18n="select_chapter">Selecciona un capítulo</h3>
+          <div id="chapterSelectorList" class="chapter-selector-list"></div>
+          <button class="btn btn-ghost" onclick="App.renderSimulatorMenu()" data-i18n="cancel">Cancelar</button>
+        </div>
+
+        <!-- EXAM MODE -->
+        <div id="examMode" style="display:none;" class="exam-mode">
+          <div class="exam-topbar">
+            <div class="exam-title" id="examTitle">Examen</div>
+            <div class="exam-timer" id="examTimer">60:00</div>
+            <button class="btn btn-ghost btn-sm" id="endExamBtn" data-i18n="end_exam">Finalizar</button>
+          </div>
+          <div class="exam-progress-bar">
+            <div class="exam-progress-fill" id="examProgressFill"></div>
+          </div>
+          <div class="exam-body" id="examBody"></div>
+          <div class="exam-nav">
+            <button class="btn btn-ghost" id="examPrev" data-i18n="previous">Anterior</button>
+            <span id="examQCounter" class="exam-counter"></span>
+            <button class="btn btn-primary" id="examNext" data-i18n="next">Siguiente</button>
+          </div>
+          <div class="exam-question-dots" id="examDots"></div>
+        </div>
+
+        <!-- RESULTS VIEW -->
+        <div id="examResults" style="display:none;" class="exam-results">
+          <div class="results-header">
+            <div class="results-emoji" id="resultsEmoji">🎉</div>
+            <h2 id="resultsTitle" data-i18n="results_title">Resultado del examen</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-verdict" id="resultsVerdict"></div>
+          </div>
+          <div class="results-stats" id="resultsStats"></div>
+          <div class="results-review" id="resultsReview"></div>
+          <div class="results-actions">
+            <button class="btn btn-primary" onclick="App.navigate('simulator')" data-i18n="new_exam">Nuevo examen</button>
+            <button class="btn btn-ghost" onclick="App.navigate('curriculum')" data-i18n="study_more">Seguir estudiando</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ GLOSSARY VIEW ============ -->
+      <div class="view" id="view-glossary">
+        <div class="glossary-header">
+          <h2 data-i18n="glossary_title">Glosario ISTQB</h2>
+          <p data-i18n="glossary_sub">Términos y definiciones clave para la certificación Foundation Level</p>
+        </div>
+        <div class="glossary-search">
+          <input type="text" class="search-input-full" id="glossarySearch" data-i18n-placeholder="glossary_search_placeholder" placeholder="Buscar término..." />
+        </div>
+        <div class="glossary-filters" id="glossaryFilters"></div>
+        <div class="glossary-list" id="glossaryList"></div>
+      </div>
+
+      <!-- ============ PROGRESS VIEW ============ -->
+      <div class="view" id="view-progress">
+        <h2 data-i18n="progress_title">Mi Progreso</h2>
+        <div class="progress-grid">
+          <div class="card progress-overview">
+            <h3 data-i18n="overview">Resumen general</h3>
+            <div class="progress-stats-big" id="progressStatsBig"></div>
+          </div>
+          <div class="card">
+            <h3 data-i18n="chapter_progress">Progreso por capítulo</h3>
+            <div id="chapterProgressBars"></div>
+          </div>
+          <div class="card">
+            <h3 data-i18n="exam_performance">Rendimiento en exámenes</h3>
+            <div id="examPerformanceChart" class="bar-chart-container"></div>
+          </div>
+          <div class="card">
+            <h3 data-i18n="activity_log">Actividad reciente</h3>
+            <div id="activityLog" class="activity-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ ACHIEVEMENTS VIEW ============ -->
+      <div class="view" id="view-achievements">
+        <div class="achievements-header">
+          <h2 data-i18n="achievements_title">Logros y Recompensas</h2>
+          <p data-i18n="achievements_sub">Desbloquea insignias completando actividades de estudio</p>
+        </div>
+        <div class="achievements-summary" id="achievementsSummary"></div>
+        <div class="achievements-grid" id="achievementsGrid"></div>
+      </div>
+
+    </div><!-- end views-container -->
+  </main>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- XP POPUP -->
+  <div class="xp-popup" id="xpPopup"></div>
+
+  <!-- AVATAR SELECTOR MODAL -->
+  <div id="avatar-modal" style="display:none">
+    <div class="avatar-modal-card">
+      <div class="avatar-modal-header">
+        <h2>Elige tu perfil de tester</h2>
+        <button class="avatar-modal-close" id="avatarModalClose">✕</button>
+      </div>
+      <p class="avatar-modal-sub">Tu avatar refleja tu estilo como tester. Puedes cambiarlo cuando quieras.</p>
+      <div class="avatar-grid" id="avatarGrid"></div>
+      <div class="avatar-modal-footer">
+        <button class="avatar-btn-cancel" id="avatarCancel">Cancelar</button>
+        <button class="avatar-btn-save" id="avatarSave">Guardar avatar</button>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end #app-container -->
+
+  <!-- SCRIPTS -->
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/onboarding.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
