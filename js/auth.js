@@ -8,6 +8,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const Auth = {
   user: null,
   _mode: 'login', // 'login' | 'register'
+  _authInProgress: false,
 
   /* ===== INIT ===== */
   async init() {
@@ -17,6 +18,7 @@ const Auth = {
         await this._onAuthSuccess(session.user);
       } else if (event === 'SIGNED_OUT') {
         this.user = null;
+        this._authInProgress = false;
         this._showAuthScreen();
       }
     });
@@ -47,9 +49,10 @@ const Auth = {
   },
 
   async signInGoogle() {
+    const cleanUrl = window.location.origin + window.location.pathname;
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href }
+      options: { redirectTo: cleanUrl }
     });
     if (error) throw error;
   },
@@ -71,21 +74,50 @@ const Auth = {
   },
 
   async _onAuthSuccess(user) {
+    if (this._authInProgress) return;
+    this._authInProgress = true;
+
     this._hideAuthScreen();
     this._updateUserUI(user);
     window.CAMPUS_USER_ID = user.id;
 
+    // Limpiar tokens OAuth del URL para no contaminar futuros logins
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+
     if (!App._initialized) {
-      // Cargar progreso desde Supabase antes de iniciar la app
-      const cloudState = await Sync.loadState(user.id);
-      App.init(cloudState);
+      // Iniciar la app inmediatamente con estado local para que los clicks funcionen
+      const localState = App.loadState();
+      App.init(localState);
       AvatarSelector.init(user.id);
       setTimeout(() => Onboarding.start(user.id), 600);
+
+      // Sincronizar con Supabase en segundo plano sin bloquear la UI
+      Sync.loadState(user.id).then(cloudState => {
+        if (cloudState) {
+          App.state = cloudState;
+          localStorage.setItem(`mycampus_istqb_v1_${user.id}`, JSON.stringify(cloudState));
+          App.updateSidebar();
+          App.navigate(App.currentView || 'dashboard');
+        }
+      }).catch(e => {
+        console.warn('[Auth] Sync en segundo plano falló:', e.message);
+      }).finally(() => {
+        this._authInProgress = false;
+      });
     } else {
-      const cloudState = await Sync.loadState(user.id);
-      App.state = cloudState || App.loadState();
-      App.updateSidebar();
-      App.navigate('dashboard');
+      Sync.loadState(user.id).then(cloudState => {
+        App.state = cloudState || App.loadState();
+        App.updateSidebar();
+        App.navigate('dashboard');
+      }).catch(() => {
+        App.state = App.loadState();
+        App.updateSidebar();
+        App.navigate('dashboard');
+      }).finally(() => {
+        this._authInProgress = false;
+      });
     }
   },
 
