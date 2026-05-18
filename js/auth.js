@@ -110,11 +110,11 @@ const Auth = {
       Sync.loadState(user.id).then(cloudState => {
         App.state = cloudState || App.loadState();
         App.updateSidebar();
-        App.navigate('dashboard');
+        App.navigate(App.currentView || 'dashboard');
       }).catch(() => {
         App.state = App.loadState();
         App.updateSidebar();
-        App.navigate('dashboard');
+        App.navigate(App.currentView || 'dashboard');
       }).finally(() => {
         this._authInProgress = false;
       });

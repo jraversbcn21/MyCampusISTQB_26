@@ -139,14 +139,23 @@ const App = {
     if (view === 'glossary') this.renderGlossary();
     if (view === 'progress') this.renderProgress();
     if (view === 'achievements') this.renderAchievements();
+    if (view === 'lesson' && this.currentLesson) {
+      this.renderLesson(this.currentLesson.chapterId, this.currentLesson.topicId);
+    }
+
+    this._saveCurrentView(view);
   },
 
   navigateToLesson(chapterId, topicId) {
+    this.currentView = 'lesson';
     this.currentLesson = { chapterId, topicId };
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-lesson').classList.add('active');
     document.getElementById('pageTitle').textContent = i18n.t('nav_curriculum');
+    if (!this._expandedChapters) this._expandedChapters = new Set();
+    this._expandedChapters.add(chapterId);
     this.renderLesson(chapterId, topicId);
+    this._saveCurrentView('lesson');
   },
 
   /* ===== SIDEBAR ===== */
@@ -351,11 +360,24 @@ const App = {
           </div>
         </div>`;
     }).join('');
+
+    if (this._expandedChapters) {
+      this._expandedChapters.forEach(i => {
+        const card = document.getElementById(`chapter-${i}`);
+        if (card) card.classList.add('open');
+      });
+    }
   },
 
   toggleChapter(i) {
     const card = document.getElementById(`chapter-${i}`);
-    card.classList.toggle('open');
+    const isOpen = card.classList.toggle('open');
+    if (!this._expandedChapters) this._expandedChapters = new Set();
+    if (isOpen) {
+      this._expandedChapters.add(i);
+    } else {
+      this._expandedChapters.delete(i);
+    }
   },
 
   /* ===== LESSON ===== */
@@ -446,9 +468,15 @@ const App = {
     const card = this.fcCards[this.fcIndex];
     const lang = i18n.lang;
 
+    window.speechSynthesis.cancel();
+
+    this._currentCard = { qText: card.q[lang], aText: card.a[lang], lang };
+
     document.getElementById('fcTag').textContent = card.chapterTag[lang];
-    document.getElementById('fcQuestion').textContent = card.q[lang];
-    document.getElementById('fcAnswer').textContent = card.a[lang];
+    document.getElementById('fcQuestion').innerHTML = `${card.q[lang]}
+      <button class="fc-tts-btn" onclick="App._handleTTS('question',event)" aria-label="${lang === 'es' ? 'Leer pregunta' : 'Read question'}">🔇</button>`;
+    document.getElementById('fcAnswer').innerHTML = `${card.a[lang]}
+      <button class="fc-tts-btn" onclick="App._handleTTS('answer',event)" aria-label="${lang === 'es' ? 'Leer respuesta' : 'Read answer'}">🔇</button>`;
     document.getElementById('cardCounter').textContent = `${this.fcIndex + 1}/${this.fcCards.length}`;
 
     const inner = document.getElementById('flashcardInner');
@@ -461,6 +489,11 @@ const App = {
   },
 
   flipFlashcard() {
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.fc-tts-btn').forEach(b => {
+      b.textContent = '🔇';
+      b.classList.remove('fc-tts-playing');
+    });
     const inner = document.getElementById('flashcardInner');
     this.fcFlipped = !this.fcFlipped;
     inner.classList.toggle('flipped', this.fcFlipped);
@@ -995,7 +1028,18 @@ const App = {
     document.getElementById('themeToggle').textContent = savedTheme === 'light' ? '☀️' : '🌙';
 
     this.updateSidebar();
-    this.navigate('dashboard');
+
+    const saved = this._restoreSavedView();
+    if (saved && saved.view === 'lesson' && saved.lesson) {
+      this.currentLesson = saved.lesson;
+      if (saved.expandedChapters) this._expandedChapters = new Set(saved.expandedChapters);
+      this.navigateToLesson(saved.lesson.chapterId, saved.lesson.topicId);
+    } else if (saved && saved.view && document.getElementById(`view-${saved.view}`)) {
+      if (saved.expandedChapters) this._expandedChapters = new Set(saved.expandedChapters);
+      this.navigate(saved.view);
+    } else {
+      this.navigate('dashboard');
+    }
 
     // Event listeners
     document.getElementById('sidebarToggle').addEventListener('click', () => {
@@ -1088,6 +1132,87 @@ const App = {
     this.updateStreakAndDate();
     if (this.state.streak > 1) {
       setTimeout(() => this.showToast(`🔥 ${this.state.streak} ${i18n.t('streak_label')} — ¡Sigue así!`, 'success'), 1000);
+    }
+  },
+
+  /* ===== TTS (Text-to-Speech) ===== */
+  _handleTTS(side, e) {
+    if (e) e.stopPropagation();
+    const card = this._currentCard;
+    if (!card) return;
+    const text = side === 'question' ? card.qText : card.aText;
+    const langCode = card.lang === 'es' ? 'es' : 'en';
+
+    const elementId = side === 'question' ? 'fcQuestion' : 'fcAnswer';
+    const el = document.getElementById(elementId);
+    const btn = el.querySelector('.fc-tts-btn');
+    if (!btn) return;
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      btn.textContent = '🔇';
+      btn.classList.remove('fc-tts-playing');
+      return;
+    }
+
+    btn.textContent = '🔊';
+    btn.classList.add('fc-tts-playing');
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = langCode === 'es' ? 'es-ES' : 'en-US';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    const onEnd = () => {
+      btn.textContent = '🔇';
+      btn.classList.remove('fc-tts-playing');
+    };
+    utterance.onend = onEnd;
+    utterance.onerror = onEnd;
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      this._setVoice(utterance, voices, langCode);
+      window.speechSynthesis.speak(utterance);
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => {
+        const updatedVoices = window.speechSynthesis.getVoices();
+        this._setVoice(utterance, updatedVoices, langCode);
+        window.speechSynthesis.speak(utterance);
+      };
+    }
+  },
+
+  _setVoice(utterance, voices, langCode) {
+    const femaleKeywords = ['female', 'woman', 'mujer', 'femenina', 'girl'];
+    let voice = voices.find(v =>
+      v.lang.startsWith(langCode) && femaleKeywords.some(k => v.name.toLowerCase().includes(k.toLowerCase()))
+    );
+    if (!voice) voice = voices.find(v => v.lang.startsWith(langCode));
+    if (voice) utterance.voice = voice;
+  },
+
+  /* ===== VIEW PERSISTENCE ===== */
+  _saveCurrentView(view) {
+    try {
+      const data = { view };
+      if (view === 'lesson' && this.currentLesson) {
+        data.lesson = this.currentLesson;
+      }
+      if (this._expandedChapters && this._expandedChapters.size > 0) {
+        data.expandedChapters = [...this._expandedChapters];
+      }
+      localStorage.setItem('mycampus_current_view', JSON.stringify(data));
+    } catch (e) {}
+  },
+
+  _restoreSavedView() {
+    try {
+      const raw = localStorage.getItem('mycampus_current_view');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
     }
   }
 };
