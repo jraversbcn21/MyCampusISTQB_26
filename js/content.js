@@ -1593,7 +1593,7 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 📌 <strong>Ejemplo (BVA de 2 valores):</strong> Para el rango 18-65, cada frontera aporta 2 elementos de cobertura (el valor frontera y su vecino más cercano de la partición adyacente):
 <br>• Límites: 17, 18, 65, 66
 <br><strong>Ejemplo (BVA de 3 valores):</strong> cada frontera aporta 3 elementos (el valor frontera y sus dos vecinos): 17, 18, 19, 64, 65, 66
-<br>El BVA de 3 valores es más riguroso: detecta defectos "off-by-one" que el de 2 valores puede pasar por alto (p. ej. si "x = 10" se implementó como "x = 10" con un límite desplazado, x=9 sí lo detecta y x=10/x=11 no).
+<br>El BVA de 3 valores es más riguroso: puede detectar defectos "off-by-one" que el BVA de 2 valores pasa por alto.
 </div>
 
 <h3>3. Prueba de Tabla de Decisión</h3>
