@@ -1485,5 +1485,240 @@ const QUESTIONS = [
       es: "Según el syllabus, entre los inconvenientes de la independencia de pruebas están el aislamiento de los testers respecto al equipo de desarrollo, problemas de comunicación, relaciones conflictivas, pérdida de sentido de responsabilidad de calidad por parte de los desarrolladores, y la percepción de los testers como un cuello de botella.",
       en: "According to the syllabus, drawbacks of test independence include testers becoming isolated from the development team, communication problems, adversarial relationships, developers losing a sense of responsibility for quality, and testers being seen as a bottleneck."
     }
+  },
+
+  // ===== CHAPTER 2 (Testing Throughout the SDLC) — additional LO-mapped questions =====
+  {
+    id: 65, chapter: 1, lo: "FL-2.2.3", k: 2,
+    source: "Syllabus v4.0 §2.2.3",
+    q: {
+      es: "Tras corregir un defecto, se vuelve a ejecutar el mismo caso de prueba que lo detectó para comprobar que ha quedado solucionado. ¿Qué tipo de prueba es?",
+      en: "After a defect is fixed, the same test case that detected it is re-executed to check the fix worked. What type of testing is this?"
+    },
+    options: {
+      es: ["Prueba de confirmación", "Prueba de regresión", "Prueba de humo", "Prueba de mantenimiento"],
+      en: ["Confirmation testing", "Regression testing", "Smoke testing", "Maintenance testing"]
+    },
+    correct: 0,
+    explanation: {
+      es: "La prueba de confirmación (re-test) vuelve a ejecutar el caso que falló, tras la corrección, para confirmar que el defecto se resolvió. La regresión busca efectos secundarios no deseados en otras partes.",
+      en: "Confirmation testing (re-testing) re-runs the failed test after the fix to confirm the defect is resolved. Regression testing looks for unintended side effects elsewhere."
+    }
+  },
+  {
+    id: 66, chapter: 1, lo: "FL-2.1.1", k: 2,
+    source: "Syllabus v4.0 §2.1.1",
+    q: {
+      es: "Un equipo debe decidir cómo organizar sus actividades de prueba al elegir entre un modelo de ciclo de vida secuencial (por ejemplo, cascada) o uno iterativo-incremental (por ejemplo, ágil). Según el syllabus, ¿qué aspectos de la prueba se ven afectados por la elección del CVDS (ciclo de vida de desarrollo de software)?",
+      en: "A team must decide how to organize its test activities when choosing between a sequential lifecycle model (e.g., waterfall) and an iterative-incremental one (e.g., agile). According to the syllabus, which aspects of testing are impacted by the choice of SDLC (software development lifecycle)?"
+    },
+    options: {
+      es: [
+        "Únicamente el número de probadores contratados para el proyecto",
+        "El alcance y la cronología de las actividades de prueba, el nivel de detalle de la documentación, las técnicas de prueba elegidas y el alcance de la automatización",
+        "Solo el presupuesto asignado a la fase de mantenimiento",
+        "Nada; las actividades de prueba son siempre idénticas independientemente del modelo de CVDS elegido"
+      ],
+      en: [
+        "Only the number of testers hired for the project",
+        "The scope and timing of test activities, the level of detail of test documentation, the chosen test techniques, and the extent of test automation",
+        "Only the budget allocated to the maintenance phase",
+        "Nothing; test activities are always identical regardless of the chosen SDLC model"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El CVDS elegido repercute en el alcance/cronología de los niveles y tipos de prueba, el nivel de detalle de la documentación, las técnicas y el enfoque de prueba, el alcance de la automatización y el rol del probador. Además, independientemente del CVDS, aplican buenas prácticas comunes: cada actividad de desarrollo tiene su actividad de prueba correspondiente y el análisis/diseño de prueba comienza pronto (prueba temprana).",
+      en: "The chosen SDLC impacts the scope/timing of test levels and types, the level of detail of test documentation, test techniques and approach, the extent of automation, and the tester's role. Regardless of the SDLC, common good practices apply: every development activity has a corresponding test activity, and test analysis/design starts early (early testing)."
+    }
+  },
+  {
+    id: 67, chapter: 1, lo: "FL-2.1.3", k: 1,
+    source: "Syllabus v4.0 §2.1.3",
+    q: {
+      es: "¿Cuáles son ejemplos de enfoques de 'prueba primero' (test-first) para el desarrollo de software, según el syllabus?",
+      en: "Which are examples of 'test-first' approaches to software development, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Cascada, modelo en V y modelo en espiral",
+        "Revisión informal, walkthrough e inspección",
+        "Desarrollo guiado por pruebas (TDD), desarrollo guiado por pruebas de aceptación (ATDD) y desarrollo guiado por el comportamiento (BDD)",
+        "Prueba de humo, prueba de confirmación y prueba de regresión"
+      ],
+      en: [
+        "Waterfall, V-model and spiral model",
+        "Informal review, walkthrough and inspection",
+        "Test-Driven Development (TDD), Acceptance Test-Driven Development (ATDD) and Behaviour-Driven Development (BDD)",
+        "Smoke testing, confirmation testing and regression testing"
+      ]
+    },
+    correct: 2,
+    explanation: {
+      es: "TDD, ATDD y BDD son enfoques donde las pruebas se definen antes de escribir el código, aplicando el principio de prueba temprana y el desplazamiento a la izquierda, y apoyando un modelo de desarrollo iterativo.",
+      en: "TDD, ATDD and BDD are approaches where tests are defined before the code is written, applying the early testing principle and shift-left approach, and supporting an iterative development model."
+    }
+  },
+  {
+    id: 68, chapter: 1, lo: "FL-2.1.4", k: 2,
+    source: "Syllabus v4.0 §2.1.4",
+    q: {
+      es: "¿Cuál de las siguientes es una ventaja de DevOps desde la perspectiva de la prueba, según el syllabus?",
+      en: "Which of the following is an advantage of DevOps from a testing perspective, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "La integración continua (IC) promueve un enfoque de desplazamiento a la izquierda, animando a los desarrolladores a entregar código acompañado de pruebas de componente y análisis estático",
+        "DevOps elimina completamente la necesidad de pruebas manuales",
+        "DevOps garantiza que no se necesiten recursos adicionales para automatizar las pruebas",
+        "DevOps sustituye la necesidad de un cambio cultural dentro de la organización"
+      ],
+      en: [
+        "Continuous integration (CI) promotes a shift-left approach by encouraging developers to deliver code accompanied by component tests and static analysis",
+        "DevOps completely eliminates the need for manual testing",
+        "DevOps guarantees that no additional resources are needed to automate testing",
+        "DevOps replaces the need for a cultural change within the organization"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Entre las ventajas de DevOps para la prueba están la retroalimentación rápida, que la IC promueva el desplazamiento a la izquierda, procesos automatizados (CI/CD) que facilitan entornos de prueba estables, y menor riesgo de regresión. Sin embargo, la prueba manual sigue siendo necesaria y la automatización requiere recursos y mantenimiento.",
+      en: "DevOps advantages for testing include fast feedback, CI promoting a shift-left approach, automated CI/CD processes that facilitate stable test environments, and reduced regression risk. However, manual testing is still necessary and automation requires resources and maintenance."
+    }
+  },
+  {
+    id: 69, chapter: 1, lo: "FL-2.1.5", k: 2,
+    source: "Syllabus v4.0 §2.1.5",
+    q: {
+      es: "¿Cuál de las siguientes es una buena práctica para lograr un enfoque de 'desplazamiento a la izquierda' (shift-left), según el syllabus?",
+      en: "Which of the following is a good practice for achieving a 'shift-left' approach, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Posponer todas las pruebas no funcionales hasta después de la aceptación del usuario",
+        "Esperar a que el sistema completo esté integrado antes de iniciar cualquier análisis estático",
+        "Reducir la participación de los probadores en las fases iniciales del proyecto",
+        "Revisar la especificación desde la perspectiva de la prueba y redactar los casos de prueba antes de escribir el código"
+      ],
+      en: [
+        "Postpone all non-functional testing until after user acceptance",
+        "Wait until the whole system is integrated before starting any static analysis",
+        "Reduce testers' involvement in the early phases of the project",
+        "Review the specification from a testing perspective and write test cases before the code is written"
+      ]
+    },
+    correct: 3,
+    explanation: {
+      es: "Las buenas prácticas de desplazamiento a la izquierda incluyen revisar las especificaciones desde la perspectiva de la prueba, redactar casos de prueba antes de escribir el código, usar IC/EC, completar el análisis estático antes de la prueba dinámica, y realizar pruebas no funcionales desde el nivel de componente cuando sea posible.",
+      en: "Shift-left good practices include reviewing specifications from a testing perspective, writing test cases before the code is written, using CI/CD, completing static analysis before dynamic testing, and performing non-functional testing starting at the component level when possible."
+    }
+  },
+  {
+    id: 70, chapter: 1, lo: "FL-2.1.6", k: 2,
+    source: "Syllabus v4.0 §2.1.6",
+    q: {
+      es: "¿Cuál es el propósito PRINCIPAL de una retrospectiva de proyecto o de iteración, según el syllabus?",
+      en: "What is the MAIN purpose of a project or iteration retrospective, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Debatir qué tuvo éxito y debe conservarse, qué no funcionó y puede mejorarse, y cómo incorporar esas mejoras en el futuro",
+        "Evaluar el desempeño individual de cada probador para decisiones salariales",
+        "Sustituir el informe de cierre de pruebas por una reunión informal",
+        "Determinar exclusivamente qué herramientas de automatización se deben comprar"
+      ],
+      en: [
+        "Discuss what worked well and should be kept, what did not work and could be improved, and how to incorporate improvements going forward",
+        "Evaluate each tester's individual performance for salary decisions",
+        "Replace the test completion report with an informal meeting",
+        "Determine exclusively which automation tools should be purchased"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Las retrospectivas, en las que participan probadores, desarrolladores, arquitectos, el propietario de producto y analistas de negocio, debaten qué tuvo éxito, qué puede mejorarse y cómo incorporar las mejoras. Sus beneficios incluyen mayor efectividad de la prueba, mejor calidad de los productos de prueba y mejor cooperación entre desarrollo y prueba.",
+      en: "Retrospectives, attended by testers, developers, architects, the product owner and business analysts, discuss what succeeded, what can be improved, and how to incorporate improvements. Benefits include increased test effectiveness, better quality of test work products, and improved cooperation between development and testing."
+    }
+  },
+  {
+    id: 71, chapter: 1, lo: "FL-2.2.1", k: 2,
+    source: "Syllabus v4.0 §2.2.1",
+    q: {
+      es: "¿Cuál de las siguientes es una FORMA reconocida de prueba de ACEPTACIÓN (nivel de prueba), según el syllabus?",
+      en: "Which of the following is a recognized form of ACCEPTANCE testing (test level), according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Prueba de integración de componentes",
+        "Prueba de humo (smoke testing)",
+        "Prueba de aceptación operativa",
+        "Análisis estático del código fuente"
+      ],
+      en: [
+        "Component integration testing",
+        "Smoke testing",
+        "Operational acceptance testing",
+        "Static analysis of the source code"
+      ]
+    },
+    correct: 2,
+    explanation: {
+      es: "Las principales formas de prueba de aceptación son: prueba de aceptación de usuario (PAU), prueba de aceptación operativa, prueba de aceptación contractual y de regulación, prueba alfa y prueba beta. Se concentran en validar que el sistema satisface las necesidades de negocio del usuario y está listo para el despliegue.",
+      en: "The main forms of acceptance testing are: user acceptance testing (UAT), operational acceptance testing, contractual and regulatory acceptance testing, alpha testing and beta testing. They focus on validating that the system meets the user's business needs and is ready for deployment."
+    }
+  },
+  {
+    id: 72, chapter: 1, lo: "FL-2.2.2", k: 2,
+    source: "Syllabus v4.0 §2.2.2",
+    q: {
+      es: "Un tester diseña casos de prueba a partir del código fuente y los flujos de datos internos del sistema, sin considerar la especificación externa. ¿Qué TIPO de prueba, de los cuatro descritos en el syllabus, está realizando?",
+      en: "A tester designs test cases based on the source code and the system's internal data flows, without considering the external specification. Which TYPE of testing, among the four described in the syllabus, is this?"
+    },
+    options: {
+      es: [
+        "Prueba de caja negra",
+        "Prueba de caja blanca",
+        "Prueba funcional",
+        "Prueba de aceptación"
+      ],
+      en: [
+        "Black-box testing",
+        "White-box testing",
+        "Functional testing",
+        "Acceptance testing"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "La prueba de caja blanca se basa en la estructura y obtiene pruebas de la implementación interna (código, arquitectura, flujos de trabajo y de datos). La prueba de caja negra, en cambio, obtiene pruebas a partir de documentación externa al objeto de prueba. Ambas, junto con la prueba funcional y no funcional, son los cuatro tipos de prueba y pueden aplicarse en todos los niveles de prueba.",
+      en: "White-box testing is structure-based and derives tests from the internal implementation (code, architecture, workflows and data flows). Black-box testing, in contrast, derives tests from documentation external to the test object. Both, together with functional and non-functional testing, are the four test types and can be applied at all test levels."
+    }
+  },
+  {
+    id: 73, chapter: 1, lo: "FL-2.3.1", k: 2,
+    source: "Syllabus v4.0 §2.3.1",
+    q: {
+      es: "¿Cuál de los siguientes es un DESENCADENANTE (trigger) típico de la prueba de mantenimiento, según el syllabus?",
+      en: "Which of the following is a typical TRIGGER for maintenance testing, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "La redacción inicial del plan de pruebas del proyecto",
+        "La migración del entorno de operación a una nueva plataforma",
+        "La selección del framework de automatización de pruebas",
+        "La firma del contrato con el cliente al inicio del proyecto"
+      ],
+      en: [
+        "The initial drafting of the project's test plan",
+        "Migration of the operational environment to a new platform",
+        "The selection of the test automation framework",
+        "Signing the contract with the customer at the start of the project"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Los desencadenantes de la prueba de mantenimiento incluyen modificaciones (mejoras planificadas, cambios correctivos o correcciones en caliente), actualizaciones o migraciones del entorno de operación (por ejemplo, a una nueva plataforma, requiriendo pruebas de conversión de datos) y la retirada del sistema. El alcance depende del riesgo del cambio, el tamaño del sistema y la magnitud del cambio.",
+      en: "Maintenance testing triggers include modifications (planned enhancements, corrective changes or hotfixes), updates or migrations of the operational environment (e.g., to a new platform, requiring data conversion testing) and system retirement. The scope depends on the risk of the change, the size of the system and the magnitude of the change."
+    }
   }
 ];
