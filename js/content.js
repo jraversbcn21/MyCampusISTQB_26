@@ -15,11 +15,11 @@ const CHAPTERS = [
       en: "What testing is, why it is necessary, the 7 testing principles and testing process activities."
     },
     topics: [
-      { id: "1.1", title: { es: "¿Qué es el testing?", en: "What is testing?" }, xp: 30 },
-      { id: "1.2", title: { es: "¿Por qué es necesario el testing?", en: "Why is testing necessary?" }, xp: 30 },
-      { id: "1.3", title: { es: "Los 7 Principios del Testing", en: "The 7 Testing Principles" }, xp: 50 },
-      { id: "1.4", title: { es: "Actividades, testware y roles", en: "Testing activities, testware and roles" }, xp: 40 },
-      { id: "1.5", title: { es: "Habilidades esenciales en testing", en: "Essential skills in testing" }, xp: 30 },
+      { id: "1.1", title: { es: "¿Qué es el testing?", en: "What is testing?" }, xp: 30, lo: ["FL-1.1.1","FL-1.1.2"], source: "Syllabus v4.0 §1.1" },
+      { id: "1.2", title: { es: "¿Por qué es necesario el testing?", en: "Why is testing necessary?" }, xp: 30, lo: ["FL-1.2.1","FL-1.2.2","FL-1.2.3"], source: "Syllabus v4.0 §1.2" },
+      { id: "1.3", title: { es: "Los 7 Principios del Testing", en: "The 7 Testing Principles" }, xp: 50, lo: ["FL-1.3.1"], source: "Syllabus v4.0 §1.3" },
+      { id: "1.4", title: { es: "Actividades, testware y roles", en: "Testing activities, testware and roles" }, xp: 40, lo: ["FL-1.4.1","FL-1.4.2","FL-1.4.3","FL-1.4.4","FL-1.4.5"], source: "Syllabus v4.0 §1.4" },
+      { id: "1.5", title: { es: "Habilidades esenciales en testing", en: "Essential skills in testing" }, xp: 30, lo: ["FL-1.5.1","FL-1.5.2","FL-1.5.3"], source: "Syllabus v4.0 §1.5" },
     ]
   },
   {
@@ -157,6 +157,7 @@ const LESSONS = {
 <div class="warning-box">
 ⚠️ <strong>Importante para el examen:</strong> El testing NO puede probar que no hay defectos. Solo puede detectar fallos y reducir la probabilidad de problemas en producción.
 </div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §1.1</p>
       `
     },
     en: {
@@ -199,9 +200,16 @@ const LESSONS = {
 <p><strong>Dynamic testing:</strong> Requires software execution (functionality, performance tests, etc.).</p>
 <p><strong>Static testing:</strong> Does not require software execution (code reviews, static analysis, document reviews).</p>
 
+<h3>Verification vs Validation</h3>
+<ul>
+  <li><strong>Verification:</strong> Are we building the product right? (meets specified requirements)</li>
+  <li><strong>Validation:</strong> Are we building the right product? (satisfies the needs of users and other stakeholders)</li>
+</ul>
+
 <div class="warning-box">
 ⚠️ <strong>Important for the exam:</strong> Testing CANNOT prove the absence of defects. It can only detect failures and reduce the probability of problems in production.
 </div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §1.1</p>
       `
     }
   },
@@ -256,6 +264,7 @@ const LESSONS = {
 <br>QA: Implementar revisiones de código obligatorias en el proceso de desarrollo.
 <br>QC: Ejecutar pruebas para encontrar defectos en la aplicación antes de su lanzamiento.
 </div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §1.2</p>
       `
     },
     en: {
@@ -277,9 +286,19 @@ const LESSONS = {
 A human <em>error</em> introduces a <em>defect</em> in the code. If that code is executed, it may produce a <em>failure</em>.
 </div>
 
+<h3>The Role of Testing in Software Development</h3>
+<p>Testing is important because it contributes to the success of software:</p>
+<ul>
+  <li><strong>Risk reduction</strong> of defects in production</li>
+  <li><strong>Compliance</strong> with contractual, legal and regulatory requirements</li>
+  <li><strong>Confidence</strong> for users and customers in the product</li>
+  <li><strong>Early detection</strong> reduces the cost of fixing defects</li>
+</ul>
+
 <h3>QA vs Testing</h3>
 <p><strong>QA (Quality Assurance):</strong> Focuses on <em>processes</em> to prevent defects. It is preventive and proactive.</p>
 <p><strong>Testing / QC (Quality Control):</strong> Focuses on the <em>product</em> to detect defects. It is reactive and corrective.</p>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §1.2</p>
       `
     }
   },
@@ -332,6 +351,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <tr><td>6</td><td>Depende del contexto</td><td>No hay recetas únicas</td></tr>
   <tr><td>7</td><td>Falacia de ausencia de defectos</td><td>Validación es esencial</td></tr>
 </table>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §1.3</p>
       `
     },
     en: {
@@ -355,6 +375,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 <p>Safety-critical software is tested differently from e-commerce apps.</p>
 <h3>Principle 7: Absence-of-defects fallacy</h3>
 <p>Finding and fixing all defects doesn't help if the system doesn't meet user needs.</p>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §1.3</p>
       `
     }
   },
@@ -375,6 +396,18 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li><strong>Completitud de pruebas:</strong> Verificar criterios de salida, reportar, archivar.</li>
 </ul>
 
+<h3>El proceso de prueba en su contexto</h3>
+<p>La prueba no se realiza de forma aislada: depende de varios factores contextuales que influyen en la estrategia, las técnicas, el grado de automatización y el nivel de documentación:</p>
+<ul>
+  <li>Implicados (necesidades, expectativas, requisitos)</li>
+  <li>Miembros del equipo (competencias, experiencia, disponibilidad)</li>
+  <li>Dominio del negocio (criticidad, riesgos, normativa)</li>
+  <li>Factores técnicos (tipo de software, arquitectura, tecnología)</li>
+  <li>Restricciones del proyecto (alcance, tiempo, presupuesto)</li>
+  <li>Factores organizativos y ciclo de vida de desarrollo (SDLC)</li>
+  <li>Herramientas disponibles</li>
+</ul>
+
 <h3>Testware</h3>
 <p>El <strong>testware</strong> es el conjunto de artefactos producidos durante el proceso de prueba:</p>
 <ul>
@@ -393,7 +426,15 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 </table>
 
 <h3>Trazabilidad</h3>
-<p>La <strong>trazabilidad</strong> es la capacidad de relacionar los productos de trabajo de testing (casos de prueba, defectos) con los requisitos y demás artefactos del proyecto. Permite determinar el impacto de los cambios.</p>
+<p>La <strong>trazabilidad</strong> es la capacidad de relacionar los productos de trabajo de testing (casos de prueba, defectos) con los requisitos y demás artefactos del proyecto.</p>
+<p>Una buena trazabilidad aporta valor porque:</p>
+<ul>
+  <li>Permite evaluar la cobertura de los requisitos por los casos de prueba</li>
+  <li>Facilita determinar el impacto de los cambios</li>
+  <li>Ayuda en las auditorías de prueba y en el cumplimiento de criterios de gobernanza de TI</li>
+  <li>Facilita comunicar el avance y la finalización de la prueba a los implicados</li>
+</ul>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §1.4</p>
       `
     },
     en: {
@@ -410,6 +451,17 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li><strong>Test execution:</strong> Run tests and compare results.</li>
   <li><strong>Test completion:</strong> Verify exit criteria, report, archive.</li>
 </ul>
+<h3>The Test Process in Context</h3>
+<p>Testing is not performed in isolation: it depends on several contextual factors that influence strategy, techniques, automation level and documentation detail:</p>
+<ul>
+  <li>Stakeholders (needs, expectations, requirements)</li>
+  <li>Team members (skills, experience, availability)</li>
+  <li>Business domain (criticality, risks, regulations)</li>
+  <li>Technical factors (software type, architecture, technology)</li>
+  <li>Project constraints (scope, time, budget)</li>
+  <li>Organizational factors and software development lifecycle (SDLC)</li>
+  <li>Available tools</li>
+</ul>
 <h3>Testware</h3>
 <p>Artifacts produced during the test process: test plans, test cases, scripts, test data, defect reports, test reports.</p>
 <h3>Roles</h3>
@@ -418,6 +470,16 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <tr><td><strong>Test Manager</strong></td><td>Planning, monitoring, overall test management</td></tr>
   <tr><td><strong>Tester</strong></td><td>Analysis, design, implementation and test execution</td></tr>
 </table>
+<h3>Traceability</h3>
+<p><strong>Traceability</strong> is the ability to relate testware (test cases, defects) to requirements and other project artifacts.</p>
+<p>Good traceability adds value because it:</p>
+<ul>
+  <li>Supports evaluating requirement coverage by test cases</li>
+  <li>Makes it easier to determine the impact of changes</li>
+  <li>Helps with test audits and IT governance compliance</li>
+  <li>Makes it easier to communicate test progress and completion to stakeholders</li>
+</ul>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §1.4</p>
       `
     }
   },
@@ -515,6 +577,16 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 <div class="highlight-box">
 💡 <strong>Mentalidad del tester:</strong> Los testers deben ser capaces de pensar de forma diferente a los desarrolladores — buscando cómo el sistema puede fallar, en lugar de cómo funciona correctamente.
 </div>
+<h3>Enfoque de Equipo Completo (Whole Team Approach)</h3>
+<p>Es una práctica procedente de la Programación Extrema (XP) en la que cualquier miembro del equipo con los conocimientos y competencias necesarios puede realizar cualquier tarea, y todos son responsables de la calidad.</p>
+<ul>
+  <li>Mejora la dinámica de equipo y potencia la comunicación y colaboración</li>
+  <li>Crea sinergia al aprovechar los distintos conjuntos de competencias dentro del equipo</li>
+  <li>Los testers colaboran con el negocio en los criterios de aceptación y con los desarrolladores en la estrategia de automatización</li>
+</ul>
+<div class="warning-box">
+⚠️ <strong>Ojo:</strong> No siempre es apropiado — en sistemas críticos para la seguridad puede necesitarse un alto nivel de independencia de la prueba.
+</div>
 <h3>Independencia del Testing</h3>
 <p>El nivel de independencia del tester influye en la efectividad del testing:</p>
 <table>
@@ -526,7 +598,8 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 </table>
 <div class="warning-box">
 ⚠️ <strong>Importante:</strong> Mayor independencia no siempre es mejor — puede introducir problemas de comunicación y falta de conocimiento del dominio.
-</div>`
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §1.5</p>`
     },
     en: {
       title: "Essential skills in testing",
@@ -541,7 +614,25 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Attention to detail and analytical thinking</li>
   <li>Effective communication and teamwork</li>
 </ul>
-<div class="highlight-box">💡 <strong>Tester mindset:</strong> Testers should be able to think differently from developers — looking for how the system can fail, rather than how it works correctly.</div>`
+<div class="highlight-box">💡 <strong>Tester mindset:</strong> Testers should be able to think differently from developers — looking for how the system can fail, rather than how it works correctly.</div>
+<h3>Whole Team Approach</h3>
+<p>A practice from Extreme Programming (XP) where any team member with the necessary knowledge and skills can perform any task, and everyone is responsible for quality.</p>
+<ul>
+  <li>Improves team dynamics and boosts communication and collaboration</li>
+  <li>Creates synergy by leveraging the different skill sets within the team</li>
+  <li>Testers collaborate with business representatives on acceptance criteria and with developers on automation strategy</li>
+</ul>
+<div class="warning-box">⚠️ <strong>Note:</strong> Not always appropriate — safety-critical systems may require a high level of test independence.</div>
+<h3>Test Independence</h3>
+<table>
+  <tr><th>Level</th><th>Description</th><th>Advantage</th></tr>
+  <tr><td>No independence</td><td>Developer tests their own code</td><td>Knows the code well</td></tr>
+  <tr><td>Internal independence</td><td>Tester from the same team</td><td>Greater objectivity</td></tr>
+  <tr><td>Team independence</td><td>Separate QA team</td><td>External perspective</td></tr>
+  <tr><td>Full independence</td><td>External organization</td><td>Maximum objectivity</td></tr>
+</table>
+<div class="warning-box">⚠️ <strong>Important:</strong> More independence is not always better — it can introduce communication problems and lack of domain knowledge.</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §1.5</p>`
     }
   },
   "2.1": {
