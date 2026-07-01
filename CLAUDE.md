@@ -41,7 +41,7 @@ User Action → App.* method → mutate App.state → App.saveState()
 | `js/auth.js` | `Auth` | Supabase auth (email + Google OAuth), session handling |
 | `js/sync.js` | `Sync` | Debounced cloud save/load to Supabase `user_progress` table |
 | `js/content.js` | *(data)* | Curriculum chapters, lessons, glossary |
-| `js/questions.js` | *(data)* | Exam question bank (100+ questions) |
+| `js/questions.js` | *(data)* | Exam question bank (120 questions) |
 | `js/gamification.js` | `Gamification` | XP, levels (7 tiers), achievement badges |
 | `js/i18n.js` | `i18n` | Spanish/English translations; all UI strings go through this |
 | `js/avatar.js` | `AvatarSelector` | Tester personality avatar picker |
@@ -64,4 +64,28 @@ The app is fully functional without cloud sync. If Supabase is unavailable or th
 
 ## No Tests, No Linter
 
-There is no test suite and no linter configuration. Manual browser testing is the only testing mechanism.
+There is no test suite and no linter configuration for the application itself. Manual browser testing is the only testing mechanism for UI/behavior changes.
+
+The one exception is `scripts/validate-questions.js`, a Node-only dev script (never served to the browser) that gates edits to `js/questions.js`. It checks: per-chapter question counts against the target distribution, structural integrity (bilingual fields, 4 options, valid `correct` index, unique ids), and traceability (`lo`/`k`/`source` present for every question added after id 50). Run it after any change to the question bank:
+
+```bash
+node scripts/validate-questions.js
+```
+
+## ISTQB Content Fidelity Effort (in progress)
+
+The question bank, lessons, and glossary are being brought into closer alignment with the official **ISTQB CTFL v4.0 syllabus**, in three phases. Full design and rationale: `docs/superpowers/specs/2026-07-01-content-and-question-bank-expansion-design.md`.
+
+**Ground rule for this effort:** every new/changed piece of ISTQB content (question, lesson fact, glossary term) must cite a `source` traceable to official material (syllabus PDF, official sample exams) — never invent exam content.
+
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 1. Question bank (50 → 120) | ✅ Done (merged to `master`) | `js/questions.js` expanded to 120 questions matching official exam-weight distribution per chapter (24/18/12/36/24/6). Every question added has `lo` (learning-objective code), `k` (cognitive level), `source`. Plan: `docs/superpowers/plans/2026-07-01-phase1-question-bank.md`. |
+| 2. Lesson content audit | ⏳ Not started | Audit the 28 lessons in `js/content.js` against the syllabus; add `lo`/`source` fields to `CHAPTERS` topics; add a lesson-source footer in the UI. See spec §"Fase 2". |
+| 3. Glossary expansion | ⏳ Not started | Expand `GLOSSARY` in `js/content.js` with official syllabus keywords; add `source` per term. See spec §"Fase 3". |
+
+**Known minor gaps from Phase 1** (non-blocking, worth revisiting in a future content pass):
+- Chapter 4 (Test Analysis & Design) is light on boundary-value-analysis questions (only 1, reusing the "1–100" domain already used by a pre-existing question) — consider adding 1–2 more with a different domain.
+- Learning objective FL-2.1.2 (SDLC good practices) has no dedicated question, only a mention folded into another question's explanation.
+
+**To resume this effort:** brainstorm/plan Phase 2 next, following the same spec → plan → `superpowers:subagent-driven-development` workflow used for Phase 1 (one implementer + one reviewer subagent per chapter/task, reviewer independently re-verifies content against the syllabus text, not just internal consistency).

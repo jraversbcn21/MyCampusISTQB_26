@@ -41,7 +41,7 @@ Every module is a **global singleton object**. Naming is inconsistent:
 | `Onboarding` | `js/onboarding.js` | First-run tour |
 | `i18n` | `js/i18n.js` | **lowercase** — not `I18n` |
 | *(data)* | `js/content.js` | Chapters, lessons, glossary |
-| *(data)* | `js/questions.js` | 100+ exam questions |
+| *(data)* | `js/questions.js` | 120 exam questions |
 
 All modules follow the same pattern: a plain object with an `init()` method and private helpers prefixed with `_`.
 
@@ -106,6 +106,20 @@ Saves current view to `localStorage` key `mycampus_current_view`. Restores on in
 
 Empty `.nav-badge` elements (e.g., `#curriculumBadge`) are hidden via CSS: `.nav-badge:empty { display: none; }`
 
+### Question Bank Schema (`js/questions.js`)
+
+120 questions in the `QUESTIONS` array, distributed by official ISTQB exam weight per
+chapter: Cap0=24, Cap1=18, Cap2=12, Cap3=36, Cap4=24, Cap5=6 (0-indexed `chapter` field).
+
+Every question with `id > 50` (i.e. everything beyond the original 50) additionally carries:
+- `lo`: official learning-objective code, format `FL-x.y.z` (e.g. `"FL-4.2.2"`)
+- `k`: cognitive level, `1` | `2` | `3` (K1 recall, K2 understand, K3 apply)
+- `source`: citation string, format `"Syllabus v4.0 §x.y.z"`
+
+**Any edit to this file must be followed by `node scripts/validate-questions.js`** — it
+enforces the per-chapter counts, bilingual/structural integrity, and the `lo`/`k`/`source`
+presence for `id > 50`. Treat a failing run as a blocker, not a warning.
+
 ### Supabase Backend
 
 - Credentials in `js/config.js` (anon key — public, safe to commit)
@@ -126,8 +140,40 @@ Fully functional without cloud sync. Falls back silently to localStorage.
 
 ## No Tests or Linter
 
-Manual browser testing only. There is no test suite, no linter config, no type checking.
+Manual browser testing only for app behavior/UI. There is no linter config, no type checking.
+
+The one exception: `scripts/validate-questions.js` (Node, dev-only, never served to the
+browser) gates `js/questions.js` — see "Question Bank Schema" above.
 
 ## Reference Materials
 
 The `ISTQB 2026/` folder contains official ISTQB PDFs (syllabus, sample exams). Not part of the application code — do not modify.
+
+## ISTQB Content Fidelity Effort — Status & Next Session
+
+Full spec: `docs/superpowers/specs/2026-07-01-content-and-question-bank-expansion-design.md`.
+Ground rule for all three phases: every content item needs a `source` citation traceable
+to official ISTQB material (syllabus PDFs, official sample exams) — never invent content.
+
+- **Phase 1 (question bank 50→120): DONE**, merged to `master` (commits `da3f954..3235f84`).
+  Plan: `docs/superpowers/plans/2026-07-01-phase1-question-bank.md`. All 7 tasks reviewed
+  and approved; final whole-branch review found no Critical/Important issues.
+- **Phase 2 (lesson content audit): NOT STARTED.** Audit the 28 lessons in `js/content.js`
+  against the syllabus per-topic; add `lo`/`source` fields to `CHAPTERS` topics; add a
+  lesson-source footer in the UI (new `.lesson-source` CSS class). See spec §"Fase 2" for
+  the per-lesson method and the specific syllabus sections flagged as likely gaps
+  (§3.2.3 review roles, §5.1.4–5.1.5 estimation/prioritization, §5.5 defect management).
+- **Phase 3 (glossary expansion): NOT STARTED.** Expand `GLOSSARY` in `js/content.js` with
+  the official syllabus keywords (listed under each chapter heading in the syllabus text);
+  add `source` per term. `glossary.istqb.org` is a JS-heavy SPA — prefer the syllabus
+  keyword lists as primary source over scraping it. See spec §"Fase 3".
+
+**To resume:** run brainstorming for Phase 2, then writing-plans, then
+`superpowers:subagent-driven-development` — same workflow as Phase 1 (one implementer +
+one reviewer subagent per task; reviewer independently re-verifies content against the
+syllabus text, not just internal consistency of the implementer's report).
+
+**Known minor gaps from Phase 1** (non-blocking, optional future cleanup):
+- Chapter 4 (Test Analysis & Design) is light on boundary-value-analysis questions (only
+  id 80, reusing the "1–100" domain already used by pre-existing id 15).
+- Learning objective FL-2.1.2 has no dedicated question (folded into id 66's explanation).
