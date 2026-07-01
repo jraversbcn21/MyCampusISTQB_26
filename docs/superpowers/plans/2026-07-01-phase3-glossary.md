@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ampliar `GLOSSARY` en `js/content.js` para cubrir los 97 *keywords* oficiales únicos del ISTQB CTFL Syllabus v4.0 (hoy hay 49 términos, ~30 mapean a keywords), añadir `source` a todos los términos, y barrer `FLASHCARDS` de contenido no-v4.0 (ids 9, 14, 27, 28 conocidos).
+**Goal:** Ampliar `GLOSSARY` en `js/content.js` para cubrir los 97 *keywords* oficiales únicos del ISTQB CTFL Syllabus v4.0 (hoy hay 48 términos, ~30 mapean a keywords), añadir `source` a todos los términos, y barrer `FLASHCARDS` de contenido no-v4.0 (ids 9, 14, 27, 28 conocidos).
 
 **Architecture:** `GLOSSARY` es un array de datos puro (`{ term, def: {es,en}, chapter, source }`); el campo `source` es aditivo y la UI (`App.renderGlossary()` en `js/app.js:849`, búsqueda global en `js/app.js:1108`) solo lee `term`, `def[lang]`, `chapter` — no requiere cambios. El arnés `scripts/validate-content.js` (Fase 2) se extiende con validación de `GLOSSARY` (schema + completitud de keywords contra lista canónica embebida) y `FLASHCARDS` (estructural). Sin UI nueva (YAGNI, per spec).
 
@@ -16,7 +16,7 @@
 - **Retrocompatibilidad:** no tocar `js/app.js`, `js/questions.js`, `css/styles.css` ni el schema existente (`term`/`def`/`chapter` se conservan; `source` es aditivo). `chapter` es string `"1"`–`"6"`.
 - **Keywords duplicados entre capítulos** (coverage, test object, test control, test monitoring, test planning): UNA sola entrada, asignada al primer capítulo donde aparecen (todos → `chapter: "1"`).
 - **Bilingüe:** toda `def` tiene `es` y `en`, una-dos frases, estilo de las entradas existentes.
-- **No reescribir lo correcto:** en la auditoría de los 49 existentes, solo se corrige la definición si contradice el syllabus v4.0; renombrar `term` al nombre oficial no cuenta como reescritura.
+- **No reescribir lo correcto:** en la auditoría de los 48 existentes, solo se corrige la definición si contradice el syllabus v4.0; renombrar `term` al nombre oficial no cuenta como reescritura.
 
 ## Fuentes de verificación (texto plano, en disco)
 
@@ -247,7 +247,7 @@ FLASHCARDS.forEach(f => {
 - [ ] **Step 2: Ejecutar y verificar que falla como se espera**
 
 Run: `node scripts/validate-content.js`
-Expected: exit 1. Las validaciones de Fase 2 (CHAPTERS/LESSONS) siguen ✅. Errores nuevos: 49 × `source vacío` (todo el GLOSSARY actual) y ~60–70 `keyword faltante` (la cifra exacta antes del renombrado no es gate; la lista debe ser un subconjunto de los 97). Sin errores de FLASHCARDS (estructura ya válida).
+Expected: exit 1. Las validaciones de Fase 2 (CHAPTERS/LESSONS) siguen ✅. Errores nuevos: 48 × `source vacío` (todo el GLOSSARY actual) y ~60–70 `keyword faltante` (la cifra exacta antes del renombrado no es gate; la lista debe ser un subconjunto de los 97). Sin errores de FLASHCARDS (estructura ya válida).
 
 - [ ] **Step 3: Commit**
 
@@ -258,14 +258,14 @@ git commit -m "test(content): extend validator with GLOSSARY keyword-completenes
 
 ---
 
-### Task 2: Auditoría de los 49 términos existentes (source + nombres oficiales)
+### Task 2: Auditoría de los 48 términos existentes (source + nombres oficiales)
 
 **Files:**
 - Modify: `js/content.js` (solo el array `GLOSSARY`, líneas ~2372–2421)
 
 **Interfaces:**
 - Consumes: validador de Task 1.
-- Produces: los 49 términos existentes con `source` y nombres oficiales; los errores `source vacío` desaparecen; quedan exactamente 59 `keyword faltante` (los de las Tasks 3–6).
+- Produces: los 48 términos existentes con `source` y nombres oficiales; los errores `source vacío` desaparecen; quedan exactamente 59 `keyword faltante` (los de las Tasks 3–6).
 
 - [ ] **Step 1: Renombrar términos al nombre oficial y añadir `source`**
 
@@ -463,7 +463,7 @@ Run:
 ```bash
 node -e "const fs=require('fs');const src=fs.readFileSync('js/content.js','utf8');const {GLOSSARY}=new Function(src+';return {GLOSSARY}')();const letters=[...new Set(GLOSSARY.map(g=>g.term[0].toUpperCase()))].sort();const hits=GLOSSARY.filter(g=>g.term.toLowerCase().includes('riesgo')||g.def.es.toLowerCase().includes('riesgo'));console.log('terms:',GLOSSARY.length,'letters:',letters.join(''),'busqueda riesgo:',hits.length);"
 ```
-Expected: ~108 terms (49±bajas + 59), letras sin errores, búsqueda "riesgo" ≥ 10 resultados. (Emula `App.renderGlossary()` de `js/app.js:849-863`.)
+Expected: ~107 terms (48±bajas + 59), letras sin errores, búsqueda "riesgo" ≥ 10 resultados. (Emula `App.renderGlossary()` de `js/app.js:849-863`.)
 
 - [ ] **Step 4: Commit**
 
