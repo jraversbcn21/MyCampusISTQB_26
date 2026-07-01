@@ -101,7 +101,7 @@ const CHAPTERS = [
       en: "Tool types, benefits, risks and considerations for tool adoption."
     },
     topics: [
-      { id: "6.1", title: { es: "Soporte de herramientas al testing", en: "Tool support for testing" }, xp: 20 },
+      { id: "6.1", title: { es: "Soporte de herramientas al testing", en: "Tool support for testing" }, xp: 20, lo: ["FL-6.1.1","FL-6.2.1"], source: "Syllabus v4.0 §6.1 / §6.2" },
     ]
   }
 ];
@@ -1674,64 +1674,86 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
       chapterTag: "Cap. 6 · Herramientas",
       content: `
 <h3>Herramientas de Testing</h3>
-<p>Las herramientas de testing pueden soportar muchas actividades del proceso de prueba:</p>
-<h3>Categorías de Herramientas</h3>
+<p>Las herramientas de prueba apoyan y facilitan muchas actividades de prueba. El syllabus distingue ocho tipos de herramientas (lista no exhaustiva):</p>
 <table>
-  <tr><th>Categoría</th><th>Ejemplos</th></tr>
-  <tr><td>Gestión de pruebas</td><td>TestRail, Zephyr, Xray</td></tr>
-  <tr><td>Análisis estático</td><td>SonarQube, ESLint, FindBugs</td></tr>
-  <tr><td>Automatización de UI</td><td>Selenium, Playwright, Cypress</td></tr>
-  <tr><td>Pruebas de API</td><td>Postman, RestAssured, SoapUI</td></tr>
-  <tr><td>Pruebas de rendimiento</td><td>JMeter, Gatling, k6</td></tr>
-  <tr><td>Pruebas unitarias</td><td>JUnit, pytest, NUnit</td></tr>
-  <tr><td>CI/CD</td><td>Jenkins, GitHub Actions, GitLab CI</td></tr>
-  <tr><td>Seguimiento de defectos</td><td>Jira, Bugzilla, Redmine</td></tr>
+  <tr><th>Tipo</th><th>Qué aportan</th><th>Ejemplos</th></tr>
+  <tr><td>Gestión</td><td>Gestión del ciclo de vida (CVDS), requisitos, pruebas, defectos y configuración</td><td>Jira, TestRail, Xray</td></tr>
+  <tr><td>Prueba estática</td><td>Apoyan las revisiones y el análisis estático</td><td>SonarQube, ESLint</td></tr>
+  <tr><td>Diseño e implementación de pruebas</td><td>Generación de casos de prueba, datos de prueba y procedimientos de prueba</td><td>—</td></tr>
+  <tr><td>Ejecución de pruebas y cobertura</td><td>Ejecución automatizada de pruebas y medición de cobertura</td><td>Selenium, Playwright, Cypress, JUnit, pytest</td></tr>
+  <tr><td>Pruebas no funcionales</td><td>Pruebas difíciles o imposibles de realizar manualmente</td><td>JMeter, Gatling, k6</td></tr>
+  <tr><td>DevOps</td><td>Canalización de entrega, seguimiento del flujo de trabajo, construcción automatizada, IC/EC</td><td>Jenkins, GitHub Actions, GitLab CI</td></tr>
+  <tr><td>Colaboración</td><td>Facilitan la comunicación</td><td>Slack, Confluence</td></tr>
+  <tr><td>Escalabilidad y normalización del despliegue</td><td>Máquinas virtuales, herramientas de contenerización</td><td>Docker, Kubernetes</td></tr>
+  <tr><td>Cualquier otra herramienta</td><td>Cualquier herramienta que ayude en las pruebas</td><td>p. ej., una hoja de cálculo</td></tr>
 </table>
 <h3>Beneficios de la Automatización</h3>
+<div class="highlight-box">
+💡 Adquirir una herramienta no garantiza el éxito: cada nueva herramienta requiere esfuerzo (introducción, mantenimiento, formación) para lograr beneficios reales y duraderos.
+</div>
 <ul>
-  <li>Ejecución más rápida de pruebas de regresión</li>
-  <li>Mayor consistencia y repetibilidad</li>
-  <li>Cobertura ampliada (más pruebas en menos tiempo)</li>
-  <li>Disponibilidad 24/7 (integración continua)</li>
-  <li>Reducción del trabajo manual repetitivo</li>
+  <li>Ahorro de tiempo al reducir el trabajo manual repetitivo (ejecutar pruebas de regresión, reintroducir los mismos datos, comparar resultados esperados vs. reales, verificar estándares de codificación)</li>
+  <li>Prevención de errores humanos simples gracias a mayor consistencia y repetibilidad</li>
+  <li>Evaluación más objetiva (p. ej. cobertura) y medidas demasiado complejas de obtener manualmente</li>
+  <li>Acceso más fácil a la información de pruebas para la gestión y los informes (estadísticas, gráficos, datos agregados)</li>
+  <li>Tiempos de ejecución reducidos: detección más temprana de defectos, retroalimentación más rápida, menor tiempo de comercialización</li>
+  <li>Más tiempo para que los probadores diseñen pruebas nuevas, más profundas y eficaces</li>
 </ul>
 <h3>Riesgos de la Automatización</h3>
 <ul>
-  <li>Expectativas poco realistas sobre los beneficios</li>
-  <li>Alto costo inicial de implementación</li>
-  <li>Mantenimiento costoso de scripts (especialmente con UI cambiante)</li>
-  <li>Falsa sensación de seguridad</li>
-  <li>Dependencia de herramientas específicas</li>
+  <li>Expectativas poco realistas sobre los beneficios de una herramienta (funcionalidad, facilidad de uso)</li>
+  <li>Estimaciones imprecisas de tiempo, costos y esfuerzo para introducir la herramienta, mantener los scripts y cambiar el proceso manual existente</li>
+  <li>Usar una herramienta de prueba cuando la prueba manual es más apropiada</li>
+  <li>Confiar demasiado en la herramienta, ignorando la necesidad del pensamiento crítico humano</li>
+  <li>Dependencia del proveedor de la herramienta (puede quebrar, retirarla, venderla a otro proveedor o dar soporte deficiente)</li>
+  <li>Usar software de código abierto que puede estar abandonado o requerir actualizaciones frecuentes</li>
+  <li>Incompatibilidad de la herramienta de automatización con la plataforma de desarrollo</li>
+  <li>Elegir una herramienta inadecuada que no cumpla los requisitos regulatorios o los estándares de seguridad</li>
 </ul>
-<div class="highlight-box">
-💡 <strong>Consideraciones para adoptar herramientas:</strong>
-<br>1. Evaluar la madurez del proceso existente
-<br>2. Pilotar antes de adoptar masivamente
-<br>3. Capacitar al equipo
-<br>4. Establecer métricas de ROI claras
-</div>`
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §6.1 / §6.2</p>`
     },
     en: {
       title: "Tool support for testing",
       chapterTag: "Ch. 6 · Tools",
       content: `
-<h3>Testing Tool Categories</h3>
+<h3>Test Tools</h3>
+<p>Test tools support and facilitate many test activities. The syllabus distinguishes eight types of tools (non-exhaustive list):</p>
 <table>
-  <tr><th>Category</th><th>Examples</th></tr>
-  <tr><td>Test management</td><td>TestRail, Zephyr</td></tr>
-  <tr><td>Static analysis</td><td>SonarQube, ESLint</td></tr>
-  <tr><td>UI automation</td><td>Selenium, Playwright, Cypress</td></tr>
-  <tr><td>API testing</td><td>Postman, RestAssured</td></tr>
-  <tr><td>Performance</td><td>JMeter, Gatling, k6</td></tr>
+  <tr><th>Type</th><th>What they provide</th><th>Examples</th></tr>
+  <tr><td>Management</td><td>Manage the SDLC, requirements, tests, defects and configuration</td><td>Jira, TestRail, Xray</td></tr>
+  <tr><td>Static testing</td><td>Support reviews and static analysis</td><td>SonarQube, ESLint</td></tr>
+  <tr><td>Test design and implementation</td><td>Generate test cases, test data and test procedures</td><td>—</td></tr>
+  <tr><td>Test execution and coverage</td><td>Automated test execution and coverage measurement</td><td>Selenium, Playwright, Cypress, JUnit, pytest</td></tr>
+  <tr><td>Non-functional testing</td><td>Testing that is difficult or impossible to perform manually</td><td>JMeter, Gatling, k6</td></tr>
+  <tr><td>DevOps</td><td>Delivery pipeline, workflow tracking, automated build, CI/CD</td><td>Jenkins, GitHub Actions, GitLab CI</td></tr>
+  <tr><td>Collaboration</td><td>Facilitate communication</td><td>Slack, Confluence</td></tr>
+  <tr><td>Scalability and deployment standardization</td><td>Virtual machines, containerization tools</td><td>Docker, Kubernetes</td></tr>
+  <tr><td>Any other tool</td><td>Any tool that assists in testing</td><td>e.g., a spreadsheet</td></tr>
 </table>
-<h3>Benefits of Automation</h3>
+<h3>Benefits of Test Automation</h3>
+<div class="highlight-box">
+💡 Simply acquiring a tool does not guarantee success: each new tool requires effort (introduction, maintenance, training) to achieve real and lasting benefits.
+</div>
 <ul>
-  <li>Faster regression test execution, greater consistency, extended coverage</li>
+  <li>Time saved by reducing repetitive manual work (regression tests, re-entering the same test data, comparing expected vs. actual results, checking coding standards)</li>
+  <li>Prevention of simple human errors through greater consistency and repeatability</li>
+  <li>More objective assessment (e.g. coverage) and measures too complicated for humans to determine</li>
+  <li>Easier access to test information to support test management and reporting (statistics, graphs, aggregated data)</li>
+  <li>Reduced test execution times: earlier defect detection, faster feedback, faster time to market</li>
+  <li>More time for testers to design new, deeper and more effective tests</li>
 </ul>
-<h3>Risks of Automation</h3>
+<h3>Risks of Test Automation</h3>
 <ul>
-  <li>Unrealistic expectations, high initial cost, maintenance overhead, false sense of security</li>
-</ul>`
+  <li>Unrealistic expectations about the benefits of a tool (functionality, ease of use)</li>
+  <li>Inaccurate estimates of time, cost and effort to introduce a tool, maintain test scripts and change the existing manual test process</li>
+  <li>Using a test tool when manual testing is more appropriate</li>
+  <li>Relying on a tool too much, e.g. ignoring the need for human critical thinking</li>
+  <li>Dependency on the tool vendor (may go out of business, retire the tool, sell it to another vendor, or provide poor support)</li>
+  <li>Using open-source software that may be abandoned or require frequent updates</li>
+  <li>The automation tool is not compatible with the development platform</li>
+  <li>Choosing an unsuitable tool that does not comply with regulatory requirements or safety standards</li>
+</ul>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §6.1 / §6.2</p>`
     }
   },
   "4.2": {
