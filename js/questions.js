@@ -1863,5 +1863,561 @@ const QUESTIONS = [
       es: "Entre los factores de éxito de las revisiones, el syllabus destaca definir objetivos claros y criterios de salida medibles, elegir el tipo de revisión adecuado, revisar en fragmentos pequeños, dar tiempo suficiente para prepararse y contar con apoyo de la dirección. Explícitamente señala que la evaluación del desempeño de los participantes NUNCA debe ser un objetivo de la revisión.",
       en: "Among the success factors for reviews, the syllabus highlights defining clear objectives and measurable exit criteria, choosing the right review type, reviewing in small chunks, giving participants enough time to prepare, and having management support. It explicitly states that evaluating the performance of participants should NEVER be an objective of the review."
     }
+  },
+  // ===== CHAPTER 4 (Test Analysis & Design) — additional LO-mapped questions (Task 5) =====
+  {
+    id: 80, chapter: 3, lo: "FL-4.2.2", k: 3,
+    source: "Syllabus v4.0 §4.2.2",
+    q: {
+      es: "Un campo de entrada acepta números enteros válidos de 1 a 100. Aplicando el análisis de valores límite de 2 valores, ¿qué conjunto de valores límite debería probarse?",
+      en: "An input field accepts valid integers from 1 to 100. Applying 2-value boundary value analysis, which set of boundary values should be tested?"
+    },
+    options: {
+      es: ["0, 1, 100, 101", "1, 100", "1, 50, 100", "0, 50, 101"],
+      en: ["0, 1, 100, 101", "1, 100", "1, 50, 100", "0, 50, 101"]
+    },
+    correct: 0,
+    explanation: {
+      es: "El BVA de 2 valores prueba cada valor límite y su valor adyacente. Para los límites 1 y 100, los valores a probar son 0 y 1 (en torno al límite inferior) y 100 y 101 (en torno al superior).",
+      en: "2-value BVA tests each boundary and its adjacent value. For boundaries 1 and 100, the values to test are 0 and 1 (around the lower boundary) and 100 and 101 (around the upper one)."
+    }
+  },
+  {
+    id: 81, chapter: 3, lo: "FL-4.1.1", k: 2,
+    source: "Syllabus v4.0 §4.1.1",
+    q: {
+      es: "¿Cuál de las siguientes técnicas se clasifica como técnica de prueba de CAJA BLANCA (basada en la estructura)?",
+      en: "Which of the following techniques is classified as a WHITE-BOX (structure-based) test technique?"
+    },
+    options: {
+      es: ["Partición de equivalencia", "Prueba de rama (branch testing)", "Tabla de decisión", "Prueba exploratoria"],
+      en: ["Equivalence partitioning", "Branch testing", "Decision table testing", "Exploratory testing"]
+    },
+    correct: 1,
+    explanation: {
+      es: "Las técnicas de caja blanca se basan en el análisis de la estructura interna y el procesamiento del objeto de prueba, y solo pueden crearse tras el diseño o la implementación del código. La prueba de rama analiza el código fuente y sus ramas de decisión, por lo que es una técnica de caja blanca. Las otras tres son técnicas de caja negra o basadas en la experiencia.",
+      en: "White-box techniques are based on analysis of the internal structure and processing of the test object, and can only be created after the code has been designed or implemented. Branch testing analyzes the source code and its decision branches, making it a white-box technique. The other three are black-box or experience-based techniques."
+    }
+  },
+  {
+    id: 82, chapter: 3, lo: "FL-4.1.1", k: 2,
+    source: "Syllabus v4.0 §4.1.1",
+    q: {
+      es: "¿Cuál es la diferencia FUNDAMENTAL entre las técnicas de prueba de caja negra y las de caja blanca?",
+      en: "What is the FUNDAMENTAL difference between black-box and white-box test techniques?"
+    },
+    options: {
+      es: [
+        "Las técnicas de caja negra se basan en el comportamiento especificado sin hacer referencia a la estructura interna; las de caja blanca se basan en el análisis de la estructura interna, por lo que solo pueden crearse después del diseño o la implementación",
+        "Las técnicas de caja negra requieren siempre acceso al código fuente, mientras que las de caja blanca no",
+        "No existe diferencia real; ambos términos son sinónimos según el syllabus",
+        "Las técnicas de caja negra solo se aplican en pruebas unitarias; las de caja blanca solo en pruebas de sistema"
+      ],
+      en: [
+        "Black-box techniques are based on specified behavior without referring to internal structure; white-box techniques are based on analysis of internal structure, so they can only be created after design or implementation",
+        "Black-box techniques always require access to the source code, while white-box techniques do not",
+        "There is no real difference; both terms are synonyms according to the syllabus",
+        "Black-box techniques only apply to unit testing; white-box techniques only to system testing"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Las técnicas de caja negra (basadas en la especificación) analizan el comportamiento especificado del objeto de prueba sin referencia a su estructura interna, por lo que los casos de prueba son independientes de la implementación. Las técnicas de caja blanca (basadas en la estructura) analizan la estructura interna y el procesamiento, por lo que solo pueden crearse tras el diseño o la implementación del objeto de prueba.",
+      en: "Black-box techniques (specification-based) analyze the specified behavior of the test object without reference to its internal structure, so test cases are independent of the implementation. White-box techniques (structure-based) analyze the internal structure and processing, so they can only be created after the test object has been designed or implemented."
+    }
+  },
+  {
+    id: 83, chapter: 3, lo: "FL-4.1.1", k: 2,
+    source: "Syllabus v4.0 §4.1.1",
+    q: {
+      es: "Según el syllabus, ¿qué característica distingue a las técnicas de prueba BASADAS EN LA EXPERIENCIA?",
+      en: "According to the syllabus, what characteristic distinguishes EXPERIENCE-BASED test techniques?"
+    },
+    options: {
+      es: [
+        "Son las únicas capaces de alcanzar el 100% de cobertura de código",
+        "Dependen en gran medida de los conocimientos y competencias del probador, y pueden detectar defectos no detectados por las técnicas de caja negra y de caja blanca, siendo complementarias a ellas",
+        "Solo pueden aplicarse antes de que el código esté implementado",
+        "Sustituyen completamente la necesidad de aplicar técnicas de caja negra y de caja blanca"
+      ],
+      en: [
+        "They are the only techniques able to achieve 100% code coverage",
+        "They rely heavily on the tester's knowledge and skills, and can detect defects not found by black-box and white-box techniques, making them complementary to those techniques",
+        "They can only be applied before the code has been implemented",
+        "They completely replace the need to apply black-box and white-box techniques"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Las técnicas basadas en la experiencia utilizan de forma eficaz los conocimientos y la experiencia de los probadores. Su efectividad depende en gran medida de las competencias del probador, y pueden detectar defectos que las técnicas de caja negra y caja blanca no detectan, por lo que son complementarias a ellas, no sustitutas.",
+      en: "Experience-based techniques effectively use testers' knowledge and experience. Their effectiveness depends heavily on the tester's skills, and they can detect defects that black-box and white-box techniques do not, making them complementary rather than a replacement."
+    }
+  },
+  {
+    id: 84, chapter: 3, lo: "FL-4.2.1", k: 3,
+    source: "Syllabus v4.0 §4.2.1",
+    q: {
+      es: "Un sistema de reservas de vuelos acepta un número entero de asientos por transacción: los valores de 1 a 9 (inclusive) son válidos; 0 o menos, y 10 o más, son inválidos. Aplicando partición de equivalencia, ¿qué conjunto de valores de prueba representa correctamente las 3 particiones (una válida y dos inválidas)?",
+      en: "A flight booking system accepts an integer number of seats per transaction: values from 1 to 9 (inclusive) are valid; 0 or less, and 10 or more, are invalid. Applying equivalence partitioning, which set of test values correctly represents the 3 partitions (one valid, two invalid)?"
+    },
+    options: {
+      es: ["-1, 5, 15", "0, 1, 9, 10", "5, 6, 7", "-1, 15"],
+      en: ["-1, 5, 15", "0, 1, 9, 10", "5, 6, 7", "-1, 15"]
+    },
+    correct: 0,
+    explanation: {
+      es: "La partición de equivalencia requiere un valor representativo de CADA partición: uno de la partición inválida inferior (p. ej., -1), uno de la partición válida (p. ej., 5) y uno de la partición inválida superior (p. ej., 15). La opción 0,1,9,10 corresponde a valores de BVA (límites y adyacentes), no a representantes de partición; 5,6,7 solo cubre la partición válida; -1,15 omite la partición válida.",
+      en: "Equivalence partitioning requires one representative value from EACH partition: one from the lower invalid partition (e.g., -1), one from the valid partition (e.g., 5), and one from the upper invalid partition (e.g., 15). The 0,1,9,10 option corresponds to BVA values (boundaries and neighbors), not EP representatives; 5,6,7 only covers the valid partition; -1,15 omits the valid partition."
+    }
+  },
+  {
+    id: 85, chapter: 3, lo: "FL-4.2.1", k: 3,
+    source: "Syllabus v4.0 §4.2.1",
+    q: {
+      es: "Un formulario de checkout acepta como método de pago únicamente los valores 'Tarjeta de crédito', 'PayPal' o 'Transferencia bancaria'; cualquier otro valor introducido (por ejemplo, 'Bitcoin') debe ser rechazado. Aplicando partición de equivalencia sobre este campo, ¿cuántas particiones se identifican y de qué tipo?",
+      en: "A checkout form accepts only 'Credit card', 'PayPal' or 'Bank transfer' as payment method values; any other entered value (e.g., 'Bitcoin') must be rejected. Applying equivalence partitioning to this field, how many partitions are identified and of what type?"
+    },
+    options: {
+      es: [
+        "1 única partición inválida",
+        "3 particiones válidas (una por cada método de pago admitido) y 1 partición inválida (cualquier otro valor)",
+        "3 particiones válidas y 3 particiones inválidas correspondientes, una por cada método",
+        "1 partición válida que agrupa los tres métodos y 1 partición inválida"
+      ],
+      en: [
+        "1 single invalid partition",
+        "3 valid partitions (one per supported payment method) and 1 invalid partition (any other value)",
+        "3 valid partitions and 3 corresponding invalid partitions, one per method",
+        "1 valid partition grouping all three methods and 1 invalid partition"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Las particiones de equivalencia pueden ser discretas y desordenadas. Cada valor válido discreto que el sistema puede procesar de forma distinta constituye su propia partición válida (Tarjeta, PayPal, Transferencia), y todos los valores no reconocidos forman una única partición inválida, ya que el sistema los trata de la misma manera (rechazo).",
+      en: "Equivalence partitions can be discrete and unordered. Each discrete valid value that the system may process differently forms its own valid partition (Card, PayPal, Bank transfer), while all unrecognized values form a single invalid partition, since the system treats them the same way (rejection)."
+    }
+  },
+  {
+    id: 86, chapter: 3, lo: "FL-4.2.1", k: 3,
+    source: "Syllabus v4.0 §4.2.1",
+    q: {
+      es: "Un formulario tiene dos parámetros independientes: 'País de envío' (particiones: Nacional, Internacional) y 'Método de pago' (particiones: Tarjeta, Efectivo contra entrega). Aplicando el criterio de cobertura de 'Cada Elección' (Each Choice) de partición de equivalencia, ¿cuál es el número MÍNIMO de casos de prueba necesarios para lograr el 100% de cobertura?",
+      en: "A form has two independent parameters: 'Shipping country' (partitions: Domestic, International) and 'Payment method' (partitions: Card, Cash on delivery). Applying the Each Choice equivalence partitioning coverage criterion, what is the MINIMUM number of test cases needed to achieve 100% coverage?"
+    },
+    options: {
+      es: ["4 (todas las combinaciones posibles)", "2 (el tamaño del conjunto de particiones más grande)", "1 (un único caso puede cubrirlo todo)", "3"],
+      en: ["4 (all possible combinations)", "2 (the size of the largest partition set)", "1 (a single case can cover everything)", "3"]
+    },
+    correct: 1,
+    explanation: {
+      es: "La cobertura de Cada Elección exige que los casos de prueba utilicen cada partición de cada conjunto al menos una vez, sin exigir todas las combinaciones. Con dos conjuntos de 2 particiones cada uno, bastan 2 casos de prueba (p. ej., Nacional+Tarjeta e Internacional+Efectivo) para cubrir todas las particiones al menos una vez; probar las 4 combinaciones sería un criterio más fuerte (combinatorio), no exigido por Cada Elección.",
+      en: "Each Choice coverage requires test cases to use each partition of each set at least once, without requiring all combinations. With two sets of 2 partitions each, 2 test cases suffice (e.g., Domestic+Card and International+Cash) to cover all partitions at least once; testing all 4 combinations would be a stronger (combinatorial) criterion, not required by Each Choice."
+    }
+  },
+  {
+    id: 87, chapter: 3, lo: "FL-4.2.3", k: 3,
+    source: "Syllabus v4.0 §4.2.3",
+    q: {
+      es: "Un sistema de envíos aplica las siguientes reglas de negocio: (1) Si el cliente es Premium, el envío es siempre gratuito, sin importar el peso del paquete. (2) Si el cliente NO es Premium y el paquete pesa más de 10 kg, se aplica un recargo de envío. (3) Si el cliente NO es Premium y el paquete pesa 10 kg o menos, el envío tiene coste estándar (sin recargo ni gratuidad). Usando una tabla de decisión con las condiciones 'Cliente Premium' y 'Peso > 10 kg', ¿qué acción resulta de la regla 'Cliente Premium = Falso' y 'Peso > 10 kg = Verdadero'?",
+      en: "A shipping system applies these business rules: (1) If the customer is Premium, shipping is always free, regardless of package weight. (2) If the customer is NOT Premium and the package weighs more than 10 kg, a shipping surcharge applies. (3) If the customer is NOT Premium and the package weighs 10 kg or less, shipping has a standard cost (no surcharge, no free shipping). Using a decision table with the conditions 'Premium customer' and 'Weight > 10 kg', what action results from the rule 'Premium customer = False' and 'Weight > 10 kg = True'?"
+    },
+    options: {
+      es: ["Envío gratuito", "Recargo de envío", "Envío estándar, sin recargo", "La combinación es inviable (N/A)"],
+      en: ["Free shipping", "Shipping surcharge", "Standard shipping, no surcharge", "The combination is infeasible (N/A)"]
+    },
+    correct: 1,
+    explanation: {
+      es: "Según la regla (2) del enunciado, cuando el cliente NO es Premium y el paquete pesa más de 10 kg, se aplica un recargo de envío. La gratuidad (regla 1) solo aplica a clientes Premium, y el coste estándar (regla 3) solo aplica cuando el peso es ≤10 kg.",
+      en: "According to rule (2) in the scenario, when the customer is NOT Premium and the package weighs more than 10 kg, a shipping surcharge applies. Free shipping (rule 1) only applies to Premium customers, and the standard cost (rule 3) only applies when the weight is ≤10 kg."
+    }
+  },
+  {
+    id: 88, chapter: 3, lo: "FL-4.2.3", k: 3,
+    source: "Syllabus v4.0 §4.2.3",
+    q: {
+      es: "Un gimnasio gestiona reservas de clases con las condiciones 'Es socio' y 'Cuota al día', sabiendo que el concepto de 'cuota al día' SOLO existe y aplica para quienes son socios (un no socio no paga cuota de socio). ¿Cuál de las siguientes combinaciones de condiciones es IMPOSIBLE (inviable, N/A) en la tabla de decisión?",
+      en: "A gym manages class bookings with the conditions 'Is member' and 'Membership fee up to date', knowing that the concept of 'fee up to date' ONLY exists and applies to members (a non-member does not pay a membership fee). Which of the following condition combinations is IMPOSSIBLE (infeasible, N/A) in the decision table?"
+    },
+    options: {
+      es: [
+        "Es socio = Verdadero, Cuota al día = Verdadero",
+        "Es socio = Verdadero, Cuota al día = Falso",
+        "Es socio = Falso, Cuota al día = Verdadero",
+        "Es socio = Falso, Cuota al día = Falso"
+      ],
+      en: [
+        "Is member = True, Fee up to date = True",
+        "Is member = True, Fee up to date = False",
+        "Is member = False, Fee up to date = True",
+        "Is member = False, Fee up to date = False"
+      ]
+    },
+    correct: 2,
+    explanation: {
+      es: "Dado que 'cuota al día' solo tiene sentido para socios, la combinación 'Es socio = Falso' junto con 'Cuota al día = Verdadero' es lógicamente imposible: un no socio no puede tener una cuota de socio al día. Esta columna debería marcarse como N/A y eliminarse de la tabla de decisión.",
+      en: "Since 'fee up to date' only makes sense for members, the combination 'Is member = False' together with 'Fee up to date = True' is logically impossible: a non-member cannot have a member fee that is up to date. This column should be marked N/A and removed from the decision table."
+    }
+  },
+  {
+    id: 89, chapter: 3, lo: "FL-4.2.3", k: 3,
+    source: "Syllabus v4.0 §4.2.3",
+    q: {
+      es: "Una tabla de decisión de entrada AMPLIADA (extended entry) tiene dos condiciones: 'Tipo de cliente' (con 3 valores posibles: Nuevo, Regular, VIP) y '¿Compra > $50?' (con 2 valores posibles: Sí, No). Sin combinaciones inviables, ¿cuántas reglas (columnas) completas tiene la tabla?",
+      en: "An extended-entry decision table has two conditions: 'Customer type' (with 3 possible values: New, Regular, VIP) and 'Purchase > $50?' (with 2 possible values: Yes, No). With no infeasible combinations, how many complete rules (columns) does the table have?"
+    },
+    options: {
+      es: ["5", "6", "8", "3"],
+      en: ["5", "6", "8", "3"]
+    },
+    correct: 1,
+    explanation: {
+      es: "En una tabla de entrada ampliada, el número de reglas es el producto del número de valores posibles de cada condición: 3 (tipos de cliente) × 2 (valores de compra) = 6 reglas. Esto difiere de una tabla de entrada limitada con condiciones puramente booleanas, donde el número de reglas sería 2^n.",
+      en: "In an extended-entry table, the number of rules is the product of the number of possible values of each condition: 3 (customer types) × 2 (purchase values) = 6 rules. This differs from a limited-entry table with purely boolean conditions, where the number of rules would be 2^n."
+    }
+  },
+  {
+    id: 90, chapter: 3, lo: "FL-4.2.3", k: 3,
+    source: "Syllabus v4.0 §4.2.3",
+    q: {
+      es: "La regla de negocio de un sistema de biblioteca establece: 'Un usuario puede llevarse un libro en préstamo solo si NO tiene multas pendientes Y el libro está disponible. Si tiene multas pendientes, el préstamo se rechaza sin importar la disponibilidad del libro.' Usando una tabla de decisión con las condiciones 'Multas pendientes' y 'Libro disponible', ¿qué resultado corresponde a la regla 'Multas pendientes = Falso' y 'Libro disponible = Falso'?",
+      en: "A library system's business rule states: 'A user can borrow a book only if they have NO pending fines AND the book is available. If they have pending fines, the loan is rejected regardless of book availability.' Using a decision table with the conditions 'Pending fines' and 'Book available', what outcome corresponds to the rule 'Pending fines = False' and 'Book available = False'?"
+    },
+    options: {
+      es: ["Préstamo concedido", "Préstamo rechazado por libro no disponible", "Préstamo rechazado por multas pendientes", "Combinación inviable (N/A)"],
+      en: ["Loan granted", "Loan rejected due to book unavailability", "Loan rejected due to pending fines", "Infeasible combination (N/A)"]
+    },
+    correct: 1,
+    explanation: {
+      es: "Cuando no hay multas pendientes pero el libro no está disponible, el préstamo se rechaza por falta de disponibilidad, no por multas (que en este caso son Falso). El préstamo solo se concede cuando ambas condiciones favorables se cumplen: sin multas Y libro disponible.",
+      en: "When there are no pending fines but the book is not available, the loan is rejected due to unavailability, not due to fines (which are False in this case). The loan is only granted when both favorable conditions hold: no fines AND book available."
+    }
+  },
+  {
+    id: 91, chapter: 3, lo: "FL-4.2.4", k: 3,
+    source: "Syllabus v4.0 §4.2.4",
+    q: {
+      es: "Un sistema de gestión de pedidos tiene los estados Creado, Pagado, Enviado, Entregado y Cancelado, con las transiciones válidas: Creado→Pagado, Creado→Cancelado, Pagado→Enviado, Pagado→Cancelado y Enviado→Entregado. Aplicando el criterio de cobertura de TODOS LOS ESTADOS, ¿cuál es el número MÍNIMO de casos de prueba para visitar todos los estados al menos una vez?",
+      en: "An order management system has the states Created, Paid, Shipped, Delivered and Cancelled, with valid transitions: Created→Paid, Created→Cancelled, Paid→Shipped, Paid→Cancelled and Shipped→Delivered. Applying the ALL STATES coverage criterion, what is the MINIMUM number of test cases needed to visit all states at least once?"
+    },
+    options: {
+      es: ["1", "2", "5", "4"],
+      en: ["1", "2", "5", "4"]
+    },
+    correct: 1,
+    explanation: {
+      es: "Un caso de prueba puede recorrer Creado→Pagado→Enviado→Entregado, visitando 4 estados. Como Cancelado solo se alcanza abandonando ese flujo (p. ej., Creado→Cancelado), se necesita un segundo caso de prueba para visitarlo. Por lo tanto, el mínimo es 2 casos de prueba para cubrir los 5 estados.",
+      en: "One test case can traverse Created→Paid→Shipped→Delivered, visiting 4 states. Since Cancelled is only reached by leaving that flow (e.g., Created→Cancelled), a second test case is needed to visit it. Therefore, the minimum is 2 test cases to cover all 5 states."
+    }
+  },
+  {
+    id: 92, chapter: 3, lo: "FL-4.2.4", k: 3,
+    source: "Syllabus v4.0 §4.2.4",
+    q: {
+      es: "Usando el mismo sistema de gestión de pedidos (transiciones válidas: Creado→Pagado, Creado→Cancelado, Pagado→Enviado, Pagado→Cancelado, Enviado→Entregado), ¿cuál es el número MÍNIMO de casos de prueba para lograr una cobertura del 100% de TRANSICIONES VÁLIDAS (cobertura de conmutador 0)?",
+      en: "Using the same order management system (valid transitions: Created→Paid, Created→Cancelled, Paid→Shipped, Paid→Cancelled, Shipped→Delivered), what is the MINIMUM number of test cases needed to achieve 100% VALID TRANSITIONS coverage (0-switch coverage)?"
+    },
+    options: {
+      es: ["5", "2", "3", "4"],
+      en: ["5", "2", "3", "4"]
+    },
+    correct: 2,
+    explanation: {
+      es: "Un caso de prueba Creado→Pagado→Enviado→Entregado cubre 3 transiciones (Creado→Pagado, Pagado→Enviado, Enviado→Entregado). Se necesita un segundo caso, Creado→Cancelado, para cubrir esa transición, y un tercero, Creado→Pagado→Cancelado, para cubrir Pagado→Cancelado (ya que, tras cancelar, el flujo termina y no puede continuar en el mismo caso). En total, 3 casos de prueba cubren las 5 transiciones válidas.",
+      en: "A test case Created→Paid→Shipped→Delivered covers 3 transitions (Created→Paid, Paid→Shipped, Shipped→Delivered). A second case, Created→Cancelled, is needed to cover that transition, and a third, Created→Paid→Cancelled, to cover Paid→Cancelled (since after cancelling the flow ends and cannot continue in the same case). In total, 3 test cases cover the 5 valid transitions."
+    }
+  },
+  {
+    id: 93, chapter: 3, lo: "FL-4.2.4", k: 3,
+    source: "Syllabus v4.0 §4.2.4",
+    q: {
+      es: "Según el mismo modelo de estados del sistema de pedidos, ¿cuál de las siguientes transiciones sería INVÁLIDA y debería intentarse explícitamente al aplicar el criterio de cobertura de TODAS LAS TRANSICIONES (que incluye las inválidas)?",
+      en: "Based on the same order state model, which of the following transitions would be INVALID and should be explicitly attempted when applying the ALL TRANSITIONS coverage criterion (which includes invalid ones)?"
+    },
+    options: {
+      es: ["Enviado → Entregado", "Entregado → Pagado", "Creado → Pagado", "Pagado → Cancelado"],
+      en: ["Shipped → Delivered", "Delivered → Paid", "Created → Paid", "Paid → Cancelled"]
+    },
+    correct: 1,
+    explanation: {
+      es: "'Entregado → Pagado' no forma parte de las transiciones válidas definidas: un pedido entregado no puede volver al estado Pagado. La cobertura de todas las transiciones exige, además de cubrir todas las transiciones válidas, intentar también las inválidas (idealmente una por caso de prueba, para evitar el enmascaramiento de defectos).",
+      en: "'Delivered → Paid' is not among the defined valid transitions: a delivered order cannot revert to the Paid state. All transitions coverage requires, in addition to covering all valid transitions, also attempting invalid ones (ideally one per test case, to avoid defect masking)."
+    }
+  },
+  {
+    id: 94, chapter: 3, lo: "FL-4.3.1", k: 2,
+    source: "Syllabus v4.0 §4.3.1",
+    q: {
+      es: "Según el syllabus ISTQB, ¿qué NO garantiza necesariamente una cobertura de sentencia (statement coverage) del 100%?",
+      en: "According to the ISTQB syllabus, what does 100% statement coverage NOT necessarily guarantee?"
+    },
+    options: {
+      es: [
+        "Que todas las sentencias ejecutables del código han sido ejecutadas al menos una vez",
+        "Que se ha practicado toda la lógica de decisión, incluyendo todas las ramas del código",
+        "Que puede calcularse como el número de sentencias ejecutadas dividido entre el total de sentencias ejecutables",
+        "Que es una técnica de prueba de caja blanca"
+      ],
+      en: [
+        "That all executable statements in the code have been executed at least once",
+        "That all decision logic has been exercised, including all branches in the code",
+        "That it can be calculated as the number of statements executed divided by the total number of executable statements",
+        "That it is a white-box test technique"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Una cobertura de sentencia del 100% asegura que cada sentencia ejecutable se ha ejecutado al menos una vez, pero NO asegura que se haya practicado toda la lógica de decisión, ya que puede que no se ejerciten todas las ramas del código (por ejemplo, si un IF sin ELSE tiene todas sus sentencias en la rama verdadera).",
+      en: "100% statement coverage ensures every executable statement has been executed at least once, but it does NOT ensure that all decision logic has been exercised, since not all branches of the code may be exercised (for example, if an IF without ELSE has all its statements in the true branch)."
+    }
+  },
+  {
+    id: 95, chapter: 3, lo: "FL-4.3.2", k: 2,
+    source: "Syllabus v4.0 §4.3.2",
+    q: {
+      es: "¿Qué relación existe, según el syllabus, entre la cobertura de rama (branch coverage) y la cobertura de sentencia (statement coverage)?",
+      en: "According to the syllabus, what relationship exists between branch coverage and statement coverage?"
+    },
+    options: {
+      es: [
+        "Son completamente independientes; no existe relación entre ellas",
+        "La cobertura de sentencia siempre subsume a la cobertura de rama",
+        "La cobertura de rama subsume a la cobertura de sentencia: el 100% de cobertura de rama implica el 100% de cobertura de sentencia, pero no al revés",
+        "Ambas miden exactamente lo mismo, solo cambia el nombre"
+      ],
+      en: [
+        "They are completely independent; there is no relationship between them",
+        "Statement coverage always subsumes branch coverage",
+        "Branch coverage subsumes statement coverage: 100% branch coverage implies 100% statement coverage, but not the other way around",
+        "Both measure exactly the same thing, only the name differs"
+      ]
+    },
+    correct: 2,
+    explanation: {
+      es: "El syllabus indica que la cobertura de rama subsume la cobertura de sentencia: cualquier conjunto de casos de prueba que logre el 100% de cobertura de rama también logra el 100% de cobertura de sentencia, pero un conjunto con 100% de cobertura de sentencia puede no alcanzar el 100% de cobertura de rama.",
+      en: "The syllabus states that branch coverage subsumes statement coverage: any test suite achieving 100% branch coverage also achieves 100% statement coverage, but a suite with 100% statement coverage may not achieve 100% branch coverage."
+    }
+  },
+  {
+    id: 96, chapter: 3, lo: "FL-4.3.3", k: 2,
+    source: "Syllabus v4.0 §4.3.3",
+    q: {
+      es: "¿Cuál es un punto FUERTE compartido por todas las técnicas de prueba de caja blanca, según el syllabus?",
+      en: "According to the syllabus, what is a STRENGTH shared by all white-box test techniques?"
+    },
+    options: {
+      es: [
+        "No requieren que el código esté implementado para poder aplicarse",
+        "Tienen en cuenta toda la implementación del software, lo que facilita detectar defectos incluso cuando la especificación es vaga, obsoleta o incompleta",
+        "Detectan automáticamente los defectos de omisión cuando falta implementar un requisito",
+        "Eliminan la necesidad de realizar pruebas de caja negra"
+      ],
+      en: [
+        "They do not require the code to be implemented in order to be applied",
+        "They take into account the entire software implementation, which makes it easier to detect defects even when the specification is vague, outdated or incomplete",
+        "They automatically detect omission defects when a requirement has not been implemented",
+        "They eliminate the need to perform black-box testing"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El syllabus señala que un punto fuerte fundamental de las técnicas de caja blanca es que consideran toda la implementación del software, facilitando la detección de defectos aunque la especificación sea vaga o incompleta. Un punto débil correspondiente es que, si el software no implementa uno o más requisitos, la prueba de caja blanca puede NO detectar esos defectos de omisión.",
+      en: "The syllabus notes that a fundamental strength of white-box techniques is that they take the entire software implementation into account, making it easier to detect defects even when the specification is vague or incomplete. A corresponding weakness is that if the software fails to implement one or more requirements, white-box testing may NOT detect the resulting omission defects."
+    }
+  },
+  {
+    id: 97, chapter: 3, lo: "FL-4.4.1", k: 2,
+    source: "Syllabus v4.0 §4.4.1",
+    q: {
+      es: "Según el syllabus ISTQB, los 'ataques de defecto' (fault attacks) son un enfoque metódico de implementación de:",
+      en: "According to the ISTQB syllabus, 'fault attacks' are a methodical approach to implementing:"
+    },
+    options: {
+      es: ["La prueba de tabla de decisión", "La predicción de errores (error guessing)", "La prueba de transición de estado", "El desarrollo guiado por prueba de aceptación (DGPA)"],
+      en: ["Decision table testing", "Error guessing", "State transition testing", "Acceptance test-driven development (ATDD)"]
+    },
+    correct: 1,
+    explanation: {
+      es: "El syllabus define los ataques de defecto como un enfoque metódico de la implementación de la predicción de errores (error guessing), donde el probador crea o adquiere una lista de posibles errores, defectos y fallos, y diseña pruebas para exponerlos.",
+      en: "The syllabus defines fault attacks as a methodical approach to implementing error guessing, where the tester creates or acquires a list of possible errors, defects and failures, and designs tests to expose them."
+    }
+  },
+  {
+    id: 98, chapter: 3, lo: "FL-4.4.2", k: 2,
+    source: "Syllabus v4.0 §4.4.2",
+    q: {
+      es: "En un enfoque de prueba exploratoria BASADO EN SESIONES (session-based), ¿qué elemento se utiliza para guiar la sesión de prueba, conteniendo los objetivos de la prueba?",
+      en: "In a SESSION-BASED exploratory testing approach, what element is used to guide the test session, containing the test objectives?"
+    },
+    options: {
+      es: ["Un caso de prueba detallado, escrito paso a paso", "Un contrato de prueba (test charter)", "Una tabla de decisión", "Un diagrama de transición de estados"],
+      en: ["A detailed, step-by-step written test case", "A test charter", "A decision table", "A state transition diagram"]
+    },
+    correct: 1,
+    explanation: {
+      es: "En el enfoque basado en sesiones, el probador utiliza un contrato de prueba (test charter) que contiene los objetivos de prueba para guiar la sesión, dentro de un marco temporal definido, seguida normalmente de una recapitulación (debrief) con los implicados.",
+      en: "In the session-based approach, the tester uses a test charter containing the test objectives to guide the session, within a defined time frame, typically followed by a debrief with stakeholders."
+    }
+  },
+  {
+    id: 99, chapter: 3, lo: "FL-4.4.2", k: 2,
+    source: "Syllabus v4.0 §4.4.2",
+    q: {
+      es: "¿En cuál de las siguientes situaciones resulta ESPECIALMENTE útil aplicar la prueba exploratoria, según el syllabus?",
+      en: "According to the syllabus, in which of the following situations is exploratory testing ESPECIALLY useful?"
+    },
+    options: {
+      es: [
+        "Cuando las especificaciones son completas, detalladas y estables",
+        "Cuando las especificaciones son escasas o inadecuadas, o existe una presión de tiempo importante para la prueba",
+        "Únicamente durante las pruebas de aceptación formales con el cliente",
+        "Solo cuando el equipo carece por completo de testers con experiencia"
+      ],
+      en: [
+        "When the specifications are complete, detailed and stable",
+        "When the specifications are sparse or inadequate, or there is significant time pressure for testing",
+        "Only during formal acceptance testing with the customer",
+        "Only when the team completely lacks experienced testers"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El syllabus indica que la prueba exploratoria resulta útil cuando las especificaciones son escasas o inadecuadas, o cuando existe una presión de tiempo importante para la prueba; también es útil para complementar otras técnicas más formales.",
+      en: "The syllabus states that exploratory testing is useful when specifications are sparse or inadequate, or when there is significant time pressure for testing; it is also useful to complement other more formal techniques."
+    }
+  },
+  {
+    id: 100, chapter: 3, lo: "FL-4.4.3", k: 2,
+    source: "Syllabus v4.0 §4.4.3",
+    q: {
+      es: "Según el syllabus, ¿qué tipo de elementos NO deberían incluirse en una lista de comprobación (checklist) usada para la prueba basada en lista de comprobación?",
+      en: "According to the syllabus, what type of items should NOT be included in a checklist used for checklist-based testing?"
+    },
+    options: {
+      es: [
+        "Elementos formulados como preguntas que pueden comprobarse de forma directa",
+        "Elementos que pueden comprobarse automáticamente, que son más adecuados como criterios de entrada/salida, o que son demasiado generales",
+        "Elementos relacionados con características de calidad no funcionales, como la usabilidad",
+        "Elementos basados en la experiencia del probador sobre por qué falla el software"
+      ],
+      en: [
+        "Items formulated as questions that can be checked directly",
+        "Items that can be checked automatically, that are better suited as entry/exit criteria, or that are too general",
+        "Items related to non-functional quality characteristics, such as usability",
+        "Items based on the tester's experience about why software fails"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El syllabus indica que las listas de comprobación no deben contener elementos que puedan comprobarse automáticamente, elementos más adecuados como criterios de entrada/salida, o elementos demasiado generales. Los elementos deben formularse como preguntas verificables directa e individualmente.",
+      en: "The syllabus states that checklists should not contain items that can be checked automatically, items better suited as entry/exit criteria, or items that are too general. Items should be formulated as questions that can be checked directly and individually."
+    }
+  },
+  {
+    id: 101, chapter: 3, lo: "FL-4.5.1", k: 2,
+    source: "Syllabus v4.0 §4.5.1",
+    q: {
+      es: "Según el modelo de las '3 C' para historias de usuario (Card, Conversation, Confirmation), ¿qué representa la 'Confirmación' (Confirmation)?",
+      en: "According to the '3 C's' model for user stories (Card, Conversation, Confirmation), what does 'Confirmation' represent?"
+    },
+    options: {
+      es: [
+        "El medio físico o digital que describe la historia de usuario (por ejemplo, una tarjeta o entrada en un tablón)",
+        "La conversación, verbal o documentada, que explica cómo se utilizará el software",
+        "Los criterios de aceptación de la historia de usuario",
+        "La estimación de esfuerzo (story points) asignada a la historia de usuario"
+      ],
+      en: [
+        "The physical or digital medium describing the user story (e.g., a card or an entry on a board)",
+        "The conversation, verbal or documented, that explains how the software will be used",
+        "The acceptance criteria of the user story",
+        "The effort estimate (story points) assigned to the user story"
+      ]
+    },
+    correct: 2,
+    explanation: {
+      es: "Las '3 C' son Card (Cuartilla, el medio que describe la historia), Conversation (Conversación, cómo se usará el software) y Confirmation (Confirmación, los criterios de aceptación de la historia de usuario).",
+      en: "The '3 C's' are Card (the medium describing the story), Conversation (how the software will be used) and Confirmation (the acceptance criteria of the user story)."
+    }
+  },
+  {
+    id: 102, chapter: 3, lo: "FL-4.5.2", k: 2,
+    source: "Syllabus v4.0 §4.5.2",
+    q: {
+      es: "¿Cuáles son los DOS formatos más comunes para redactar los criterios de aceptación de una historia de usuario, según el syllabus?",
+      en: "According to the syllabus, what are the TWO most common formats for writing the acceptance criteria of a user story?"
+    },
+    options: {
+      es: [
+        "Orientado al escenario (Dado/Cuando/Entonces) y orientado a reglas (lista de verificación o tabla entrada-salida)",
+        "Diagramas UML de casos de uso y pseudocódigo",
+        "Casos de prueba automatizados y casos de prueba manuales",
+        "Tablas de decisión y diagramas de transición de estados"
+      ],
+      en: [
+        "Scenario-oriented (Given/When/Then) and rule-oriented (checklist or input-output table)",
+        "UML use case diagrams and pseudocode",
+        "Automated test cases and manual test cases",
+        "Decision tables and state transition diagrams"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El syllabus indica que los dos formatos más comunes para los criterios de aceptación son: orientado al escenario (por ejemplo, formato Dado/Cuando/Entonces del desarrollo guiado por el comportamiento) y orientado a reglas (lista de verificación con viñetas, o forma tabulada de mapeo entrada-salida).",
+      en: "The syllabus states that the two most common formats for acceptance criteria are: scenario-oriented (e.g., the Given/When/Then format used in behavior-driven development) and rule-oriented (a bulleted checklist, or a tabular input-output mapping)."
+    }
+  },
+  {
+    id: 103, chapter: 3, lo: "FL-4.5.3", k: 3,
+    source: "Syllabus v4.0 §4.5.3",
+    q: {
+      es: "Siguiendo el enfoque DGPA (ATDD) para la historia de usuario 'Como cliente registrado, quiero recibir un código de descuento del 10% en mi primera compra, para sentirme incentivado a completar mi pedido', ¿qué tipo de casos de prueba deben crearse PRIMERO, según el orden recomendado por el syllabus?",
+      en: "Following the ATDD approach for the user story 'As a registered customer, I want to receive a 10% discount code on my first purchase, so that I feel encouraged to complete my order', which type of test cases should be created FIRST, according to the order recommended by the syllabus?"
+    },
+    options: {
+      es: [
+        "Casos de prueba de rendimiento y carga",
+        "Casos de prueba positivos que confirman el comportamiento correcto sin excepciones (por ejemplo, el cliente recibe el 10% de descuento en su primera compra)",
+        "Casos de prueba negativos (por ejemplo, un cliente no registrado intenta usar el código)",
+        "Casos de prueba de usabilidad de la interfaz de checkout"
+      ],
+      en: [
+        "Performance and load test cases",
+        "Positive test cases that confirm correct behavior without exceptions (e.g., the customer receives the 10% discount on their first purchase)",
+        "Negative test cases (e.g., an unregistered customer tries to use the code)",
+        "Usability test cases for the checkout interface"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Según el syllabus, normalmente los primeros casos de prueba en DGPA son positivos, confirmando el comportamiento correcto sin excepciones ni condiciones de error. Una vez completados estos, el equipo realiza las pruebas negativas, y por último cubre las características de calidad no funcionales.",
+      en: "According to the syllabus, in ATDD the first test cases are typically positive, confirming correct behavior without exceptions or error conditions. Once these are completed, the team performs negative tests, and finally covers non-functional quality characteristics."
+    }
+  },
+  {
+    id: 104, chapter: 3, lo: "FL-4.5.3", k: 3,
+    source: "Syllabus v4.0 §4.5.3",
+    q: {
+      es: "Para la misma historia de usuario ('Como cliente registrado, quiero recibir un código de descuento del 10% en mi primera compra'), con el criterio de aceptación 'Dado un cliente registrado sin compras previas, cuando completa su primer pedido, entonces el sistema aplica automáticamente un 10% de descuento', ¿cuál de las siguientes opciones representa un caso de prueba NEGATIVO derivado correctamente mediante DGPA?",
+      en: "For the same user story ('As a registered customer, I want to receive a 10% discount code on my first purchase'), with the acceptance criterion 'Given a registered customer with no previous purchases, when they complete their first order, then the system automatically applies a 10% discount', which of the following options represents a NEGATIVE test case correctly derived using ATDD?"
+    },
+    options: {
+      es: [
+        "Dado un cliente registrado sin compras previas, cuando completa su primer pedido, entonces recibe el 10% de descuento",
+        "Dado un cliente registrado que YA realizó una compra anterior, cuando completa un nuevo pedido, entonces el sistema NO debe aplicar el 10% de descuento de bienvenida",
+        "Dado un cliente Premium, cuando solicita soporte técnico, entonces recibe respuesta en menos de 24 horas",
+        "Verificar que la página de checkout carga en menos de 2 segundos"
+      ],
+      en: [
+        "Given a registered customer with no previous purchases, when they complete their first order, then they receive the 10% discount",
+        "Given a registered customer who has ALREADY made a previous purchase, when they complete a new order, then the system must NOT apply the 10% welcome discount",
+        "Given a Premium customer, when they request technical support, then they receive a response within 24 hours",
+        "Verify that the checkout page loads in under 2 seconds"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Un caso de prueba negativo válido comprueba que el sistema rechaza correctamente una condición fuera del alcance previsto: un cliente que ya compró antes NO debe recibir el descuento de 'primera compra'. La opción (a) es el caso positivo; la opción (c) es una funcionalidad no relacionada (fuera del alcance de esta historia); la opción (d) es una prueba no funcional no vinculada a la regla de negocio de esta historia. El syllabus indica que los casos de prueba deben cubrir las características de la historia sin ir más allá de ella.",
+      en: "A valid negative test case checks that the system correctly rejects a condition outside the intended scope: a customer who has already purchased before must NOT receive the 'first purchase' discount. Option (a) is the positive case; option (c) is unrelated functionality (outside this story's scope); option (d) is a non-functional test unrelated to this story's business rule. The syllabus states that test cases must cover the story's features without going beyond it."
+    }
   }
 ];
