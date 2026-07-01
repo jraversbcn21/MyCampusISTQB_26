@@ -1720,5 +1720,148 @@ const QUESTIONS = [
       es: "Los desencadenantes de la prueba de mantenimiento incluyen modificaciones (mejoras planificadas, cambios correctivos o correcciones en caliente), actualizaciones o migraciones del entorno de operación (por ejemplo, a una nueva plataforma, requiriendo pruebas de conversión de datos) y la retirada del sistema. El alcance depende del riesgo del cambio, el tamaño del sistema y la magnitud del cambio.",
       en: "Maintenance testing triggers include modifications (planned enhancements, corrective changes or hotfixes), updates or migrations of the operational environment (e.g., to a new platform, requiring data conversion testing) and system retirement. The scope depends on the risk of the change, the size of the system and the magnitude of the change."
     }
+  },
+  // ===== CHAPTER 3: STATIC TESTING (extra, Task 4) =====
+  {
+    id: 74, chapter: 2, lo: "FL-3.2.4", k: 2,
+    source: "Syllabus v4.0 §3.2.4",
+    q: {
+      es: "¿Cuál de los siguientes tipos de revisión es el MÁS formal, sigue un proceso definido y suele incluir métricas y roles asignados?",
+      en: "Which of the following review types is the MOST formal, follows a defined process and usually includes metrics and assigned roles?"
+    },
+    options: {
+      es: ["Inspección", "Revisión informal", "Walkthrough (recorrido)", "Revisión técnica"],
+      en: ["Inspection", "Informal review", "Walkthrough", "Technical review"]
+    },
+    correct: 0,
+    explanation: {
+      es: "La inspección es el tipo de revisión más formal: sigue un proceso definido, con roles, reglas de entrada/salida y recolección de métricas. La revisión informal es la menos formal.",
+      en: "The inspection is the most formal review type: it follows a defined process with roles, entry/exit rules and metrics collection. The informal review is the least formal."
+    }
+  },
+  {
+    id: 75, chapter: 2, lo: "FL-3.1.1", k: 1,
+    source: "Syllabus v4.0 §3.1.1",
+    q: {
+      es: "Según el syllabus, ¿cuál de los siguientes productos de trabajo es MENOS apropiado para ser examinado mediante prueba estática?",
+      en: "According to the syllabus, which of the following work products is LEAST appropriate to be examined through static testing?"
+    },
+    options: {
+      es: [
+        "El código ejecutable de terceros, difícil de interpretar y que no debe ser analizado por razones legales",
+        "Un documento de especificación de requisitos",
+        "El código fuente escrito por el equipo de desarrollo",
+        "Un plan de pruebas o un caso de prueba"
+      ],
+      en: [
+        "Third-party executable code, hard to interpret and that must not be analyzed for legal reasons",
+        "A requirements specification document",
+        "Source code written by the development team",
+        "A test plan or a test case"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Casi cualquier producto de trabajo legible y comprensible puede examinarse mediante prueba estática (requisitos, código fuente, planes y casos de prueba, elementos del backlog, etc.). Los productos NO apropiados son los difíciles de interpretar por personas y que no deben analizarse con herramientas, como el código ejecutable de terceros por razones legales.",
+      en: "Almost any readable and understandable work product can be examined via static testing (requirements, source code, test plans and cases, backlog items, etc.). Work products that are NOT appropriate are those hard for people to interpret and that must not be analyzed by tools, such as third-party executable code for legal reasons."
+    }
+  },
+  {
+    id: 76, chapter: 2, lo: "FL-3.1.2", k: 2,
+    source: "Syllabus v4.0 §3.1.2",
+    q: {
+      es: "Según el syllabus, ¿por qué los costes totales del proyecto suelen ser MENORES cuando se realizan revisiones, a pesar de que implementarlas tiene un coste?",
+      en: "According to the syllabus, why are total project costs usually LOWER when reviews are performed, even though implementing reviews has a cost?"
+    },
+    options: {
+      es: [
+        "Porque se necesita dedicar menos tiempo y esfuerzo a corregir defectos cuando el proyecto está más avanzado",
+        "Porque las revisiones eliminan por completo la necesidad de realizar pruebas dinámicas",
+        "Porque las revisiones siempre las realizan herramientas automáticas sin coste de personal",
+        "Porque las revisiones sustituyen a la gestión de requisitos y al diseño"
+      ],
+      en: [
+        "Because less time and effort is needed to fix defects when the project is further advanced",
+        "Because reviews completely eliminate the need for dynamic testing",
+        "Because reviews are always performed by automated tools at no staffing cost",
+        "Because reviews replace requirements management and design"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Aunque implementar revisiones puede resultar costoso, los costes totales del proyecto suelen ser menores que cuando no se realizan, ya que se necesita dedicar menos tiempo y esfuerzo a la corrección de defectos cuando el proyecto se encuentra más avanzado. Además, la prueba estática cumple el principio de prueba temprana y puede detectar defectos que la prueba dinámica no encuentra.",
+      en: "Although implementing reviews can be costly, total project costs are usually much lower than when reviews are not performed, since less time and effort is needed to fix defects later in the project. Static testing also fulfills the early testing principle and can find defects that dynamic testing cannot."
+    }
+  },
+  {
+    id: 77, chapter: 2, lo: "FL-3.1.3", k: 2,
+    source: "Syllabus v4.0 §3.1.3",
+    q: {
+      es: "Según el syllabus, ¿cuál de las siguientes es una diferencia CORRECTA entre la prueba estática y la prueba dinámica?",
+      en: "According to the syllabus, which of the following is a CORRECT difference between static and dynamic testing?"
+    },
+    options: {
+      es: [
+        "La prueba estática encuentra los defectos directamente, mientras que la prueba dinámica provoca fallos a partir de los cuales se determinan los defectos mediante un análisis posterior",
+        "La prueba estática solo puede aplicarse a productos de trabajo ejecutables, igual que la dinámica",
+        "La prueba dinámica detecta más fácilmente los defectos en caminos del código que rara vez se ejecutan",
+        "La prueba estática mide características de calidad que dependen de la ejecución del código, como la eficiencia de rendimiento"
+      ],
+      en: [
+        "Static testing finds defects directly, while dynamic testing causes failures from which the associated defects are determined through subsequent analysis",
+        "Static testing can only be applied to executable work products, just like dynamic testing",
+        "Dynamic testing more easily detects defects in code paths that are rarely executed",
+        "Static testing measures quality characteristics that depend on code execution, such as performance efficiency"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "La prueba estática y la dinámica son complementarias: la estática encuentra los defectos directamente, mientras que la dinámica provoca fallos a partir de los cuales se determinan los defectos mediante análisis posterior. Además, la prueba estática puede aplicarse a productos no ejecutables y detecta más fácilmente defectos en caminos de código poco ejecutados o difíciles de alcanzar dinámicamente.",
+      en: "Static and dynamic testing are complementary: static testing finds defects directly, while dynamic testing causes failures from which the associated defects are determined through subsequent analysis. Static testing can also be applied to non-executable work products and more easily detects defects in code paths that are rarely executed or hard to reach dynamically."
+    }
+  },
+  {
+    id: 78, chapter: 2, lo: "FL-3.2.2", k: 2,
+    source: "Syllabus v4.0 §3.2.2",
+    q: {
+      es: "En el proceso de revisión genérico del syllabus, ¿cómo se denomina la actividad en la que cada revisor evalúa el producto de trabajo por su cuenta, aplicando técnicas como la basada en lista de comprobación o en escenarios, y registra las anomalías encontradas?",
+      en: "In the syllabus's generic review process, what is the activity called in which each reviewer independently evaluates the work product, applying techniques such as checklist-based or scenario-based review, and records the anomalies found?"
+    },
+    options: {
+      es: ["Revisión individual", "Planificación", "Inicio de la revisión", "Corrección y suministro de información"],
+      en: ["Individual review", "Planning", "Review initiation", "Fixing and reporting"]
+    },
+    correct: 0,
+    explanation: {
+      es: "Las actividades del proceso de revisión son: planificación, inicio de la revisión, revisión individual, comunicación y análisis, y corrección y suministro de información. En la revisión individual, cada revisor evalúa la calidad del producto de trabajo aplicando una o varias técnicas (por ejemplo, basada en lista de comprobación o en escenarios) y registra las anomalías, recomendaciones y preguntas identificadas.",
+      en: "The review process activities are: planning, review initiation, individual review, communication and analysis, and fixing and reporting. During individual review, each reviewer evaluates the quality of the work product applying one or more techniques (e.g., checklist-based or scenario-based review) and records the anomalies, recommendations and questions identified."
+    }
+  },
+  {
+    id: 79, chapter: 2, lo: "FL-3.2.5", k: 1,
+    source: "Syllabus v4.0 §3.2.5",
+    q: {
+      es: "Según el syllabus, ¿cuál de las siguientes acciones NUNCA debe ser un objetivo de una revisión, siendo en realidad contraria a los factores de éxito de las revisiones?",
+      en: "According to the syllabus, which of the following actions should NEVER be an objective of a review, being in fact contrary to the success factors of reviews?"
+    },
+    options: {
+      es: [
+        "Evaluar el desempeño de los participantes",
+        "Definir objetivos claros y criterios de salida medibles",
+        "Proporcionar tiempo suficiente a los participantes para prepararse",
+        "Contar con el apoyo de la dirección al proceso de revisión"
+      ],
+      en: [
+        "Evaluating the performance of the participants",
+        "Defining clear objectives and measurable exit criteria",
+        "Providing participants with sufficient time to prepare",
+        "Having management support for the review process"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Entre los factores de éxito de las revisiones, el syllabus destaca definir objetivos claros y criterios de salida medibles, elegir el tipo de revisión adecuado, revisar en fragmentos pequeños, dar tiempo suficiente para prepararse y contar con apoyo de la dirección. Explícitamente señala que la evaluación del desempeño de los participantes NUNCA debe ser un objetivo de la revisión.",
+      en: "Among the success factors for reviews, the syllabus highlights defining clear objectives and measurable exit criteria, choosing the right review type, reviewing in small chunks, giving participants enough time to prepare, and having management support. It explicitly states that evaluating the performance of participants should NEVER be an objective of the review."
+    }
   }
 ];
