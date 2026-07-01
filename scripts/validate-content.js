@@ -5,11 +5,13 @@ const path = require('path');
 const SRC = path.join(__dirname, '..', 'js', 'content.js');
 const src = fs.readFileSync(SRC, 'utf8');
 
-let CHAPTERS, LESSONS;
+let CHAPTERS, LESSONS, GLOSSARY, FLASHCARDS;
 try {
-  const result = new Function(src + '\n; return {CHAPTERS, LESSONS};')();
+  const result = new Function(src + '\n; return {CHAPTERS, LESSONS, GLOSSARY, FLASHCARDS};')();
   CHAPTERS = result.CHAPTERS;
   LESSONS = result.LESSONS;
+  GLOSSARY = result.GLOSSARY;
+  FLASHCARDS = result.FLASHCARDS;
 } catch (e) {
   console.error('❌ content.js no parsea:', e.message);
   process.exit(1);
@@ -55,6 +57,76 @@ CHAPTERS.forEach((ch, chIdx) => {
       }
     }
   });
+});
+
+/* ===== GLOSSARY ===== */
+// Lista canónica: keywords oficiales por capítulo, syllabus v4.0 (secciones "Keywords").
+// Duplicados entre capítulos asignados al primer capítulo donde aparecen.
+const KEYWORDS = {
+  '1': ['coverage','debugging','defect','error','failure','quality','quality assurance','root cause',
+        'test analysis','test basis','test case','test completion','test condition','test control',
+        'test data','test design','test execution','test implementation','test monitoring','test object',
+        'test objective','test planning','test procedure','test process','test result','testing',
+        'testware','traceability','validation','verification'],
+  '2': ['acceptance testing','black-box testing','component integration testing','component testing',
+        'confirmation testing','functional testing','integration testing','maintenance testing',
+        'non-functional testing','regression testing','shift left','system integration testing',
+        'system testing','test level','test type','white-box testing'],
+  '3': ['anomaly','dynamic testing','formal review','informal review','inspection','review',
+        'static analysis','static testing','technical review','walkthrough'],
+  '4': ['acceptance criteria','acceptance test-driven development','black-box test technique',
+        'boundary value analysis','branch coverage','checklist-based testing',
+        'collaboration-based test approach','coverage item','decision table testing',
+        'equivalence partitioning','error guessing','experience-based test technique',
+        'exploratory testing','state transition testing','statement coverage','test technique',
+        'white-box test technique'],
+  '5': ['defect management','defect report','entry criteria','exit criteria','product risk',
+        'project risk','risk','risk analysis','risk assessment','risk control','risk identification',
+        'risk level','risk management','risk mitigation','risk monitoring','risk-based testing',
+        'test approach','test completion report','test plan','test progress report','test pyramid',
+        'test strategy','testing quadrants'],
+  '6': ['test automation']
+};
+
+const norm = s => s.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+const segsOf = term => term.split('/').map(norm).filter(Boolean);
+
+const seenTerms = new Set();
+GLOSSARY.forEach((g, i) => {
+  const tag = `glossary[${i}] "${(g.term || '(sin term)').slice(0, 45)}"`;
+  if (!g.term || !g.term.trim()) errors.push(`${tag}: term vacío`);
+  for (const lang of ['es', 'en']) {
+    if (!g.def || !g.def[lang] || !g.def[lang].trim()) errors.push(`${tag}: falta def.${lang}`);
+  }
+  if (!['1','2','3','4','5','6'].includes(g.chapter)) errors.push(`${tag}: chapter inválido "${g.chapter}"`);
+  if (!g.source || !g.source.trim()) errors.push(`${tag}: source vacío`);
+  const key = (g.term || '').toLowerCase().trim();
+  if (seenTerms.has(key)) errors.push(`${tag}: término duplicado`);
+  seenTerms.add(key);
+});
+
+const allSegs = new Set();
+GLOSSARY.forEach(g => segsOf(g.term || '').forEach(s => allSegs.add(s)));
+let totalKw = 0, missingKw = [];
+for (const [ch, list] of Object.entries(KEYWORDS)) {
+  for (const kw of list) {
+    totalKw++;
+    if (!allSegs.has(norm(kw))) missingKw.push(`keyword faltante (cap.${ch}): "${kw}"`);
+  }
+}
+console.log(`\nKeywords oficiales cubiertos: ${totalKw - missingKw.length}/${totalKw}`);
+missingKw.forEach(m => errors.push(m));
+
+/* ===== FLASHCARDS (estructural) ===== */
+const fcIds = new Set();
+FLASHCARDS.forEach(f => {
+  const tag = `flashcard id ${f.id}`;
+  if (fcIds.has(f.id)) errors.push(`${tag}: id duplicado`);
+  fcIds.add(f.id);
+  for (const lang of ['es', 'en']) {
+    if (!f.q || !f.q[lang] || !f.q[lang].trim()) errors.push(`${tag}: falta q.${lang}`);
+    if (!f.a || !f.a[lang] || !f.a[lang].trim()) errors.push(`${tag}: falta a.${lang}`);
+  }
 });
 
 if (errors.length) {
