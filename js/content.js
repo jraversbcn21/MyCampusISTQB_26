@@ -33,10 +33,10 @@ const CHAPTERS = [
       en: "How testing integrates into different development models, test levels and test types."
     },
     topics: [
-      { id: "2.1", title: { es: "Testing en el contexto del SDLC", en: "Testing in the context of SDLC" }, xp: 40 },
-      { id: "2.2", title: { es: "Niveles de prueba", en: "Test levels" }, xp: 50 },
-      { id: "2.3", title: { es: "Tipos de prueba", en: "Test types" }, xp: 40 },
-      { id: "2.4", title: { es: "Pruebas de mantenimiento", en: "Maintenance testing" }, xp: 30 },
+      { id: "2.1", title: { es: "Testing en el contexto del SDLC", en: "Testing in the context of SDLC" }, xp: 40, lo: ["FL-2.1.1","FL-2.1.2","FL-2.1.3","FL-2.1.4","FL-2.1.5","FL-2.1.6"], source: "Syllabus v4.0 §2.1" },
+      { id: "2.2", title: { es: "Niveles de prueba", en: "Test levels" }, xp: 50, lo: ["FL-2.2.1"], source: "Syllabus v4.0 §2.2" },
+      { id: "2.3", title: { es: "Tipos de prueba", en: "Test types" }, xp: 40, lo: ["FL-2.2.2","FL-2.2.3"], source: "Syllabus v4.0 §2.3" },
+      { id: "2.4", title: { es: "Pruebas de mantenimiento", en: "Maintenance testing" }, xp: 30, lo: ["FL-2.3.1"], source: "Syllabus v4.0 §2.4" },
     ]
   },
   {
@@ -488,7 +488,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
       title: "Niveles de prueba",
       chapterTag: "Cap. 2 · SDLC",
       content: `
-<h3>Los 4 Niveles de Prueba</h3>
+<h3>Los 5 Niveles de Prueba</h3>
 <p>Los niveles de prueba son grupos de actividades de testing organizadas y gestionadas juntos. Cada nivel corresponde a una fase del desarrollo.</p>
 
 <h3>Prueba de Componente / Unitaria</h3>
@@ -516,6 +516,14 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li><strong>Realizado por:</strong> Equipo de pruebas independiente</li>
 </ul>
 
+<h3>Prueba de Integración de Sistemas</h3>
+<p>Verifica las interfaces del sistema bajo prueba con otros sistemas y servicios externos.</p>
+<ul>
+  <li><strong>Objeto de prueba:</strong> Interfaces con sistemas/servicios externos</li>
+  <li><strong>Defectos típicos:</strong> Fallos de comunicación entre sistemas, incompatibilidad de formatos de datos</li>
+  <li><strong>Entorno:</strong> Requiere entornos de prueba similares al de producción</li>
+</ul>
+
 <h3>Prueba de Aceptación</h3>
 <p>Verifica si el sistema cumple con los criterios de aceptación del negocio y es listo para entrega.</p>
 <ul>
@@ -529,25 +537,72 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 <table>
   <tr><th>Nivel</th><th>¿Qué verifica?</th><th>¿Quién?</th></tr>
   <tr><td>Componente</td><td>Módulos individuales</td><td>Desarrolladores</td></tr>
-  <tr><td>Integración</td><td>Interacción entre componentes</td><td>Desarrolladores / Testers</td></tr>
+  <tr><td>Integración de Componentes</td><td>Interacción entre componentes</td><td>Desarrolladores / Testers</td></tr>
   <tr><td>Sistema</td><td>Sistema completo</td><td>Testers independientes</td></tr>
+  <tr><td>Integración de Sistemas</td><td>Interfaces con sistemas externos</td><td>Testers independientes / especializados</td></tr>
   <tr><td>Aceptación</td><td>Necesidades del negocio/usuario</td><td>Usuarios / Clientes</td></tr>
 </table>
-      `
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.2</p>`
     },
     en: {
       title: "Test levels",
       chapterTag: "Ch. 2 · SDLC",
       content: `
-<h3>The 4 Test Levels</h3>
+<h3>The 5 Test Levels</h3>
+<p>Test levels are groups of test activities that are organized and managed together. Each level corresponds to a stage of development.</p>
+
+<h3>Component/Unit Testing</h3>
+<p>Verifies individual components in isolation. Also called unit testing.</p>
+<ul>
+  <li><strong>Test object:</strong> Source code, modules, classes</li>
+  <li><strong>Typical defects:</strong> Coding errors, incorrect logic paths</li>
+  <li><strong>Environment:</strong> Stubs and drivers to simulate dependencies</li>
+  <li><strong>Performed by:</strong> Developers</li>
+</ul>
+
+<h3>Component Integration Testing</h3>
+<p>Verifies the interaction between integrated components.</p>
+<ul>
+  <li><strong>Test object:</strong> Interfaces, APIs, data flows between modules</li>
+  <li><strong>Typical defects:</strong> Incorrect communication between components</li>
+  <li><strong>Approaches:</strong> Bottom-up, Top-down, Big-bang, Sandwich</li>
+</ul>
+
+<h3>System Testing</h3>
+<p>Verifies the behavior of the complete system end-to-end.</p>
+<ul>
+  <li><strong>Test object:</strong> Complete system, end-to-end application</li>
+  <li><strong>Typical defects:</strong> Incorrect data flows, functional system failures</li>
+  <li><strong>Performed by:</strong> Independent test team</li>
+</ul>
+
+<h3>System Integration Testing</h3>
+<p>Verifies the interfaces of the system under test with other external systems and services.</p>
+<ul>
+  <li><strong>Test object:</strong> Interfaces with external systems/services</li>
+  <li><strong>Typical defects:</strong> Communication failures between systems, data format incompatibility</li>
+  <li><strong>Environment:</strong> Requires test environments similar to production</li>
+</ul>
+
+<h3>Acceptance Testing</h3>
+<p>Verifies whether the system meets business acceptance criteria and is ready for delivery.</p>
+<ul>
+  <li><strong>UAT (User Acceptance Testing):</strong> End users</li>
+  <li><strong>BAT (Business Acceptance Testing):</strong> Business processes</li>
+  <li><strong>Alpha testing:</strong> At the developer's site</li>
+  <li><strong>Beta testing:</strong> At the customer's site</li>
+  <li><strong>Regulatory testing:</strong> Legal compliance</li>
+</ul>
+
 <table>
   <tr><th>Level</th><th>What it verifies</th><th>Who?</th></tr>
   <tr><td>Component/Unit</td><td>Individual modules</td><td>Developers</td></tr>
-  <tr><td>Integration</td><td>Interaction between components</td><td>Developers / Testers</td></tr>
-  <tr><td>System</td><td>Complete system end-to-end</td><td>Independent testers</td></tr>
+  <tr><td>Component Integration</td><td>Interaction between components</td><td>Developers / Testers</td></tr>
+  <tr><td>System</td><td>Complete system</td><td>Independent testers</td></tr>
+  <tr><td>System Integration</td><td>Interfaces with external systems</td><td>Independent / specialized testers</td></tr>
   <tr><td>Acceptance</td><td>Business/user needs</td><td>Users / Clients</td></tr>
 </table>
-      `
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.2</p>`
     }
   },
   "1.5": {
@@ -656,6 +711,21 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Testing continuo con feedback rápido</li>
   <li>Automatización es esencial para mantener el ritmo</li>
 </ul>
+<h3>Buenas Prácticas de Prueba Válidas para Cualquier CVDS</h3>
+<p>Independientemente del modelo de ciclo de vida elegido, se recomienda:</p>
+<ul>
+  <li>Cada actividad de desarrollo tiene su actividad de prueba correspondiente</li>
+  <li>Cada nivel de prueba tiene objetivos específicos y distintos, evitando redundancia</li>
+  <li>El análisis y diseño de prueba de un nivel comienza durante la fase de desarrollo correspondiente (principio de prueba temprana)</li>
+  <li>Los testers revisan los productos de trabajo (requisitos, historias de usuario) en cuanto hay borradores disponibles</li>
+</ul>
+<h3>La Prueba como Impulsor del Desarrollo</h3>
+<p>Los enfoques de "prueba primero" definen las pruebas antes de escribir el código, aplicando el principio de prueba temprana y el desplazamiento a la izquierda:</p>
+<ul>
+  <li><strong>TDD (Test-Driven Development):</strong> las pruebas dirigen la codificación; se escribe primero la prueba, luego el código que la satisface y después se refactoriza</li>
+  <li><strong>ATDD (Acceptance Test-Driven Development):</strong> las pruebas se derivan de los criterios de aceptación como parte del diseño del sistema, antes de desarrollar esa parte de la aplicación</li>
+  <li><strong>BDD (Behaviour-Driven Development):</strong> expresa el comportamiento deseado con casos de prueba en lenguaje natural (formato Dado/Cuando/Entonces), fáciles de entender por todos los implicados</li>
+</ul>
 <h3>DevOps y Shift-Left</h3>
 <p><strong>DevOps</strong> combina el desarrollo y las operaciones para entregar software más rápidamente. El <strong>shift-left</strong> mueve el testing hacia las fases más tempranas del SDLC.</p>
 <div class="example-box">
@@ -669,15 +739,56 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 </div>
 <div class="highlight-box">
 💡 <strong>Principio:</strong> En cualquier modelo de SDLC, el testing debe comenzar lo antes posible (Principio 3: testing temprano).
-</div>`
+</div>
+<h3>Retrospectivas y Mejora de Proceso</h3>
+<p>Las <strong>retrospectivas</strong> suelen celebrarse al final de un proyecto o iteración para debatir qué tuvo éxito, qué puede mejorarse y cómo incorporar esas mejoras. Sus resultados deben registrarse (normalmente en el informe de compleción de la prueba).</p>
+<div class="warning-box">
+⚠️ <strong>Para el examen:</strong> Las retrospectivas son clave para la mejora continua del proceso de prueba: mayor efectividad/eficiencia, mejor calidad de los productos de prueba y mejor cooperación entre desarrollo y prueba.
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.1</p>`
     },
     en: {
       title: "Testing in the context of SDLC",
       chapterTag: "Ch. 2 · SDLC",
       content: `
 <h3>Software Development Models and Testing</h3>
-<p>Testing must adapt to the development model being used. In Waterfall, testing occurs after development is complete. In Agile/iterative models, testing is integrated into each sprint. DevOps and shift-left bring testing as early as possible in the SDLC.</p>
-<div class="highlight-box">💡 In any SDLC model, testing should start as early as possible (Principle 3: early testing).</div>`
+<p>Testing must adapt to the development model being used:</p>
+<h3>Waterfall Model</h3>
+<ul>
+  <li>Phases are sequential: requirements → design → code → testing → maintenance</li>
+  <li>Testing occurs after development is complete</li>
+  <li>Defects found late are very costly</li>
+  <li>More formal, documented testing</li>
+</ul>
+<h3>Iterative/Agile Models (Scrum, Kanban)</h3>
+<ul>
+  <li>Testing is integrated into each iteration/sprint</li>
+  <li>Testers collaborate with developers from the start</li>
+  <li>Continuous testing with fast feedback</li>
+  <li>Automation is essential to keep up the pace</li>
+</ul>
+<h3>Good Testing Practices Valid for Any SDLC</h3>
+<p>Regardless of the lifecycle model chosen:</p>
+<ul>
+  <li>Every development activity has a corresponding test activity</li>
+  <li>Each test level has specific, distinct objectives, avoiding redundancy</li>
+  <li>Test analysis and design for a level starts during the corresponding development phase (early testing principle)</li>
+  <li>Testers review work products (requirements, user stories) as soon as drafts are available</li>
+</ul>
+<h3>Testing as a Driver for Development</h3>
+<p>"Test-first" approaches define tests before the code is written, applying the early testing principle and shift-left:</p>
+<ul>
+  <li><strong>TDD (Test-Driven Development):</strong> tests drive coding; tests are written first, then code to satisfy them, then both are refactored</li>
+  <li><strong>ATDD (Acceptance Test-Driven Development):</strong> tests are derived from acceptance criteria as part of system design, before that part of the application is developed</li>
+  <li><strong>BDD (Behaviour-Driven Development):</strong> expresses desired behavior with test cases in natural language (Given/When/Then), easy for all stakeholders to understand</li>
+</ul>
+<h3>DevOps and Shift-Left</h3>
+<p><strong>DevOps</strong> combines development and operations to deliver software faster. <strong>Shift-left</strong> moves testing to earlier phases of the SDLC.</p>
+<div class="highlight-box">💡 In any SDLC model, testing should start as early as possible (Principle 3: early testing).</div>
+<h3>Retrospectives and Process Improvement</h3>
+<p><strong>Retrospectives</strong> are usually held at the end of a project or iteration to discuss what worked, what can be improved, and how to incorporate those improvements. Results should be recorded (typically in the test completion report).</p>
+<div class="warning-box">⚠️ <strong>For the exam:</strong> Retrospectives are key to continuous process improvement: increased test effectiveness/efficiency, better quality of test work products, and better cooperation between development and testing.</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.1</p>`
     }
   },
   "2.3": {
@@ -686,16 +797,15 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
       chapterTag: "Cap. 2 · SDLC",
       content: `
 <h3>Tipos de Prueba</h3>
-<p>Los tipos de prueba categorizan las pruebas según su objetivo:</p>
+<p>Los tipos de prueba categorizan las pruebas según su objetivo. El syllabus define cuatro tipos de prueba, aplicables en todos los niveles de prueba:</p>
 <h3>Pruebas Funcionales</h3>
-<p>Verifican <strong>QUÉ hace</strong> el sistema (comportamiento funcional). Evalúan características, funciones y comportamiento del sistema.</p>
+<p>Verifican <strong>QUÉ hace</strong> el sistema (comportamiento funcional). Evalúan la completitud, corrección y pertinencia funcional.</p>
 <ul>
   <li>Prueba de funcionalidad</li>
-  <li>Prueba de regresión</li>
   <li>Prueba de humo (smoke/sanity)</li>
 </ul>
 <h3>Pruebas No Funcionales</h3>
-<p>Verifican <strong>CÓMO se comporta</strong> el sistema. Cubren características de calidad que no son funciones específicas.</p>
+<p>Verifican <strong>CÓMO se comporta</strong> el sistema. Cubren características de calidad que no son funciones específicas (ISO/IEC 25010).</p>
 <table>
   <tr><th>Tipo</th><th>Qué evalúa</th></tr>
   <tr><td>Rendimiento/Carga</td><td>Velocidad, escalabilidad bajo carga</td></tr>
@@ -705,29 +815,64 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <tr><td>Compatibilidad</td><td>Interoperabilidad con otros sistemas</td></tr>
   <tr><td>Mantenibilidad</td><td>Facilidad de modificación</td></tr>
 </table>
+<h3>Pruebas de Caja Negra</h3>
+<p>Se basan en la <strong>especificación</strong>. Las pruebas se obtienen a partir de documentación externa al objeto de prueba (requisitos, especificaciones), sin necesitar conocimiento del código interno.</p>
 <h3>Pruebas de Caja Blanca</h3>
-<p>Basadas en la estructura interna del código. Se derivan de la implementación del software (sentencias, ramas, rutas).</p>
-<h3>Pruebas Relacionadas con Cambios</h3>
+<p>Se basan en la <strong>estructura interna</strong> del código. Se derivan de la implementación del software (sentencias, ramas, rutas).</p>
+<div class="highlight-box">
+💡 <strong>Los cuatro tipos de prueba</strong> (funcional, no funcional, caja negra, caja blanca) pueden aplicarse en todos los niveles de prueba, aunque el enfoque varía en cada nivel.
+</div>
+<h3>Prueba de Confirmación y Prueba de Regresión</h3>
+<p>Cuando se corrige un defecto o se añade una prestación, la prueba debe incluir también estos dos tipos:</p>
 <ul>
-  <li><strong>Confirmación:</strong> Verifica que un defecto corregido ya no falla</li>
-  <li><strong>Regresión:</strong> Verifica que los cambios no introdujeron nuevos defectos</li>
+  <li><strong>Prueba de confirmación (retesting):</strong> Confirma que el defecto original se corrigió con éxito. Puede hacerse reejecutando los casos de prueba que fallaron por el defecto, o añadiendo pruebas nuevas para el cambio.</li>
+  <li><strong>Prueba de regresión:</strong> Confirma que el cambio no ha provocado efectos adversos en partes del sistema que ya funcionaban (el mismo componente, otros componentes u otros sistemas conectados). Conviene hacer antes un <strong>análisis de impacto</strong> para acotar su alcance.</li>
 </ul>
+<div class="example-box">
+📌 <strong>Para el examen:</strong> La prueba de confirmación verifica que UN defecto concreto está corregido; la prueba de regresión verifica que NADA MÁS se ha roto. Ambas pueden ser necesarias en cualquier nivel de prueba, y la regresión es una firme candidata a la automatización.
+</div>
 <div class="warning-box">
-⚠️ <strong>Para el examen:</strong> Distingue entre pruebas funcionales (QUÉ hace el sistema) y no funcionales (CÓMO lo hace).
-</div>`
+⚠️ <strong>Para el examen:</strong> Distingue entre pruebas funcionales (QUÉ hace el sistema) y no funcionales (CÓMO lo hace), y entre caja negra (especificación) y caja blanca (estructura interna).
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.3</p>`
     },
     en: {
       title: "Test types",
       chapterTag: "Ch. 2 · SDLC",
       content: `
 <h3>Test Types</h3>
+<p>Test types categorize tests according to their objective. The syllabus defines four test types, applicable at every test level:</p>
+<h3>Functional Testing</h3>
+<p>Verifies <strong>WHAT</strong> the system does (functional behavior). Evaluates functional completeness, correctness and appropriateness.</p>
+<ul>
+  <li>Functionality testing</li>
+  <li>Smoke/sanity testing</li>
+</ul>
+<h3>Non-Functional Testing</h3>
+<p>Verifies <strong>HOW WELL</strong> the system behaves. Covers quality characteristics that are not specific functions (ISO/IEC 25010).</p>
 <table>
   <tr><th>Type</th><th>What it evaluates</th></tr>
-  <tr><td>Functional</td><td>WHAT the system does (behavior)</td></tr>
-  <tr><td>Non-functional</td><td>HOW the system performs (performance, security, usability)</td></tr>
-  <tr><td>White-box</td><td>Internal structure of the code</td></tr>
-  <tr><td>Change-related</td><td>Confirmation (retesting) and Regression</td></tr>
-</table>`
+  <tr><td>Performance/Load</td><td>Speed, scalability under load</td></tr>
+  <tr><td>Security</td><td>Vulnerabilities, unauthorized access</td></tr>
+  <tr><td>Usability</td><td>Ease of use, user experience</td></tr>
+  <tr><td>Reliability</td><td>Availability, fault tolerance</td></tr>
+  <tr><td>Compatibility</td><td>Interoperability with other systems</td></tr>
+  <tr><td>Maintainability</td><td>Ease of modification</td></tr>
+</table>
+<h3>Black-Box Testing</h3>
+<p>Based on the <strong>specification</strong>. Tests are derived from documentation external to the test object (requirements, specifications), without needing knowledge of the internal code.</p>
+<h3>White-Box Testing</h3>
+<p>Based on the <strong>internal structure</strong> of the code. Tests are derived from the software's implementation (statements, branches, paths).</p>
+<div class="highlight-box">💡 <strong>The four test types</strong> (functional, non-functional, black-box, white-box) can be applied at every test level, although the approach differs at each level.</div>
+<h3>Confirmation Testing and Regression Testing</h3>
+<p>When a defect is fixed or a feature is added, testing should also include these two:</p>
+<ul>
+  <li><strong>Confirmation testing (retesting):</strong> Confirms that the original defect was successfully fixed. It can be done by re-running the test cases that previously failed because of the defect, or by adding new tests for the change.</li>
+  <li><strong>Regression testing:</strong> Confirms that the change hasn't caused adverse effects on parts of the system that already worked (the same component, other components, or other connected systems). An <strong>impact analysis</strong> beforehand helps scope it.</li>
+</ul>
+<div class="example-box">📌 <strong>For the exam:</strong> Confirmation testing checks that ONE specific defect is fixed; regression testing checks that NOTHING ELSE broke. Both may be needed at any test level, and regression testing is a strong candidate for automation.</div>
+<div class="warning-box">⚠️ <strong>For the exam:</strong> Distinguish functional (WHAT the system does) from non-functional (HOW it does it), and black-box (specification) from white-box (internal structure).</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.3</p>`
     }
   },
   "3.1": {
@@ -1354,6 +1499,7 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
 <div class="highlight-box">
 💡 <strong>Para el examen:</strong> Recuerda los tres desencadenantes principales: <strong>modificación</strong>, <strong>migración</strong> y <strong>retirada</strong>. Y que el análisis de impacto precede siempre a las pruebas de mantenimiento.
 </div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.4</p>
       `
     },
     en: {
@@ -1399,6 +1545,7 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
 <div class="highlight-box">
 💡 <strong>For the exam:</strong> Remember the three main triggers: <strong>modification</strong>, <strong>migration</strong> and <strong>retirement</strong>. And that impact analysis always precedes maintenance testing.
 </div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.4</p>
       `
     }
   },
