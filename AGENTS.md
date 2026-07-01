@@ -184,7 +184,7 @@ to official ISTQB material (syllabus PDFs, official sample exams) — never inve
   the official syllabus keywords (listed under each chapter heading in the syllabus text);
   add `source` per term. `glossary.istqb.org` is a JS-heavy SPA — prefer the syllabus
   keyword lists as primary source over scraping it. See spec §"Fase 3".
-  **Also sweep `FAQ`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` for stale non-v4.0 terms**
+  **Also sweep `FLASHCARDS` in `js/content.js` for stale non-v4.0 terms**
   that Phase 2 removed from lessons but didn't touch elsewhere — at minimum, flashcard
   id 28 still says "false sense of security" (an automation risk phrase confirmed absent
   from the v4.0 syllabus and removed from the Chapter 6 lesson during Phase 2).
