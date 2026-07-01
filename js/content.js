@@ -83,11 +83,11 @@ const CHAPTERS = [
       en: "Planning, monitoring, risk management, configuration management and defect management."
     },
     topics: [
-      { id: "5.1", title: { es: "Planificación de pruebas", en: "Test planning" }, xp: 50 },
-      { id: "5.2", title: { es: "Gestión de riesgos", en: "Risk management" }, xp: 50 },
-      { id: "5.3", title: { es: "Monitoreo, control y completitud", en: "Test monitoring, control and completion" }, xp: 40 },
-      { id: "5.4", title: { es: "Gestión de la configuración", en: "Configuration management" }, xp: 30 },
-      { id: "5.5", title: { es: "Gestión de defectos", en: "Defect management" }, xp: 40 },
+      { id: "5.1", title: { es: "Planificación de pruebas", en: "Test planning" }, xp: 50, lo: ["FL-5.1.1","FL-5.1.2","FL-5.1.3","FL-5.1.4","FL-5.1.5","FL-5.1.6","FL-5.1.7"], source: "Syllabus v4.0 §5.1" },
+      { id: "5.2", title: { es: "Gestión de riesgos", en: "Risk management" }, xp: 50, lo: ["FL-5.2.1","FL-5.2.2","FL-5.2.3","FL-5.2.4"], source: "Syllabus v4.0 §5.2" },
+      { id: "5.3", title: { es: "Monitoreo, control y completitud", en: "Test monitoring, control and completion" }, xp: 40, lo: ["FL-5.3.1","FL-5.3.2","FL-5.3.3"], source: "Syllabus v4.0 §5.3" },
+      { id: "5.4", title: { es: "Gestión de la configuración", en: "Configuration management" }, xp: 30, lo: ["FL-5.4.1"], source: "Syllabus v4.0 §5.4" },
+      { id: "5.5", title: { es: "Gestión de defectos", en: "Defect management" }, xp: 40, lo: ["FL-5.5.1"], source: "Syllabus v4.0 §5.5" },
     ]
   },
   {
@@ -1366,16 +1366,22 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <h3>El Plan de Pruebas</h3>
 <p>El plan de pruebas documenta el enfoque, recursos, alcance y actividades del testing. Un plan de pruebas típico incluye:</p>
 <ul>
-  <li>Contexto (alcance, objetivos, stakeholders)</li>
+  <li>Contexto (alcance, objetivos, stakeholders, base de prueba)</li>
   <li>Supuestos y restricciones</li>
+  <li>Implicados (roles, responsabilidades, necesidades de contratación y formación)</li>
   <li>Comunicación y reporte de información</li>
-  <li>Gestión de riesgos</li>
-  <li>Enfoque de pruebas (niveles, tipos, técnicas)</li>
-  <li>Criterios de entrada y salida</li>
-  <li>Estimación del esfuerzo</li>
-  <li>Calendario de actividades</li>
-  <li>Roles y responsabilidades</li>
+  <li>Registro de riesgos</li>
+  <li>Enfoque de pruebas (niveles, tipos, técnicas, entregables, criterios de entrada/salida, independencia de prueba, métricas)</li>
+  <li>Presupuesto y calendario</li>
 </ul>
+
+<h3>La Contribución del Probador a la Planificación de la Iteración y la Entrega</h3>
+<p>En los CVDS iterativos suelen darse dos tipos de planificación:</p>
+<ul>
+  <li><strong>Planificación de la entrega:</strong> se anticipa al lanzamiento de un producto y redefine la lista de trabajo acumulado. Los probadores participan redactando historias de usuario y criterios de aceptación comprobables, en los análisis de riesgo de calidad y de proyecto, y estimando el esfuerzo de prueba asociado a las historias de usuario.</li>
+  <li><strong>Planificación de la iteración:</strong> se ocupa de una única iteración. Los probadores participan en el análisis detallado del riesgo de las historias de usuario, determinan su capacidad de ser probadas, las desglosan en tareas de prueba y estiman el esfuerzo de cada una.</li>
+</ul>
+
 <h3>Criterios de Entrada y Salida</h3>
 <table>
   <tr><th>Criterios de Entrada</th><th>Criterios de Salida</th></tr>
@@ -1384,27 +1390,116 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
   <tr><td>Los datos de prueba están preparados</td><td>Todos los defectos críticos cerrados</td></tr>
   <tr><td>Los requisitos están aprobados</td><td>Informe de pruebas generado</td></tr>
 </table>
-<h3>Estimación del Esfuerzo de Testing</h3>
-<p>Las técnicas de estimación incluyen:</p>
+<p>En Desarrollo Ágil, los criterios de salida suelen llamarse <strong>definición de hecho</strong> (Definition of Done) y los criterios de entrada de una historia de usuario, <strong>definición de preparado</strong> (Definition of Ready).</p>
+
+<h3>Técnicas de Estimación del Esfuerzo de Prueba</h3>
+<p>El syllabus describe cuatro técnicas de estimación del esfuerzo de prueba:</p>
 <ul>
-  <li><strong>Basada en métricas:</strong> Usando datos históricos de proyectos similares</li>
-  <li><strong>Basada en expertos:</strong> Planning Poker, estimación en 3 puntos</li>
-  <li><strong>Porcentaje del desarrollo:</strong> El testing suele representar el 20-40% del total</li>
-</ul>`
+  <li><strong>Basada en proporciones:</strong> se recopilan proporciones "estándar" de proyectos anteriores similares (p. ej. la proporción esfuerzo de desarrollo : esfuerzo de prueba) y se aplican al nuevo proyecto.</li>
+  <li><strong>Extrapolación:</strong> se miden datos tempranos del proyecto actual y se extrapola el esfuerzo restante (p. ej. el esfuerzo medio de las últimas iteraciones); adecuada para CVDS iterativos.</li>
+  <li><strong>Delphi de Banda Ancha:</strong> técnica iterativa basada en expertos. Cada experto estima el esfuerzo de forma aislada; si hay desviaciones fuera de los límites acordados, se discuten y se vuelve a estimar hasta alcanzar consenso. El <strong>Planning Poker</strong> es una variante ágil habitual, con cartas numeradas.</li>
+  <li><strong>Estimación de tres puntos:</strong> técnica basada en expertos que combina una estimación optimista (a), la más probable (m) y una pesimista (b): <strong>E = (a + 4m + b) / 6</strong>, con un error de medición <strong>SD = (b - a) / 6</strong>.</li>
+</ul>
+<div class="example-box">
+📌 <strong>Ejemplo — estimación de tres puntos:</strong> a = 6 horas-persona, m = 9, b = 18.
+<br>E = (6 + 4×9 + 18) / 6 = (6 + 36 + 18) / 6 = 60 / 6 = <strong>10 horas-persona</strong>
+<br>SD = (18 - 6) / 6 = <strong>2</strong> → la estimación final es 10 ± 2 horas-persona (entre 8 y 12).
+<br>📌 <strong>Ejemplo — basada en proporciones:</strong> si en un proyecto anterior la proporción desarrollo:prueba fue 3:2, y el esfuerzo de desarrollo del proyecto actual se estima en 600 días-persona, el esfuerzo de prueba se estima en 600 × (2/3) = <strong>400 días-persona</strong>.
+</div>
+
+<h3>Priorización de Casos de Prueba</h3>
+<p>Una vez especificados y agrupados en conjuntos, los casos de prueba se organizan en un calendario de ejecución. Las estrategias de priorización más usadas son:</p>
+<ul>
+  <li><strong>Basada en riesgo:</strong> se ejecutan primero los casos que cubren los riesgos más importantes (ver §5.2.3).</li>
+  <li><strong>Basada en cobertura:</strong> se ejecutan primero los casos que logran mayor cobertura (p. ej. de sentencias). En la variante de <em>cobertura adicional</em>, cada caso posterior es el que aporta la mayor cobertura adicional.</li>
+  <li><strong>Basada en requisitos:</strong> se ejecutan primero los casos vinculados a los requisitos de mayor prioridad para los implicados.</li>
+</ul>
+<div class="warning-box">
+⚠️ <strong>Dependencias:</strong> si un caso de prueba de prioridad alta depende de otro de prioridad más baja, este último debe ejecutarse primero, aunque rompa el orden ideal. La disponibilidad de recursos (herramientas, entornos, personas) también condiciona el orden real de ejecución.
+</div>
+
+<h3>Pirámide de Prueba</h3>
+<p>Modelo que muestra que las distintas pruebas tienen granularidad diferente, y ayuda a asignar el esfuerzo de automatización. Cuanto más alta la capa, menor la granularidad y el aislamiento de la prueba, y mayor su duración: la capa inferior agrupa muchas pruebas pequeñas, aisladas y rápidas; la capa superior, pocas pruebas complejas de extremo a extremo. Un modelo popular usa tres capas: <strong>pruebas de componentes</strong>, <strong>pruebas de integración</strong> y <strong>pruebas de extremo a extremo</strong> (el modelo original de Cohn usaba "unitarias", "de servicio" y "de interfaz de usuario").</p>
+
+<h3>Cuadrantes de Prueba</h3>
+<p>Definidos por Brian Marick, agrupan niveles de prueba, tipos de prueba, actividades, técnicas y productos de trabajo en el Desarrollo Ágil, según dos ejes: si la prueba está orientada al negocio o a la tecnología, y si apoya al equipo (guía el desarrollo) o critica el producto (mide su comportamiento frente a expectativas):</p>
+<table>
+  <tr><th></th><th>Apoya al equipo</th><th>Critica el producto</th></tr>
+  <tr><td><strong>Orientada a tecnología</strong></td><td>Q1: pruebas de componentes e integración de componentes (automatizadas, en CI)</td><td>Q4: pruebas de humo y no funcionales excepto usabilidad (normalmente automatizadas)</td></tr>
+  <tr><td><strong>Orientada a negocio</strong></td><td>Q2: pruebas funcionales, de historias de usuario, de API, prototipos (manuales o automatizadas)</td><td>Q3: prueba exploratoria, de usabilidad y de aceptación de usuario (normalmente manuales)</td></tr>
+</table>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §5.1</p>`
     },
     en: {
       title: "Test planning",
       chapterTag: "Ch. 5 · Management",
       content: `
 <h3>The Test Plan</h3>
-<p>Documents the testing approach, resources, scope and activities. Includes context, risks, approach, entry/exit criteria, effort estimates and schedules.</p>
-<h3>Entry and Exit Criteria Examples</h3>
+<p>Documents the testing approach, resources, scope and activities. A typical test plan includes:</p>
+<ul>
+  <li>Context (scope, objectives, stakeholders, test basis)</li>
+  <li>Assumptions and constraints</li>
+  <li>Stakeholders (roles, responsibilities, hiring/training needs)</li>
+  <li>Communication and reporting</li>
+  <li>Risk register</li>
+  <li>Test approach (levels, types, techniques, deliverables, entry/exit criteria, test independence, metrics)</li>
+  <li>Budget and schedule</li>
+</ul>
+
+<h3>The Tester's Contribution to Iteration and Release Planning</h3>
+<p>Iterative SDLCs usually involve two kinds of planning:</p>
+<ul>
+  <li><strong>Release planning:</strong> anticipates a product release and redefines the product backlog. Testers help write user stories and testable acceptance criteria, take part in quality and project risk analysis, and estimate the test effort of user stories.</li>
+  <li><strong>Iteration planning:</strong> looks at a single iteration. Testers take part in detailed risk analysis of user stories, determine their testability, break them down into test tasks, and estimate the effort for each task.</li>
+</ul>
+
+<h3>Entry and Exit Criteria</h3>
 <table>
   <tr><th>Entry Criteria</th><th>Exit Criteria</th></tr>
   <tr><td>Code complete and compiled</td><td>All test cases executed</td></tr>
   <tr><td>Test environment available</td><td>90% tests passed</td></tr>
-  <tr><td>Requirements approved</td><td>All critical defects closed</td></tr>
-</table>`
+  <tr><td>Test data ready</td><td>All critical defects closed</td></tr>
+  <tr><td>Requirements approved</td><td>Test report produced</td></tr>
+</table>
+<p>In Agile, exit criteria are often called the <strong>Definition of Done</strong>, and the entry criteria a user story must meet the <strong>Definition of Ready</strong>.</p>
+
+<h3>Test Estimation Techniques</h3>
+<p>The syllabus describes four test estimation techniques:</p>
+<ul>
+  <li><strong>Ratio-based:</strong> "standard" ratios are gathered from similar past projects (e.g. the development effort : test effort ratio) and applied to the new project.</li>
+  <li><strong>Extrapolation:</strong> measurements are taken early in the current project and the remaining effort is extrapolated (e.g. the average effort of the last few iterations); well suited to iterative SDLCs.</li>
+  <li><strong>Wideband Delphi:</strong> an iterative, expert-based technique. Each expert estimates in isolation; if results deviate beyond agreed limits, experts discuss and re-estimate until consensus is reached. <strong>Planning Poker</strong> is a common Agile variant using numbered cards.</li>
+  <li><strong>Three-point estimation:</strong> an expert-based technique combining an optimistic (a), most likely (m) and pessimistic (b) estimate: <strong>E = (a + 4m + b) / 6</strong>, with a measurement error of <strong>SD = (b - a) / 6</strong>.</li>
+</ul>
+<div class="example-box">
+📌 <strong>Example — three-point estimation:</strong> a = 6 person-hours, m = 9, b = 18.
+<br>E = (6 + 4×9 + 18) / 6 = (6 + 36 + 18) / 6 = 60 / 6 = <strong>10 person-hours</strong>
+<br>SD = (18 - 6) / 6 = <strong>2</strong> → the final estimate is 10 ± 2 person-hours (between 8 and 12).
+<br>📌 <strong>Example — ratio-based:</strong> if a previous project's development:test ratio was 3:2, and the current project's development effort is estimated at 600 person-days, the test effort is estimated at 600 × (2/3) = <strong>400 person-days</strong>.
+</div>
+
+<h3>Test Case Prioritization</h3>
+<p>Once specified and grouped into test suites, test cases are organized into a test execution schedule. The most common prioritization strategies are:</p>
+<ul>
+  <li><strong>Risk-based:</strong> test cases covering the most important risks are run first (see §5.2.3).</li>
+  <li><strong>Coverage-based:</strong> test cases achieving the highest coverage (e.g. statement coverage) run first. In the <em>additional coverage</em> variant, each subsequent test case is the one achieving the highest additional coverage.</li>
+  <li><strong>Requirements-based:</strong> test cases linked to the requirements stakeholders prioritize highest run first.</li>
+</ul>
+<div class="warning-box">
+⚠️ <strong>Dependencies:</strong> if a higher-priority test case depends on a lower-priority one, the lower-priority test case must run first, even if that breaks the ideal priority order. Resource availability (tools, environments, people) also affects the actual execution order.
+</div>
+
+<h3>Test Pyramid</h3>
+<p>A model showing that tests can have different granularity, helping the team allocate test automation effort. The higher the layer, the lower the granularity and test isolation, and the longer the execution time: the bottom layer groups many small, isolated, fast tests; the top layer has few complex, end-to-end tests. A popular model uses three layers: <strong>component tests</strong>, <strong>integration tests</strong> and <strong>end-to-end tests</strong> (Cohn's original model used "unit tests", "service tests" and "UI tests").</p>
+
+<h3>Test Quadrants</h3>
+<p>Defined by Brian Marick, they group test levels, test types, activities, techniques and work products in Agile development along two axes: business-facing vs. technology-facing, and supporting the team (guiding development) vs. critiquing the product (measuring it against expectations):</p>
+<table>
+  <tr><th></th><th>Supports the team</th><th>Critiques the product</th></tr>
+  <tr><td><strong>Technology-facing</strong></td><td>Q1: component and component integration tests (automated, in CI)</td><td>Q4: smoke tests and non-functional tests except usability (usually automated)</td></tr>
+  <tr><td><strong>Business-facing</strong></td><td>Q2: functional tests, user story tests, API tests, prototypes (manual or automated)</td><td>Q3: exploratory, usability and user acceptance testing (usually manual)</td></tr>
+</table>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §5.1</p>`
     }
   },
   "5.2": {
@@ -1413,43 +1508,84 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
       chapterTag: "Cap. 5 · Gestión",
       content: `
 <h3>Riesgo en el Contexto del Testing</h3>
-<p>Un <strong>riesgo</strong> es un factor potencial que puede resultar en una consecuencia negativa en el futuro. Se calcula como:</p>
+<p>Un <strong>riesgo</strong> es un factor potencial que puede resultar en una consecuencia negativa en el futuro. El nivel de riesgo combina dos factores:</p>
 <div class="highlight-box">
-📊 <strong>Nivel de Riesgo = Probabilidad × Impacto</strong>
+📊 <strong>Nivel de Riesgo = Probabilidad del riesgo × Impacto del riesgo</strong>
 </div>
+<p>La evaluación puede ser <strong>cuantitativa</strong> (multiplicando probabilidad e impacto) o <strong>cualitativa</strong> (usando una matriz de riesgo). Cuanto mayor el nivel de riesgo, más importante su tratamiento.</p>
 <h3>Tipos de Riesgo</h3>
 <table>
   <tr><th>Tipo</th><th>Descripción</th><th>Ejemplos</th></tr>
-  <tr><td><strong>Riesgo de Producto</strong></td><td>Posibilidad de que el producto no cumpla su función</td><td>Fallo de seguridad, rendimiento deficiente, funcionalidad incorrecta</td></tr>
-  <tr><td><strong>Riesgo de Proyecto</strong></td><td>Posibilidad de que el proyecto falle en sus objetivos</td><td>Exceso de presupuesto, retrasos, problemas de personal</td></tr>
+  <tr><td><strong>Riesgo de Producto</strong></td><td>Posibilidad de que el producto no satisfaga las necesidades de los implicados</td><td>Funcionalidad ausente/incorrecta, cálculos erróneos, arquitectura deficiente, rendimiento inadecuado, vulnerabilidades de seguridad</td></tr>
+  <tr><td><strong>Riesgo de Proyecto</strong></td><td>Posibilidad de que el proyecto falle en sus objetivos de gestión y control</td><td>Problemas de organización (retrasos, estimaciones inexactas), de personal (competencias, conflictos), técnicos y con proveedores</td></tr>
 </table>
-<h3>Testing Basado en Riesgos</h3>
-<p>El testing basado en riesgos prioriza los esfuerzos de testing según el nivel de riesgo de cada área:</p>
-<ol>
-  <li><strong>Identificar</strong> los riesgos del producto</li>
-  <li><strong>Evaluar</strong> su probabilidad e impacto</li>
-  <li><strong>Priorizar</strong> el testing en áreas de mayor riesgo</li>
-  <li><strong>Mitigar</strong> los riesgos mediante pruebas</li>
-  <li><strong>Monitorear</strong> los riesgos a lo largo del proyecto</li>
-</ol>
+<h3>Análisis del Riesgo de Producto: Influencia en el Alcance de las Pruebas</h3>
+<p>El análisis del riesgo de producto (identificación + evaluación del riesgo) debería comenzar en una fase temprana del CVDS. Sus resultados se usan para:</p>
+<ul>
+  <li>Determinar el <strong>alcance</strong> de la prueba a realizar</li>
+  <li>Determinar los <strong>niveles y tipos de prueba</strong> concretos a aplicar</li>
+  <li>Determinar las <strong>técnicas de prueba</strong> y el nivel de <strong>cobertura</strong> a alcanzar</li>
+  <li><strong>Estimar el esfuerzo</strong> de prueba necesario para cada tarea</li>
+  <li><strong>Priorizar</strong> las pruebas para encontrar los defectos críticos lo antes posible</li>
+  <li>Determinar si conviene aplicar alguna actividad adicional (no de prueba) para reducir el riesgo</li>
+</ul>
+<h3>Control del Riesgo de Producto</h3>
+<p>Una vez analizado el riesgo, las respuestas posibles son: mitigación mediante pruebas, aceptación del riesgo, transferencia del riesgo o un plan de contingencia. Las medidas para mitigar riesgos de producto mediante pruebas incluyen:</p>
+<ul>
+  <li>Seleccionar probadores con el nivel adecuado de experiencia para cada tipo de riesgo</li>
+  <li>Aplicar el nivel adecuado de independencia de la prueba</li>
+  <li>Realizar revisiones y análisis estático</li>
+  <li>Aplicar las técnicas de prueba y niveles de cobertura adecuados</li>
+  <li>Aplicar los tipos de prueba que abordan las características de calidad afectadas</li>
+  <li>Ejecutar pruebas dinámicas, incluyendo pruebas de regresión</li>
+</ul>
+<p>La <strong>monitorización del riesgo</strong> asegura que las acciones de mitigación son efectivas, aporta información para mejorar la evaluación del riesgo, e identifica riesgos emergentes.</p>
 <div class="example-box">
-📌 <strong>Ejemplo:</strong> En un sistema bancario, el módulo de transferencias tiene mayor riesgo que la página de inicio. Por lo tanto, se le asigna más esfuerzo de testing y técnicas más exhaustivas.
-</div>`
+📌 <strong>Ejemplo:</strong> En un sistema bancario, el módulo de transferencias tiene mayor riesgo de producto que la página de inicio (impacto alto: pérdida económica). El análisis de riesgo le asigna mayor cobertura y probadores más experimentados; como control del riesgo se añaden revisiones de código y pruebas de regresión adicionales sobre ese módulo.
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §5.2</p>`
     },
     en: {
       title: "Risk management",
       chapterTag: "Ch. 5 · Management",
       content: `
 <h3>Risk in Testing Context</h3>
-<p><strong>Risk Level = Probability × Impact</strong></p>
+<p>The <strong>risk level</strong> combines two factors:</p>
+<div class="highlight-box">
+📊 <strong>Risk Level = Risk Probability × Risk Impact</strong>
+</div>
+<p>Evaluation can be <strong>quantitative</strong> (multiplying probability and impact) or <strong>qualitative</strong> (using a risk matrix). The higher the risk level, the more important its treatment.</p>
 <h3>Risk Types</h3>
 <table>
-  <tr><th>Type</th><th>Description</th></tr>
-  <tr><td>Product risk</td><td>Possibility product won't meet requirements</td></tr>
-  <tr><td>Project risk</td><td>Possibility project won't meet objectives</td></tr>
+  <tr><th>Type</th><th>Description</th><th>Examples</th></tr>
+  <tr><td><strong>Product risk</strong></td><td>Possibility the product won't meet stakeholder needs</td><td>Missing/incorrect functionality, wrong calculations, poor architecture, inadequate performance, security vulnerabilities</td></tr>
+  <tr><td><strong>Project risk</strong></td><td>Possibility the project won't meet its management and control objectives</td><td>Organizational issues (delays, inaccurate estimates), staffing issues (skills, conflicts), technical and supplier issues</td></tr>
 </table>
-<h3>Risk-Based Testing</h3>
-<p>Prioritize testing effort based on risk level. Higher risk areas get more testing and exhaustive techniques.</p>`
+<h3>Product Risk Analysis: Influence on Test Scope</h3>
+<p>Product risk analysis (risk identification + risk assessment) should ideally start early in the SDLC. Its results are used to:</p>
+<ul>
+  <li>Determine the <strong>scope</strong> of testing to be carried out</li>
+  <li>Determine the specific <strong>test levels and types</strong> to apply</li>
+  <li>Determine the <strong>test techniques</strong> and <strong>coverage</strong> level to achieve</li>
+  <li><strong>Estimate the test effort</strong> required for each task</li>
+  <li><strong>Prioritize</strong> tests to find critical defects as early as possible</li>
+  <li>Determine whether any additional (non-test) activity could reduce the risk</li>
+</ul>
+<h3>Product Risk Control</h3>
+<p>Once risk has been analyzed, possible responses include mitigation through testing, risk acceptance, risk transfer or a contingency plan. Measures to mitigate product risks through testing include:</p>
+<ul>
+  <li>Selecting testers with the appropriate level of experience for each risk type</li>
+  <li>Applying the appropriate level of test independence</li>
+  <li>Performing reviews and static analysis</li>
+  <li>Applying appropriate test techniques and coverage levels</li>
+  <li>Applying test types that address the affected quality characteristics</li>
+  <li>Performing dynamic testing, including regression testing</li>
+</ul>
+<p><strong>Risk monitoring</strong> ensures mitigation actions are effective, provides information to improve risk assessment, and identifies emerging risks.</p>
+<div class="example-box">
+📌 <strong>Example:</strong> In a banking system, the transfers module has higher product risk than the home page (high impact: financial loss). Risk analysis assigns it more coverage and more experienced testers; as risk control, extra code reviews and regression tests are added for that module.
+</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §5.2</p>`
     }
   },
   "5.5": {
@@ -1457,24 +1593,33 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
       title: "Gestión de defectos",
       chapterTag: "Cap. 5 · Gestión",
       content: `
+<h3>Objetivos de un Informe de Defectos</h3>
+<p>Un informe de defecto bien preparado persigue tres objetivos: dar a quienes gestionan y corrigen el defecto información suficiente para resolverlo, servir de medio de seguimiento de la calidad del producto, y aportar ideas para mejorar el proceso de desarrollo y de prueba.</p>
+
 <h3>El Ciclo de Vida de un Defecto</h3>
 <p>Un defecto pasa por diferentes estados desde que se detecta hasta que se cierra:</p>
 <div class="example-box">
 📌 <strong>Estados típicos:</strong>
 <br>Nuevo → Asignado → En corrección → Pendiente retest → Reabierto / Cerrado
 </div>
-<h3>Informe de Defecto</h3>
-<p>Un informe de defecto bien escrito debe incluir:</p>
+
+<h3>Campos de un Informe de Defecto</h3>
+<p>Un informe de defecto registrado durante una prueba dinámica suele incluir:</p>
 <ul>
-  <li><strong>ID único</strong> y título descriptivo</li>
-  <li><strong>Fecha</strong> de detección y <strong>autor</strong></li>
-  <li><strong>Objeto de prueba</strong> (módulo, versión)</li>
-  <li><strong>Entorno</strong> de prueba (OS, browser, etc.)</li>
-  <li><strong>Pasos para reproducir</strong> el defecto</li>
+  <li><strong>Identificador único</strong></li>
+  <li><strong>Título</strong> con un breve resumen de la anomalía notificada</li>
+  <li><strong>Fecha</strong> de detección, organización emisora y <strong>autor</strong> (incluyendo su rol)</li>
+  <li><strong>Objeto de prueba</strong> (módulo, versión) y <strong>entorno de prueba</strong> identificados</li>
+  <li><strong>Contexto del defecto:</strong> caso de prueba que se estaba ejecutando, actividad de prueba en curso, fase del CVDS, y otra información relevante (técnica de prueba, checklist o datos de prueba usados)</li>
+  <li><strong>Descripción del fallo</strong> para permitir su reproducción y resolución: pasos que detectaron la anomalía, registros de prueba, volcados de base de datos, capturas de pantalla o grabaciones</li>
   <li><strong>Resultado esperado</strong> vs <strong>resultado actual</strong></li>
-  <li><strong>Severidad</strong> y <strong>prioridad</strong></li>
-  <li><strong>Evidencia:</strong> capturas de pantalla, logs</li>
+  <li><strong>Severidad</strong> del defecto (grado de impacto)</li>
+  <li><strong>Prioridad</strong> de corrección</li>
+  <li><strong>Estado</strong> del defecto (p. ej. abierto, aplazado, duplicado, pendiente de corrección, pendiente de prueba de confirmación, reabierto, cerrado, rechazado)</li>
+  <li><strong>Referencias</strong> (p. ej. al caso de prueba)</li>
 </ul>
+<p>Algunos de estos campos (identificador, fecha, autor, estado inicial) suelen completarse automáticamente al usar una herramienta de gestión de defectos.</p>
+
 <h3>Severidad vs Prioridad</h3>
 <table>
   <tr><th></th><th>Alta prioridad</th><th>Baja prioridad</th></tr>
@@ -1483,24 +1628,44 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 </table>
 <div class="warning-box">
 ⚠️ <strong>Para el examen:</strong> Severidad = impacto técnico. Prioridad = urgencia de corrección. Son dimensiones independientes.
-</div>`
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §5.5</p>`
     },
     en: {
       title: "Defect management",
       chapterTag: "Ch. 5 · Management",
       content: `
+<h3>Objectives of a Defect Report</h3>
+<p>A well-prepared defect report has three goals: give the people who manage and fix the defect enough information to resolve it, provide a means of tracking product quality, and provide ideas for improving the development and test process.</p>
+
 <h3>Defect Lifecycle</h3>
 <p>New → Assigned → In Fix → Pending Retest → Reopened / Closed</p>
-<h3>Defect Report Contents</h3>
+
+<h3>Fields of a Defect Report</h3>
+<p>A defect report raised during dynamic testing usually includes:</p>
 <ul>
-  <li>Unique ID, title, date, author</li>
-  <li>Test object and environment</li>
-  <li>Steps to reproduce</li>
-  <li>Expected vs actual result</li>
-  <li>Severity and priority</li>
-  <li>Evidence (screenshots, logs)</li>
+  <li><strong>Unique identifier</strong></li>
+  <li><strong>Title</strong> with a brief summary of the reported anomaly</li>
+  <li><strong>Date</strong> the anomaly was observed, issuing organization and <strong>author</strong> (including their role)</li>
+  <li><strong>Test object</strong> (module, version) and <strong>test environment</strong> identification</li>
+  <li><strong>Defect context:</strong> test case being executed, test activity in progress, SDLC phase, and other relevant information (test technique, checklist or test data being used)</li>
+  <li><strong>Failure description</strong> to allow reproduction and resolution: steps that detected the anomaly, test logs, database dumps, screenshots or recordings</li>
+  <li><strong>Expected</strong> vs <strong>actual result</strong></li>
+  <li><strong>Severity</strong> of the defect (degree of impact)</li>
+  <li><strong>Priority</strong> for fixing</li>
+  <li><strong>Status</strong> (e.g. open, deferred, duplicate, waiting to be fixed, waiting for confirmation testing, reopened, closed, rejected)</li>
+  <li><strong>References</strong> (e.g. to the test case)</li>
 </ul>
-<div class="warning-box">⚠️ Severity = technical impact. Priority = urgency of fix. Independent dimensions.</div>`
+<p>Some of these fields (identifier, date, author, initial status) are usually filled in automatically when using a defect management tool.</p>
+
+<h3>Severity vs Priority</h3>
+<table>
+  <tr><th></th><th>High priority</th><th>Low priority</th></tr>
+  <tr><td><strong>High severity</strong></td><td>System down, affects everyone</td><td>Crash in a rarely used function</td></tr>
+  <tr><td><strong>Low severity</strong></td><td>Typo on the main page</td><td>Visual glitch in a settings screen</td></tr>
+</table>
+<div class="warning-box">⚠️ Severity = technical impact. Priority = urgency of fix. Independent dimensions.</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §5.5</p>`
     }
   },
   "6.1": {
@@ -1806,20 +1971,32 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 <h3>Métricas de prueba más utilizadas</h3>
 <table>
   <tr><th>Métrica</th><th>Descripción</th></tr>
-  <tr><td>Porcentaje de trabajo completado</td><td>Casos de prueba ejecutados / total planificados</td></tr>
-  <tr><td>Cobertura de requisitos</td><td>% de requisitos cubiertos por al menos un test</td></tr>
-  <tr><td>Densidad de defectos</td><td>Número de defectos por módulo o componente</td></tr>
-  <tr><td>Defectos encontrados vs. cerrados</td><td>Tendencia de apertura/cierre de bugs</td></tr>
-  <tr><td>Cobertura de código</td><td>% de código ejecutado por los tests</td></tr>
-  <tr><td>Coste del testing</td><td>Coste real vs. coste planificado</td></tr>
+  <tr><td>Avance del proyecto</td><td>Compleción de tareas, uso de recursos, esfuerzo de prueba</td></tr>
+  <tr><td>Avance de la prueba</td><td>Casos de prueba implementados/ejecutados, pasados/fallados, tiempo de ejecución</td></tr>
+  <tr><td>Calidad de producto</td><td>Disponibilidad, tiempo de respuesta, tiempo medio hasta el fallo</td></tr>
+  <tr><td>Defectos</td><td>Número y prioridad de defectos encontrados/corregidos, densidad de defectos</td></tr>
+  <tr><td>Riesgo</td><td>Nivel de riesgo residual</td></tr>
+  <tr><td>Cobertura</td><td>Cobertura de requisitos, cobertura de código</td></tr>
+  <tr><td>Coste</td><td>Coste de la prueba, coste organizativo de la calidad</td></tr>
 </table>
 
 <h3>Informes de prueba (Test reports)</h3>
-<p>El equipo de testing comunica su progreso mediante informes. Existen dos tipos principales:</p>
+<p>El equipo de testing comunica su progreso mediante informes. Distintos públicos (el propio equipo, gestión, clientes) requieren información distinta e influyen en el grado de formalidad y frecuencia: informar al equipo suele ser frecuente e informal, mientras que un informe de un proyecto finalizado sigue una plantilla formal y se entrega una sola vez. Existen dos tipos principales:</p>
 <ul>
   <li><strong>Informe de progreso de pruebas (Test progress report):</strong> Se genera periódicamente durante la ejecución. Incluye estado actual, avance, defectos encontrados y desviaciones del plan.</li>
   <li><strong>Informe de completitud de pruebas (Test completion report):</strong> Se genera al finalizar una fase de testing. Resume los resultados, lecciones aprendidas y recomendaciones para el futuro.</li>
 </ul>
+
+<h3>Comunicación del Estado de la Prueba</h3>
+<p>La mejor forma de comunicar el estado de la prueba depende de los intereses de la gestión de pruebas, la estrategia de la organización, normas reglamentarias o, en equipos autoorganizados, del propio equipo. Opciones habituales:</p>
+<ul>
+  <li>Comunicación verbal con el equipo y otros implicados</li>
+  <li>Cuadros de mando (paneles de control CI/CD, tableros de tareas, gráficos de quemado)</li>
+  <li>Canales de comunicación electrónica (correo, chat)</li>
+  <li>Documentación en línea</li>
+  <li>Informes formales de prueba</li>
+</ul>
+<p>Puede usarse más de una opción a la vez; la comunicación formal suele ser más apropiada para equipos distribuidos donde la comunicación directa no siempre es posible.</p>
 
 <h3>Criterios de entrada y salida (Entry/Exit criteria)</h3>
 <p>Los <strong>criterios de entrada</strong> (también llamados Definition of Ready) definen las condiciones que deben cumplirse antes de iniciar una actividad de testing:</p>
@@ -1851,6 +2028,7 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
   <li>Analizar lecciones aprendidas para mejorar futuros proyectos</li>
   <li>Archivar resultados, logs y evidencias de prueba</li>
 </ul>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §5.3</p>
       `
     },
     en: {
@@ -1870,20 +2048,32 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 <h3>Commonly used test metrics</h3>
 <table>
   <tr><th>Metric</th><th>Description</th></tr>
-  <tr><td>Percentage of work completed</td><td>Test cases executed / total planned</td></tr>
-  <tr><td>Requirements coverage</td><td>% of requirements covered by at least one test</td></tr>
-  <tr><td>Defect density</td><td>Number of defects per module or component</td></tr>
-  <tr><td>Defects found vs. closed</td><td>Bug opening/closing trend</td></tr>
-  <tr><td>Code coverage</td><td>% of code executed by tests</td></tr>
-  <tr><td>Testing cost</td><td>Actual cost vs. planned cost</td></tr>
+  <tr><td>Project progress</td><td>Task completion, resource usage, test effort</td></tr>
+  <tr><td>Test progress</td><td>Test cases implemented/executed, passed/failed, execution time</td></tr>
+  <tr><td>Product quality</td><td>Availability, response time, mean time to failure</td></tr>
+  <tr><td>Defects</td><td>Number and priority of defects found/fixed, defect density</td></tr>
+  <tr><td>Risk</td><td>Residual risk level</td></tr>
+  <tr><td>Coverage</td><td>Requirements coverage, code coverage</td></tr>
+  <tr><td>Cost</td><td>Testing cost, organizational cost of quality</td></tr>
 </table>
 
 <h3>Test reports</h3>
-<p>Two main types:</p>
+<p>The test team communicates progress through reports. Different audiences (the team itself, management, customers) need different information and drive the formality and frequency of reporting: reporting to the team tends to be frequent and informal, while a finished project's report follows a formal template and is delivered once. Two main types:</p>
 <ul>
   <li><strong>Test progress report:</strong> Generated periodically during execution. Includes current status, progress, defects found and plan deviations.</li>
   <li><strong>Test completion report:</strong> Generated at the end of a testing phase. Summarizes results, lessons learned and future recommendations.</li>
 </ul>
+
+<h3>Communicating Test Status</h3>
+<p>The best way to communicate test status depends on test management's concerns, the organization's test strategies, regulatory standards or, for self-organizing teams, the team itself. Common options:</p>
+<ul>
+  <li>Verbal communication with the team and other stakeholders</li>
+  <li>Dashboards (CI/CD dashboards, task boards, burndown charts)</li>
+  <li>Electronic communication channels (email, chat)</li>
+  <li>Online documentation</li>
+  <li>Formal test reports</li>
+</ul>
+<p>More than one option can be used at once; more formal communication is usually more appropriate for distributed teams where direct face-to-face communication isn't always possible.</p>
 
 <h3>Entry and Exit criteria</h3>
 <p><strong>Entry criteria</strong> (Definition of Ready) define conditions that must be met before starting a testing activity.</p>
@@ -1896,6 +2086,7 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 <div class="example-box">
 📌 <strong>Control action example:</strong> Monitoring detects only 40% of test cases executed when 70% was expected. Control may involve: reassigning testers, reducing scope, negotiating delivery date or prioritizing highest-risk tests.
 </div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §5.3</p>
       `
     }
   },
@@ -1962,6 +2153,11 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 <h3>Línea base (Baseline)</h3>
 <p>Una <strong>línea base</strong> es una instantánea aprobada y verificada de un conjunto de ítems de configuración en un momento determinado. Solo puede modificarse mediante un proceso formal de control de cambios.</p>
 <p>Ejemplo: la línea base de la versión 1.0 incluye el código, los casos de prueba ejecutados y los informes de prueba de ese release.</p>
+
+<div class="highlight-box">
+💡 <strong>DevOps:</strong> La integración continua, la entrega continua y el despliegue continuo suelen implementarse como parte de una canalización automatizada de DevOps, en la que normalmente se incluye la gestión de la configuración automatizada.
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §5.4</p>
       `
     },
     en: {
@@ -2014,6 +2210,11 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 
 <h3>Baseline</h3>
 <p>A <strong>baseline</strong> is an approved and verified snapshot of a set of configuration items at a specific point in time. It can only be modified through a formal change control process.</p>
+
+<div class="highlight-box">
+💡 <strong>DevOps:</strong> Continuous integration, continuous delivery and continuous deployment are usually implemented as part of an automated DevOps pipeline, which typically includes automated configuration management.
+</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §5.4</p>
       `
     }
   }
