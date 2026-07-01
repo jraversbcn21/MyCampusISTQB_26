@@ -106,6 +106,22 @@ Saves current view to `localStorage` key `mycampus_current_view`. Restores on in
 
 Empty `.nav-badge` elements (e.g., `#curriculumBadge`) are hidden via CSS: `.nav-badge:empty { display: none; }`
 
+### Lesson Content Schema (`js/content.js`)
+
+Every topic object in `CHAPTERS[i].topics[]` (22 total across 6 chapters: 5/4/2/5/5/1)
+carries traceability fields alongside the pre-existing `id`/`title`/`xp`:
+- `lo`: array of official learning-objective codes, format `FL-x.y.z` (e.g. `["FL-4.2.1","FL-4.2.2"]`)
+- `source`: citation string, format `"Syllabus v4.0 §x.y"`
+
+Every `LESSONS[id].es/en.content` HTML string ends with a footer paragraph:
+`<p class="lesson-source">Fuente: ...</p>` (es) / `<p class="lesson-source">Source: ...</p>` (en),
+styled by the `.lesson-content .lesson-source` CSS rule (`css/styles.css`).
+
+**Any edit to `CHAPTERS`/`LESSONS` must be followed by `node scripts/validate-content.js`**
+— it enforces topic counts per chapter, `lo`/`source` presence+format, and footer presence
+in both languages for every topic. A sibling script to `validate-questions.js` (different
+data shape, kept separate on purpose — don't try to merge them).
+
 ### Question Bank Schema (`js/questions.js`)
 
 120 questions in the `QUESTIONS` array, distributed by official ISTQB exam weight per
@@ -142,8 +158,9 @@ Fully functional without cloud sync. Falls back silently to localStorage.
 
 Manual browser testing only for app behavior/UI. There is no linter config, no type checking.
 
-The one exception: `scripts/validate-questions.js` (Node, dev-only, never served to the
-browser) gates `js/questions.js` — see "Question Bank Schema" above.
+Two exceptions: `scripts/validate-questions.js` gates `js/questions.js` (see "Question Bank
+Schema" above), and `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS` in `js/content.js`
+(see "Lesson Content Schema" above). Both are Node, dev-only, never served to the browser.
 
 ## Reference Materials
 
@@ -158,22 +175,35 @@ to official ISTQB material (syllabus PDFs, official sample exams) — never inve
 - **Phase 1 (question bank 50→120): DONE**, merged to `master` (commits `da3f954..3235f84`).
   Plan: `docs/superpowers/plans/2026-07-01-phase1-question-bank.md`. All 7 tasks reviewed
   and approved; final whole-branch review found no Critical/Important issues.
-- **Phase 2 (lesson content audit): NOT STARTED.** Audit the 28 lessons in `js/content.js`
-  against the syllabus per-topic; add `lo`/`source` fields to `CHAPTERS` topics; add a
-  lesson-source footer in the UI (new `.lesson-source` CSS class). See spec §"Fase 2" for
-  the per-lesson method and the specific syllabus sections flagged as likely gaps
-  (§3.2.3 review roles, §5.1.4–5.1.5 estimation/prioritization, §5.5 defect management).
+- **Phase 2 (lesson content audit): DONE**, merged to `master` (commits `493d757..138b4fb`
+  via branch `feat/content-audit-phase2`). Plan: `docs/superpowers/plans/2026-07-01-phase2-content-audit.md`.
+  All 8 tasks reviewed and approved (2 required a glyph-labeling fix, 1 required a Critical
+  content fix — see below); final whole-branch review found no Critical/Important issues.
+  Audit trail with per-lesson verdicts: `docs/content-audit-report.md`.
 - **Phase 3 (glossary expansion): NOT STARTED.** Expand `GLOSSARY` in `js/content.js` with
   the official syllabus keywords (listed under each chapter heading in the syllabus text);
   add `source` per term. `glossary.istqb.org` is a JS-heavy SPA — prefer the syllabus
   keyword lists as primary source over scraping it. See spec §"Fase 3".
+  **Also sweep `FAQ`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` for stale non-v4.0 terms**
+  that Phase 2 removed from lessons but didn't touch elsewhere — at minimum, flashcard
+  id 28 still says "false sense of security" (an automation risk phrase confirmed absent
+  from the v4.0 syllabus and removed from the Chapter 6 lesson during Phase 2).
 
-**To resume:** run brainstorming for Phase 2, then writing-plans, then
-`superpowers:subagent-driven-development` — same workflow as Phase 1 (one implementer +
+**To resume:** run brainstorming for Phase 3, then writing-plans, then
+`superpowers:subagent-driven-development` — same workflow as Phases 1-2 (one implementer +
 one reviewer subagent per task; reviewer independently re-verifies content against the
-syllabus text, not just internal consistency of the implementer's report).
+syllabus text, not just internal consistency of the implementer's report; re-derive any
+worked numeric example from scratch; verify "not in the syllabus"/"removed" claims via
+grep, since those are as risky as invented content if wrong).
 
 **Known minor gaps from Phase 1** (non-blocking, optional future cleanup):
 - Chapter 4 (Test Analysis & Design) is light on boundary-value-analysis questions (only
   id 80, reusing the "1–100" domain already used by pre-existing id 15).
 - Learning objective FL-2.1.2 has no dedicated question (folded into id 66's explanation).
+
+**Real errors found and fixed during Phase 2** (useful precedent for how thorough the audit needs to be):
+- Ch.2 lesson: false "4 test levels" claim (syllabus defines 5) — corrected.
+- Ch.3 lesson: two distinct review roles (Gestor, Moderador) had been silently merged into one — split back out, all 6 roles now correct.
+- Ch.4 lesson: a non-syllabus technique ("Prueba de Caso de Uso", confirmed removed in v4.0 via the syllabus's own changelog) and a self-contradictory worked BVA example (root-caused to OCR-corrupted source text with an unrecoverable comparison operator — fixed by removing the invented numeric example rather than guessing a replacement).
+- Ch.6 lesson: non-official tool-category taxonomy, plus two non-v4.0 concepts ("false sense of security", "tool adoption considerations") — replaced/removed after independent grep + changelog verification.
+- **Not yet fixed (Phase 3 input):** `FLASHCARDS` array id 28 still contradicts the Ch.6 lesson fix above (see Phase 2 entry).
