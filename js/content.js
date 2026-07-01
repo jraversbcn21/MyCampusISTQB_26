@@ -65,11 +65,11 @@ const CHAPTERS = [
       en: "Black-box, white-box, experience-based and collaboration-based techniques. The largest exam section."
     },
     topics: [
-      { id: "4.1", title: { es: "Panorama de las técnicas", en: "Test techniques overview" }, xp: 30 },
-      { id: "4.2", title: { es: "Técnicas de caja negra", en: "Black-box test techniques" }, xp: 70 },
-      { id: "4.3", title: { es: "Técnicas de caja blanca", en: "White-box test techniques" }, xp: 60 },
-      { id: "4.4", title: { es: "Técnicas basadas en experiencia", en: "Experience-based techniques" }, xp: 50 },
-      { id: "4.5", title: { es: "Técnicas basadas en colaboración", en: "Collaboration-based techniques" }, xp: 40 },
+      { id: "4.1", title: { es: "Panorama de las técnicas", en: "Test techniques overview" }, xp: 30, lo: ["FL-4.1.1"], source: "Syllabus v4.0 §4.1" },
+      { id: "4.2", title: { es: "Técnicas de caja negra", en: "Black-box test techniques" }, xp: 70, lo: ["FL-4.2.1","FL-4.2.2","FL-4.2.3","FL-4.2.4"], source: "Syllabus v4.0 §4.2" },
+      { id: "4.3", title: { es: "Técnicas de caja blanca", en: "White-box test techniques" }, xp: 60, lo: ["FL-4.3.1","FL-4.3.2","FL-4.3.3"], source: "Syllabus v4.0 §4.3" },
+      { id: "4.4", title: { es: "Técnicas basadas en experiencia", en: "Experience-based techniques" }, xp: 50, lo: ["FL-4.4.1","FL-4.4.2","FL-4.4.3"], source: "Syllabus v4.0 §4.4" },
+      { id: "4.5", title: { es: "Técnicas basadas en colaboración", en: "Collaboration-based techniques" }, xp: 40, lo: ["FL-4.5.1","FL-4.5.2","FL-4.5.3"], source: "Syllabus v4.0 §4.5" },
     ]
   },
   {
@@ -1082,13 +1082,13 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
       chapterTag: "Cap. 4 · Técnicas",
       content: `
 <h3>Categorías de Técnicas de Prueba</h3>
-<p>Las técnicas de diseño de pruebas se clasifican en tres grandes categorías:</p>
+<p>El syllabus clasifica las técnicas de diseño de pruebas en <strong>tres</strong> grandes categorías. Las técnicas ayudan al probador en el análisis (qué probar) y el diseño (cómo probar) de las pruebas, permitiendo obtener un conjunto pequeño pero suficiente de casos de prueba de forma sistemática.</p>
 <div class="highlight-box">
-🎯 <strong>Resumen clave para el examen:</strong>
+🎯 <strong>Resumen clave para el examen (las 3 categorías oficiales):</strong>
 <ul>
-  <li><strong>Caja Negra:</strong> Basadas en la especificación (qué hace el sistema)</li>
-  <li><strong>Caja Blanca:</strong> Basadas en la estructura interna (cómo lo hace)</li>
-  <li><strong>Experiencia:</strong> Basadas en el conocimiento del tester</li>
+  <li><strong>Caja Negra:</strong> Basadas en la especificación (qué hace el sistema), independientes de cómo esté implementado</li>
+  <li><strong>Caja Blanca:</strong> Basadas en la estructura interna (cómo lo hace); solo pueden crearse tras el diseño/implementación</li>
+  <li><strong>Basadas en Experiencia:</strong> Basadas en el conocimiento, intuición y experiencia del tester; detectan defectos que las otras dos no encuentran, por lo que son complementarias</li>
 </ul>
 </div>
 <h3>Técnicas de Caja Negra (Black-Box)</h3>
@@ -1098,7 +1098,6 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Análisis de Valor Límite (BVA)</li>
   <li>Tablas de Decisión</li>
   <li>Prueba de Transición de Estado</li>
-  <li>Prueba de Caso de Uso</li>
 </ul>
 <h3>Técnicas de Caja Blanca (White-Box)</h3>
 <p>Requieren acceso al código fuente. Miden la cobertura del código:</p>
@@ -1113,23 +1112,24 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Testing Exploratorio</li>
   <li>Testing basado en Checklists</li>
 </ul>
-<h3>Técnicas Basadas en Colaboración (CTFL 4.0)</h3>
-<ul>
-  <li>Escritura colaborativa de historias de usuario</li>
-  <li>ATDD (Acceptance Test-Driven Development)</li>
-</ul>`
+<div class="warning-box">
+⚠️ <strong>Para el examen:</strong> Los <strong>enfoques basados en colaboración</strong> (historias de usuario, ATDD — ver tema 4.5) <u>no</u> son una cuarta categoría de técnica de prueba: el syllabus solo clasifica las técnicas en las 3 categorías de arriba. Los enfoques colaborativos son un tema aparte que se centra en <em>prevenir</em> defectos mediante comunicación temprana, más que en detectarlos con una técnica sistemática.
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §4.1</p>`
     },
     en: {
       title: "Test techniques overview",
       chapterTag: "Ch. 4 · Techniques",
       content: `
 <h3>Test Design Technique Categories</h3>
+<p>The syllabus classifies test design techniques into <strong>three</strong> categories. Techniques help the tester with test analysis (what to test) and test design (how to test it), producing a small but sufficient set of test cases systematically.</p>
 <ul>
-  <li><strong>Black-Box:</strong> Specification-based (EP, BVA, Decision Tables, State Transition)</li>
-  <li><strong>White-Box:</strong> Structure-based (Statement Coverage, Branch Coverage)</li>
-  <li><strong>Experience-based:</strong> Error Guessing, Exploratory Testing, Checklist-based</li>
-  <li><strong>Collaboration-based:</strong> User stories, ATDD</li>
-</ul>`
+  <li><strong>Black-Box:</strong> Specification-based (EP, BVA, Decision Tables, State Transition); test cases don't depend on the implementation</li>
+  <li><strong>White-Box:</strong> Structure-based (Statement Coverage, Branch Coverage); can only be created after design/implementation</li>
+  <li><strong>Experience-based:</strong> Error Guessing, Exploratory Testing, Checklist-based; complementary because they find defects the other two miss</li>
+</ul>
+<div class="warning-box">⚠️ <strong>For the exam:</strong> Collaboration-based approaches (user stories, ATDD — see topic 4.5) are <u>not</u> a fourth technique category; the syllabus classifies techniques into only the 3 above. Collaboration-based approaches are a separate topic focused on preventing defects through early communication.</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.1</p>`
     }
   },
   "4.3": {
@@ -1164,7 +1164,17 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
 <br>• Statement coverage = % de sentencias ejecutadas
 <br>• Branch coverage = % de ramas ejecutadas (más fuerte)
 <br>• 100% branch coverage implica 100% statement coverage (no viceversa)
-</div>`
+</div>
+<h3>El Valor de la Prueba de Caja Blanca</h3>
+<p>Todas las técnicas de caja blanca comparten un punto fuerte: tienen en cuenta <strong>toda la implementación real</strong> del software, lo que facilita detectar defectos incluso cuando la especificación es vaga, está obsoleta o incompleta.</p>
+<div class="highlight-box">
+💡 <strong>Fortalezas y debilidades:</strong>
+<br>✅ Detecta defectos aunque la especificación sea deficiente, porque se basa en el código real
+<br>✅ Es muy adecuada para revisar código (o pseudocódigo) que aún no está listo para ejecutarse, es decir, también se usa en <strong>prueba estática</strong> (p. ej. en un code walkthrough)
+<br>✅ Proporciona una medición objetiva de la cobertura, permitiendo generar pruebas adicionales para aumentarla y así ganar confianza en el código
+<br>❌ Si el software no implementa uno o más requisitos, la prueba de caja blanca por sí sola puede no detectar ese defecto de <strong>omisión</strong> (para eso hace falta caja negra)
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §4.3</p>`
     },
     en: {
       title: "White-box test techniques",
@@ -1174,8 +1184,28 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
 <p>Based on the internal structure of the code. Require access to source code.</p>
 <h3>Statement Coverage</h3>
 <p>Measures the percentage of executable statements executed by test cases.</p>
+<div class="example-box">
+📌 <strong>Example:</strong>
+<code>
+if (x > 0) {
+  y = x * 2;  // Statement 1
+}
+z = y + 1;    // Statement 2
+</code>
+Testing only x=5 executes both statements → 100% statement coverage. Testing only x=-1 executes only statement 2 → 50% statement coverage.
+</div>
 <h3>Branch Coverage</h3>
-<p>Measures the percentage of control flow branches executed. Stronger than statement coverage: 100% branch coverage implies 100% statement coverage (but not vice versa).</p>`
+<p>Measures the percentage of control flow branches executed. Stronger than statement coverage: 100% branch coverage implies 100% statement coverage (but not vice versa).</p>
+<h3>The Value of White-Box Testing</h3>
+<p>All white-box techniques share a key strength: they account for the actual software implementation, making it easier to find defects even when the specification is vague, outdated or incomplete.</p>
+<div class="highlight-box">
+💡 <strong>Strengths and weaknesses:</strong>
+<br>✅ Finds defects even with a poor specification, since it relies on the real code
+<br>✅ Well suited to reviewing code (or pseudocode) not yet ready to execute — also used in <strong>static testing</strong> (e.g. a code walkthrough)
+<br>✅ Gives an objective coverage measurement, enabling additional tests to raise coverage and confidence in the code
+<br>❌ If the software fails to implement one or more requirements, white-box testing alone may miss that <strong>omission</strong> defect (black-box testing is needed for that)
+</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.3</p>`
     }
   },
   "4.4": {
@@ -1198,32 +1228,65 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
 </ul>
 </div>
 <h3>Testing Exploratorio</h3>
-<p>Técnica simultánea donde el aprendizaje, diseño y ejecución ocurren al mismo tiempo. Se guía por <strong>charters</strong> (objetivos de exploración).</p>
+<p>Técnica simultánea donde el aprendizaje, diseño y ejecución ocurren al mismo tiempo, mientras el probador aprende sobre el objeto de prueba. Es especialmente útil cuando las especificaciones son escasas o hay mucha presión de tiempo, y complementa a las técnicas más formales.</p>
 <ul>
-  <li>No sigue scripts predefinidos</li>
-  <li>El tester adapta su enfoque en tiempo real</li>
-  <li>Útil para descubrir defectos inesperados</li>
-  <li>Requiere testers experimentados</li>
+  <li>No sigue scripts predefinidos; el tester adapta su enfoque en tiempo real</li>
+  <li>Útil para descubrir defectos inesperados y para explorar en profundidad áreas no cubiertas</li>
+  <li>Es más eficaz cuanta más experiencia, conocimiento del dominio y competencias clave (análisis, curiosidad, creatividad) tenga el probador</li>
 </ul>
+<div class="example-box">
+📌 <strong>Prueba exploratoria basada en sesiones (session-based):</strong> forma estructurada de aplicar la técnica dentro de un <strong>marco de tiempo definido</strong> (p. ej. 60-90 min).
+<ol>
+  <li>El tester usa un <strong>charter</strong> (objetivo de prueba de alto nivel) para guiar la sesión</li>
+  <li>Durante la sesión identifica y practica elementos de cobertura, documentando pasos y hallazgos en una <strong>hoja de sesión</strong></li>
+  <li>Al terminar, hay una <strong>recapitulación (debrief)</strong>: el probador discute con los implicados los resultados de la sesión</li>
+</ol>
+La prueba exploratoria puede además incorporar otras técnicas ya vistas, como la partición de equivalencia.
+</div>
 <h3>Testing Basado en Checklists</h3>
-<p>El tester usa una lista de condiciones o comprobaciones basadas en experiencia, estándares o heurísticas para guiar el testing.</p>
+<p>El tester diseña, implementa y ejecuta pruebas para cubrir las condiciones de una lista de comprobación, construida a partir de la experiencia, del conocimiento de lo importante para el usuario o de por qué y cómo falla el software.</p>
+<ul>
+  <li>Cada elemento se suele formular como una pregunta, comprobable de forma individual y directa</li>
+  <li>No debe incluir elementos automatizables ni demasiado generales</li>
+  <li>Debe actualizarse periódicamente (nuevos defectos hallados) sin dejar que crezca en exceso; listas muy detalladas dan más repetibilidad, listas más generales dan más cobertura pero menos repetibilidad</li>
+</ul>
 <div class="highlight-box">
 💡 <strong>Cuándo usar cada técnica:</strong>
 <br>• Error guessing: defectos esperados en áreas conocidas
 <br>• Exploratorio: descubrir lo desconocido, probar sin especificaciones
 <br>• Checklist: asegurar cobertura de áreas de riesgo conocidas
-</div>`
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §4.4</p>`
     },
     en: {
       title: "Experience-based techniques",
       chapterTag: "Ch. 4 · Techniques",
       content: `
 <h3>Experience-Based Techniques</h3>
+<h3>Error Guessing</h3>
+<p>The tester anticipates likely errors, defects and failures based on experience: how the application behaved in the past, typical developer mistakes, and failure types seen in similar applications. <strong>Defect attacks</strong> use a list of possible errors/defects to design targeted tests.</p>
+<h3>Exploratory Testing</h3>
+<p>Simultaneous learning, test design and execution while the tester learns about the test object. Especially useful with scarce specifications or high time pressure, and complements more formal techniques.</p>
 <ul>
-  <li><strong>Error Guessing:</strong> Tester anticipates likely errors based on experience</li>
-  <li><strong>Exploratory Testing:</strong> Simultaneous learning, design and execution guided by charters</li>
-  <li><strong>Checklist-based:</strong> Testing guided by a checklist based on experience or standards</li>
-</ul>`
+  <li>No predefined scripts; the tester adapts in real time</li>
+  <li>More effective the more experience, domain knowledge and core skills (analysis, curiosity, creativity) the tester has</li>
+</ul>
+<div class="example-box">
+📌 <strong>Session-based exploratory testing:</strong> a structured way to apply the technique within a <strong>defined time-box</strong> (e.g. 60-90 min).
+<ol>
+  <li>The tester uses a <strong>charter</strong> (high-level test objective) to guide the session</li>
+  <li>During the session, coverage items are identified and exercised, with steps and findings logged in a <strong>test session sheet</strong></li>
+  <li>Afterward, a <strong>debrief</strong> discussion is held between the tester and stakeholders about the session's results</li>
+</ol>
+</div>
+<h3>Checklist-Based Testing</h3>
+<p>The tester designs, implements and executes tests to cover the conditions of a checklist, built from experience, knowledge of what matters to users, or understanding of why/how the software fails.</p>
+<ul>
+  <li>Items are usually phrased as questions, individually and directly checkable</li>
+  <li>Should not include automatable or overly general items</li>
+  <li>Should be updated periodically without growing excessively long</li>
+</ul>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.4</p>`
     }
   },
   "4.5": {
@@ -1232,38 +1295,67 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
       chapterTag: "Cap. 4 · Técnicas",
       content: `
 <h3>Técnicas Basadas en Colaboración</h3>
-<p>En el ISTQB v4.0, se añaden técnicas basadas en la colaboración entre desarrolladores, testers y representantes del negocio.</p>
+<p>En el ISTQB v4.0, se añaden enfoques basados en la colaboración entre desarrolladores, testers y representantes del negocio. A diferencia de las técnicas de los temas 4.2-4.4, no buscan detectar defectos sistemáticamente, sino <strong>prevenirlos</strong> mediante comunicación y consenso temprano.</p>
 <h3>Escritura Colaborativa de Historias de Usuario</h3>
-<p>Las historias de usuario se escriben en colaboración. El formato típico es:</p>
+<p>Una historia de usuario representa una prestación de valor para un usuario. Tiene tres aspectos clave, las <strong>3 C</strong>: <strong>Card</strong> (cuartilla/ficha que la describe), <strong>Conversation</strong> (conversación sobre cómo se usará el software) y <strong>Confirmation</strong> (los criterios de aceptación). Se redacta en colaboración (lluvia de ideas, mapas mentales) entre negocio, desarrollo y prueba. El formato típico es:</p>
 <div class="example-box">
 📌 <strong>Formato:</strong>
-<br><em>Como [tipo de usuario], quiero [acción/objetivo] para que [beneficio/valor].</em>
+<br><em>Como [tipo de usuario], quiero [acción/objetivo] para que [beneficio/valor]</em>, seguido de los criterios de aceptación.
 <br><br><strong>Ejemplo:</strong> Como cliente registrado, quiero restablecer mi contraseña por email, para que pueda recuperar mi acceso si la olvido.
 </div>
-<p>Las historias deben incluir <strong>criterios de aceptación</strong> claros que definan cuándo la historia está "done".</p>
-<h3>ATDD (Acceptance Test-Driven Development)</h3>
-<p>En ATDD, los criterios de aceptación se expresan como <strong>casos de prueba</strong> antes de comenzar el desarrollo:</p>
+<div class="highlight-box">
+💡 <strong>INVEST:</strong> una buena historia de usuario debe ser <strong>I</strong>ndependiente, <strong>N</strong>egociable, <strong>V</strong>aliosa, <strong>E</strong>stimable, pequeña (<strong>S</strong>mall) y comprobable (<strong>T</strong>estable). Si nadie sabe cómo probarla, probablemente no está lo bastante clara.
+</div>
+<h3>Criterios de Aceptación</h3>
+<p>Son las condiciones que debe cumplir la historia para ser aceptada; equivalen a las condiciones de prueba de la historia. Sirven para acotar su alcance, alcanzar consenso, describir escenarios positivos y negativos, y son la base de la prueba de aceptación (ver DGPA más abajo). Existen dos formatos habituales para escribirlos:</p>
+<ul>
+  <li><strong>Orientado a escenario:</strong> formato Dado/Cuando/Entonces (Given/When/Then) usado en desarrollo guiado por comportamiento (BDD)</li>
+  <li><strong>Orientado a reglas:</strong> lista de verificación con viñetas, o una tabla de mapeo entrada→salida</li>
+</ul>
+<div class="example-box">
+📌 <strong>Ejemplo orientado a escenario (Given/When/Then):</strong> Dado que el usuario ha olvidado su contraseña, cuando solicita el restablecimiento con su email registrado, entonces recibe un enlace de restablecimiento válido por 30 minutos.
+<br><strong>Ejemplo orientado a reglas:</strong> "- El enlace expira a los 30 min. - Solo es válido para el email que lo solicitó. - Tras usarlo, se invalida."
+</div>
+<h3>Desarrollo Guiado por Prueba de Aceptación (DGPA / ATDD)</h3>
+<p>En ATDD, los casos de prueba se crean <strong>antes</strong> de implementar la historia, a partir de sus criterios de aceptación:</p>
 <ol>
-  <li>El equipo (dev + tester + negocio) define los criterios de aceptación</li>
-  <li>Se crean los casos de prueba de aceptación</li>
-  <li>El desarrollador implementa la funcionalidad para pasar esas pruebas</li>
-  <li>Se ejecutan las pruebas para verificar que la historia está completa</li>
+  <li>Taller de especificación: el equipo (negocio + dev + tester) redacta/depura la historia y sus criterios de aceptación, resolviendo ambigüedades</li>
+  <li>Se crean los casos de prueba de aceptación a partir de esos criterios (pueden verse como ejemplos de cómo funciona el software)</li>
+  <li>Primero se cubren casos positivos, luego negativos y por último características de calidad no funcionales</li>
+  <li>El desarrollador implementa la funcionalidad para pasar esas pruebas; si están en un formato compatible con un framework de automatización, se convierten en requisitos ejecutables</li>
 </ol>
 <div class="highlight-box">
 💡 <strong>Diferencia ATDD vs TDD:</strong>
 <br>• TDD: el desarrollador escribe pruebas unitarias antes de su código
-<br>• ATDD: el equipo completo escribe pruebas de aceptación antes del desarrollo
-</div>`
+<br>• ATDD: el equipo completo escribe pruebas de aceptación (basadas en los criterios de aceptación) antes del desarrollo
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §4.5</p>`
     },
     en: {
       title: "Collaboration-based techniques",
       chapterTag: "Ch. 4 · Techniques",
       content: `
 <h3>Collaboration-Based Techniques (CTFL v4.0)</h3>
+<p>Added in ISTQB v4.0, these approaches rely on collaboration between developers, testers and business representatives. Unlike the techniques in topics 4.2-4.4, they aim to <strong>prevent</strong> defects through early communication and consensus rather than systematically detecting them.</p>
 <h3>Collaborative User Story Writing</h3>
-<p>User stories written collaboratively with format: "As a [user], I want [action] so that [benefit]." Must include clear acceptance criteria.</p>
-<h3>ATDD</h3>
-<p>Acceptance criteria expressed as test cases before development begins. Whole team (dev + tester + business) participates.</p>`
+<p>A user story represents a feature of value to a user. It has three key aspects, the <strong>3 C's</strong>: <strong>Card</strong> (the medium describing it), <strong>Conversation</strong> (how the software will be used) and <strong>Confirmation</strong> (the acceptance criteria). Written collaboratively (brainstorming, mind maps) across business, development and testing, using the format: "As a [user], I want [action] so that [benefit]", followed by acceptance criteria.</p>
+<div class="highlight-box">💡 <strong>INVEST:</strong> a good user story should be Independent, Negotiable, Valuable, Estimable, Small and Testable. If nobody knows how to test it, it's probably not clear enough.</div>
+<h3>Acceptance Criteria</h3>
+<p>Conditions the story must satisfy to be accepted — effectively its test conditions. Used to bound scope, reach consensus, describe positive/negative scenarios, and as the basis for acceptance testing. Two common formats:</p>
+<ul>
+  <li><strong>Scenario-oriented:</strong> Given/When/Then, used in Behavior-Driven Development (BDD)</li>
+  <li><strong>Rule-oriented:</strong> a bulleted checklist, or an input→output mapping table</li>
+</ul>
+<h3>Acceptance Test-Driven Development (ATDD)</h3>
+<p>Acceptance test cases are created <strong>before</strong> implementation, derived from the acceptance criteria:</p>
+<ol>
+  <li>Specification workshop: the whole team writes/refines the story and its acceptance criteria, resolving ambiguities</li>
+  <li>Acceptance test cases are created from those criteria (they can be seen as examples of how the software should behave)</li>
+  <li>Positive cases are covered first, then negative, then non-functional quality characteristics</li>
+  <li>The developer implements the feature to pass those tests; in an automation-compatible format they become executable requirements</li>
+</ol>
+<div class="highlight-box">💡 <strong>ATDD vs TDD:</strong> TDD = developer writes unit tests before code. ATDD = whole team writes acceptance tests (from acceptance criteria) before development.</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.5</p>`
     }
   },
   "5.1": {
@@ -1483,46 +1575,59 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
       chapterTag: "Cap. 4 · Técnicas",
       content: `
 <h3>¿Qué son las técnicas de caja negra?</h3>
-<p>Las técnicas de caja negra (black-box) se basan en la especificación del objeto de prueba. No se accede al código fuente; solo se evalúan entradas y salidas.</p>
+<p>Las técnicas de caja negra (black-box) se basan en la especificación del objeto de prueba. No se accede al código fuente; solo se evalúan entradas y salidas. El syllabus cubre cuatro: partición de equivalencia, análisis del valor frontera, prueba de tabla de decisión y prueba de transición de estado.</p>
 
 <h3>1. Partición de Equivalencia (EP)</h3>
-<p>Divide los datos en particiones donde todos los valores se comportan de la misma manera. Se prueba un valor representativo de cada partición.</p>
+<p>Divide los datos en particiones donde todos los valores se comportan de la misma manera (particiones válidas o inválidas, no solapadas y no vacías). Basta con un valor representativo de cada partición: si detecta un defecto, se asume que cualquier otro valor de esa partición también lo detectaría.</p>
 <div class="example-box">
 📌 <strong>Ejemplo:</strong> Un campo acepta edades de 18 a 65 años.
 <br>• Partición válida: 18-65 (ej: probar con 30)
 <br>• Partición inválida 1: menor a 18 (ej: probar con 10)
 <br>• Partición inválida 2: mayor a 65 (ej: probar con 70)
+<br>Con <strong>cobertura de Cada Elección</strong>, si hay varios parámetros (varias particiones de entrada), cada partición de cada conjunto debe usarse al menos una vez en algún caso de prueba.
 </div>
 
 <h3>2. Análisis de Valor Límite (BVA)</h3>
-<p>Se enfoca en los valores en los límites de las particiones, donde es más probable que haya defectos.</p>
+<p>Practica las fronteras (valores mínimo y máximo) de las particiones, porque es donde los desarrolladores cometen más errores (p. ej. usar <code>&gt;</code> en vez de <code>&gt;=</code>).</p>
 <div class="example-box">
-📌 <strong>Ejemplo (BVA 2 valores):</strong> Para el rango 18-65:
+📌 <strong>Ejemplo (BVA de 2 valores):</strong> Para el rango 18-65, cada frontera aporta 2 elementos de cobertura (el valor frontera y su vecino más cercano de la partición adyacente):
 <br>• Límites: 17, 18, 65, 66
-<br><strong>Ejemplo (BVA 3 valores):</strong> 17, 18, 19, 64, 65, 66
+<br><strong>Ejemplo (BVA de 3 valores):</strong> cada frontera aporta 3 elementos (el valor frontera y sus dos vecinos): 17, 18, 19, 64, 65, 66
+<br>El BVA de 3 valores es más riguroso: detecta defectos "off-by-one" que el de 2 valores puede pasar por alto (p. ej. si "x = 10" se implementó como "x = 10" con un límite desplazado, x=9 sí lo detecta y x=10/x=11 no).
 </div>
 
-<h3>3. Tablas de Decisión</h3>
-<p>Se utilizan para probar sistemas con combinaciones de condiciones (reglas de negocio). Cada columna representa una combinación posible de condiciones y sus resultados.</p>
+<h3>3. Prueba de Tabla de Decisión</h3>
+<p>Se utiliza para probar reglas de negocio: cómo distintas combinaciones de <strong>condiciones</strong> (filas superiores) producen distintas <strong>acciones</strong> (filas inferiores). Cada columna es una <strong>regla</strong> que combina un valor de cada condición con las acciones resultantes. El elemento de cobertura es la columna/regla; para 100% de cobertura hay que practicar todas las reglas factibles.</p>
 <div class="example-box">
-📌 <strong>Estructura:</strong>
-<br>Condiciones (filas superiores) × Acciones (filas inferiores) × Reglas (columnas)
+📌 <strong>Ejemplo — descuento de una tienda online</strong> (condiciones: ¿es cliente VIP? · ¿compra ≥ 100€?):
+<table>
+  <tr><th></th><th>R1</th><th>R2</th><th>R3</th><th>R4</th></tr>
+  <tr><td>¿Cliente VIP?</td><td>V</td><td>V</td><td>F</td><td>F</td></tr>
+  <tr><td>¿Compra ≥ 100€?</td><td>V</td><td>F</td><td>V</td><td>F</td></tr>
+  <tr><td>Acción: 20% descuento</td><td>X</td><td></td><td></td><td></td></tr>
+  <tr><td>Acción: 10% descuento</td><td></td><td>X</td><td>X</td><td></td></tr>
+  <tr><td>Acción: sin descuento</td><td></td><td></td><td></td><td>X</td></tr>
+</table>
+Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 → cliente VIP con compra de 80€ → se espera 10% de descuento.
 </div>
 
 <h3>4. Prueba de Transición de Estado</h3>
-<p>Se usa cuando el comportamiento del sistema depende del estado actual y del evento recibido. Se modela como un diagrama de estados.</p>
+<p>Se usa cuando el comportamiento del sistema depende del estado actual y del evento recibido (con una posible condición de guarda y acción resultante). Se modela como un diagrama o tabla de estados. Un caso de prueba se construye como una <strong>secuencia de eventos</strong> que recorre varios estados.</p>
 <ul>
-  <li><strong>Cobertura de todos los estados:</strong> cada estado se visita al menos una vez</li>
-  <li><strong>Cobertura de transiciones válidas:</strong> todas las transiciones válidas se ejercitan</li>
-  <li><strong>Cobertura de transiciones inválidas:</strong> se prueban transiciones que no deberían ser posibles</li>
+  <li><strong>Cobertura de todos los estados:</strong> los casos de prueba visitan cada estado al menos una vez (criterio más débil)</li>
+  <li><strong>Cobertura de transiciones válidas</strong> (también llamada <em>cobertura de conmutador 0</em>): se ejercita cada transición válida al menos una vez; alcanzarla al 100% garantiza también el 100% de cobertura de todos los estados. Es el criterio más usado</li>
+  <li><strong>Cobertura de todas las transiciones:</strong> se ejercitan todas las transiciones válidas <u>y además</u> se intentan las transiciones inválidas (no definidas). Es el criterio más exigente y debería ser el mínimo exigible en sistemas críticos</li>
 </ul>
 <div class="example-box">
-📌 <strong>Ejemplo:</strong> Un cajero ATM: estados = "Esperando tarjeta", "Esperando PIN", "Menú principal", "Dispensando efectivo".
+📌 <strong>Ejemplo — cajero ATM</strong> (estados: Esperando tarjeta → Esperando PIN → Menú principal → Dispensando efectivo):
+<br>Transiciones válidas: "Esperando tarjeta" --insertar tarjeta--> "Esperando PIN"; "Esperando PIN" --PIN correcto--> "Menú principal"; "Menú principal" --retirar efectivo--> "Dispensando efectivo".
+<br>Un caso de prueba de cobertura de transiciones válidas recorre esa secuencia completa. Un caso de prueba de transición <strong>inválida</strong> intentaría, p. ej., "retirar efectivo" estando en "Esperando PIN" (no debería estar permitido) — probar solo una transición inválida por caso evita el enmascaramiento de defectos.
 </div>
 
 <div class="warning-box">
-⚠️ <strong>Para el examen:</strong> Debes poder calcular el número de casos de prueba con EP y BVA, e identificar qué técnica aplicar en un escenario dado.
+⚠️ <strong>Para el examen:</strong> Debes poder calcular el número de casos de prueba con EP y BVA, derivar reglas de una tabla de decisión y casos de prueba de un diagrama de estados, e identificar qué técnica aplicar en un escenario dado.
 </div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §4.2</p>
       `
     },
     en: {
@@ -1530,15 +1635,55 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
       chapterTag: "Ch. 4 · Techniques",
       content: `
 <h3>Black-box Techniques</h3>
-<p>Based on the specification of the test object, without accessing the source code.</p>
+<p>Based on the specification of the test object, without accessing the source code. The syllabus covers four: equivalence partitioning, boundary value analysis, decision table testing and state transition testing.</p>
+
 <h3>1. Equivalence Partitioning (EP)</h3>
-<p>Divide data into partitions where all values behave the same. Test one representative value per partition.</p>
+<p>Divide data into partitions (valid or invalid, non-overlapping, non-empty) where all values behave the same. One representative value per partition is enough: if it detects a defect, any other value in that partition is assumed to detect it too.</p>
+<div class="example-box">
+📌 <strong>Example:</strong> A field accepts ages 18 to 65.
+<br>• Valid partition: 18-65 (test with 30)
+<br>• Invalid partition 1: below 18 (test with 10)
+<br>• Invalid partition 2: above 65 (test with 70)
+<br>With <strong>Each Choice coverage</strong>, when a test object has several parameters, each partition of each set must be used at least once across the test cases.
+</div>
+
 <h3>2. Boundary Value Analysis (BVA)</h3>
-<p>Focus on values at the boundaries of partitions. BVA-2: min and max of each boundary. BVA-3: includes values just inside and outside.</p>
+<p>Practices the boundaries (min/max values) of partitions, since developers are most likely to make off-by-one errors there.</p>
+<div class="example-box">
+📌 <strong>2-value BVA:</strong> for the 18-65 range, each boundary gives 2 coverage items (the boundary value and its nearest neighbor in the adjacent partition): 17, 18, 65, 66.
+<br><strong>3-value BVA:</strong> each boundary gives 3 coverage items (the boundary and both neighbors): 17, 18, 19, 64, 65, 66.
+<br>3-value BVA is more rigorous — it can catch off-by-one defects that 2-value BVA misses.
+</div>
+
 <h3>3. Decision Table Testing</h3>
-<p>For systems with combinations of conditions. Each column is a rule (combination of conditions and their actions).</p>
+<p>Used for business rules: how combinations of <strong>conditions</strong> (top rows) produce different <strong>actions</strong> (bottom rows). Each column is a <strong>rule</strong> combining one value per condition with the resulting actions. The coverage item is the column/rule; 100% coverage means testing every feasible rule.</p>
+<div class="example-box">
+📌 <strong>Example — online store discount</strong> (conditions: VIP customer? · purchase ≥ €100?):
+<table>
+  <tr><th></th><th>R1</th><th>R2</th><th>R3</th><th>R4</th></tr>
+  <tr><td>VIP customer?</td><td>T</td><td>T</td><td>F</td><td>F</td></tr>
+  <tr><td>Purchase ≥ €100?</td><td>T</td><td>F</td><td>T</td><td>F</td></tr>
+  <tr><td>Action: 20% discount</td><td>X</td><td></td><td></td><td></td></tr>
+  <tr><td>Action: 10% discount</td><td></td><td>X</td><td>X</td><td></td></tr>
+  <tr><td>Action: no discount</td><td></td><td></td><td></td><td>X</td></tr>
+</table>
+Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer with an €80 purchase → expect 10% discount.
+</div>
+
 <h3>4. State Transition Testing</h3>
-<p>Used when system behavior depends on current state and received event. Modeled as state diagrams.</p>
+<p>Used when behavior depends on the current state and the received event (with an optional guard condition and resulting action). Modeled as a state diagram or state table. A test case is built as a <strong>sequence of events</strong> traversing several states.</p>
+<ul>
+  <li><strong>All states coverage:</strong> every state is visited at least once (weakest criterion)</li>
+  <li><strong>Valid transitions coverage</strong> (also called <em>0-switch coverage</em>): every valid transition is exercised at least once; achieving 100% also guarantees 100% all-states coverage. The most commonly used criterion</li>
+  <li><strong>All transitions coverage:</strong> all valid transitions are exercised <u>and</u> invalid (undefined) transitions are also attempted. The strictest criterion, recommended as a minimum for safety/mission-critical systems</li>
+</ul>
+<div class="example-box">
+📌 <strong>Example — ATM machine</strong> (states: Waiting for card → Waiting for PIN → Main menu → Dispensing cash):
+<br>A valid-transitions test case walks the full sequence. An invalid-transition test case would attempt, e.g., "withdraw cash" while still in "Waiting for PIN" — testing only one invalid transition per test case avoids defect masking.
+</div>
+
+<div class="warning-box">⚠️ <strong>For the exam:</strong> Be able to calculate the number of test cases for EP and BVA, derive rules from a decision table and test cases from a state diagram, and identify which technique applies to a given scenario.</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.2</p>
       `
     }
   },
