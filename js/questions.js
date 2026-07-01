@@ -1106,5 +1106,384 @@ const QUESTIONS = [
       es: "Las herramientas de cobertura de código instrumentan el código para registrar qué líneas, ramas o condiciones se ejecutan durante las pruebas. Ejemplos: JaCoCo (Java), Istanbul/NYC (JavaScript), Coverage.py (Python).",
       en: "Code coverage tools instrument code to record which lines, branches, or conditions are executed during testing. Examples: JaCoCo (Java), Istanbul/NYC (JavaScript), Coverage.py (Python)."
     }
+  },
+  // ===== CHAPTER 1 (Fundamentals) — additional LO-mapped questions =====
+  {
+    id: 51, chapter: 0, lo: "FL-1.4.4", k: 2,
+    source: "Syllabus v4.0 §1.4.4",
+    q: {
+      es: "¿Cuál es el principal beneficio de mantener la trazabilidad entre las bases de prueba y los productos de trabajo de prueba?",
+      en: "What is the main benefit of maintaining traceability between the test basis and test work products?"
+    },
+    options: {
+      es: [
+        "Permite evaluar la cobertura, analizar el impacto de los cambios y facilitar auditorías",
+        "Reduce el número de casos de prueba necesarios",
+        "Garantiza que el software no tenga defectos",
+        "Elimina la necesidad de la gestión de la configuración"
+      ],
+      en: [
+        "It enables coverage assessment, change impact analysis and facilitates audits",
+        "It reduces the number of test cases needed",
+        "It guarantees the software has no defects",
+        "It removes the need for configuration management"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "La trazabilidad permite evaluar la cobertura, analizar el impacto de los cambios, facilitar auditorías y hacer el progreso del testing comprensible. No elimina otros procesos ni garantiza ausencia de defectos.",
+      en: "Traceability enables coverage assessment, change impact analysis, audit support and makes testing progress understandable. It does not remove other processes nor guarantee absence of defects."
+    }
+  },
+  {
+    id: 52, chapter: 0, lo: "FL-1.1.1", k: 1,
+    source: "Syllabus v4.0 §1.1.1",
+    q: {
+      es: "Según el syllabus, ¿cuál de los siguientes es un objetivo típico de las pruebas?",
+      en: "According to the syllabus, which of the following is a typical test objective?"
+    },
+    options: {
+      es: [
+        "Sustituir por completo la actividad de depuración del equipo de desarrollo",
+        "Certificar legalmente el software sin necesidad de aprobación de los interesados",
+        "Proporcionar información a los interesados para que puedan tomar decisiones informadas",
+        "Reducir el número de desarrolladores necesarios en el proyecto"
+      ],
+      en: [
+        "Completely replace the development team's debugging activity",
+        "Legally certify the software without stakeholder approval",
+        "Provide information to stakeholders so they can make informed decisions",
+        "Reduce the number of developers needed on the project"
+      ]
+    },
+    correct: 2,
+    explanation: {
+      es: "El syllabus lista objetivos típicos de las pruebas como evaluar productos de trabajo, encontrar defectos, verificar el cumplimiento de requisitos y, entre otros, proporcionar información a los interesados para la toma de decisiones informadas. La depuración es una actividad distinta y las pruebas no sustituyen la certificación legal ni reducen la plantilla.",
+      en: "The syllabus lists typical test objectives such as evaluating work products, finding defects, verifying requirements compliance and, among others, providing information to stakeholders for informed decision-making. Debugging is a separate activity, and testing does not replace legal certification or reduce staffing."
+    }
+  },
+  {
+    id: 53, chapter: 0, lo: "FL-1.1.2", k: 2,
+    source: "Syllabus v4.0 §1.1.2",
+    q: {
+      es: "Cuando una prueba dinámica provoca un fallo, ¿qué actividad se encarga de encontrar la causa (el defecto), analizarla y eliminarla?",
+      en: "When dynamic testing triggers a failure, which activity is responsible for finding the cause (the defect), analyzing it and eliminating it?"
+    },
+    options: {
+      es: [
+        "La depuración (debugging)",
+        "La prueba de confirmación (confirmation testing)",
+        "El análisis de pruebas (test analysis)",
+        "La prueba de regresión (regression testing)"
+      ],
+      en: [
+        "Debugging",
+        "Confirmation testing",
+        "Test analysis",
+        "Regression testing"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El testing y la depuración son actividades separadas. El testing puede provocar fallos (pruebas dinámicas) o encontrar defectos directamente (pruebas estáticas); la depuración se encarga de reproducir el fallo, diagnosticar el defecto y corregirlo. Después, la prueba de confirmación verifica la corrección y la de regresión comprueba que no se hayan introducido nuevos fallos.",
+      en: "Testing and debugging are separate activities. Testing can trigger failures (dynamic testing) or directly find defects (static testing); debugging is concerned with reproducing the failure, diagnosing the defect and fixing it. Afterwards, confirmation testing checks the fix, and regression testing checks that no new failures were introduced."
+    }
+  },
+  {
+    id: 54, chapter: 0, lo: "FL-1.2.1", k: 2,
+    source: "Syllabus v4.0 §1.2.1",
+    q: {
+      es: "¿Cuál de las siguientes es una contribución del testing al éxito de un proyecto, según el syllabus?",
+      en: "Which of the following is a contribution of testing to project success, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Elimina por completo la necesidad de aseguramiento de calidad (QA)",
+        "Proporciona a los usuarios una representación indirecta en el proyecto de desarrollo",
+        "Garantiza que no se incumplirá ningún plazo del proyecto",
+        "Sustituye la necesidad de cumplir requisitos contractuales o legales"
+      ],
+      en: [
+        "It completely eliminates the need for quality assurance (QA)",
+        "It provides users with indirect representation in the development project",
+        "It guarantees no project deadline will be missed",
+        "It replaces the need to comply with contractual or legal requirements"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El syllabus indica que el testing proporciona a los usuarios una representación indirecta en el proyecto, ya que los testers procuran que las necesidades reales de los usuarios se tengan en cuenta durante todo el ciclo de vida, cuando no es viable involucrar directamente a usuarios representativos.",
+      en: "The syllabus states that testing provides users with indirect representation on the development project, since testers ensure real user needs are considered throughout the lifecycle when directly involving representative users is not feasible."
+    }
+  },
+  {
+    id: 55, chapter: 0, lo: "FL-1.2.2", k: 1,
+    source: "Syllabus v4.0 §1.2.2",
+    q: {
+      es: "¿Cuál de las siguientes afirmaciones describe correctamente la relación entre el testing y el Aseguramiento de la Calidad (QA)?",
+      en: "Which statement correctly describes the relationship between testing and Quality Assurance (QA)?"
+    },
+    options: {
+      es: [
+        "El testing es un enfoque orientado al producto y correctivo; el QA es un enfoque orientado al proceso y preventivo",
+        "El testing y el QA son términos sinónimos e intercambiables",
+        "El QA es responsabilidad exclusiva del equipo de testing",
+        "El testing se centra en mejorar los procesos de desarrollo, mientras que el QA se centra en encontrar defectos en el código"
+      ],
+      en: [
+        "Testing is a product-oriented, corrective approach; QA is a process-oriented, preventive approach",
+        "Testing and QA are synonymous, interchangeable terms",
+        "QA is the exclusive responsibility of the test team",
+        "Testing focuses on improving development processes, while QA focuses on finding defects in code"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Aunque a menudo se usan indistintamente, testing y QA no son lo mismo: el testing es un enfoque orientado al producto y correctivo (una forma de control de calidad), mientras que el QA es un enfoque orientado al proceso y preventivo, y es responsabilidad de todos en el proyecto, no solo del equipo de testing.",
+      en: "Although often used interchangeably, testing and QA are not the same: testing is a product-oriented, corrective approach (a form of quality control), while QA is a process-oriented, preventive approach, and is the responsibility of everyone on the project, not just the test team."
+    }
+  },
+  {
+    id: 56, chapter: 0, lo: "FL-1.2.3", k: 2,
+    source: "Syllabus v4.0 §1.2.3",
+    q: {
+      es: "Un desarrollador, bajo presión de tiempo, malinterpreta un requisito y escribe código incorrecto que queda en el sistema sin detectarse. ¿Qué elemento representa la CAUSA RAÍZ en este escenario?",
+      en: "Under time pressure, a developer misunderstands a requirement and writes incorrect code that remains undetected in the system. What represents the ROOT CAUSE in this scenario?"
+    },
+    options: {
+      es: [
+        "El código incorrecto que quedó en el sistema",
+        "El comportamiento incorrecto que el sistema mostraría al ejecutarse",
+        "La malinterpretación del requisito por parte del desarrollador",
+        "La presión de tiempo que llevó a cometer el error"
+      ],
+      en: [
+        "The incorrect code left in the system",
+        "The incorrect behavior the system would show when executed",
+        "The developer's misunderstanding of the requirement",
+        "The time pressure that led to the mistake"
+      ]
+    },
+    correct: 3,
+    explanation: {
+      es: "Una causa raíz es la razón fundamental de un problema (una situación que lleva a un error). Aquí, la presión de tiempo es la causa raíz que llevó al error humano (malinterpretar el requisito), que produjo un defecto (el código incorrecto) que, de ejecutarse, podría causar un fallo.",
+      en: "A root cause is the fundamental reason for a problem (a situation that leads to an error). Here, time pressure is the root cause that led to the human error (misunderstanding the requirement), which produced a defect (the incorrect code) that, if executed, could cause a failure."
+    }
+  },
+  {
+    id: 57, chapter: 0, lo: "FL-1.3.1", k: 2,
+    source: "Syllabus v4.0 §1.3.1",
+    q: {
+      es: "¿Qué principio de las pruebas establece que 'las pruebas tempranas ahorran tiempo y dinero'?",
+      en: "Which testing principle states that 'early testing saves time and money'?"
+    },
+    options: {
+      es: [
+        "Principio 1: Las pruebas muestran la presencia de defectos",
+        "Principio 3: Las pruebas tempranas ahorran tiempo y dinero",
+        "Principio 4: Los defectos se agrupan",
+        "Principio 6: Las pruebas dependen del contexto"
+      ],
+      en: [
+        "Principle 1: Testing shows the presence of defects",
+        "Principle 3: Early testing saves time and money",
+        "Principle 4: Defects cluster together",
+        "Principle 6: Testing is context dependent"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El Principio 3 indica que los defectos eliminados tempranamente no provocarán defectos posteriores en productos de trabajo derivados, reduciendo el coste de calidad. Por ello, tanto las pruebas estáticas como las dinámicas deben comenzar lo antes posible en el ciclo de vida.",
+      en: "Principle 3 states that defects removed early will not cause subsequent defects in derived work products, reducing the cost of quality. Therefore, both static and dynamic testing should start as early as possible in the lifecycle."
+    }
+  },
+  {
+    id: 58, chapter: 0, lo: "FL-1.4.1", k: 2,
+    source: "Syllabus v4.0 §1.4.1",
+    q: {
+      es: "Dentro del proceso de pruebas, ¿qué actividad responde a la pregunta '¿qué probar?', analizando la base de pruebas para identificar condiciones de prueba?",
+      en: "Within the test process, which activity answers the question 'what to test?' by analyzing the test basis to identify test conditions?"
+    },
+    options: {
+      es: [
+        "El análisis de pruebas (test analysis)",
+        "El diseño de pruebas (test design)",
+        "La implementación de pruebas (test implementation)",
+        "El cierre de pruebas (test completion)"
+      ],
+      en: [
+        "Test analysis",
+        "Test design",
+        "Test implementation",
+        "Test completion"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El análisis de pruebas incluye analizar la base de pruebas para identificar características comprobables, y definir y priorizar condiciones de prueba; responde a la pregunta '¿qué probar?' en términos de criterios de cobertura medibles. El diseño de pruebas, en cambio, responde a '¿cómo probar?'.",
+      en: "Test analysis includes analyzing the test basis to identify testable features, and defining and prioritizing test conditions; it answers the question 'what to test?' in terms of measurable coverage criteria. Test design, in contrast, answers 'how to test?'."
+    }
+  },
+  {
+    id: 59, chapter: 0, lo: "FL-1.4.2", k: 2,
+    source: "Syllabus v4.0 §1.4.2",
+    q: {
+      es: "¿Cuáles de los siguientes son factores de CONTEXTO que, según el syllabus, influyen en cómo se lleva a cabo el proceso de pruebas?",
+      en: "Which of the following are CONTEXT factors that, according to the syllabus, influence how the test process is carried out?"
+    },
+    options: {
+      es: [
+        "Las partes interesadas, el dominio de negocio, los factores técnicos y las restricciones del proyecto",
+        "Únicamente el número de líneas de código fuente del sistema",
+        "Únicamente la antigüedad de la empresa que desarrolla el software",
+        "Únicamente el sistema operativo instalado en el servidor de producción"
+      ],
+      en: [
+        "Stakeholders, business domain, technical factors and project constraints",
+        "Only the number of lines of source code in the system",
+        "Only the age of the company developing the software",
+        "Only the operating system installed on the production server"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El syllabus enumera varios factores contextuales que impactan el proceso de pruebas: partes interesadas, miembros del equipo, dominio de negocio, factores técnicos, restricciones del proyecto, factores organizacionales, el SDLC y las herramientas. Estos factores afectan la estrategia, las técnicas, el nivel de automatización y el reporte de pruebas.",
+      en: "The syllabus lists several contextual factors impacting the test process: stakeholders, team members, business domain, technical factors, project constraints, organizational factors, the SDLC, and tools. These factors affect the test strategy, techniques, automation level and test reporting."
+    }
+  },
+  {
+    id: 60, chapter: 0, lo: "FL-1.4.3", k: 2,
+    source: "Syllabus v4.0 §1.4.3",
+    q: {
+      es: "El 'registro de riesgos' (risk register), a menudo incluido en el plan de pruebas, ¿a qué grupo de actividades del proceso de pruebas pertenece como producto de trabajo (testware)?",
+      en: "The 'risk register', often included in the test plan, belongs to which group of test process activities as a testware work product?"
+    },
+    options: {
+      es: [
+        "Planificación de pruebas (test planning)",
+        "Diseño de pruebas (test design)",
+        "Ejecución de pruebas (test execution)",
+        "Cierre de pruebas (test completion)"
+      ],
+      en: [
+        "Test planning",
+        "Test design",
+        "Test execution",
+        "Test completion"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Según el syllabus, los productos de trabajo de la planificación de pruebas incluyen el plan de pruebas, el cronograma de pruebas, el registro de riesgos y los criterios de entrada y salida; estos últimos suelen formar parte del propio plan de pruebas.",
+      en: "According to the syllabus, test planning work products include the test plan, test schedule, risk register, and entry/exit criteria; the latter are often part of the test plan itself."
+    }
+  },
+  {
+    id: 61, chapter: 0, lo: "FL-1.4.5", k: 2,
+    source: "Syllabus v4.0 §1.4.5",
+    q: {
+      es: "En el desarrollo Ágil, según el syllabus, ¿qué puede ocurrir con algunas de las tareas del rol de gestión de pruebas?",
+      en: "In Agile development, according to the syllabus, what can happen with some of the test management role's tasks?"
+    },
+    options: {
+      es: [
+        "Pueden ser asumidas por el propio equipo ágil",
+        "Deben eliminarse por completo, ya que Ágil no requiere gestión de pruebas",
+        "Siempre deben ser realizadas por un Test Manager externo a la organización",
+        "Se transfieren automáticamente al cliente final"
+      ],
+      en: [
+        "They can be handled by the Agile team itself",
+        "They must be eliminated entirely, since Agile does not require test management",
+        "They must always be performed by a Test Manager outside the organization",
+        "They are automatically transferred to the end customer"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El syllabus señala que la forma de llevar a cabo el rol de gestión de pruebas varía según el contexto; por ejemplo, en el desarrollo ágil, algunas tareas de gestión de pruebas pueden ser gestionadas por el propio equipo ágil, sin necesidad de un rol separado.",
+      en: "The syllabus notes that the way the test management role is carried out varies by context; for example, in Agile development, some test management tasks may be handled by the Agile team itself, without needing a separate role."
+    }
+  },
+  {
+    id: 62, chapter: 0, lo: "FL-1.5.1", k: 2,
+    source: "Syllabus v4.0 §1.5.1",
+    q: {
+      es: "¿Cuál de las siguientes combinaciones representa habilidades GENÉRICAS que el syllabus considera relevantes para los testers?",
+      en: "Which of the following combinations represents GENERIC skills the syllabus considers relevant for testers?"
+    },
+    options: {
+      es: [
+        "Ser el desarrollador con más antigüedad en la empresa",
+        "Minuciosidad, atención al detalle, pensamiento analítico y buenas habilidades de comunicación",
+        "Poseer una certificación obligatoria en gestión financiera",
+        "Conocer un único lenguaje de programación en profundidad"
+      ],
+      en: [
+        "Being the most senior developer at the company",
+        "Thoroughness, attention to detail, analytical thinking and good communication skills",
+        "Holding a mandatory certification in financial management",
+        "Deep knowledge of a single programming language"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El syllabus enumera como habilidades genéricas relevantes para los testers: conocimiento de pruebas, minuciosidad/atención al detalle/curiosidad, buenas habilidades de comunicación, pensamiento analítico y crítico/creatividad, conocimiento técnico y conocimiento del dominio de negocio.",
+      en: "The syllabus lists as relevant generic skills for testers: testing knowledge, thoroughness/attention to detail/curiosity, good communication skills, analytical and critical thinking/creativity, technical knowledge, and domain knowledge."
+    }
+  },
+  {
+    id: 63, chapter: 0, lo: "FL-1.5.2", k: 1,
+    source: "Syllabus v4.0 §1.5.2",
+    q: {
+      es: "¿Cuál de las siguientes es una VENTAJA del enfoque de equipo completo (whole team approach), según el syllabus?",
+      en: "Which of the following is an ADVANTAGE of the whole team approach, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Mejora la dinámica del equipo y potencia la comunicación y la colaboración, creando sinergia entre las distintas habilidades",
+        "Elimina por completo la necesidad de independencia de pruebas en cualquier contexto",
+        "Reduce la necesidad de que los testers colaboren con los representantes del negocio",
+        "Garantiza que todos los miembros del equipo tengan el mismo nivel de conocimiento técnico"
+      ],
+      en: [
+        "It improves team dynamics and enhances communication and collaboration, creating synergy between different skill sets",
+        "It completely eliminates the need for test independence in any context",
+        "It reduces the need for testers to collaborate with business representatives",
+        "It guarantees all team members have the same level of technical knowledge"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El enfoque de equipo completo mejora la dinámica del equipo, potencia la comunicación y la colaboración, y crea sinergia al aprovechar las distintas habilidades del equipo. Sin embargo, no siempre es apropiado; en contextos críticos de seguridad puede requerirse un alto nivel de independencia.",
+      en: "The whole team approach improves team dynamics, enhances communication and collaboration, and creates synergy by leveraging the team's various skill sets. However, it is not always appropriate; safety-critical contexts may require a high level of independence."
+    }
+  },
+  {
+    id: 64, chapter: 0, lo: "FL-1.5.3", k: 2,
+    source: "Syllabus v4.0 §1.5.3",
+    q: {
+      es: "¿Cuál de los siguientes es un posible INCONVENIENTE de un alto grado de independencia de las pruebas, según el syllabus?",
+      en: "Which of the following is a possible DRAWBACK of a high degree of test independence, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Los testers independientes nunca encuentran defectos relevantes",
+        "Los testers independientes pueden aislarse del equipo de desarrollo, generando problemas de comunicación o una relación conflictiva",
+        "La independencia elimina por completo los sesgos cognitivos de todo el equipo",
+        "La independencia mejora automáticamente la velocidad de codificación de los desarrolladores"
+      ],
+      en: [
+        "Independent testers never find relevant defects",
+        "Independent testers may become isolated from the development team, leading to communication problems or an adversarial relationship",
+        "Independence completely eliminates the whole team's cognitive biases",
+        "Independence automatically improves developers' coding speed"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Según el syllabus, entre los inconvenientes de la independencia de pruebas están el aislamiento de los testers respecto al equipo de desarrollo, problemas de comunicación, relaciones conflictivas, pérdida de sentido de responsabilidad de calidad por parte de los desarrolladores, y la percepción de los testers como un cuello de botella.",
+      en: "According to the syllabus, drawbacks of test independence include testers becoming isolated from the development team, communication problems, adversarial relationships, developers losing a sense of responsibility for quality, and testers being seen as a bottleneck."
+    }
   }
 ];
