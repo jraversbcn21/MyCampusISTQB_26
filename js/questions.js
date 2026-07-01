@@ -2419,5 +2419,378 @@ const QUESTIONS = [
       es: "Un caso de prueba negativo válido comprueba que el sistema rechaza correctamente una condición fuera del alcance previsto: un cliente que ya compró antes NO debe recibir el descuento de 'primera compra'. La opción (a) es el caso positivo; la opción (c) es una funcionalidad no relacionada (fuera del alcance de esta historia); la opción (d) es una prueba no funcional no vinculada a la regla de negocio de esta historia. El syllabus indica que los casos de prueba deben cubrir las características de la historia sin ir más allá de ella.",
       en: "A valid negative test case checks that the system correctly rejects a condition outside the intended scope: a customer who has already purchased before must NOT receive the 'first purchase' discount. Option (a) is the positive case; option (c) is unrelated functionality (outside this story's scope); option (d) is a non-functional test unrelated to this story's business rule. The syllabus states that test cases must cover the story's features without going beyond it."
     }
+  },
+  // ===== CHAPTER 5 (Managing Test Activities): 16 new questions, ids 105-120 =====
+  {
+    id: 105, chapter: 4, lo: "FL-5.2.2", k: 2,
+    source: "Syllabus v4.0 §5.2.2",
+    q: {
+      es: "El riesgo de que un proveedor externo no entregue a tiempo el entorno de pruebas necesario para el proyecto es un ejemplo de:",
+      en: "The risk that an external supplier fails to deliver the required test environment on time is an example of:"
+    },
+    options: {
+      es: ["Riesgo de proyecto", "Riesgo de producto", "Riesgo de calidad del producto", "Riesgo técnico del producto"],
+      en: ["Project risk", "Product risk", "Product quality risk", "Technical product risk"]
+    },
+    correct: 0,
+    explanation: {
+      es: "Los riesgos de proyecto se relacionan con la gestión y el control del proyecto (retrasos, recursos, proveedores, entornos). Los riesgos de producto se relacionan con las características de calidad del producto (fallos del software).",
+      en: "Project risks relate to project management and control (delays, resources, suppliers, environments). Product risks relate to the product's quality characteristics (software failures)."
+    }
+  },
+  {
+    id: 106, chapter: 4, lo: "FL-5.1.1", k: 2,
+    source: "Syllabus v4.0 §5.1.1",
+    q: {
+      es: "Según el syllabus, ¿cuál de los siguientes elementos forma parte del CONTENIDO habitual de un plan de pruebas?",
+      en: "According to the syllabus, which of the following elements is typically part of a test plan's CONTENT?"
+    },
+    options: {
+      es: [
+        "Los guiones de prueba detallados paso a paso de cada caso de prueba",
+        "El registro de riesgos (por ejemplo, riesgos de producto y de proyecto)",
+        "El número final de defectos cerrados al terminar el proyecto",
+        "El plan de marketing del producto"
+      ],
+      en: [
+        "The detailed step-by-step test scripts for each test case",
+        "The risk register (e.g., product and project risks)",
+        "The final number of defects closed when the project ends",
+        "The product's marketing plan"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "El plan de pruebas incluye, entre otros elementos, el contexto de la prueba, implicados, comunicación, el registro de riesgos y el enfoque de prueba. Los guiones de prueba detallados son testware aparte, y el conteo final de defectos pertenece al informe de compleción de la prueba.",
+      en: "A test plan includes, among other elements, the test context, stakeholders, communication, the risk register, and the test approach. Detailed test scripts are separate testware, and the final defect count belongs to the test completion report."
+    }
+  },
+  {
+    id: 107, chapter: 4, lo: "FL-5.1.2", k: 1,
+    source: "Syllabus v4.0 §5.1.2",
+    q: {
+      es: "En los ciclos de vida iterativos, ¿cuál de las siguientes actividades es propia de la PLANIFICACIÓN DE LA ENTREGA (release planning), y no de la planificación de la iteración?",
+      en: "In iterative lifecycles, which of the following activities belongs to RELEASE PLANNING, rather than iteration planning?"
+    },
+    options: {
+      es: [
+        "Desglosar las historias de usuario en tareas de prueba concretas",
+        "Determinar la capacidad de ser probadas de las historias de usuario de la iteración",
+        "Participar en la redacción de historias de usuario y criterios de aceptación comprobables",
+        "Perfeccionar los aspectos funcionales y no funcionales del objeto de prueba de la iteración"
+      ],
+      en: [
+        "Breaking down user stories into concrete test tasks",
+        "Determining the testability of the iteration's user stories",
+        "Participating in writing user stories and testable acceptance criteria",
+        "Refining the functional and non-functional aspects of the iteration's test object"
+      ]
+    },
+    correct: 2,
+    explanation: {
+      es: "La planificación de la entrega incluye la participación del tester en la redacción de historias de usuario y criterios de aceptación comprobables, además de los análisis de riesgo de proyecto y calidad. Las otras opciones son actividades propias de la planificación de la iteración.",
+      en: "Release planning includes the tester participating in writing user stories and testable acceptance criteria, along with project and quality risk analysis. The other options are activities typical of iteration planning."
+    }
+  },
+  {
+    id: 108, chapter: 4, lo: "FL-5.1.3", k: 2,
+    source: "Syllabus v4.0 §5.1.3",
+    q: {
+      es: "¿Cuál de las siguientes opciones es un ejemplo de CRITERIO DE ENTRADA (y no de criterio de salida)?",
+      en: "Which of the following is an example of an ENTRY criterion (and not an exit criterion)?"
+    },
+    options: {
+      es: [
+        "La densidad de defectos se encuentra por debajo del umbral acordado",
+        "La disponibilidad de la base de prueba y de requisitos comprobables",
+        "Se han ejecutado todas las pruebas planificadas",
+        "El nivel de cobertura de código alcanzado"
+      ],
+      en: [
+        "Defect density is below the agreed threshold",
+        "The availability of the test basis and testable requirements",
+        "All planned tests have been executed",
+        "The level of code coverage achieved"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "Los criterios de entrada son precondiciones para emprender una actividad, como la disponibilidad de material de prueba (base de prueba, requisitos comprobables). Las otras tres opciones son medidas de completitud típicas de los criterios de salida.",
+      en: "Entry criteria are preconditions for undertaking an activity, such as the availability of test material (test basis, testable requirements). The other three options are completeness measures typical of exit criteria."
+    }
+  },
+  {
+    id: 109, chapter: 4, lo: "FL-5.1.4", k: 3,
+    source: "Syllabus v4.0 §5.1.4",
+    q: {
+      es: "Tres expertos estiman el esfuerzo de prueba de una nueva funcionalidad usando la técnica de ESTIMACIÓN DE TRES PUNTOS: estimación optimista (a) = 4 días-persona, estimación más probable (m) = 6 días-persona, estimación pesimista (b) = 14 días-persona. Aplicando la fórmula E = (a + 4m + b) / 6, ¿cuál es la estimación final (E)?",
+      en: "Three experts estimate the test effort for a new feature using the THREE-POINT ESTIMATION technique: optimistic estimate (a) = 4 person-days, most likely estimate (m) = 6 person-days, pessimistic estimate (b) = 14 person-days. Applying the formula E = (a + 4m + b) / 6, what is the final estimate (E)?"
+    },
+    options: {
+      es: ["6 días-persona", "7 días-persona", "8 días-persona", "9 días-persona"],
+      en: ["6 person-days", "7 person-days", "8 person-days", "9 person-days"]
+    },
+    correct: 1,
+    explanation: {
+      es: "E = (a + 4m + b) / 6 = (4 + 4×6 + 14) / 6 = (4 + 24 + 14) / 6 = 42 / 6 = 7 días-persona. Esta es la técnica de estimación de tres puntos, basada en expertos, descrita en el syllabus.",
+      en: "E = (a + 4m + b) / 6 = (4 + 4×6 + 14) / 6 = (4 + 24 + 14) / 6 = 42 / 6 = 7 person-days. This is the expert-based three-point estimation technique described in the syllabus."
+    }
+  },
+  {
+    id: 110, chapter: 4, lo: "FL-5.1.5", k: 3,
+    source: "Syllabus v4.0 §5.1.5",
+    q: {
+      es: "Un equipo debe ordenar la ejecución de tres casos de prueba: TC1 (riesgo alto, sin dependencias), TC2 (riesgo medio, depende de datos que crea TC3), TC3 (riesgo bajo, crea los datos que necesita TC2). Aplicando la priorización basada en riesgo y respetando las dependencias, ¿cuál es el orden de ejecución CORRECTO?",
+      en: "A team must order the execution of three test cases: TC1 (high risk, no dependencies), TC2 (medium risk, depends on data created by TC3), TC3 (low risk, creates the data TC2 needs). Applying risk-based prioritization while respecting dependencies, what is the CORRECT execution order?"
+    },
+    options: {
+      es: ["TC1, TC2, TC3", "TC1, TC3, TC2", "TC3, TC1, TC2", "TC3, TC2, TC1"],
+      en: ["TC1, TC2, TC3", "TC1, TC3, TC2", "TC3, TC1, TC2", "TC3, TC2, TC1"]
+    },
+    correct: 1,
+    explanation: {
+      es: "TC1 tiene el riesgo más alto y ninguna dependencia, por lo que se ejecuta primero. Aunque TC2 tiene mayor riesgo que TC3, TC2 depende de los datos que genera TC3; según el syllabus, si un caso de prioridad más alta depende de uno de prioridad más baja, este último debe ejecutarse antes. Por tanto, el orden correcto es TC1, TC3, TC2.",
+      en: "TC1 has the highest risk and no dependencies, so it runs first. Although TC2 has higher risk than TC3, TC2 depends on the data TC3 generates; per the syllabus, if a higher-priority test case depends on a lower-priority one, the lower-priority one must run first. Therefore, the correct order is TC1, TC3, TC2."
+    }
+  },
+  {
+    id: 111, chapter: 4, lo: "FL-5.1.6", k: 1,
+    source: "Syllabus v4.0 §5.1.6",
+    q: {
+      es: "Según el modelo de la PIRÁMIDE DE PRUEBA, ¿qué característica tienen las pruebas de la capa SUPERIOR en comparación con las de la capa inferior?",
+      en: "According to the TEST PYRAMID model, what characteristic do tests in the TOP layer have compared to those in the bottom layer?"
+    },
+    options: {
+      es: [
+        "Son más numerosas, pero de menor granularidad y más rápidas",
+        "Son menos numerosas, de mayor granularidad, extremo a extremo y más lentas",
+        "Tienen exactamente la misma cantidad y velocidad que las de la capa inferior",
+        "Solo pueden ejecutarse de forma manual, nunca automatizada"
+      ],
+      en: [
+        "They are more numerous, but of smaller granularity and faster",
+        "They are fewer, of larger granularity, end-to-end, and slower",
+        "They have exactly the same number and speed as the bottom layer's tests",
+        "They can only be executed manually, never automated"
+      ]
+    },
+    correct: 1,
+    explanation: {
+      es: "La capa superior de la pirámide de prueba representa pruebas complejas, de alto nivel y de extremo a extremo, que suelen ser más lentas y de las que normalmente se necesitan pocas para lograr una cobertura razonable, a diferencia de las pruebas pequeñas, aisladas y rápidas de la capa inferior.",
+      en: "The top layer of the test pyramid represents complex, high-level, end-to-end tests, which tend to be slower and of which normally only a few are needed to achieve reasonable coverage, unlike the small, isolated, fast tests of the bottom layer."
+    }
+  },
+  {
+    id: 112, chapter: 4, lo: "FL-5.1.7", k: 2,
+    source: "Syllabus v4.0 §5.1.7",
+    q: {
+      es: "¿Cuál de los CUADRANTES DE PRUEBA (testing quadrants) contiene las pruebas de componente y de integración de componentes, que deberían automatizarse e incluirse en el proceso de integración continua?",
+      en: "Which of the TESTING QUADRANTS contains component and component integration tests, which should be automated and included in the continuous integration process?"
+    },
+    options: {
+      es: ["Cuadrante Q1 (orientado a la tecnología, apoya al equipo)", "Cuadrante Q2 (orientado al negocio, apoya al equipo)", "Cuadrante Q3 (orientado al negocio, critica al producto)", "Cuadrante Q4 (orientado a la tecnología, critica al producto)"],
+      en: ["Quadrant Q1 (technology-facing, supports the team)", "Quadrant Q2 (business-facing, supports the team)", "Quadrant Q3 (business-facing, critiques the product)", "Quadrant Q4 (technology-facing, critiques the product)"]
+    },
+    correct: 0,
+    explanation: {
+      es: "El Cuadrante Q1 (orientado a la tecnología, apoya al equipo) contiene las pruebas de componentes y de integración de componentes, que deben automatizarse e incluirse en el proceso de integración continua (IC).",
+      en: "Quadrant Q1 (technology-facing, supports the team) contains component and component integration tests, which should be automated and included in the continuous integration (CI) process."
+    }
+  },
+  {
+    id: 113, chapter: 4, lo: "FL-5.2.1", k: 1,
+    source: "Syllabus v4.0 §5.2.1",
+    q: {
+      es: "¿Qué dos factores se combinan para determinar el NIVEL DE RIESGO de un riesgo identificado?",
+      en: "Which two factors are combined to determine the RISK LEVEL of an identified risk?"
+    },
+    options: {
+      es: ["La probabilidad del riesgo y el impacto del riesgo", "El costo de la prueba y la duración del proyecto", "La experiencia del equipo y la disponibilidad de herramientas", "La complejidad del código y la densidad de defectos"],
+      en: ["Risk probability and risk impact", "Test cost and project duration", "Team experience and tool availability", "Code complexity and defect density"]
+    },
+    correct: 0,
+    explanation: {
+      es: "El nivel de riesgo se determina combinando la probabilidad del riesgo (la probabilidad de que ocurra) y el impacto del riesgo (el daño o las consecuencias si ocurre). Cuanto mayor es el nivel de riesgo, más importante es su tratamiento.",
+      en: "Risk level is determined by combining risk probability (the likelihood it occurs) and risk impact (the harm or consequences if it occurs). The higher the risk level, the more important its treatment."
+    }
+  },
+  {
+    id: 114, chapter: 4, lo: "FL-5.2.3", k: 2,
+    source: "Syllabus v4.0 §5.2.3",
+    q: {
+      es: "¿Para cuál de los siguientes propósitos se utilizan los resultados del ANÁLISIS DEL RIESGO DE PRODUCTO, según el syllabus?",
+      en: "According to the syllabus, for which of the following purposes are the results of PRODUCT RISK ANALYSIS used?"
+    },
+    options: {
+      es: [
+        "Determinar el alcance de la prueba y priorizar las pruebas para encontrar antes los defectos críticos",
+        "Fijar el salario de los miembros del equipo de prueba",
+        "Sustituir por completo la necesidad de un plan de pruebas",
+        "Eliminar la necesidad de definir criterios de entrada"
+      ],
+      en: [
+        "Determine the scope of testing and prioritize tests to find critical defects earlier",
+        "Set the salary of the test team members",
+        "Completely replace the need for a test plan",
+        "Eliminate the need to define entry criteria"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El análisis del riesgo de producto influye en la minuciosidad y el alcance de las pruebas: se usa para determinar el alcance, los niveles y tipos de prueba, las técnicas y la cobertura, estimar el esfuerzo y priorizar las pruebas para encontrar los defectos críticos lo antes posible.",
+      en: "Product risk analysis influences the thoroughness and scope of testing: it is used to determine the scope, test levels and types, techniques and coverage, estimate test effort, and prioritize tests to find critical defects as early as possible."
+    }
+  },
+  {
+    id: 115, chapter: 4, lo: "FL-5.2.4", k: 2,
+    source: "Syllabus v4.0 §5.2.4",
+    q: {
+      es: "¿Cuál de las siguientes es una medida propuesta por el syllabus para MITIGAR un riesgo de producto mediante la prueba?",
+      en: "Which of the following is a measure proposed by the syllabus to MITIGATE a product risk through testing?"
+    },
+    options: {
+      es: [
+        "Seleccionar testers con el nivel de experiencia adecuado para el tipo de riesgo y aplicar los niveles de cobertura apropiados",
+        "Aumentar el presupuesto del proyecto sin ningún límite",
+        "Ignorar todos los riesgos por debajo de nivel medio",
+        "Eliminar al equipo de prueba del proyecto"
+      ],
+      en: [
+        "Selecting testers with the appropriate level of experience for the risk type and applying appropriate coverage levels",
+        "Increasing the project budget without any limit",
+        "Ignoring all risks below medium level",
+        "Removing the test team from the project"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Entre las medidas para mitigar riesgos de producto mediante la prueba, el syllabus menciona: seleccionar testers con experiencia y competencia adecuadas, aplicar el nivel de independencia adecuado, realizar revisiones y análisis estático, y aplicar las técnicas y niveles de cobertura adecuados.",
+      en: "Among the measures to mitigate product risks through testing, the syllabus mentions: selecting testers with appropriate experience and competence, applying the appropriate level of independence, performing reviews and static analysis, and applying appropriate techniques and coverage levels."
+    }
+  },
+  {
+    id: 116, chapter: 4, lo: "FL-5.3.1", k: 1,
+    source: "Syllabus v4.0 §5.3.1",
+    q: {
+      es: "La densidad de defectos y el porcentaje de detección de defectos son ejemplos de qué CATEGORÍA de métrica de prueba, según el syllabus?",
+      en: "Defect density and defect detection percentage are examples of which CATEGORY of test metric, according to the syllabus?"
+    },
+    options: {
+      es: ["Métricas de defectos", "Métricas de costo", "Métricas de avance del proyecto", "Métricas de cobertura"],
+      en: ["Defect metrics", "Cost metrics", "Project progress metrics", "Coverage metrics"]
+    },
+    correct: 0,
+    explanation: {
+      es: "El syllabus agrupa la densidad de defectos y el porcentaje de detección de defectos, junto con el número y prioridades de defectos encontrados/corregidos, dentro de las métricas de defectos.",
+      en: "The syllabus groups defect density and defect detection percentage, along with the number and priorities of defects found/fixed, under defect metrics."
+    }
+  },
+  {
+    id: 117, chapter: 4, lo: "FL-5.3.2", k: 2,
+    source: "Syllabus v4.0 §5.3.2",
+    q: {
+      es: "¿Cuál es la principal diferencia entre un INFORME DEL AVANCE DE LA PRUEBA y un INFORME DE COMPLECIÓN DE LA PRUEBA?",
+      en: "What is the main difference between a TEST PROGRESS REPORT and a TEST COMPLETION REPORT?"
+    },
+    options: {
+      es: [
+        "Los informes de avance se generan regularmente durante la prueba para apoyar el control continuo; los de compleción resumen una etapa de prueba ya finalizada",
+        "Los informes de compleción se generan a diario; los de avance solo una vez, al final del proyecto",
+        "Son el mismo documento, solo cambia el nombre según la organización",
+        "Los informes de avance son solo para desarrolladores; los de compleción solo para clientes"
+      ],
+      en: [
+        "Progress reports are generated regularly during testing to support ongoing control; completion reports summarize an already-finished test stage",
+        "Completion reports are generated daily; progress reports only once, at the end of the project",
+        "They are the same document, only the name changes depending on the organization",
+        "Progress reports are only for developers; completion reports only for customers"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Los informes del avance de la prueba se generan de forma regular (diaria, semanal, etc.) para apoyar el control continuo de la prueba. Los informes de compleción de la prueba se preparan cuando un proyecto, nivel o tipo de prueba está completo, resumiendo esa etapa específica.",
+      en: "Test progress reports are generated regularly (daily, weekly, etc.) to support ongoing test control. Test completion reports are prepared when a project, test level, or test type is complete, summarizing that specific stage."
+    }
+  },
+  {
+    id: 118, chapter: 4, lo: "FL-5.3.3", k: 2,
+    source: "Syllabus v4.0 §5.3.3",
+    q: {
+      es: "¿Cuál de las siguientes opciones es un ejemplo de cómo COMUNICAR EL ESTADO DE LA PRUEBA, según el syllabus?",
+      en: "Which of the following is an example of how to COMMUNICATE TEST STATUS, according to the syllabus?"
+    },
+    options: {
+      es: [
+        "Cuadros de mando, como paneles de control de IC/CD, tableros de tareas y gráficos de quemado",
+        "Refactorizar el código fuente del sistema",
+        "Escribir nuevas pruebas unitarias para el módulo",
+        "Realizar un taller de análisis de causa raíz de un defecto"
+      ],
+      en: [
+        "Dashboards, such as CI/CD control panels, task boards, and burndown charts",
+        "Refactoring the system's source code",
+        "Writing new unit tests for the module",
+        "Conducting a defect root-cause-analysis workshop"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "El syllabus menciona como opciones para comunicar el estado de la prueba: comunicación verbal, cuadros de mando (paneles de IC/CD, tableros de tareas, gráficos de quemado), canales electrónicos, documentación en línea e informes formales de prueba.",
+      en: "The syllabus mentions as options for communicating test status: verbal communication, dashboards (CI/CD control panels, task boards, burndown charts), electronic channels, online documentation, and formal test reports."
+    }
+  },
+  {
+    id: 119, chapter: 4, lo: "FL-5.4.1", k: 2,
+    source: "Syllabus v4.0 §5.4.1",
+    q: {
+      es: "Cuando un elemento de configuración (por ejemplo, un entorno de prueba) es aprobado para ser probado, se convierte en una LÍNEA BASE. ¿Qué implica esto según la gestión de la configuración?",
+      en: "When a configuration item (e.g., a test environment) is approved for testing, it becomes a BASELINE. What does this imply according to configuration management?"
+    },
+    options: {
+      es: [
+        "Solo puede modificarse a partir de entonces mediante un proceso formal de control de cambios",
+        "Ya no necesita ser identificado ni versionado nunca más",
+        "Cualquier miembro del equipo puede modificarlo libremente sin registro",
+        "Deja de estar relacionado con otros elementos de configuración"
+      ],
+      en: [
+        "It can only be modified from then on through a formal change control process",
+        "It no longer needs to be identified or versioned again",
+        "Any team member can freely modify it without any record",
+        "It is no longer related to other configuration items"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Una vez que un elemento de configuración se aprueba y se convierte en línea base, solo puede modificarse mediante un proceso formal de control de cambios. La gestión de la configuración mantiene un registro de los elementos modificados al crear una nueva línea base.",
+      en: "Once a configuration item is approved and becomes a baseline, it can only be modified through a formal change control process. Configuration management keeps a record of modified items when a new baseline is created."
+    }
+  },
+  {
+    id: 120, chapter: 4, lo: "FL-5.5.1", k: 3,
+    source: "Syllabus v4.0 §5.5.1",
+    q: {
+      es: "Un tester registra el siguiente informe de defecto: Título: 'El login falla'. Pasos para reproducir: introducir credenciales válidas y pulsar 'Iniciar sesión'. Resultado esperado: el usuario es redirigido al panel principal. Resultado real: se muestra un error 500. ¿Cuál de los siguientes elementos ESENCIALES, según el syllabus, falta en este informe de defecto?",
+      en: "A tester logs the following defect report: Title: 'Login fails'. Steps to reproduce: enter valid credentials and click 'Login'. Expected result: the user is redirected to the main dashboard. Actual result: a 500 error is shown. Which of the following ESSENTIAL elements, according to the syllabus, is missing from this defect report?"
+    },
+    options: {
+      es: [
+        "La severidad y la prioridad del defecto",
+        "El esquema de colores de la pantalla de login",
+        "El historial de commits de Git del desarrollador",
+        "La campaña de marketing relacionada con el login"
+      ],
+      en: [
+        "The severity and priority of the defect",
+        "The color scheme of the login screen",
+        "The developer's Git commit history",
+        "The marketing campaign related to the login"
+      ]
+    },
+    correct: 0,
+    explanation: {
+      es: "Un informe de defecto típico debe incluir, entre otros elementos, la severidad (grado de impacto) y la prioridad de corrección, además del identificador único, la descripción del fallo y los resultados esperado/real. El informe del escenario carece de severidad y prioridad, información esencial para gestionar la resolución del defecto.",
+      en: "A typical defect report must include, among other elements, the severity (degree of impact) and the fix priority, in addition to the unique identifier, failure description, and expected/actual results. The scenario's report lacks severity and priority, information essential for managing the defect's resolution."
+    }
   }
 ];
