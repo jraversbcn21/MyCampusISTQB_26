@@ -50,8 +50,8 @@ const CHAPTERS = [
       en: "Static reviews, review types, benefits of early feedback."
     },
     topics: [
-      { id: "3.1", title: { es: "Conceptos básicos del testing estático", en: "Basic concepts of static testing" }, xp: 35 },
-      { id: "3.2", title: { es: "El proceso de revisión", en: "The review process" }, xp: 45 },
+      { id: "3.1", title: { es: "Conceptos básicos del testing estático", en: "Basic concepts of static testing" }, xp: 35, lo: ["FL-3.1.1","FL-3.1.2","FL-3.1.3"], source: "Syllabus v4.0 §3.1" },
+      { id: "3.2", title: { es: "El proceso de revisión", en: "The review process" }, xp: 45, lo: ["FL-3.2.1","FL-3.2.2","FL-3.2.3","FL-3.2.4","FL-3.2.5"], source: "Syllabus v4.0 §3.2" },
     ]
   },
   {
@@ -910,26 +910,72 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Facilita la comunicación entre el equipo</li>
   <li>Reduce el tiempo de testing dinámico posterior</li>
 </ul>
+<h3>Diferencias entre la Prueba Estática y la Prueba Dinámica</h3>
+<p>La prueba estática y la prueba dinámica son prácticas complementarias que persiguen objetivos similares (detectar defectos), pero presentan diferencias clave:</p>
+<ul>
+  <li>La prueba estática encuentra los <strong>defectos directamente</strong>; la prueba dinámica provoca <strong>fallos</strong> a partir de los cuales se determina el defecto mediante un análisis posterior.</li>
+  <li>La prueba estática detecta más fácilmente defectos en caminos del código poco ejecutados o difíciles de alcanzar mediante prueba dinámica.</li>
+  <li>La prueba estática puede aplicarse a productos de trabajo <strong>no ejecutables</strong> (requisitos, diseño); la prueba dinámica solo puede aplicarse a productos <strong>ejecutables</strong>.</li>
+  <li>La prueba estática puede medir características de calidad independientes de la ejecución del código (p. ej. mantenibilidad); la prueba dinámica mide características que dependen de la ejecución (p. ej. eficiencia de rendimiento).</li>
+</ul>
 <div class="highlight-box">
 💡 <strong>Defectos típicos encontrados en testing estático:</strong>
 <br>• Requisitos ambiguos o contradictorios
 <br>• Errores de diseño o interfaces
 <br>• Código no seguro o difícil de mantener
 <br>• Desviaciones de los estándares de codificación
-</div>`
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §3.1</p>`
     },
     en: {
       title: "Basic concepts of static testing",
       chapterTag: "Ch. 3 · Static Testing",
       content: `
 <h3>What is Static Testing?</h3>
-<p>Static testing evaluates software artifacts WITHOUT executing the software. It applies to requirements, code, design, user stories, documentation, and contracts.</p>
-<h3>Benefits</h3>
+<p>Static testing evaluates software artifacts <strong>without executing the software</strong>. It can be applied to:</p>
+<ul>
+  <li>Requirements specifications</li>
+  <li>User stories and acceptance criteria</li>
+  <li>System design and architecture</li>
+  <li>Source code</li>
+  <li>Technical and test documentation</li>
+  <li>Contracts and project plans</li>
+</ul>
+<h3>Static Analysis</h3>
+<p><strong>Static analysis</strong> is the automated process of examining source code without executing it. Static analysis tools detect:</p>
+<ul>
+  <li>Coding standard violations</li>
+  <li>Uninitialized or unused variables</li>
+  <li>Dead code (code that is never executed)</li>
+  <li>Security vulnerabilities (SQL injection, XSS, etc.)</li>
+  <li>High cyclomatic complexity</li>
+</ul>
+<div class="example-box">
+📌 <strong>Common tools:</strong> SonarQube, ESLint, FindBugs, PMD, Checkstyle.
+</div>
+<h3>Benefits of Static Testing</h3>
 <ul>
   <li>Finds defects before execution (cheaper to fix)</li>
   <li>Finds defects dynamic testing cannot easily detect</li>
   <li>Improves code and documentation quality</li>
-</ul>`
+  <li>Facilitates communication within the team</li>
+  <li>Reduces the time needed for later dynamic testing</li>
+</ul>
+<h3>Differences Between Static and Dynamic Testing</h3>
+<ul>
+  <li>Static testing finds defects <strong>directly</strong>; dynamic testing causes <strong>failures</strong> from which the underlying defect is determined through further analysis.</li>
+  <li>Static testing more easily detects defects on rarely executed or hard-to-reach code paths.</li>
+  <li>Static testing can be applied to <strong>non-executable</strong> work products; dynamic testing only to <strong>executable</strong> ones.</li>
+  <li>Static testing can measure quality characteristics independent of code execution (e.g. maintainability); dynamic testing measures characteristics that depend on execution (e.g. performance efficiency).</li>
+</ul>
+<div class="highlight-box">
+💡 <strong>Typical defects found in static testing:</strong>
+<br>• Ambiguous or contradictory requirements
+<br>• Design or interface errors
+<br>• Insecure or hard-to-maintain code
+<br>• Deviations from coding standards
+</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §3.1</p>`
     }
   },
   "3.2": {
@@ -937,6 +983,8 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
       title: "El proceso de revisión",
       chapterTag: "Cap. 3 · Testing Estático",
       content: `
+<h3>Beneficios de la Retroalimentación Temprana y Frecuente</h3>
+<p>La retroalimentación temprana y frecuente de los implicados permite comunicar cuanto antes posibles problemas de calidad. Si hay poca implicación de los implicados durante el ciclo de vida, el producto puede no cumplir su visión original o actual, lo que puede provocar repetición de trabajo, incumplimiento de plazos o incluso el fracaso del proyecto. La retroalimentación frecuente ayuda al equipo de desarrollo a comprender mejor lo que construye y a centrarse en las funcionalidades que más valor aportan.</p>
 <h3>Tipos de Revisión</h3>
 <table>
   <tr><th>Tipo</th><th>Formalidad</th><th>Guiado por</th><th>Objetivo</th></tr>
@@ -945,13 +993,14 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <tr><td>Revisión técnica</td><td>Media</td><td>Moderador</td><td>Consenso técnico</td></tr>
   <tr><td>Inspección</td><td>Alta</td><td>Moderador certificado</td><td>Máxima detección de defectos</td></tr>
 </table>
-<h3>Roles en una Revisión Formal</h3>
+<h3>Roles y Responsabilidades en una Revisión Formal</h3>
 <ul>
-  <li><strong>Autor:</strong> Creó el producto de trabajo que se revisa</li>
-  <li><strong>Moderador (Manager):</strong> Facilita el proceso, asegura la eficacia</li>
-  <li><strong>Escritor/Escriba:</strong> Documenta los defectos encontrados</li>
-  <li><strong>Revisores (Inspectores):</strong> Analizan el producto de trabajo</li>
-  <li><strong>Líder de revisión:</strong> Planifica y organiza la revisión</li>
+  <li><strong>Gestor:</strong> Decide qué se va a revisar y aporta los recursos (personal, tiempo) para la revisión</li>
+  <li><strong>Autor:</strong> Crea y corrige el producto de trabajo que se revisa</li>
+  <li><strong>Moderador (facilitador):</strong> Asegura el funcionamiento eficaz de las reuniones de revisión: media, gestiona el tiempo y mantiene un entorno seguro en el que todos puedan hablar libremente</li>
+  <li><strong>Escriba (o grabador):</strong> Recopila las anomalías de los revisores y registra la información de la revisión (decisiones, nuevas anomalías)</li>
+  <li><strong>Revisor:</strong> Lleva a cabo la revisión individual del producto de trabajo</li>
+  <li><strong>Líder de revisión:</strong> Asume la responsabilidad general de la revisión: decide quién participa y organiza cuándo y dónde se realiza</li>
 </ul>
 <h3>Proceso de Revisión</h3>
 <ol>
@@ -962,26 +1011,69 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li><strong>Corrección y reporte:</strong> El autor corrige; se genera el informe</li>
   <li><strong>Seguimiento:</strong> Verificar que los defectos fueron corregidos</li>
 </ol>
+<h3>Factores de Éxito de las Revisiones</h3>
+<ul>
+  <li>Objetivos claros y criterios de salida medibles (nunca evaluar a los participantes)</li>
+  <li>Elegir el tipo de revisión adecuado al objetivo y al producto de trabajo</li>
+  <li>Revisar en fragmentos pequeños para mantener la concentración</li>
+  <li>Dar retroalimentación a los implicados y autores para que puedan mejorar</li>
+  <li>Dar tiempo suficiente a los participantes para prepararse</li>
+  <li>Apoyo de la dirección al proceso de revisión</li>
+  <li>Integrar las revisiones en la cultura de la organización</li>
+  <li>Formación adecuada para todos los participantes</li>
+</ul>
 <div class="highlight-box">
-💡 <strong>Para el examen:</strong> La INSPECCIÓN es la revisión más formal. El WALKTHROUGH es guiado por el autor. La revisión INFORMAL no tiene proceso definido.
-</div>`
+💡 <strong>Para el examen:</strong> La INSPECCIÓN es la revisión más formal. El WALKTHROUGH es guiado por el autor. La revisión INFORMAL no tiene proceso definido. El GESTOR y el MODERADOR son roles distintos: el Gestor decide qué se revisa y aporta recursos; el Moderador facilita la reunión.
+</div>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §3.2</p>`
     },
     en: {
       title: "The review process",
       chapterTag: "Ch. 3 · Static Testing",
       content: `
+<h3>Benefits of Early and Frequent Feedback</h3>
+<p>Early and frequent feedback from stakeholders allows quality issues to be communicated as soon as possible. Low stakeholder involvement during the SDLC can result in a product that fails to meet the stakeholder's original or current vision, which can lead to costly rework, missed deadlines, or even project failure. Frequent feedback helps the development team better understand what they are building and focus on the features that bring the most value.</p>
 <h3>Review Types</h3>
 <table>
-  <tr><th>Type</th><th>Formality</th><th>Led by</th></tr>
-  <tr><td>Informal</td><td>Very low</td><td>Anyone</td></tr>
-  <tr><td>Walkthrough</td><td>Low-Medium</td><td>Author</td></tr>
-  <tr><td>Technical review</td><td>Medium</td><td>Moderator</td></tr>
-  <tr><td>Inspection</td><td>High</td><td>Certified moderator</td></tr>
+  <tr><th>Type</th><th>Formality</th><th>Led by</th><th>Objective</th></tr>
+  <tr><td>Informal</td><td>Very low</td><td>Anyone</td><td>Find defects quickly</td></tr>
+  <tr><td>Walkthrough</td><td>Low-Medium</td><td>Author</td><td>Team learning</td></tr>
+  <tr><td>Technical review</td><td>Medium</td><td>Moderator</td><td>Technical consensus</td></tr>
+  <tr><td>Inspection</td><td>High</td><td>Certified moderator</td><td>Maximum defect detection</td></tr>
 </table>
-<h3>Roles in a Formal Review</h3>
+<h3>Roles and Responsibilities in a Formal Review</h3>
 <ul>
-  <li>Author, Moderator, Scribe, Reviewers, Review leader</li>
-</ul>`
+  <li><strong>Manager:</strong> Decides what is to be reviewed and provides resources (staff, time) for the review</li>
+  <li><strong>Author:</strong> Creates and fixes the work product under review</li>
+  <li><strong>Moderator (facilitator):</strong> Ensures the effective running of review meetings: mediation, time management, and a safe environment in which everyone can speak freely</li>
+  <li><strong>Scribe (recorder):</strong> Collates anomalies from reviewers and records review information (decisions, new anomalies)</li>
+  <li><strong>Reviewer:</strong> Performs the individual review of the work product</li>
+  <li><strong>Review leader:</strong> Takes overall responsibility for the review: decides who participates and organizes when and where it takes place</li>
+</ul>
+<h3>Review Process</h3>
+<ol>
+  <li><strong>Planning:</strong> Define scope, entry/exit criteria, assign roles</li>
+  <li><strong>Kick-off:</strong> Distribute materials, check entry criteria</li>
+  <li><strong>Individual review:</strong> Each reviewer examines the work product</li>
+  <li><strong>Communication and analysis:</strong> Meeting to discuss findings</li>
+  <li><strong>Fixing and reporting:</strong> The author fixes issues; a report is produced</li>
+  <li><strong>Follow-up:</strong> Verify that defects were fixed</li>
+</ol>
+<h3>Review Success Factors</h3>
+<ul>
+  <li>Clear objectives and measurable exit criteria (never evaluating participants)</li>
+  <li>Choosing the right review type for the objective and work product</li>
+  <li>Reviewing in small chunks to maintain focus</li>
+  <li>Providing feedback to stakeholders and authors so they can improve</li>
+  <li>Giving participants enough time to prepare</li>
+  <li>Management support for the review process</li>
+  <li>Making reviews part of the organizational culture</li>
+  <li>Adequate training for all participants</li>
+</ul>
+<div class="highlight-box">
+💡 <strong>For the exam:</strong> INSPECTION is the most formal review. WALKTHROUGH is led by the author. INFORMAL review has no defined process. MANAGER and MODERATOR are distinct roles: the Manager decides what is reviewed and provides resources; the Moderator facilitates the meeting.
+</div>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §3.2</p>`
     }
   },
   "4.1": {
