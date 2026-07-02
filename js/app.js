@@ -849,34 +849,33 @@ const App = {
   renderGlossary(filter = '') {
     const search = (document.getElementById('glossarySearch')?.value || '').toLowerCase();
     const lang = i18n.lang;
+    const activeFilter = filter && filter !== 'all' ? filter : 'all';
 
-    const letters = [...new Set(GLOSSARY.map(g => g.term[0].toUpperCase()))].sort();
+    const letters = [...new Set(GLOSSARY.map(g => g.term[lang][0].toUpperCase()))].sort();
     const filtersEl = document.getElementById('glossaryFilters');
-    if (filtersEl && !filtersEl.hasChildNodes()) {
-      filtersEl.innerHTML = `<button class="filter-btn active" onclick="App.filterGlossary('all', this)">${i18n.lang === 'es' ? 'Todos' : 'All'}</button>` +
-        letters.map(l => `<button class="filter-btn" onclick="App.filterGlossary('${l}', this)">${l}</button>`).join('');
+    if (filtersEl) {
+      filtersEl.innerHTML = `<button class="filter-btn${activeFilter === 'all' ? ' active' : ''}" onclick="App.filterGlossary('all')">${lang === 'es' ? 'Todos' : 'All'}</button>` +
+        letters.map(l => `<button class="filter-btn${activeFilter === l ? ' active' : ''}" onclick="App.filterGlossary('${l}')">${l}</button>`).join('');
     }
 
     let items = GLOSSARY;
     if (search) {
-      items = items.filter(g => g.term.toLowerCase().includes(search) || g.def[lang].toLowerCase().includes(search));
+      items = items.filter(g => g.term[lang].toLowerCase().includes(search) || g.def[lang].toLowerCase().includes(search));
     }
-    if (filter && filter !== 'all') {
-      items = items.filter(g => g.term[0].toUpperCase() === filter);
+    if (activeFilter !== 'all') {
+      items = items.filter(g => g.term[lang][0].toUpperCase() === activeFilter);
     }
 
     const chapterNames = { '1': 'Cap.1', '2': 'Cap.2', '3': 'Cap.3', '4': 'Cap.4', '5': 'Cap.5' };
     document.getElementById('glossaryList').innerHTML = items.map(g => `
       <div class="glossary-item">
-        <div class="glossary-term">${g.term}</div>
+        <div class="glossary-term">${g.term[lang]}</div>
         <div class="glossary-def">${g.def[lang]}</div>
         <div class="glossary-chapter">${chapterNames[g.chapter] || ''}</div>
-      </div>`).join('') || `<div class="empty-state"><p>${i18n.lang === 'es' ? 'No se encontraron términos' : 'No terms found'}</p></div>`;
+      </div>`).join('') || `<div class="empty-state"><p>${lang === 'es' ? 'No se encontraron términos' : 'No terms found'}</p></div>`;
   },
 
-  filterGlossary(letter, btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+  filterGlossary(letter) {
     this.renderGlossary(letter);
     this.state.glossarySearches++;
     this.saveState();
@@ -1106,7 +1105,7 @@ const App = {
 
       // Buscar en términos Y definiciones del glosario
       const glossaryMatch = GLOSSARY.find(g =>
-        g.term.toLowerCase().includes(q) || g.def[i18n.lang].toLowerCase().includes(q)
+        g.term[i18n.lang].toLowerCase().includes(q) || g.def[i18n.lang].toLowerCase().includes(q)
       );
       if (glossaryMatch) {
         // Bug fix: setear el valor ANTES de navegar para evitar flash sin filtro

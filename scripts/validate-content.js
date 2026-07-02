@@ -89,24 +89,26 @@ const KEYWORDS = {
 };
 
 const norm = s => s.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-const segsOf = term => term.split('/').map(norm).filter(Boolean);
+const segsOf = term => [term.es, term.en].map(s => norm(s || '')).filter(Boolean);
 
 const seenTerms = new Set();
 GLOSSARY.forEach((g, i) => {
-  const tag = `glossary[${i}] "${(g.term || '(sin term)').slice(0, 45)}"`;
-  if (!g.term || !g.term.trim()) errors.push(`${tag}: term vacío`);
+  const label = g.term ? `${g.term.es || '?'} / ${g.term.en || '?'}` : '(sin term)';
+  const tag = `glossary[${i}] "${label.slice(0, 45)}"`;
+  if (!g.term || !g.term.es || !g.term.es.trim()) errors.push(`${tag}: falta term.es`);
+  if (!g.term || !g.term.en || !g.term.en.trim()) errors.push(`${tag}: falta term.en`);
   for (const lang of ['es', 'en']) {
     if (!g.def || !g.def[lang] || !g.def[lang].trim()) errors.push(`${tag}: falta def.${lang}`);
   }
   if (!['1','2','3','4','5','6'].includes(g.chapter)) errors.push(`${tag}: chapter inválido "${g.chapter}"`);
   if (!g.source || !g.source.trim()) errors.push(`${tag}: source vacío`);
-  const key = (g.term || '').toLowerCase().trim();
+  const key = g.term ? `${(g.term.es || '').toLowerCase().trim()}|${(g.term.en || '').toLowerCase().trim()}` : '';
   if (seenTerms.has(key)) errors.push(`${tag}: término duplicado`);
   seenTerms.add(key);
 });
 
 const allSegs = new Set();
-GLOSSARY.forEach(g => segsOf(g.term || '').forEach(s => allSegs.add(s)));
+GLOSSARY.forEach(g => { if (g.term) segsOf(g.term).forEach(s => allSegs.add(s)); });
 let totalKw = 0, missingKw = [];
 for (const [ch, list] of Object.entries(KEYWORDS)) {
   for (const kw of list) {
