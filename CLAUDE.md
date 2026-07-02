@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MyCampus ISTQB is a browser-based study platform for the ISTQB Certified Tester Foundation Level (CTFL) v4.0 certification. It is a **vanilla JavaScript SPA** — no framework, no build system, no package manager.
 
+**Repo:** https://github.com/jraversbcn21/MyCampusISTQB_26 — public, default branch `master`, no CI/PR workflow (direct commits). Full repo/GitHub notes, security posture, and the 2026-07-02 git-history rewrite (all commit hashes changed that day) are documented in `AGENTS.md` — read that first if you need any pre-2026-07-02 commit reference.
+
 ## Running the Project
 
 Open `index.html` directly in a browser, or serve it with any static file server:
@@ -55,7 +57,8 @@ All views are HTML sections in `index.html` toggled via `display` style. Navigat
 
 - Config in `js/config.js` — contains the Supabase URL and anon key.
 - The single table used is `user_progress` with columns: `user_id` (UUID), `data` (JSONB), `updated_at` (timestamptz).
-- Row Level Security must be enabled in Supabase so users can only access their own row.
+- Row Level Security enabled and verified (2026-07-02): `SELECT`/`INSERT`/`UPDATE` policies all scope on `auth.uid() = user_id`, no `DELETE` policy (default-deny).
+- Client script pinned to an exact version + SRI hash in `index.html` (not a floating CDN tag) — see `AGENTS.md` for the exact update procedure when bumping it.
 - Google OAuth redirect URL is handled and cleaned by `auth.js` to prevent hash pollution in the URL after login.
 
 ### Offline / Graceful Degradation
@@ -72,7 +75,7 @@ The one exception is `scripts/validate-questions.js`, a Node-only dev script (ne
 node scripts/validate-questions.js
 ```
 
-## ISTQB Content Fidelity Effort (in progress)
+## ISTQB Content Fidelity Effort (complete, all 3 phases merged)
 
 The question bank, lessons, and glossary are being brought into closer alignment with the official **ISTQB CTFL v4.0 syllabus**, in three phases. Full design and rationale: `docs/superpowers/specs/2026-07-01-content-and-question-bank-expansion-design.md`.
 
@@ -82,7 +85,7 @@ The question bank, lessons, and glossary are being brought into closer alignment
 |-------|--------|---------|
 | 1. Question bank (50 → 120) | ✅ Done (merged to `master`) | `js/questions.js` expanded to 120 questions matching official exam-weight distribution per chapter (24/18/12/36/24/6). Every question added has `lo` (learning-objective code), `k` (cognitive level), `source`. Plan: `docs/superpowers/plans/2026-07-01-phase1-question-bank.md`. |
 | 2. Lesson content audit | ✅ Done (merged to `master`) | All 22 lessons in `js/content.js` audited against the syllabus (the spec's earlier "28" estimate was corrected to the verified 22). Every topic in `CHAPTERS` now has `lo`/`source`; every lesson has a `.lesson-source` footer (es/en). Real errors found and fixed along the way — see "Known corrections from Phase 2" below. Plan: `docs/superpowers/plans/2026-07-01-phase2-content-audit.md`. Audit trail: `docs/content-audit-report.md`. Gate: `node scripts/validate-content.js`. |
-| 3. Glossary expansion | ✅ Done (branch `feat/glossary-phase3`, not yet merged) | `GLOSSARY` in `js/content.js` expanded to 107 terms, covering all 97/97 official v4.0 syllabus keywords; validator extended (`node scripts/validate-content.js` now also checks `GLOSSARY` keyword-completeness and `FLASHCARDS` structure). `FLASHCARDS` swept term-by-term for v4.0 fidelity, including the 4 known errors carried over from Phase 2 (ids 9, 14, 27, 28). Plan: `docs/superpowers/plans/2026-07-01-phase3-glossary.md`. Audit trail: `docs/content-audit-report.md` §"Fase 3". |
+| 3. Glossary expansion | ✅ Done (merged to `master`) | `GLOSSARY` in `js/content.js` expanded to 107 terms, covering all 97/97 official v4.0 syllabus keywords; validator extended (`node scripts/validate-content.js` now also checks `GLOSSARY` keyword-completeness and `FLASHCARDS` structure). `FLASHCARDS` swept term-by-term for v4.0 fidelity, including the 4 known errors carried over from Phase 2 (ids 9, 14, 27, 28). `GLOSSARY.term` is `{es, en}` (not a single `"ES / EN"` string) — the glossary view shows only the active UI language. Plan: `docs/superpowers/plans/2026-07-01-phase3-glossary.md`. Audit trail: `docs/content-audit-report.md` §"Fase 3". |
 
 **Known minor gaps from Phase 1** (non-blocking, worth revisiting in a future content pass):
 - Chapter 4 (Test Analysis & Design) is light on boundary-value-analysis questions (only 1, reusing the "1–100" domain already used by a pre-existing question) — consider adding 1–2 more with a different domain.
@@ -104,4 +107,4 @@ The question bank, lessons, and glossary are being brought into closer alignment
 - `FLASHCARDS` id 17 mischaracterized 2-value BVA as "min and max of each boundary" — corrected to the official definition (boundary value + closest neighbor in the adjacent partition) per §4.2.2.
 - `FLASHCARDS` id 18's "number of rules = 2^n" was stated without qualification — clarified that this only holds for a *full* (unminimized) decision table, per §4.2.3.
 
-**To resume this effort:** all three phases are now content-complete on `feat/glossary-phase3` (question bank, lesson audit, glossary + flashcards). Next steps, if any: merge this branch to `master`, then decide whether to revisit the Phase 1 minor gaps noted above (light BVA question coverage, missing FL-2.1.2 dedicated question) as a follow-up content pass.
+**To resume this effort:** all three phases are content-complete and merged to `master` (question bank, lesson audit, glossary + flashcards). A separate post-merge maintenance pass (2026-07-02, not part of this content effort) fixed the glossary's ES/EN display and did a production-readiness/security pass (RLS verification, CDN pinning + SRI, purged copyrighted PDFs from git history) — see `AGENTS.md` for details. Next steps, if any: decide whether to revisit the Phase 1 minor gaps noted above (light BVA question coverage, missing FL-2.1.2 dedicated question) as a follow-up content pass.
