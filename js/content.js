@@ -2277,12 +2277,12 @@ const FLASHCARDS = [
   },
   { id: 8, chapter: 0, chapterTag: { es: "Cap. 1 · Fundamentos", en: "Ch. 1 · Fundamentals" },
     q: { es: "¿Cuáles son los dos roles principales en el proceso de testing?", en: "What are the two main roles in the testing process?" },
-    a: { es: "1. Test Manager: planifica, monitorea y gestiona el proceso de prueba. 2. Tester: analiza, diseña, implementa y ejecuta las pruebas.", en: "1. Test Manager: plans, monitors and manages the test process. 2. Tester: analyzes, designs, implements and executes tests." }
+    a: { es: "1. Rol de gestión de pruebas (test management role): responsable de la planificación, monitorización, control y compleción de la prueba. 2. Rol de prueba (testing role): responsable del análisis, diseño, implementación y ejecución de las pruebas. Una misma persona puede desempeñar ambos roles.", en: "1. Test management role: responsible for test planning, monitoring, control and completion. 2. Testing role: responsible for test analysis, design, implementation and execution. The same person may perform both roles." }
   },
   // Chapter 2
   { id: 9, chapter: 1, chapterTag: { es: "Cap. 2 · SDLC", en: "Ch. 2 · SDLC" },
-    q: { es: "¿Cuáles son los 4 niveles de prueba del ISTQB?", en: "What are the 4 ISTQB test levels?" },
-    a: { es: "1. Prueba de Componente (Unitaria), 2. Prueba de Integración de Componentes, 3. Prueba de Sistema, 4. Prueba de Aceptación (UAT).", en: "1. Component (Unit) Testing, 2. Component Integration Testing, 3. System Testing, 4. Acceptance Testing (UAT)." }
+    q: { es: "¿Cuáles son los 5 niveles de prueba del ISTQB?", en: "What are the 5 ISTQB test levels?" },
+    a: { es: "1. Prueba de Componentes, 2. Prueba de Integración de Componentes, 3. Prueba de Sistema, 4. Prueba de Integración de Sistemas, 5. Prueba de Aceptación (UAT).", en: "1. Component Testing, 2. Component Integration Testing, 3. System Testing, 4. System Integration Testing, 5. Acceptance Testing (UAT)." }
   },
   { id: 10, chapter: 1, chapterTag: { es: "Cap. 2 · SDLC", en: "Ch. 2 · SDLC" },
     q: { es: "¿Qué es el testing funcional vs. no funcional?", en: "What is functional vs. non-functional testing?" },
@@ -2302,8 +2302,8 @@ const FLASHCARDS = [
     a: { es: "Estático: evalúa artefactos SIN ejecutar el software (revisiones de código, análisis estático). Dinámico: ejecuta el software para verificar su comportamiento.", en: "Static: evaluates artifacts WITHOUT executing software (code reviews, static analysis). Dynamic: executes software to verify its behavior." }
   },
   { id: 14, chapter: 2, chapterTag: { es: "Cap. 3 · Testing Estático", en: "Ch. 3 · Static Testing" },
-    q: { es: "¿Cuáles son los tipos de revisión formales en el testing estático?", en: "What are the types of formal reviews in static testing?" },
-    a: { es: "1. Revisión informal, 2. Walkthrough (guiado por el autor), 3. Revisión técnica (equipo de pares), 4. Inspección (más formal, con roles definidos y métricas).", en: "1. Informal review, 2. Walkthrough (author-led), 3. Technical review (peer team), 4. Inspection (most formal, with defined roles and metrics)." }
+    q: { es: "¿Cuáles son los tipos de revisión en el testing estático?", en: "What are the review types in static testing?" },
+    a: { es: "1. Revisión informal, 2. Revisión guiada (walkthrough) (guiada por el autor), 3. Revisión técnica (equipo de pares cualificados, dirigida por un moderador), 4. Inspección (la más formal, con roles definidos y métricas).", en: "1. Informal review, 2. Walkthrough (author-led), 3. Technical review (qualified peer team, led by a moderator), 4. Inspection (most formal, with defined roles and metrics)." }
   },
   { id: 15, chapter: 2, chapterTag: { es: "Cap. 3 · Testing Estático", en: "Ch. 3 · Static Testing" },
     q: { es: "¿Qué tipos de defectos detecta mejor el testing estático?", en: "What types of defects does static testing best detect?" },
@@ -2316,11 +2316,11 @@ const FLASHCARDS = [
   },
   { id: 17, chapter: 3, chapterTag: { es: "Cap. 4 · Técnicas", en: "Ch. 4 · Techniques" },
     q: { es: "¿Qué es el Análisis de Valor Límite (BVA)?", en: "What is Boundary Value Analysis (BVA)?" },
-    a: { es: "Técnica de caja negra que prueba los valores en los BORDES de las particiones. BVA-2: mínimo y máximo de cada borde. BVA-3: también incluye los valores inmediatamente adyacentes.", en: "Black-box technique testing values at the EDGES of partitions. BVA-2: min and max of each boundary. BVA-3: also includes immediately adjacent values." }
+    a: { es: "Técnica de caja negra que prueba los valores en los BORDES de las particiones de equivalencia. BVA de 2 valores: dos elementos de cobertura por borde (el valor límite y su vecino más cercano en la partición adyacente). BVA de 3 valores: tres elementos de cobertura por borde (el valor límite y sus dos vecinos); más riguroso que el de 2 valores.", en: "Black-box technique testing values at the BOUNDARIES of equivalence partitions. 2-value BVA: two coverage items per boundary (the boundary value and its closest neighbor in the adjacent partition). 3-value BVA: three coverage items per boundary (the boundary value and both neighbors); more rigorous than 2-value BVA." }
   },
   { id: 18, chapter: 3, chapterTag: { es: "Cap. 4 · Técnicas", en: "Ch. 4 · Techniques" },
     q: { es: "¿Para qué se usan las Tablas de Decisión?", en: "When are Decision Tables used?" },
-    a: { es: "Para probar combinaciones de condiciones (lógica de negocio compleja). Cada columna es una 'regla' que combina condiciones con resultados. Número de reglas = 2^n (n = número de condiciones).", en: "For testing combinations of conditions (complex business logic). Each column is a 'rule' combining conditions with outcomes. Number of rules = 2^n (n = number of conditions)." }
+    a: { es: "Para probar combinaciones de condiciones (lógica de negocio compleja). Cada columna es una 'regla' que combina condiciones con resultados. En una tabla de decisión COMPLETA (full), el número de reglas = 2^n (n = número de condiciones); las tablas simplificadas o minimizadas tienen menos columnas.", en: "For testing combinations of conditions (complex business logic). Each column is a 'rule' combining conditions with outcomes. In a FULL decision table, the number of rules = 2^n (n = number of conditions); simplified or minimized tables have fewer columns." }
   },
   { id: 19, chapter: 3, chapterTag: { es: "Cap. 4 · Técnicas", en: "Ch. 4 · Techniques" },
     q: { es: "¿Qué es la prueba de Transición de Estado?", en: "What is State Transition Testing?" },
@@ -2358,11 +2358,11 @@ const FLASHCARDS = [
   // Chapter 6
   { id: 27, chapter: 5, chapterTag: { es: "Cap. 6 · Herramientas", en: "Ch. 6 · Tools" },
     q: { es: "¿Cuáles son los beneficios del testing automatizado?", en: "What are the benefits of automated testing?" },
-    a: { es: "Reducción del trabajo manual repetitivo, mayor consistencia, ejecución más rápida de regresión, mayor cobertura, disponibilidad 24/7, y liberación de testers para tareas de mayor valor.", en: "Reduction of repetitive manual work, greater consistency, faster regression execution, more coverage, 24/7 availability, and freeing testers for higher-value tasks." }
+    a: { es: "Ahorro de tiempo al reducir el trabajo manual repetitivo, prevención de errores humanos simples (mayor consistencia y repetibilidad), evaluación más objetiva (p. ej. cobertura), acceso más fácil a información para la gestión y el informe de pruebas, y reducción del tiempo de ejecución (detección más temprana de defectos, retroalimentación más rápida).", en: "Time saved by reducing repetitive manual work, prevention of simple human errors (greater consistency and repeatability), more objective assessment (e.g. coverage), easier access to information for test management and reporting, and reduced test execution times (earlier defect detection, faster feedback)." }
   },
   { id: 28, chapter: 5, chapterTag: { es: "Cap. 6 · Herramientas", en: "Ch. 6 · Tools" },
     q: { es: "¿Cuáles son los riesgos de la automatización de pruebas?", en: "What are the risks of test automation?" },
-    a: { es: "Expectativas poco realistas, mantenimiento de scripts costoso, falsa sensación de seguridad, costo inicial alto, dependencia de herramientas específicas, y dificultad en pruebas exploratorias y visuales.", en: "Unrealistic expectations, costly script maintenance, false sense of security, high initial cost, tool dependency, and difficulty with exploratory and visual testing." }
+    a: { es: "Expectativas poco realistas sobre los beneficios de la herramienta, estimaciones imprecisas de tiempo/coste/esfuerzo (introducción, mantenimiento de scripts, cambio del proceso manual), usar la herramienta cuando la prueba manual es más apropiada, depender demasiado de la herramienta (ignorar el pensamiento crítico humano), dependencia del proveedor, e incompatibilidad con la plataforma de desarrollo.", en: "Unrealistic expectations about the tool's benefits, inaccurate estimations of time/cost/effort (introduction, script maintenance, changing the manual process), using the tool when manual testing is more appropriate, relying on the tool too much (ignoring human critical thinking), tool vendor dependency, and incompatibility with the development platform." }
   }
 ];
 

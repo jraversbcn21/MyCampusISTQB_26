@@ -180,21 +180,20 @@ to official ISTQB material (syllabus PDFs, official sample exams) — never inve
   All 8 tasks reviewed and approved (2 required a glyph-labeling fix, 1 required a Critical
   content fix — see below); final whole-branch review found no Critical/Important issues.
   Audit trail with per-lesson verdicts: `docs/content-audit-report.md`.
-- **Phase 3 (glossary expansion): NOT STARTED.** Expand `GLOSSARY` in `js/content.js` with
-  the official syllabus keywords (listed under each chapter heading in the syllabus text);
-  add `source` per term. `glossary.istqb.org` is a JS-heavy SPA — prefer the syllabus
-  keyword lists as primary source over scraping it. See spec §"Fase 3".
-  **Also sweep `FLASHCARDS` in `js/content.js` for stale non-v4.0 terms**
-  that Phase 2 removed from lessons but didn't touch elsewhere — at minimum, flashcard
-  id 28 still says "false sense of security" (an automation risk phrase confirmed absent
-  from the v4.0 syllabus and removed from the Chapter 6 lesson during Phase 2).
+- **Phase 3 (glossary expansion): DONE**, branch `feat/glossary-phase3`, not yet merged to
+  `master` (commits `4703d99..5012e9d` plus the Task 7 closing commit). `GLOSSARY` in
+  `js/content.js` expanded from 48 to 107 terms, covering all 97/97 official syllabus
+  keywords (verified by the extended `node scripts/validate-content.js`). `FLASHCARDS`
+  was swept term-by-term against the syllabus and corrected where it contradicted v4.0 —
+  see "Known corrections from Phase 3" below. Plan:
+  `docs/superpowers/plans/2026-07-01-phase3-glossary.md`. Audit trail:
+  `docs/content-audit-report.md` §"Fase 3 — Glosario y flashcards".
 
-**To resume:** run brainstorming for Phase 3, then writing-plans, then
-`superpowers:subagent-driven-development` — same workflow as Phases 1-2 (one implementer +
-one reviewer subagent per task; reviewer independently re-verifies content against the
-syllabus text, not just internal consistency of the implementer's report; re-derive any
-worked numeric example from scratch; verify "not in the syllabus"/"removed" claims via
-grep, since those are as risky as invented content if wrong).
+**To resume this effort:** all three phases are now content-complete on
+`feat/glossary-phase3`. Remaining step is merging the branch to `master` (run
+`superpowers:finishing-a-development-branch` when ready). After merge, optional follow-up
+work is the Phase 1 minor gaps below (light BVA question coverage, missing FL-2.1.2
+dedicated question) — not blocking, just noted for a future content pass.
 
 **Known minor gaps from Phase 1** (non-blocking, optional future cleanup):
 - Chapter 4 (Test Analysis & Design) is light on boundary-value-analysis questions (only
@@ -206,4 +205,14 @@ grep, since those are as risky as invented content if wrong).
 - Ch.3 lesson: two distinct review roles (Gestor, Moderador) had been silently merged into one — split back out, all 6 roles now correct.
 - Ch.4 lesson: a non-syllabus technique ("Prueba de Caso de Uso", confirmed removed in v4.0 via the syllabus's own changelog) and a self-contradictory worked BVA example (root-caused to OCR-corrupted source text with an unrecoverable comparison operator — fixed by removing the invented numeric example rather than guessing a replacement).
 - Ch.6 lesson: non-official tool-category taxonomy, plus two non-v4.0 concepts ("false sense of security", "tool adoption considerations") — replaced/removed after independent grep + changelog verification.
-- **Not yet fixed (Phase 3 input):** `FLASHCARDS` array id 28 still contradicts the Ch.6 lesson fix above (see Phase 2 entry).
+- `FLASHCARDS` id 28's "false sense of security" (the one instance Phase 2 didn't touch, since `FLASHCARDS` was out of its scope) was fixed in Phase 3 — see below.
+
+**Known corrections from Phase 3** (real errors found by the `GLOSSARY`/`FLASHCARDS` sweep;
+full detail in `docs/content-audit-report.md` §"Fase 3"):
+- `FLASHCARDS` id 9: "4 test levels" (same bug as the Phase 2 Ch.2 lesson fix, but this array wasn't in Phase 2's scope) — corrected to the official 5.
+- `FLASHCARDS` id 14: a list including the informal review was mislabeled "formal reviews" — reworded to "review types" with the 4 official types (informal review, walkthrough, technical review, inspection).
+- `FLASHCARDS` id 27: "24/7 availability" and "frees up testers" as automation benefits, neither in syllabus §6.2 — replaced with the 5 official benefits.
+- `FLASHCARDS` id 28: "false sense of security" as an automation risk, absent from §6.2 — replaced with the 6 official risks.
+- `FLASHCARDS` id 8: "Test Manager"/"Tester" presented as fixed job titles rather than the two roles the syllabus defines — reworded to match §1.4.5 (test management role, testing role).
+- `FLASHCARDS` id 17: 2-value BVA mischaracterized as "min and max of each boundary" — corrected to the official definition per §4.2.2.
+- `FLASHCARDS` id 18: "number of rules = 2^n" stated without qualification — clarified this only holds for a *full* (unminimized) decision table, per §4.2.3.
