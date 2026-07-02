@@ -1124,9 +1124,6 @@ const App = {
       }
     });
 
-    // Stripe/monetization placeholder
-    console.log('MyCampus ISTQB v1.0 — Listo para monetización');
-
     // Welcome streak
     this.updateStreakAndDate();
     if (this.state.streak > 1) {

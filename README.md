@@ -51,7 +51,7 @@ node scripts/validate-content.js     # lecciones y glosario (js/content.js)
 
 ## Materiales de referencia
 
-La carpeta `ISTQB 2026/` contiene documentación oficial (syllabus, exámenes de muestra, libro de referencia) usada como fuente de verdad para el contenido de la app. No forma parte del código de la aplicación.
+La carpeta `ISTQB 2026/` (no versionada, ver `.gitignore`) contiene documentación oficial con copyright (syllabus, exámenes de muestra, libro de referencia) usada localmente como fuente de verdad al redactar contenido. No forma parte del código de la aplicación ni se distribuye con el repositorio — si necesitas volver a auditar contenido, coloca tus propias copias de esos PDFs ahí.
 
 ## Para desarrolladores
 

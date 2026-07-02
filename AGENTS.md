@@ -164,7 +164,7 @@ Schema" above), and `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS` in 
 
 ## Reference Materials
 
-The `ISTQB 2026/` folder contains official ISTQB PDFs (syllabus, sample exams). Not part of the application code — do not modify.
+The `ISTQB 2026/` folder contains official ISTQB PDFs (syllabus, sample exams). Not part of the application code — do not modify. **Not version-controlled** (gitignored — this is copyrighted third-party material and must never be committed/pushed to the public repo). It exists only on this local checkout; a fresh clone won't have it. If a future content-audit session needs it, source your own copies of the PDFs into that folder first.
 
 ## ISTQB Content Fidelity Effort — Status & Next Session
 
