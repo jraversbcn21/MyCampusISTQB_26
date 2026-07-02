@@ -118,7 +118,8 @@ niveles/tipos de prueba, §3.1.2–§3.1.3 para el valor y las diferencias de la
 prueba estática, §4.2.1/§4.2.4/§4.3.1/§4.3.2 para EP/transición de
 estado/cobertura de sentencia y rama, §4.4.2 (exploratoria) y §4.5.3 (ATDD),
 §5.2.2 (riesgo de producto/proyecto), §5.1.3 (criterios de entrada/salida),
-§5.6.2-equivalente (informe de defecto, severidad/prioridad) — ninguna
+§5.5 (informe de defecto) y libro "Foundations of software testing" cap.
+5.6.2 (severidad/prioridad, no desarrollado en el syllabus) — ninguna
 contradijo el texto oficial v4.0, por lo que se dejaron intactas.
 
 Puntos de atención señalados por el plan y su resultado:
