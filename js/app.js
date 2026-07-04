@@ -14,6 +14,7 @@ const App = {
   examType: 'full',
   examTimer: null,
   examTimeLeft: 0,
+  examTimeTotal: 0,
   examReviewing: false,
   examChapterId: null,
   // Flashcard state
@@ -241,17 +242,23 @@ const App = {
     const lang = i18n.lang;
     const letters = ['A', 'B', 'C', 'D'];
 
+    // La respuesta correcta se queda en memoria (_dailyQuestion), no en el
+    // atributo onclick — incrustarla en el DOM la dejaba legible con
+    // "inspeccionar elemento" antes de responder.
+    this._dailyQuestion = q;
     container.innerHTML = `
       <div class="dc-question">${q.q[lang]}</div>
       <div class="dc-options" id="dcOptions">
         ${q.options[lang].map((opt, i) => `
-          <div class="dc-option" onclick="App.answerDailyChallenge(${i}, ${q.correct})" id="dcOpt${i}">
+          <div class="dc-option" onclick="App.answerDailyChallenge(${i})" id="dcOpt${i}">
             <span class="dc-label">${letters[i]}</span>${opt}
           </div>`).join('')}
       </div>`;
   },
 
-  answerDailyChallenge(selected, correct) {
+  answerDailyChallenge(selected) {
+    if (!this._dailyQuestion) return;
+    const correct = this._dailyQuestion.correct;
     const opts = document.querySelectorAll('.dc-option');
     opts.forEach((o, i) => {
       o.onclick = null;
@@ -666,6 +673,10 @@ const App = {
   },
 
   launchExam(title) {
+    // Guardar el total permite calcular el tiempo usado en finishExam sin
+    // depender de examTimeLeft > 0 (que es falso justo cuando el temporizador
+    // se agota, y registraba time: 0 en un examen que consumió todo el tiempo).
+    this.examTimeTotal = this.examTimeLeft;
     document.getElementById('simMenu').style.display = 'none';
     document.getElementById('examMode').style.display = 'block';
     document.getElementById('examResults').style.display = 'none';
@@ -785,7 +796,7 @@ const App = {
     });
     const score = Math.round((correct / total) * 100);
     const passed = score >= 65;
-    const timeUsed = this.examTimeLeft > 0 ? (this.examType === 'full' ? 3600 : 1800) - this.examTimeLeft : 0;
+    const timeUsed = this.examTimeTotal > 0 ? this.examTimeTotal - Math.max(0, this.examTimeLeft) : 0;
 
     this.state.examsCompleted++;
     if (score > this.state.bestScore) this.state.bestScore = score;
@@ -794,6 +805,10 @@ const App = {
     if (this.state.examHistory.length > 50) this.state.examHistory.shift();
 
     // Handle chapter quiz unlock progression
+    // El || {} de renderSimulatorMenu no protege este acceso: un estado
+    // antiguo (nube) sin la clave reventaba aquí con TypeError y los
+    // resultados del examen nunca llegaban a mostrarse.
+    if (!this.state.chapterQuizPassed) this.state.chapterQuizPassed = {};
     if (this.examType === 'chapter' && this.examChapterId !== null && passed) {
       if (!this.state.chapterQuizPassed[this.examChapterId]) {
         this.state.chapterQuizPassed[this.examChapterId] = true;
@@ -1085,9 +1100,17 @@ const App = {
 
     document.getElementById('glossarySearch').addEventListener('input', (e) => {
       this.renderGlossary();
+      // Contar una búsqueda por transición a >2 caracteres, no una por
+      // pulsación — teclear "testing" contaba 5 búsquedas y disparaba el
+      // logro de glosario (10) con una sola consulta.
       if (e.target.value.length > 2) {
-        this.state.glossarySearches++;
-        this.saveState();
+        if (!this._glossarySearchCounted) {
+          this._glossarySearchCounted = true;
+          this.state.glossarySearches++;
+          this.saveState();
+        }
+      } else {
+        this._glossarySearchCounted = false;
       }
     });
 
