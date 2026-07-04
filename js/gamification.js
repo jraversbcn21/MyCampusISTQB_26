@@ -35,7 +35,7 @@ const ACHIEVEMENTS = [
     name: { es: "Currículo Completo", en: "Full Curriculum" },
     desc: { es: "Completa todas las lecciones del curriculum", en: "Complete all curriculum lessons" },
     xp: 500,
-    check: (state) => state.lessonsCompleted >= 16
+    check: (state) => state.lessonsCompleted >= CHAPTERS.reduce((a, c) => a + c.topics.length, 0)
   },
   {
     id: "first_exam",

@@ -55,7 +55,9 @@ const App = {
     if (typeof Sync !== 'undefined' && userId) {
       Sync.saveState(userId, this.state);
     } else {
-      localStorage.setItem(`mycampus_istqb_v1_${userId || 'default'}`, JSON.stringify(this.state));
+      try {
+        localStorage.setItem(`mycampus_istqb_v1_${userId || 'default'}`, JSON.stringify(this.state));
+      } catch (e) {}
     }
   },
 
@@ -789,6 +791,7 @@ const App = {
     if (score > this.state.bestScore) this.state.bestScore = score;
     const date = new Date().toLocaleDateString(i18n.lang === 'es' ? 'es-ES' : 'en-US');
     this.state.examHistory.push({ score, date, questions: total, type: this.examType, correct, time: timeUsed });
+    if (this.state.examHistory.length > 50) this.state.examHistory.shift();
 
     // Handle chapter quiz unlock progression
     if (this.examType === 'chapter' && this.examChapterId !== null && passed) {
@@ -866,7 +869,7 @@ const App = {
       items = items.filter(g => g.term[lang][0].toUpperCase() === activeFilter);
     }
 
-    const chapterNames = { '1': 'Cap.1', '2': 'Cap.2', '3': 'Cap.3', '4': 'Cap.4', '5': 'Cap.5' };
+    const chapterNames = { '1': 'Cap.1', '2': 'Cap.2', '3': 'Cap.3', '4': 'Cap.4', '5': 'Cap.5', '6': 'Cap.6' };
     document.getElementById('glossaryList').innerHTML = items.map(g => `
       <div class="glossary-item">
         <div class="glossary-term">${g.term[lang]}</div>

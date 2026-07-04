@@ -97,8 +97,8 @@ const CHAPTERS = [
     title: { es: "Soporte de Herramientas al Testing", en: "Tool Support for Testing" },
     duration: { es: "2% del examen", en: "2% of exam" },
     description: {
-      es: "Tipos de herramientas, beneficios, riesgos y consideraciones para su adopción.",
-      en: "Tool types, benefits, risks and considerations for tool adoption."
+      es: "Tipos de herramientas de soporte al testing, y los beneficios y riesgos de la automatización de pruebas.",
+      en: "Types of test support tools, and the benefits and risks of test automation."
     },
     topics: [
       { id: "6.1", title: { es: "Soporte de herramientas al testing", en: "Tool support for testing" }, xp: 20, lo: ["FL-6.1.1","FL-6.2.1"], source: "Syllabus v4.0 §6.1 / §6.2" },

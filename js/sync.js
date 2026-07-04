@@ -49,7 +49,9 @@ const Sync = {
   // Guarda inmediatamente en localStorage y programa guardado en Supabase
   saveState(userId, state) {
     // localStorage inmediato (funciona offline)
-    localStorage.setItem(`mycampus_istqb_v1_${userId}`, JSON.stringify(state));
+    try {
+      localStorage.setItem(`mycampus_istqb_v1_${userId}`, JSON.stringify(state));
+    } catch (e) {}
 
     // Supabase con debounce
     clearTimeout(this._saveTimer);
