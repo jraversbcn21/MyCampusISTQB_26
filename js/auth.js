@@ -4,9 +4,12 @@
 
 // Si el CDN de supabase-js no llegó a cargar (bloqueado, offline en la
 // primera visita, fallo de SRI), no reventamos aquí — Auth.init() lo detecta
-// y muestra un mensaje en vez de dejar la app entera sin arrancar.
+// y muestra un mensaje en vez de dejar la app entera sin arrancar. El typeof
+// de SUPABASE_URL cubre el caso hermano: config.js ausente o fallido, que
+// antes mataba este archivo entero en el parseo (ReferenceError) y dejaba
+// la pantalla de login muerta sin mensaje.
 let supabaseClient = null;
-if (window.supabase) {
+if (window.supabase && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
   const { createClient } = window.supabase;
   supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
@@ -27,6 +30,14 @@ const Auth = {
       document.getElementById('authBtnES').classList.toggle('active', i18n.lang === 'es');
       document.getElementById('authBtnEN').classList.toggle('active', i18n.lang === 'en');
     }
+
+    // Listeners ANTES del early-return de fallo de carga: los handlers ya
+    // comprueban !supabaseClient por su cuenta, y sin esto la ruta de fallo
+    // dejaba el switcher de idioma muerto y el <form> sin el preventDefault
+    // del handler de submit (una submission nativa haría GET con name=email/
+    // password en la URL — hoy lo frena el botón deshabilitado, pero no debe
+    // depender de eso).
+    this._bindEvents();
 
     if (!supabaseClient) {
       this._showLoadFailure();
@@ -59,8 +70,6 @@ const Auth = {
     } else {
       this._showAuthScreen();
     }
-
-    this._bindEvents();
   },
 
   /* ===== AUTH ACTIONS ===== */
@@ -109,9 +118,14 @@ const Auth = {
     // Si algún <script> de index.html falló al cargar (reordenado, bloqueado,
     // 404), mejor avisar aquí con un mensaje claro que dejar que App.init()
     // reviente más adelante con un error críptico a mitad de un render.
+    // Sync incluido: no se usa dentro de App.init(), pero este mismo método
+    // lo llama unas líneas más abajo — sin él aquí, un sync.js caído pasaba
+    // la guarda, reventaba con ReferenceError y dejaba _authInProgress
+    // atascado en true (logins posteriores retornaban en silencio).
     const required = { App: typeof App, i18n: typeof i18n, CHAPTERS: typeof CHAPTERS,
       QUESTIONS: typeof QUESTIONS, Gamification: typeof Gamification,
-      AvatarSelector: typeof AvatarSelector, Onboarding: typeof Onboarding };
+      AvatarSelector: typeof AvatarSelector, Onboarding: typeof Onboarding,
+      Sync: typeof Sync };
     const missing = Object.keys(required).filter(k => required[k] === 'undefined');
     if (missing.length) {
       console.error('[Auth] Módulos requeridos no cargados (¿se reordenó o falló algún <script> de index.html?):', missing.join(', '));
