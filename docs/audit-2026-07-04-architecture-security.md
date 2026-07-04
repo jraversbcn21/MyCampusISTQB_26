@@ -119,4 +119,42 @@ ni fusionar los validadores.
   duplicación de texto de usuario, es un detalle de código menor, dejado
   fuera para no ampliar el diff más allá de lo pedido.
 - Mover el hook de P1 a un directorio versionado + `core.hooksPath` — ver
-  advertencia de alcance arriba.
+  advertencia de alcance arriba. *(Hecho en la segunda pasada, ver adéndum.)*
+
+---
+
+## Adéndum: re-auditoría independiente y segunda pasada (2026-07-04, mismo día)
+
+Una re-auditoría independiente (sin acceso a la sesión que hizo la pasada
+original, solo al repo) verificó cada "Cerrado" de arriba contra el código
+real. Veredictos: **D2/D3/D4/D5/D6, la carrera de refocus, el XSS del avatar,
+el cap de `examHistory` y P4 → CONFIRMADOS. P5 (i18n) y P6 (guarda de
+scripts) → PARCIALES. El try/catch de P3 → PARCIAL en su justificación**
+("unlike every other localStorage write" era falso). La evidencia Playwright
+de la pasada original se declaró no re-ejecutable (nunca se commiteó), como
+este doc ya admitía. El hash SRI de supabase-js se verificó además contra el
+CDN real (sha384 idéntico byte a byte).
+
+La re-auditoría encontró además riesgos hermanos que la pasada original no
+vio. Todo se corrigió el mismo día en 6 commits (`fix(sync)` de frescura →
+`chore(hooks)` → docs):
+
+| # | Sev. | Hallazgo | Fix |
+|---|---|---|---|
+| N1 | Alto | `Sync.loadState` devolvía la nube siempre que existiera fila, sin comparar frescura: una nube obsoleta (pushes fallidos previos) pisaba el localStorage más nuevo **y machacaba la caché** — el hermano del refocus de P2, por el camino de la carga inicial | Sello `_updatedAt` en cada `saveState`; gana la copia más nueva (sin sello = más vieja que cualquier sellada; empate → nube, preservando multi-dispositivo); la local ganadora se re-sube; `auth.js` no pisa `App.state` con una copia menos fresca ni re-navega con un examen en marcha |
+| N2 | Medio | Nada flusheaba el debounce de 4s al cerrar la pestaña (solo el logout) — la nube quedaba obsoleta, alimentando N1 | Listener `visibilitychange→hidden` en `sync.js` con push REST `keepalive` |
+| N3 | Medio | La guarda de P6 no cubría `Sync` (sync.js caído → `ReferenceError` + `_authInProgress` atascado en `true`: logins posteriores silenciosamente muertos) ni `config.js` (mataba `auth.js` en el parseo, login muerto sin mensaje) | `Sync` añadido al mapa `required`; guard top-level `typeof SUPABASE_URL` que cae en `_showLoadFailure()` |
+| N4 | Medio-Bajo | Misma clase que el XSS del avatar, sin barrer: `activityLog`/`examHistory` (estado restaurado de la fila JSONB del usuario) interpolados crudos en `innerHTML` | `escapeHtml()` en `app.js`, aplicado en todos los sinks alimentados por `App.state` |
+| N5 | Bajo | Residuos que contradecían la verificación de P5: label "Salir" visible, 3 tooltips, "— ¡Sigue así!", fallback 'Estudiante', etiqueta "Cap.N" en la UI inglesa | 7 claves nuevas (152→159) + soporte `data-i18n-title`; y los 5 `localStorage.setItem` sin try/catch que P3 no vio (el de `Onboarding._done` dejaba el tour pegado con quota llena) |
+| N6 | Bajo | El hook validaba el working tree, no lo staged: stagear roto + arreglar el disco sin re-stagear colaba el commit roto | Hook versionado en `.githooks/` (activación: `git config core.hooksPath .githooks`), valida la copia staged (`git show :file`); verificado end-to-end con un staged roto y worktree bueno → commit bloqueado |
+| N7 | Bajo | Con el CDN caído, `Auth.init()` retornaba antes de `_bindEvents()`: switcher de idioma muerto y form sin `preventDefault` (inputs con `name=` → una submission nativa pondría la contraseña en la URL) | `_bindEvents()` antes del early-return; los handlers ya guardaban `!supabaseClient` |
+| N8 | Bajo | Respuesta del reto diario legible en el `onclick`; `time: 0` al agotarse el temporizador; `TypeError` en `finishExam` con estado antiguo sin `chapterQuizPassed`; `glossarySearches` contaba por pulsación | Los cuatro corregidos en `app.js` |
+
+**Verificación de la segunda pasada — esta vez re-ejecutable:**
+`scripts/verify-runtime.js`, commiteado al repo (a diferencia del arnés
+Playwright de la pasada original). Carga los módulos reales en un DOM mínimo
+mockeado, sin navegador ni npm. Los 19 chequeos de comportamiento fallaban
+contra el código previo a la segunda pasada y pasan tras ella (24/24 con los
+controles); el hook de pre-commit lo ejecuta automáticamente cuando se stagea
+`js/` o `index.html`. Para re-verificar cualquier fila de esta tabla:
+`node scripts/verify-runtime.js`.

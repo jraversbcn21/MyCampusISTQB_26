@@ -13,16 +13,27 @@
   - `GLOSSARY` term display fixed to show only the active UI language (no more `"ES / EN"` slash pairs) — see "Glossary Schema" below for the underlying `term.es`/`term.en` schema change.
 - **Architecture & security audit + remediation (2026-07-04):** full write-up at
   `docs/audit-2026-07-04-architecture-security.md` — read that first for the complete
-  drift map, severity-ranked findings, and how each was verified. Summary of what changed:
-  - A local pre-commit hook (`.git/hooks/pre-commit`, **not version-controlled** — a fresh
-    clone won't have it) now runs the relevant validator whenever `js/questions.js` or
-    `js/content.js` is staged, instead of that being a voluntary step.
+  drift map, severity-ranked findings, and how each was verified. **A same-day independent
+  re-audit (second pass, addendum in that same doc) found two of the closures partial and
+  several sibling risks the first pass missed; all were fixed the same day** — the summary
+  below describes the state after both passes:
+  - The pre-commit gate is now **version-controlled** in `.githooks/pre-commit` and
+    validates the **staged** copy of `js/questions.js`/`js/content.js` (not the working
+    tree). A fresh clone activates it with `git config core.hooksPath .githooks` — that
+    one command is the only per-clone setup this repo has.
   - `auth.js`: closed a refocus race where a repeated `SIGNED_IN` event for the same user
     (supabase-js can re-emit it on tab focus) overwrote `App.state` with a stale cloud copy
     and could cut off an in-progress exam; fixed a self-XSS via `avatar_url` (built the
     sidebar `<img>` through the DOM instead of `innerHTML`); guarded against the CDN script
     failing to load (previously an uncaught `TypeError` killed the whole app silently) and
     against any other required script failing to load (see "Script Load Order" below).
+  - Second pass on the same theme: `Sync.loadState` is now **freshness-aware** — every
+    `saveState` stamps `state._updatedAt` and the newer of localStorage-vs-cloud wins
+    (a stale cloud copy used to clobber newer local progress on page load, the sibling of
+    the refocus race above); a `visibilitychange→hidden` listener flushes a pending
+    debounced save via a keepalive REST call; the script-load guard also covers `Sync`
+    and a missing `config.js`; the remaining `innerHTML` sinks fed by `App.state`
+    (activity log, exam history) are escaped via `escapeHtml()` in `app.js`.
   - Data hygiene: glossary chapter-tag map was missing chapter 6; the "Full Curriculum"
     achievement still required the pre-Phase-2 lesson count (16, not 22); two
     `localStorage.setItem` calls had no `try/catch` unlike the rest of the codebase;
@@ -36,9 +47,13 @@
   - i18n now genuinely covers the whole app: `onboarding.js`, `avatar.js`, and the auth
     screen were 100% hardcoded Spanish before this pass (contradicting the "i18n" section
     below, which was aspirational until now); ~35 ad-hoc `i18n.lang === 'es' ? ... : ...`
-    ternaries in `app.js` were consolidated into `TRANSLATIONS` (152 keys, all ES/EN
-    paired). The auth screen needed its own standalone language switcher since it renders
-    before `App` exists — see `i18n.setLang()`/`i18n.restore()` in `js/i18n.js`.
+    ternaries in `app.js` were consolidated into `TRANSLATIONS`. The second pass caught
+    the survivors the first one missed (visible "Salir" logout label, sidebar/topbar
+    tooltips — now via `data-i18n-title` —, the streak toast suffix, the 'Estudiante'
+    fallback, the glossary "Cap.N" tag), leaving **159 keys, all ES/EN paired**, enforced
+    by `scripts/verify-runtime.js`. The auth screen needed its own standalone language
+    switcher since it renders before `App` exists — see `i18n.setLang()`/`i18n.restore()`
+    in `js/i18n.js`.
 
 ## Project Overview
 
@@ -65,7 +80,7 @@ Scripts are loaded sequentially near the end of `<body>` in `index.html` (a code
 config.js → i18n.js → content.js → questions.js → gamification.js → app.js → onboarding.js → avatar.js → sync.js → auth.js
 ```
 
-**Do not reorder these.** Earlier modules are dependencies of later ones. In practice, reordering the current scripts among themselves wouldn't break anything today (they're all synchronous, no `defer`/`async`, so everything has executed by the time `DOMContentLoaded` fires regardless of order) — the real risk is one of them failing to load entirely (blocked, 404). `Auth._onAuthSuccess()` guards against that: it checks that `App`/`i18n`/`CHAPTERS`/`QUESTIONS`/`Gamification`/`AvatarSelector`/`Onboarding` are actually defined and shows a clear message instead of letting `App.init()` crash with an uncaught `ReferenceError` mid-render. Don't treat that guard as permission to actually reorder things, though — a future change could easily introduce a real top-level dependency.
+**Do not reorder these.** Earlier modules are dependencies of later ones. In practice, reordering the current scripts among themselves wouldn't break anything today (they're all synchronous, no `defer`/`async`, so everything has executed by the time `DOMContentLoaded` fires regardless of order) — the real risk is one of them failing to load entirely (blocked, 404). `Auth._onAuthSuccess()` guards against that: it checks that `App`/`i18n`/`CHAPTERS`/`QUESTIONS`/`Gamification`/`AvatarSelector`/`Onboarding`/`Sync` are actually defined and shows a clear message instead of letting `App.init()` crash with an uncaught `ReferenceError` mid-render; a missing/failed `config.js` is covered separately by the top-level guard in `auth.js` (it feeds the same `_showLoadFailure()` path as a failed CDN load). Don't treat those guards as permission to actually reorder things, though — a future change could easily introduce a real top-level dependency.
 
 ### Module Pattern
 
@@ -99,14 +114,23 @@ User Action → App.* method → mutate App.state → App.saveState()
 
 `App.state` is the single source of truth. Views read from it directly.
 
+Conflict resolution (since the 2026-07-04 second pass): every `Sync.saveState()` stamps
+`state._updatedAt`; `Sync.loadState()` compares that stamp between the localStorage copy
+and the cloud copy and **the newer one wins** (unstamped copies count as older than any
+stamped one; ties go to the cloud, preserving multi-device behavior). A
+`visibilitychange→hidden` listener in `sync.js` flushes a pending debounced save with a
+keepalive REST call so closing the tab inside the 4s debounce doesn't leave the cloud stale.
+
 ### i18n
 
 - `i18n.t(key)` in JS code
 - `data-i18n="key"` for text content in HTML
 - `data-i18n-placeholder="key"` for input placeholders
 - Default language is Spanish (`i18n.lang = 'es'`)
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 152 keys, all ES/EN paired
-  (checked by a Node one-liner during the 2026-07-04 audit, not by a committed script)
+- `data-i18n-title="key"` for `title` tooltips
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 159 keys, all ES/EN paired,
+  enforced by `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
+  hardcoded-language residues)
 - `i18n.restore()` reads the saved language from `localStorage` and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
   (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore); the
@@ -235,14 +259,22 @@ at all; this only prevents a silent, unexplained crash when it can't load.
 
 Manual browser testing only for app behavior/UI. There is no linter config, no type checking.
 
-Two exceptions: `scripts/validate-questions.js` gates `js/questions.js` (see "Question Bank
-Schema" above), and `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS` in `js/content.js`
-(see "Lesson Content Schema" above). Both are Node, dev-only, never served to the browser, and
-share `scripts/lib/validate-utils.js` for the parts that overlap.
+Three exceptions, all Node, dev-only, never served to the browser:
+- `scripts/validate-questions.js` gates `js/questions.js` (see "Question Bank Schema" above).
+- `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS` in `js/content.js` (see "Lesson
+  Content Schema" above). Both share `scripts/lib/validate-utils.js` for the parts that
+  overlap, and both accept an optional file path argument (used by the pre-commit hook to
+  validate the staged copy).
+- `scripts/verify-runtime.js` loads the real `js/` modules into a mocked minimal DOM (no
+  browser, no npm install) and exercises the behaviors fixed in the 2026-07-04 passes:
+  sync freshness/flush, the script-load guards, the CDN-failure auth screen, state-derived
+  `innerHTML` escaping, and the i18n residue/parity checks. If you fix a runtime behavior,
+  add a check for it there.
 
-Since 2026-07-04, a local `.git/hooks/pre-commit` runs the relevant one automatically when its
-data file is staged — commit is blocked if it fails. This hook is **not version-controlled**
-(hooks live outside the tracked working tree); a fresh clone starts without it.
+The pre-commit gate is version-controlled at `.githooks/pre-commit` (activate once per clone:
+`git config core.hooksPath .githooks`). It validates the **staged** copy of the two data
+files — not the working tree — and runs `verify-runtime.js` whenever `js/`, `index.html`, or
+the harness itself is staged. Commit is blocked on failure.
 
 ## Reference Materials
 

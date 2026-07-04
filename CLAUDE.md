@@ -67,20 +67,22 @@ The app is fully functional without cloud sync. If Supabase is unavailable or th
 
 ## No Tests, No Linter
 
-There is no test suite and no linter configuration for the application itself. Manual browser testing is the only testing mechanism for UI/behavior changes.
+There is no test suite and no linter configuration for the application itself. Manual browser testing remains the primary mechanism for UI changes.
 
-Two exceptions, both Node-only dev scripts never served to the browser:
+Three exceptions, all Node-only dev scripts never served to the browser:
 - `scripts/validate-questions.js` gates `js/questions.js` — per-chapter question counts, structural integrity (bilingual fields, 4 options, valid `correct` index, unique ids), traceability (`lo`/`k`/`source` for every question added after id 50).
 - `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` — topic counts, `lo`/`source` presence, glossary keyword-completeness against the syllabus.
+- `scripts/verify-runtime.js` — behavior harness: loads the real `js/` modules into a mocked minimal DOM (no browser, no npm install) and exercises sync freshness/flush, the script-load guards, the CDN-failure auth screen, `innerHTML` escaping of state-derived values, and i18n parity/residue checks. Run it after any change to `js/` or `index.html`; add a check when you fix a runtime behavior.
 
-Run the relevant one after any change to that file:
+Run the relevant one after any change:
 
 ```bash
 node scripts/validate-questions.js
 node scripts/validate-content.js
+node scripts/verify-runtime.js
 ```
 
-Since 2026-07-04 a local `.git/hooks/pre-commit` runs the relevant script automatically when its file is staged and blocks the commit on failure — but it's **not version-controlled**, so a fresh clone of this repo won't have it until someone sets it up again.
+The pre-commit gate is version-controlled at `.githooks/pre-commit` — activate it once per clone with `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the **staged** copy of the two data files and runs the runtime harness when `js/` or `index.html` is staged; the commit is blocked on failure.
 
 ## ISTQB Content Fidelity Effort (complete, all 3 phases merged)
 
@@ -98,8 +100,10 @@ Known non-blocking gaps (light BVA question coverage in Ch.4, no dedicated quest
 
 ## Reliability & Security Remediation Pass (2026-07-04)
 
-A follow-up audit (separate from the content-fidelity effort above) covered the app's runtime code — `auth.js`/`sync.js` reliability, XSS surface, script-load fragility, validator-script duplication, and i18n completeness. Full findings and how each was verified: `docs/audit-2026-07-04-architecture-security.md`. Condensed summary, in case you only need the "what changed" version: `AGENTS.md`'s "Repository" section. Highlights:
+A follow-up audit (separate from the content-fidelity effort above) covered the app's runtime code — `auth.js`/`sync.js` reliability, XSS surface, script-load fragility, validator-script duplication, and i18n completeness. It was then **independently re-audited the same day** (second pass), which confirmed most closures but found two partial and several sibling risks — all fixed the same day. Full findings, verification, and the second-pass addendum: `docs/audit-2026-07-04-architecture-security.md`. Condensed summary: `AGENTS.md`'s "Repository" section. Highlights after both passes:
 
-- `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam, no longer builds the avatar `<img>` via `innerHTML` (was a self-XSS vector through `avatar_url`), and shows a clear message instead of crashing if the Supabase CDN script or any other required script fails to load.
-- `i18n` now actually covers the whole app — onboarding, the avatar picker, and the auth screen were Spanish-only before this pass, despite the "Key Modules" table above already claiming full i18n coverage.
-- A local (unversioned) pre-commit hook now runs the content validators automatically instead of that being a manual step.
+- `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
+- No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
+- A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
+- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 159 keys, ES/EN paired, enforced by `scripts/verify-runtime.js`.
+- The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
