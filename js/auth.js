@@ -2,8 +2,14 @@
    MyCampus ISTQB — Authentication (Supabase)
    =================================================== */
 
-const { createClient } = window.supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Si el CDN de supabase-js no llegó a cargar (bloqueado, offline en la
+// primera visita, fallo de SRI), no reventamos aquí — Auth.init() lo detecta
+// y muestra un mensaje en vez de dejar la app entera sin arrancar.
+let supabaseClient = null;
+if (window.supabase) {
+  const { createClient } = window.supabase;
+  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 const Auth = {
   user: null,
@@ -12,9 +18,22 @@ const Auth = {
 
   /* ===== INIT ===== */
   async init() {
+    if (!supabaseClient) {
+      this._showLoadFailure();
+      return;
+    }
+
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
+        // supabase-js puede re-emitir SIGNED_IN para el mismo usuario al
+        // recuperar el foco de la pestaña (refresh de token). Si ya está
+        // inicializada la app para este usuario, ignorarlo: si no, el
+        // else-branch de _onAuthSuccess pisa App.state con la copia de la
+        // nube (pudiendo perder XP no sincronizado aún) y re-navega la vista
+        // actual, cortando un examen en curso.
+        const sameUserAlreadyLoaded = App._initialized && this.user && this.user.id === session.user.id;
         this.user = session.user;
+        if (sameUserAlreadyLoaded) return;
         await this._onAuthSuccess(session.user);
       } else if (event === 'SIGNED_OUT') {
         this.user = null;
@@ -133,7 +152,19 @@ const Auth = {
     const avatarEl = document.getElementById('userAvatar');
     if (avatarEl) {
       if (avatar) {
-        avatarEl.innerHTML = `<img src="${avatar}" alt="avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        // avatar_url viene de user_metadata, que el propio usuario puede
+        // editar (updateUser) — construir el <img> vía DOM en vez de
+        // interpolarlo en innerHTML evita que un valor malicioso se
+        // interprete como marcado.
+        avatarEl.textContent = '';
+        const img = document.createElement('img');
+        img.src = avatar;
+        img.alt = 'avatar';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.borderRadius = '50%';
+        img.style.objectFit = 'cover';
+        avatarEl.appendChild(img);
       } else {
         avatarEl.textContent = name.charAt(0).toUpperCase();
       }
@@ -149,6 +180,12 @@ const Auth = {
 
   _hideMessage() {
     document.getElementById('authMessage').style.display = 'none';
+  },
+
+  _showLoadFailure() {
+    this._showMessage('No se pudo cargar el servicio de autenticación. Comprueba tu conexión a internet y recarga la página.', 'error');
+    document.getElementById('authSubmit').disabled = true;
+    document.getElementById('authGoogle').disabled = true;
   },
 
   _setLoading(loading) {
@@ -174,6 +211,7 @@ const Auth = {
 
     document.getElementById('authForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!supabaseClient) { this._showLoadFailure(); return; }
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value;
       const name = document.getElementById('authName').value.trim();
@@ -200,6 +238,7 @@ const Auth = {
     });
 
     document.getElementById('authGoogle').addEventListener('click', async () => {
+      if (!supabaseClient) { this._showLoadFailure(); return; }
       this._hideMessage();
       this._setLoading(true);
       try {
@@ -226,6 +265,7 @@ const Auth = {
 
     document.getElementById('authForgot').addEventListener('click', async (e) => {
       e.preventDefault();
+      if (!supabaseClient) { this._showLoadFailure(); return; }
       const email = document.getElementById('authEmail').value.trim();
       if (!email) {
         this._showMessage('Ingresa tu email primero.', 'error');
