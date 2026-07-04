@@ -11,6 +11,34 @@
   - Supabase JS client pinned to an exact version with a Subresource Integrity hash (see "Supabase Backend" below) instead of a floating `@2` CDN tag.
   - Favicon, meta description, `theme-color`, Open Graph/Twitter tags added to `index.html`; stray dev `console.log` removed from `App.init()`.
   - `GLOSSARY` term display fixed to show only the active UI language (no more `"ES / EN"` slash pairs) — see "Glossary Schema" below for the underlying `term.es`/`term.en` schema change.
+- **Architecture & security audit + remediation (2026-07-04):** full write-up at
+  `docs/audit-2026-07-04-architecture-security.md` — read that first for the complete
+  drift map, severity-ranked findings, and how each was verified. Summary of what changed:
+  - A local pre-commit hook (`.git/hooks/pre-commit`, **not version-controlled** — a fresh
+    clone won't have it) now runs the relevant validator whenever `js/questions.js` or
+    `js/content.js` is staged, instead of that being a voluntary step.
+  - `auth.js`: closed a refocus race where a repeated `SIGNED_IN` event for the same user
+    (supabase-js can re-emit it on tab focus) overwrote `App.state` with a stale cloud copy
+    and could cut off an in-progress exam; fixed a self-XSS via `avatar_url` (built the
+    sidebar `<img>` through the DOM instead of `innerHTML`); guarded against the CDN script
+    failing to load (previously an uncaught `TypeError` killed the whole app silently) and
+    against any other required script failing to load (see "Script Load Order" below).
+  - Data hygiene: glossary chapter-tag map was missing chapter 6; the "Full Curriculum"
+    achievement still required the pre-Phase-2 lesson count (16, not 22); two
+    `localStorage.setItem` calls had no `try/catch` unlike the rest of the codebase;
+    `examHistory` grew unbounded unlike `activityLog`; chapter 6's description still
+    mentioned a non-syllabus concept ("tool adoption considerations") that Phase 2 had
+    already purged from the lesson itself but not from the chapter description.
+  - `scripts/validate-questions.js` and `scripts/validate-content.js` stay separate entry
+    points (unchanged, still correct — see "Lesson Content Schema" below) but now share
+    `scripts/lib/validate-utils.js` for the parts that were genuinely duplicated (loading
+    browser globals from Node, the `FL-x.y.z` regex, the bilingual-field check).
+  - i18n now genuinely covers the whole app: `onboarding.js`, `avatar.js`, and the auth
+    screen were 100% hardcoded Spanish before this pass (contradicting the "i18n" section
+    below, which was aspirational until now); ~35 ad-hoc `i18n.lang === 'es' ? ... : ...`
+    ternaries in `app.js` were consolidated into `TRANSLATIONS` (152 keys, all ES/EN
+    paired). The auth screen needed its own standalone language switcher since it renders
+    before `App` exists — see `i18n.setLang()`/`i18n.restore()` in `js/i18n.js`.
 
 ## Project Overview
 
@@ -31,13 +59,13 @@ No `npm install`, no compilation, no build step.
 
 ### Script Load Order (Critical)
 
-Scripts are loaded sequentially in `index.html` (lines 475–484). Each exposes a global that later scripts depend on:
+Scripts are loaded sequentially near the end of `<body>` in `index.html` (a code comment there points back to this section). Each exposes a global that later scripts depend on:
 
 ```
 config.js → i18n.js → content.js → questions.js → gamification.js → app.js → onboarding.js → avatar.js → sync.js → auth.js
 ```
 
-**Do not reorder these.** Earlier modules are dependencies of later ones.
+**Do not reorder these.** Earlier modules are dependencies of later ones. In practice, reordering the current scripts among themselves wouldn't break anything today (they're all synchronous, no `defer`/`async`, so everything has executed by the time `DOMContentLoaded` fires regardless of order) — the real risk is one of them failing to load entirely (blocked, 404). `Auth._onAuthSuccess()` guards against that: it checks that `App`/`i18n`/`CHAPTERS`/`QUESTIONS`/`Gamification`/`AvatarSelector`/`Onboarding` are actually defined and shows a clear message instead of letting `App.init()` crash with an uncaught `ReferenceError` mid-render. Don't treat that guard as permission to actually reorder things, though — a future change could easily introduce a real top-level dependency.
 
 ### Module Pattern
 
@@ -77,7 +105,17 @@ User Action → App.* method → mutate App.state → App.saveState()
 - `data-i18n="key"` for text content in HTML
 - `data-i18n-placeholder="key"` for input placeholders
 - Default language is Spanish (`i18n.lang = 'es'`)
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js`
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 152 keys, all ES/EN paired
+  (checked by a Node one-liner during the 2026-07-04 audit, not by a committed script)
+- `i18n.restore()` reads the saved language from `localStorage` and applies it; `i18n.setLang(lang)`
+  sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
+  (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore); the
+  auth screen has its own `#authBtnES`/`#authBtnEN` switcher for exactly this reason. `App.setLang()`
+  delegates to `i18n.setLang()` rather than duplicating the persist logic.
+- Covers the whole app as of 2026-07-04, including `onboarding.js`, `avatar.js`, and the auth
+  screen — before that pass, those three were 100% hardcoded Spanish. If you see hardcoded
+  Spanish/English strings in those files (or a new `i18n.lang === 'es' ? ... : ...` ternary
+  anywhere), that's new drift, not a pre-existing gap.
 
 ### Views
 
@@ -112,7 +150,7 @@ Saves current view to `localStorage` key `mycampus_current_view`. Restores on in
 - `App.init()` — calls `_restoreSavedView()`, restores lesson with topic, falls back to `'dashboard'`
 - `App.navigateToLesson()` — sets `this.currentView = 'lesson'` (critical for post-sync re-navigation)
 - `App.navigate()` — handles `'lesson'` view by calling `renderLesson()` with stored `currentLesson`
-- `auth.js` line 113, 117 — `App.navigate(App.currentView || 'dashboard')` instead of hardcoded `'dashboard'`
+- `auth.js`'s `_onAuthSuccess()` (both the first-init and already-initialized branches) — `App.navigate(App.currentView || 'dashboard')` instead of hardcoded `'dashboard'`
 
 ### Sidebar Badge Fix
 
@@ -180,6 +218,12 @@ presence for `id > 50`. Treat a failing run as a blocker, not a warning.
 
 Fully functional without cloud sync. Falls back silently to localStorage.
 
+This covers *sync* failures only. Since 2026-07-04, the *auth* gate itself also degrades
+instead of crashing: if the Supabase CDN script fails to load, `supabaseClient` stays `null`
+and `Auth._showLoadFailure()` shows a message instead of an uncaught `TypeError` killing the
+whole app. There's no working offline login, though — Supabase is required to authenticate
+at all; this only prevents a silent, unexplained crash when it can't load.
+
 ## Conventions
 
 - Private methods/helpers: prefix with `_` (e.g., `_onAuthSuccess`)
@@ -193,7 +237,12 @@ Manual browser testing only for app behavior/UI. There is no linter config, no t
 
 Two exceptions: `scripts/validate-questions.js` gates `js/questions.js` (see "Question Bank
 Schema" above), and `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS` in `js/content.js`
-(see "Lesson Content Schema" above). Both are Node, dev-only, never served to the browser.
+(see "Lesson Content Schema" above). Both are Node, dev-only, never served to the browser, and
+share `scripts/lib/validate-utils.js` for the parts that overlap.
+
+Since 2026-07-04, a local `.git/hooks/pre-commit` runs the relevant one automatically when its
+data file is staged — commit is blocked if it fails. This hook is **not version-controlled**
+(hooks live outside the tracked working tree); a fresh clone starts without it.
 
 ## Reference Materials
 
