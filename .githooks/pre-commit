@@ -1,0 +1,46 @@
+#!/bin/sh
+# Pre-commit gate for MyCampusISTQB_26 — VERSIONADO en .githooks/.
+# Se activa con:  git config core.hooksPath .githooks   (una vez por clon;
+# ver AGENTS.md "No Tests or Linter"). Ejecuta el validador correspondiente
+# cuando su fichero de datos está staged, y también el arnés de runtime si
+# se toca cualquier js/ o index.html.
+#
+# Valida la copia STAGED (git show :fichero), no el working tree: stagear una
+# versión rota y arreglar el disco sin re-stagear colaba el commit roto, y el
+# caso inverso bloqueaba commits buenos.
+
+staged=$(git diff --cached --name-only)
+
+check() {
+  file="$1"
+  validator="$2"
+  if echo "$staged" | grep -qx "$file"; then
+    tmp=$(mktemp) || exit 1
+    git show ":$file" > "$tmp"
+    echo "-> $file staged, running $validator against the staged copy"
+    if ! node "$validator" "$tmp"; then
+      rm -f "$tmp"
+      echo ""
+      echo "Commit aborted: $validator found problems in the staged $file (see above)."
+      exit 1
+    fi
+    rm -f "$tmp"
+  fi
+}
+
+check "js/questions.js" "scripts/validate-questions.js"
+check "js/content.js" "scripts/validate-content.js"
+
+# Arnés de runtime: barato (<5s, sin red) y cubre sync/auth/escape/i18n.
+# Corre sobre el working tree (carga varios módulos entrelazados); es un
+# segundo cinturón, no un sustituto de la validación staged de arriba.
+if echo "$staged" | grep -qE '^(js/|index\.html|scripts/verify-runtime\.js)'; then
+  echo "-> running scripts/verify-runtime.js"
+  if ! node scripts/verify-runtime.js; then
+    echo ""
+    echo "Commit aborted: scripts/verify-runtime.js is failing (see above)."
+    exit 1
+  fi
+fi
+
+exit 0

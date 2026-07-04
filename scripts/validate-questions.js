@@ -2,7 +2,11 @@
 const path = require('path');
 const { FL_RE, loadGlobals, checkBilingualText, report } = require('./lib/validate-utils');
 
-const SRC = path.join(__dirname, '..', 'js', 'questions.js');
+// Ruta opcional por argumento: el hook de pre-commit valida una copia
+// temporal del contenido STAGED (git show :js/questions.js), no el working
+// tree — sin esto validaba lo que había en disco, que puede no ser lo que
+// entra en el commit.
+const SRC = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, '..', 'js', 'questions.js');
 const { QUESTIONS } = loadGlobals(SRC, ['QUESTIONS']);
 
 const TARGET = { 0: 24, 1: 18, 2: 12, 3: 36, 4: 24, 5: 6 };

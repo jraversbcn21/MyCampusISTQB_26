@@ -2,7 +2,9 @@
 const path = require('path');
 const { FL_RE, loadGlobals, checkBilingualText, report } = require('./lib/validate-utils');
 
-const SRC = path.join(__dirname, '..', 'js', 'content.js');
+// Ruta opcional por argumento — mismo motivo que en validate-questions.js:
+// el hook de pre-commit valida la copia staged, no el working tree.
+const SRC = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, '..', 'js', 'content.js');
 const { CHAPTERS, LESSONS, GLOSSARY, FLASHCARDS } = loadGlobals(SRC, ['CHAPTERS', 'LESSONS', 'GLOSSARY', 'FLASHCARDS']);
 
 const TARGET_TOPIC_COUNT = { 0: 5, 1: 4, 2: 2, 3: 5, 4: 5, 5: 1 };
