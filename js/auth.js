@@ -190,7 +190,9 @@ const Auth = {
   _updateUserUI(user) {
     const meta = user.user_metadata || {};
     const savedName = localStorage.getItem(`mycampus_displayname_${user.id}`);
-    const name = savedName || meta.full_name || meta.name || user.email?.split('@')[0] || 'Estudiante';
+    // i18n está garantizado aquí: _updateUserUI solo se llama después de que
+    // _onAuthSuccess pase la guarda de módulos requeridos.
+    const name = savedName || meta.full_name || meta.name || user.email?.split('@')[0] || i18n.t('student_fallback');
     const avatar = meta.avatar_url || meta.picture || null;
 
     const nameEl = document.getElementById('userName');

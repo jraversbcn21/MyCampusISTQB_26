@@ -171,9 +171,9 @@ const App = {
         const saved = localStorage.getItem(`mycampus_displayname_${uid}`);
         if (saved) return saved;
         const meta = Auth.user.user_metadata || {};
-        return meta.full_name || meta.name || Auth.user.email?.split('@')[0] || 'Estudiante';
+        return meta.full_name || meta.name || Auth.user.email?.split('@')[0] || i18n.t('student_fallback');
       }
-      return 'Estudiante';
+      return i18n.t('student_fallback');
     })();
     document.getElementById('userName').textContent = displayName;
     document.getElementById('userLevel').textContent = `${i18n.t('level_label')} ${lvl.level} · ${lvl.name[i18n.lang]}`;
@@ -869,12 +869,11 @@ const App = {
       items = items.filter(g => g.term[lang][0].toUpperCase() === activeFilter);
     }
 
-    const chapterNames = { '1': 'Cap.1', '2': 'Cap.2', '3': 'Cap.3', '4': 'Cap.4', '5': 'Cap.5', '6': 'Cap.6' };
     document.getElementById('glossaryList').innerHTML = items.map(g => `
       <div class="glossary-item">
         <div class="glossary-term">${g.term[lang]}</div>
         <div class="glossary-def">${g.def[lang]}</div>
-        <div class="glossary-chapter">${chapterNames[g.chapter] || ''}</div>
+        <div class="glossary-chapter">${g.chapter ? i18n.t('glossary_ch_tag') + g.chapter : ''}</div>
       </div>`).join('') || `<div class="empty-state"><p>${i18n.t('no_terms_found')}</p></div>`;
   },
 
@@ -1007,7 +1006,9 @@ const App = {
     const isDark = document.body.getAttribute('data-theme') !== 'light';
     document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
     document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
-    localStorage.setItem('mycampus_theme', isDark ? 'light' : 'dark');
+    try {
+      localStorage.setItem('mycampus_theme', isDark ? 'light' : 'dark');
+    } catch (e) {}
   },
 
   /* ===== INIT ===== */
@@ -1127,7 +1128,7 @@ const App = {
     // Welcome streak
     this.updateStreakAndDate();
     if (this.state.streak > 1) {
-      setTimeout(() => this.showToast(`🔥 ${this.state.streak} ${i18n.t('streak_label')} — ¡Sigue así!`, 'success'), 1000);
+      setTimeout(() => this.showToast(`🔥 ${this.state.streak} ${i18n.t('streak_label')} — ${i18n.t('streak_keep_going')}`, 'success'), 1000);
     }
   },
 

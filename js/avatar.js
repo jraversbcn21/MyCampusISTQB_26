@@ -133,7 +133,11 @@ const AvatarSelector = {
 
     const commit = () => {
       const newName = input.value.trim() || currentName;
-      localStorage.setItem(`mycampus_displayname_${this._userId}`, newName);
+      // try/catch: si la quota está llena, al menos restaurar el <span> del
+      // nombre en vez de dejar el <input> huérfano en el sidebar.
+      try {
+        localStorage.setItem(`mycampus_displayname_${this._userId}`, newName);
+      } catch (e) {}
 
       const span = document.createElement('span');
       span.className = 'user-name';
@@ -188,7 +192,9 @@ const AvatarSelector = {
 
   _save() {
     if (!this._pendingId) { this.closeModal(); return; }
-    localStorage.setItem(`mycampus_avatar_${this._userId}`, this._pendingId);
+    try {
+      localStorage.setItem(`mycampus_avatar_${this._userId}`, this._pendingId);
+    } catch (e) {}
     const avatar = AVATARS.find(a => a.id === this._pendingId);
     this._applyToSidebar(avatar);
     this.closeModal();

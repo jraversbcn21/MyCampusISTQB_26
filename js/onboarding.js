@@ -93,8 +93,13 @@ const Onboarding = {
   },
 
   _done() {
-    localStorage.setItem(`mycampus_onboarding_v1_${this._userId}`, '1');
+    // _hide() primero: si setItem revienta (quota llena, modo privado), el
+    // tour debe cerrarse igualmente — peor repetirlo mañana que dejarlo
+    // pegado en pantalla hoy.
     this._hide();
+    try {
+      localStorage.setItem(`mycampus_onboarding_v1_${this._userId}`, '1');
+    } catch (e) {}
   },
 
   /* ===== RENDER ===== */

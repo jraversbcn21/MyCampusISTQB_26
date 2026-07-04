@@ -152,6 +152,13 @@ const TRANSLATIONS = {
     avatar_modal_title: "Elige tu perfil de tester",
     avatar_modal_sub: "Tu avatar refleja tu estilo como tester. Puedes cambiarlo cuando quieras.",
     avatar_save: "Guardar avatar",
+    logout_label: "Salir",
+    logout_title: "Cerrar sesión",
+    collapse_menu_title: "Colapsar menú",
+    theme_toggle_title: "Cambiar tema",
+    streak_keep_going: "¡Sigue así!",
+    student_fallback: "Estudiante",
+    glossary_ch_tag: "Cap.",
 
     // AUTH
     auth_login_tab: "Iniciar sesión",
@@ -328,6 +335,13 @@ const TRANSLATIONS = {
     avatar_modal_title: "Choose your tester profile",
     avatar_modal_sub: "Your avatar reflects your style as a tester. You can change it anytime.",
     avatar_save: "Save avatar",
+    logout_label: "Log out",
+    logout_title: "Log out",
+    collapse_menu_title: "Collapse menu",
+    theme_toggle_title: "Toggle theme",
+    streak_keep_going: "Keep it up!",
+    student_fallback: "Student",
+    glossary_ch_tag: "Ch.",
 
     // AUTH
     auth_login_tab: "Log in",
@@ -372,6 +386,10 @@ const i18n = {
       const key = el.getAttribute('data-i18n-placeholder');
       el.placeholder = this.t(key);
     });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      el.title = this.t(key);
+    });
     document.documentElement.lang = this.lang;
   },
   // Restaura el idioma guardado y lo aplica. Se llama al arrancar, antes de
@@ -383,7 +401,9 @@ const i18n = {
   },
   setLang(lang) {
     this.lang = lang;
-    localStorage.setItem('mycampus_lang', lang);
+    try {
+      localStorage.setItem('mycampus_lang', lang);
+    } catch (e) {}
     this.apply();
   }
 };
