@@ -586,9 +586,9 @@ const App = {
     histEl.innerHTML = this.state.examHistory.slice().reverse().slice(0, 10).map(e => `
       <div class="exam-history-item">
         <span>${e.type === 'full' ? '📋' : e.type === 'quick' ? '⚡' : '🎯'}</span>
-        <span>${e.date}</span>
-        <span style="color:var(--text2)">${e.questions} ${i18n.t('questions_count_label')}</span>
-        <span class="exam-history-score ${e.score >= 65 ? 'pass' : 'fail'}">${e.score}%</span>
+        <span>${escapeHtml(e.date)}</span>
+        <span style="color:var(--text2)">${escapeHtml(e.questions)} ${i18n.t('questions_count_label')}</span>
+        <span class="exam-history-score ${e.score >= 65 ? 'pass' : 'fail'}">${escapeHtml(e.score)}%</span>
       </div>`).join('');
   },
 
@@ -925,9 +925,9 @@ const App = {
           ${recent.map((e, i) => {
             const h = Math.round((e.score / 100) * 100);
             const color = e.score >= 65 ? 'var(--success)' : 'var(--danger)';
-            return `<div style="flex:1;height:${h}px;background:${color};border-radius:4px 4px 0 0;position:relative;min-width:20px" title="${e.score}%">
-              <span style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:0.6rem;font-weight:700;color:${color};white-space:nowrap">${e.score}%</span>
-              <span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:var(--text3);white-space:nowrap">${e.date.split('/').slice(0,2).join('/')}</span>
+            return `<div style="flex:1;height:${h}px;background:${color};border-radius:4px 4px 0 0;position:relative;min-width:20px" title="${escapeHtml(e.score)}%">
+              <span style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:0.6rem;font-weight:700;color:${color};white-space:nowrap">${escapeHtml(e.score)}%</span>
+              <span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:var(--text3);white-space:nowrap">${escapeHtml(String(e.date).split('/').slice(0,2).join('/'))}</span>
             </div>`;
           }).join('')}
         </div>
@@ -940,9 +940,9 @@ const App = {
     document.getElementById('activityLog').innerHTML = acts.length ? acts.map(a => `
       <div class="activity-item">
         <span class="activity-icon">⭐</span>
-        <span class="activity-text">${a.text}</span>
-        <span class="activity-xp">+${a.xp} XP</span>
-        <span class="activity-time">${a.time}</span>
+        <span class="activity-text">${escapeHtml(a.text)}</span>
+        <span class="activity-xp">+${escapeHtml(a.xp)} XP</span>
+        <span class="activity-time">${escapeHtml(a.time)}</span>
       </div>`).join('') : `<div class="empty-state"><p>${i18n.t('no_activities')}</p></div>`;
   },
 
@@ -1214,6 +1214,17 @@ const App = {
 };
 
 // Utility
+// Escape para valores que vienen de App.state cuando se interpolan en
+// innerHTML: el estado se restaura de localStorage y de la fila JSONB del
+// usuario en Supabase (escribible por él mismo vía la API), así que no es
+// contenido de confianza como el de content.js/questions.js. Mismo criterio
+// que el fix del avatar_url en auth.js: cerrar la clase, no solo un caso.
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
 function hexToRgb(hex) {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
