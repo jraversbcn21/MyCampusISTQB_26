@@ -5,50 +5,74 @@
 const ONBOARDING_STEPS = [
   {
     target: null,
-    title: '¡Bienvenido a MyCampus! 🎓',
-    text: 'Tu plataforma de preparación para ISTQB Foundation Level v4.0. Te mostramos los módulos disponibles en menos de un minuto.',
+    title: { es: '¡Bienvenido a MyCampus! 🎓', en: 'Welcome to MyCampus! 🎓' },
+    text: {
+      es: 'Tu plataforma de preparación para ISTQB Foundation Level v4.0. Te mostramos los módulos disponibles en menos de un minuto.',
+      en: "Your preparation platform for the ISTQB Foundation Level v4.0 certification. We'll show you the available modules in under a minute."
+    },
     position: 'center',
   },
   {
     target: '[data-view="dashboard"]',
-    title: '📊 Dashboard',
-    text: 'Tu panel principal. Aquí ves tus estadísticas, el reto diario y tu nivel de preparación para el examen.',
+    title: { es: '📊 Dashboard', en: '📊 Dashboard' },
+    text: {
+      es: 'Tu panel principal. Aquí ves tus estadísticas, el reto diario y tu nivel de preparación para el examen.',
+      en: 'Your main panel. Here you can see your stats, the daily challenge, and your exam readiness level.'
+    },
     position: 'right',
   },
   {
     target: '[data-view="curriculum"]',
-    title: '📚 Curriculum',
-    text: '6 capítulos completos del temario ISTQB FL v4.0 con lecciones detalladas y seguimiento de progreso.',
+    title: { es: '📚 Curriculum', en: '📚 Curriculum' },
+    text: {
+      es: '6 capítulos completos del temario ISTQB FL v4.0 con lecciones detalladas y seguimiento de progreso.',
+      en: 'All 6 chapters of the ISTQB FL v4.0 syllabus, with detailed lessons and progress tracking.'
+    },
     position: 'right',
   },
   {
     target: '[data-view="flashcards"]',
-    title: '🃏 Flashcards',
-    text: 'Repasa conceptos clave con tarjetas interactivas. Califica cada una como fácil, normal o difícil.',
+    title: { es: '🃏 Flashcards', en: '🃏 Flashcards' },
+    text: {
+      es: 'Repasa conceptos clave con tarjetas interactivas. Califica cada una como fácil, normal o difícil.',
+      en: 'Review key concepts with interactive cards. Rate each one as easy, OK, or hard.'
+    },
     position: 'right',
   },
   {
     target: '[data-view="simulator"]',
-    title: '📝 Simulacros',
-    text: 'Practica con exámenes tipo ISTQB: examen completo (40 preguntas), rápido (20) o por capítulo.',
+    title: { es: '📝 Simulacros', en: '📝 Exam Simulator' },
+    text: {
+      es: 'Practica con exámenes tipo ISTQB: examen completo (40 preguntas), rápido (20) o por capítulo.',
+      en: 'Practice with ISTQB-style exams: full exam (40 questions), quick exam (20), or by chapter.'
+    },
     position: 'right',
   },
   {
     target: '[data-view="glossary"]',
-    title: '📖 Glosario',
-    text: 'Todos los términos y definiciones del estándar ISTQB, con búsqueda instantánea.',
+    title: { es: '📖 Glosario', en: '📖 Glossary' },
+    text: {
+      es: 'Todos los términos y definiciones del estándar ISTQB, con búsqueda instantánea.',
+      en: 'All the terms and definitions from the ISTQB standard, with instant search.'
+    },
     position: 'right',
   },
   {
     target: '[data-view="progress"]',
-    title: '📈 Progreso',
-    text: 'Gráficas de rendimiento, historial de exámenes y registro de toda tu actividad.',
+    title: { es: '📈 Progreso', en: '📈 Progress' },
+    text: {
+      es: 'Gráficas de rendimiento, historial de exámenes y registro de toda tu actividad.',
+      en: 'Performance charts, exam history, and a log of all your activity.'
+    },
     position: 'right',
   },
   {
     target: '[data-view="achievements"]',
-    title: '🏆 Logros',
-    text: 'Desbloquea insignias y acumula XP completando lecciones, exámenes y rachas de estudio.',
+    title: { es: '🏆 Logros', en: '🏆 Achievements' },
+    text: {
+      es: 'Desbloquea insignias y acumula XP completando lecciones, exámenes y rachas de estudio.',
+      en: 'Unlock badges and earn XP by completing lessons, exams, and study streaks.'
+    },
     position: 'right',
   },
 ];
@@ -83,13 +107,13 @@ const Onboarding = {
       <div id="onboarding-tooltip">
         <div class="ob-header">
           <span class="ob-step-count" id="obStepCount"></span>
-          <button class="ob-skip" id="obSkip">Saltar tour</button>
+          <button class="ob-skip" id="obSkip">${i18n.t('onboarding_skip')}</button>
         </div>
         <h3 class="ob-title" id="obTitle"></h3>
         <p class="ob-text" id="obText"></p>
         <div class="ob-footer">
           <div class="ob-dots" id="obDots"></div>
-          <button class="ob-btn-next" id="obNext">Siguiente</button>
+          <button class="ob-btn-next" id="obNext"></button>
         </div>
       </div>
     `);
@@ -130,9 +154,9 @@ const Onboarding = {
 
     // Contenido
     document.getElementById('obStepCount').textContent = this._step === 0 ? '' : `${this._step} / ${total - 1}`;
-    document.getElementById('obTitle').textContent = step.title;
-    document.getElementById('obText').textContent = step.text;
-    document.getElementById('obNext').textContent = isLast ? '¡Comenzar! 🚀' : 'Siguiente →';
+    document.getElementById('obTitle').textContent = step.title[i18n.lang];
+    document.getElementById('obText').textContent = step.text[i18n.lang];
+    document.getElementById('obNext').textContent = isLast ? i18n.t('onboarding_start') : i18n.t('onboarding_next');
 
     // Dots
     const dots = document.getElementById('obDots');

@@ -18,6 +18,16 @@ const Auth = {
 
   /* ===== INIT ===== */
   async init() {
+    // Restaurar idioma ANTES de mostrar nada: la pantalla de login no vive
+    // dentro de App, así que no puede esperar a App.init() para traducirse.
+    // Guardado tras el typeof: si i18n.js no llegó a cargar, seguimos con la
+    // pantalla de login en su español hardcodeado en vez de romper aquí.
+    if (typeof i18n !== 'undefined') {
+      i18n.restore();
+      document.getElementById('authBtnES').classList.toggle('active', i18n.lang === 'es');
+      document.getElementById('authBtnEN').classList.toggle('active', i18n.lang === 'en');
+    }
+
     if (!supabaseClient) {
       this._showLoadFailure();
       return;
@@ -105,7 +115,10 @@ const Auth = {
     const missing = Object.keys(required).filter(k => required[k] === 'undefined');
     if (missing.length) {
       console.error('[Auth] Módulos requeridos no cargados (¿se reordenó o falló algún <script> de index.html?):', missing.join(', '));
-      this._showMessage('Error al cargar la aplicación. Recarga la página; si el problema persiste, contacta soporte.', 'error');
+      const msg = typeof i18n !== 'undefined'
+        ? i18n.t('auth_missing_modules_msg')
+        : 'Error al cargar la aplicación. Recarga la página; si el problema persiste, contacta soporte.';
+      this._showMessage(msg, 'error');
       this._authInProgress = false;
       return;
     }
@@ -197,7 +210,10 @@ const Auth = {
   },
 
   _showLoadFailure() {
-    this._showMessage('No se pudo cargar el servicio de autenticación. Comprueba tu conexión a internet y recarga la página.', 'error');
+    const msg = typeof i18n !== 'undefined'
+      ? i18n.t('auth_load_failure_msg')
+      : 'No se pudo cargar el servicio de autenticación. Comprueba tu conexión a internet y recarga la página.';
+    this._showMessage(msg, 'error');
     document.getElementById('authSubmit').disabled = true;
     document.getElementById('authGoogle').disabled = true;
   },
@@ -208,12 +224,21 @@ const Auth = {
     document.getElementById('authSubmit').classList.toggle('loading', loading);
   },
 
+  _setAuthLang(lang) {
+    i18n.setLang(lang);
+    document.getElementById('authBtnES').classList.toggle('active', lang === 'es');
+    document.getElementById('authBtnEN').classList.toggle('active', lang === 'en');
+    // authSubmit depende del modo (login/registro), no solo del idioma —
+    // data-i18n lo pisaría con el texto de login siempre. Se refresca aquí.
+    document.getElementById('authSubmit').textContent = this._mode === 'login' ? i18n.t('auth_login_tab') : i18n.t('auth_submit_register');
+  },
+
   _switchMode(mode) {
     this._mode = mode;
     this._hideMessage();
     document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
     document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
-    document.getElementById('authSubmit').textContent = mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta';
+    document.getElementById('authSubmit').textContent = mode === 'login' ? i18n.t('auth_login_tab') : i18n.t('auth_submit_register');
     document.getElementById('authForgot').style.display = mode === 'login' ? 'block' : 'none';
     document.getElementById('fieldName').style.display = mode === 'register' ? 'flex' : 'none';
   },
@@ -222,6 +247,9 @@ const Auth = {
   _bindEvents() {
     document.getElementById('tabLogin').addEventListener('click', () => this._switchMode('login'));
     document.getElementById('tabRegister').addEventListener('click', () => this._switchMode('register'));
+
+    document.getElementById('authBtnES').addEventListener('click', () => this._setAuthLang('es'));
+    document.getElementById('authBtnEN').addEventListener('click', () => this._setAuthLang('en'));
 
     document.getElementById('authForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -240,7 +268,7 @@ const Auth = {
         } else {
           const result = await this.signUpEmail(email, password, name);
           if (result === 'confirm') {
-            this._showMessage('✅ Revisa tu email para confirmar tu cuenta.', 'success');
+            this._showMessage(i18n.t('auth_confirm_email_msg'), 'success');
             this._setLoading(false);
             return;
           }
@@ -282,7 +310,7 @@ const Auth = {
       if (!supabaseClient) { this._showLoadFailure(); return; }
       const email = document.getElementById('authEmail').value.trim();
       if (!email) {
-        this._showMessage('Ingresa tu email primero.', 'error');
+        this._showMessage(i18n.t('auth_enter_email_first'), 'error');
         return;
       }
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
@@ -291,19 +319,19 @@ const Auth = {
       if (error) {
         this._showMessage(this._getErrorMessage(error.message), 'error');
       } else {
-        this._showMessage('✅ Se envió un link de recuperación a tu email.', 'success');
+        this._showMessage(i18n.t('auth_reset_sent_msg'), 'success');
       }
     });
   },
 
   _getErrorMessage(msg) {
-    if (!msg) return 'Ocurrió un error. Intenta nuevamente.';
-    if (msg.includes('Invalid login credentials')) return 'Email o contraseña incorrectos.';
-    if (msg.includes('Email not confirmed')) return 'Confirma tu email antes de ingresar.';
-    if (msg.includes('User already registered')) return 'Ya existe una cuenta con ese email.';
-    if (msg.includes('Password should be at least')) return 'La contraseña debe tener al menos 6 caracteres.';
-    if (msg.includes('Unable to validate email')) return 'Formato de email inválido.';
-    if (msg.includes('rate limit')) return 'Demasiados intentos. Espera unos minutos.';
+    if (!msg) return i18n.t('auth_err_generic');
+    if (msg.includes('Invalid login credentials')) return i18n.t('auth_err_invalid_credentials');
+    if (msg.includes('Email not confirmed')) return i18n.t('auth_err_email_not_confirmed');
+    if (msg.includes('User already registered')) return i18n.t('auth_err_already_registered');
+    if (msg.includes('Password should be at least')) return i18n.t('auth_err_password_length');
+    if (msg.includes('Unable to validate email')) return i18n.t('auth_err_invalid_email');
+    if (msg.includes('rate limit')) return i18n.t('auth_err_rate_limit');
     return msg;
   }
 };

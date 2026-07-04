@@ -97,7 +97,7 @@ const App = {
   addActivity(text, xp) {
     this.state.activityLog.unshift({
       text, xp,
-      time: new Date().toLocaleString(i18n.lang === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
+      time: new Date().toLocaleString(i18n.t('date_locale'), { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
     });
     if (this.state.activityLog.length > 20) this.state.activityLog.pop();
     this.saveState();
@@ -176,7 +176,7 @@ const App = {
       return 'Estudiante';
     })();
     document.getElementById('userName').textContent = displayName;
-    document.getElementById('userLevel').textContent = `${i18n.lang === 'es' ? 'Nivel' : 'Level'} ${lvl.level} · ${lvl.name[i18n.lang]}`;
+    document.getElementById('userLevel').textContent = `${i18n.t('level_label')} ${lvl.level} · ${lvl.name[i18n.lang]}`;
     document.getElementById('xpFillSmall').style.width = progress + '%';
     document.getElementById('xpText').textContent = `${this.state.xp} XP`;
     document.getElementById('streakCount').textContent = this.state.streak;
@@ -215,7 +215,7 @@ const App = {
           <div class="continue-item-icon">${ch.icon}</div>
           <div style="flex:1">
             <div class="continue-item-title">${ch.title[i18n.lang]}</div>
-            <div class="continue-item-sub">${done}/${ch.topics.length} ${i18n.lang === 'es' ? 'temas' : 'topics'} · ${ch.duration[i18n.lang]}</div>
+            <div class="continue-item-sub">${done}/${ch.topics.length} ${i18n.t('topics_label')} · ${ch.duration[i18n.lang]}</div>
             <div class="continue-item-progress">
               <div class="continue-item-fill" style="width:${pct}%;background:${colors[i]}"></div>
             </div>
@@ -232,7 +232,7 @@ const App = {
     const isDone = this.state.dailyChallengeDate === today && this.state.dailyChallengeCompleted;
 
     if (isDone) {
-      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--success)">✅ ${i18n.lang === 'es' ? '¡Desafío completado hoy!' : 'Challenge completed today!'}</div>`;
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--success)">✅ ${i18n.t('challenge_completed_today')}</div>`;
       return;
     }
 
@@ -263,7 +263,7 @@ const App = {
     this.state.dailyChallengeCompleted = true;
     this.saveState();
     if (selected === correct) {
-      this.addXP(20, i18n.lang === 'es' ? 'Desafío diario completado' : 'Daily challenge completed');
+      this.addXP(20, i18n.t('daily_challenge_completed_activity'));
     }
   },
 
@@ -340,7 +340,7 @@ const App = {
             <div class="chapter-number" style="background:${colorsBg[i]};color:${colors[i]}">${i + 1}</div>
             <div class="chapter-info">
               <div class="chapter-title">${ch.icon} ${ch.title[i18n.lang]}</div>
-              <div class="chapter-meta">${total} ${i18n.lang === 'es' ? 'temas' : 'topics'} · ${ch.duration[i18n.lang]}</div>
+              <div class="chapter-meta">${total} ${i18n.t('topics_label')} · ${ch.duration[i18n.lang]}</div>
               <div class="chapter-meta" style="margin-top:2px;font-size:0.75rem">${ch.description[i18n.lang]}</div>
             </div>
             <div class="chapter-actions">
@@ -401,7 +401,7 @@ const App = {
     const lessonData = lesson ? lesson[lang] : {
       title: topic.title[lang],
       chapterTag: ch.title[lang],
-      content: `<div class="highlight-box">📚 ${i18n.lang === 'es' ? 'Contenido en preparación. Usa las flashcards y el simulacro para estudiar este tema.' : 'Content in preparation. Use flashcards and exam simulator to study this topic.'}</div>`
+      content: `<div class="highlight-box">📚 ${i18n.t('lesson_content_wip')}</div>`
     };
 
     document.getElementById('lessonContainer').innerHTML = `
@@ -425,7 +425,7 @@ const App = {
       this.state.completedLessons.push(topicId);
       this.state.lessonsCompleted = this.state.completedLessons.length;
       this.saveState();
-      this.addXP(xp, `${i18n.lang === 'es' ? 'Lección completada' : 'Lesson completed'}: ${topicId}`);
+      this.addXP(xp, `${i18n.t('lesson_completed_activity')}: ${topicId}`);
       this.checkAchievements();
       const btn = document.getElementById('completeLessonBtn');
       if (btn) {
@@ -462,7 +462,7 @@ const App = {
     this.fcIndex = 0;
     this.fcFlipped = false;
     this.renderFlashcard();
-    this.showToast(i18n.lang === 'es' ? '🔀 Flashcards mezcladas' : '🔀 Flashcards shuffled', 'info');
+    this.showToast(i18n.t('flashcards_shuffled_toast'), 'info');
   },
 
   renderFlashcard() {
@@ -476,9 +476,9 @@ const App = {
 
     document.getElementById('fcTag').textContent = card.chapterTag[lang];
     document.getElementById('fcQuestion').innerHTML = `${card.q[lang]}
-      <button class="fc-tts-btn" onclick="App._handleTTS('question',event)" aria-label="${lang === 'es' ? 'Leer pregunta' : 'Read question'}">🔇</button>`;
+      <button class="fc-tts-btn" onclick="App._handleTTS('question',event)" aria-label="${i18n.t('read_question_aria')}">🔇</button>`;
     document.getElementById('fcAnswer').innerHTML = `${card.a[lang]}
-      <button class="fc-tts-btn" onclick="App._handleTTS('answer',event)" aria-label="${lang === 'es' ? 'Leer respuesta' : 'Read answer'}">🔇</button>`;
+      <button class="fc-tts-btn" onclick="App._handleTTS('answer',event)" aria-label="${i18n.t('read_answer_aria')}">🔇</button>`;
     document.getElementById('cardCounter').textContent = `${this.fcIndex + 1}/${this.fcCards.length}`;
 
     const inner = document.getElementById('flashcardInner');
@@ -523,13 +523,13 @@ const App = {
       this.state.flashcardsReviewed++;
       this.saveState();
       if (this.state.flashcardsReviewed % 5 === 0) {
-        this.addXP(10, i18n.lang === 'es' ? 'Flashcards repasadas' : 'Flashcards reviewed');
+        this.addXP(10, i18n.t('flashcards_reviewed_activity'));
       }
       this.checkAchievements();
     }
     this.nextFlashcard();
     if (this.fcIndex >= this.fcCards.length - 1) {
-      this.showToast(i18n.lang === 'es' ? '🎉 ¡Mazo completado!' : '🎉 Deck completed!', 'success');
+      this.showToast(i18n.t('deck_completed_toast'), 'success');
     }
   },
 
@@ -549,29 +549,29 @@ const App = {
     document.getElementById('simCards').innerHTML = [
       {
         icon: '📋',
-        title: lang === 'es' ? 'Examen Completo' : 'Full Exam',
-        desc: lang === 'es' ? '40 preguntas · 60 minutos · Simula el examen real' : '40 questions · 60 minutes · Real exam simulation',
-        tags: lang === 'es' ? ['40 preguntas', '60 min', 'Todos los temas'] : ['40 questions', '60 min', 'All topics'],
+        title: i18n.t('exam_full'),
+        desc: i18n.t('exam_full_desc'),
+        tags: i18n.t('sim_full_tags'),
         type: 'full',
         locked: !fullUnlocked,
-        lockMsg: lang === 'es' ? `Aprueba todos los capítulos (${passedCount}/${CHAPTERS.length})` : `Pass all chapters (${passedCount}/${CHAPTERS.length})`,
+        lockMsg: `${i18n.t('unlock_all_chapters')} (${passedCount}/${CHAPTERS.length})`,
         btnClass: 'btn-primary'
       },
       {
         icon: '⚡',
-        title: lang === 'es' ? 'Examen Rápido' : 'Quick Exam',
-        desc: lang === 'es' ? '20 preguntas · 30 minutos · Repaso veloz' : '20 questions · 30 minutes · Quick review',
-        tags: lang === 'es' ? ['20 preguntas', '30 min', 'Aleatorio'] : ['20 questions', '30 min', 'Random'],
+        title: i18n.t('exam_quick'),
+        desc: i18n.t('exam_quick_desc'),
+        tags: i18n.t('sim_quick_tags'),
         type: 'quick',
         locked: !quickUnlocked,
-        lockMsg: lang === 'es' ? `Aprueba 3 capítulos (${passedCount}/3)` : `Pass 3 chapters (${passedCount}/3)`,
+        lockMsg: `${i18n.t('unlock_3_chapters')} (${passedCount}/3)`,
         btnClass: 'btn-secondary'
       },
       {
         icon: '🎯',
-        title: lang === 'es' ? 'Quiz por Capítulo' : 'Chapter Quiz',
-        desc: lang === 'es' ? 'Sin límite de tiempo · Avanza por el curriculum' : 'No time limit · Progress through the curriculum',
-        tags: lang === 'es' ? ['Sin límite', 'Por tema'] : ['No limit', 'By topic'],
+        title: i18n.t('exam_chapter'),
+        desc: i18n.t('exam_chapter_desc'),
+        tags: i18n.t('sim_chapter_tags'),
         type: 'chapter',
         locked: false,
         btnClass: 'btn-outline'
@@ -587,7 +587,7 @@ const App = {
       <div class="exam-history-item">
         <span>${e.type === 'full' ? '📋' : e.type === 'quick' ? '⚡' : '🎯'}</span>
         <span>${e.date}</span>
-        <span style="color:var(--text2)">${e.questions} ${lang === 'es' ? 'preguntas' : 'questions'}</span>
+        <span style="color:var(--text2)">${e.questions} ${i18n.t('questions_count_label')}</span>
         <span class="exam-history-score ${e.score >= 65 ? 'pass' : 'fail'}">${e.score}%</span>
       </div>`).join('');
   },
@@ -609,7 +609,7 @@ const App = {
         <h3>${title}</h3>
         <p>${desc}</p>
         <div class="sim-card-tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-        <button class="btn ${btnClass}">${lang === 'es' ? 'Iniciar' : 'Start'}</button>
+        <button class="btn ${btnClass}">${i18n.t('start_exam')}</button>
       </div>`;
   },
 
@@ -645,7 +645,7 @@ const App = {
     this.examCurrentQ = 0;
     this.examReviewing = false;
     this.examTimeLeft = timeMin * 60;
-    this.launchExam(type === 'full' ? i18n.lang === 'es' ? 'Examen Completo' : 'Full Exam' : i18n.lang === 'es' ? 'Examen Rápido' : 'Quick Exam');
+    this.launchExam(type === 'full' ? i18n.t('exam_full') : i18n.t('exam_quick'));
   },
 
   startChapterExam(chapterId) {
@@ -734,7 +734,7 @@ const App = {
 
     document.getElementById('examPrev').disabled = this.examCurrentQ === 0;
     document.getElementById('examNext').textContent = this.examCurrentQ === this.examQuestions.length - 1
-      ? (i18n.lang === 'es' ? 'Finalizar' : 'Finish')
+      ? i18n.t('end_exam')
       : i18n.t('next');
   },
 
@@ -789,7 +789,7 @@ const App = {
 
     this.state.examsCompleted++;
     if (score > this.state.bestScore) this.state.bestScore = score;
-    const date = new Date().toLocaleDateString(i18n.lang === 'es' ? 'es-ES' : 'en-US');
+    const date = new Date().toLocaleDateString(i18n.t('date_locale'));
     this.state.examHistory.push({ score, date, questions: total, type: this.examType, correct, time: timeUsed });
     if (this.state.examHistory.length > 50) this.state.examHistory.shift();
 
@@ -800,13 +800,13 @@ const App = {
         const passedCount = Object.values(this.state.chapterQuizPassed).filter(Boolean).length;
         const nextCh = CHAPTERS[this.examChapterId + 1];
         if (nextCh) {
-          setTimeout(() => this.showToast(`🔓 ${i18n.lang === 'es' ? 'Desbloqueado:' : 'Unlocked:'} ${nextCh.title[i18n.lang]}`, 'success'), 1200);
+          setTimeout(() => this.showToast(`🔓 ${i18n.t('unlocked_prefix')} ${nextCh.title[i18n.lang]}`, 'success'), 1200);
         }
         if (passedCount === 3) {
-          setTimeout(() => this.showToast(`⚡ ${i18n.lang === 'es' ? '¡Examen Rápido desbloqueado!' : 'Quick Exam unlocked!'}`, 'success'), 2200);
+          setTimeout(() => this.showToast(`⚡ ${i18n.t('quick_exam_unlocked_toast')}`, 'success'), 2200);
         }
         if (passedCount === CHAPTERS.length) {
-          setTimeout(() => this.showToast(`📋 ${i18n.lang === 'es' ? '¡Simulacro Final desbloqueado!' : 'Full Exam unlocked!'}`, 'success'), 2200);
+          setTimeout(() => this.showToast(`📋 ${i18n.t('full_exam_unlocked_toast')}`, 'success'), 2200);
         }
       }
     }
@@ -815,7 +815,7 @@ const App = {
     this.checkAchievements();
 
     const xpEarned = Math.round(score * 0.5) + (passed ? 50 : 10);
-    this.addXP(xpEarned, i18n.lang === 'es' ? `Simulacro completado (${score}%)` : `Mock exam completed (${score}%)`);
+    this.addXP(xpEarned, `${i18n.t('mock_exam_completed_activity')} (${score}%)`);
 
     document.getElementById('examMode').style.display = 'none';
     document.getElementById('examResults').style.display = 'block';
@@ -831,14 +831,14 @@ const App = {
       <div class="result-stat"><div class="result-stat-val text-success">${correct}</div><div class="result-stat-label">${i18n.t('correct_answers')}</div></div>
       <div class="result-stat"><div class="result-stat-val text-danger">${total - correct}</div><div class="result-stat-label">${i18n.t('wrong_answers')}</div></div>
       <div class="result-stat"><div class="result-stat-val">${score}%</div><div class="result-stat-label">${i18n.t('score_label')}</div></div>
-      <div class="result-stat"><div class="result-stat-val text-primary">+${xpEarned}</div><div class="result-stat-label">XP ${i18n.lang === 'es' ? 'ganados' : 'earned'}</div></div>
+      <div class="result-stat"><div class="result-stat-val text-primary">+${xpEarned}</div><div class="result-stat-label">${i18n.t('xp_gained')}</div></div>
     `;
 
     const lang = i18n.lang;
     const letters = ['A', 'B', 'C', 'D'];
     const wrongOnes = this.examQuestions.filter((q, i) => this.examAnswers[i] !== q.correct);
     document.getElementById('resultsReview').innerHTML = `
-      <h3>${i18n.lang === 'es' ? 'Revisión de respuestas incorrectas' : 'Review of wrong answers'} (${wrongOnes.length})</h3>
+      <h3>${i18n.t('wrong_answers_review_title')} (${wrongOnes.length})</h3>
       ${wrongOnes.slice(0, 10).map(q => `
         <div class="review-item">
           <div class="review-item-q">${q.q[lang]}</div>
@@ -857,7 +857,7 @@ const App = {
     const letters = [...new Set(GLOSSARY.map(g => g.term[lang][0].toUpperCase()))].sort();
     const filtersEl = document.getElementById('glossaryFilters');
     if (filtersEl) {
-      filtersEl.innerHTML = `<button class="filter-btn${activeFilter === 'all' ? ' active' : ''}" onclick="App.filterGlossary('all')">${lang === 'es' ? 'Todos' : 'All'}</button>` +
+      filtersEl.innerHTML = `<button class="filter-btn${activeFilter === 'all' ? ' active' : ''}" onclick="App.filterGlossary('all')">${i18n.t('all_label')}</button>` +
         letters.map(l => `<button class="filter-btn${activeFilter === l ? ' active' : ''}" onclick="App.filterGlossary('${l}')">${l}</button>`).join('');
     }
 
@@ -875,7 +875,7 @@ const App = {
         <div class="glossary-term">${g.term[lang]}</div>
         <div class="glossary-def">${g.def[lang]}</div>
         <div class="glossary-chapter">${chapterNames[g.chapter] || ''}</div>
-      </div>`).join('') || `<div class="empty-state"><p>${lang === 'es' ? 'No se encontraron términos' : 'No terms found'}</p></div>`;
+      </div>`).join('') || `<div class="empty-state"><p>${i18n.t('no_terms_found')}</p></div>`;
   },
 
   filterGlossary(letter) {
@@ -895,12 +895,12 @@ const App = {
       : 0;
 
     document.getElementById('progressStatsBig').innerHTML = `
-      <div class="progress-stat-big"><div class="progress-stat-big-val text-primary">${this.state.xp}</div><div class="progress-stat-big-label">XP ${lang === 'es' ? 'Total' : 'Total'}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--warning)">${lvl.icon} ${lang === 'es' ? 'Nivel' : 'Level'} ${lvl.level}</div><div class="progress-stat-big-label">${lvl.name[lang]}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val text-success">${done}/${totalLessons}</div><div class="progress-stat-big-label">${lang === 'es' ? 'Lecciones' : 'Lessons'}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--secondary)">${this.state.examsCompleted}</div><div class="progress-stat-big-label">${lang === 'es' ? 'Simulacros' : 'Exams'}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val text-primary">${this.state.xp}</div><div class="progress-stat-big-label">XP ${i18n.t('total_label')}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--warning)">${lvl.icon} ${i18n.t('level_label')} ${lvl.level}</div><div class="progress-stat-big-label">${lvl.name[lang]}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val text-success">${done}/${totalLessons}</div><div class="progress-stat-big-label">${i18n.t('lessons_label')}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--secondary)">${this.state.examsCompleted}</div><div class="progress-stat-big-label">${i18n.t('nav_simulator')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--warning)">🔥 ${this.state.streak}</div><div class="progress-stat-big-label">${i18n.t('streak_label')}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val">${avgScore}%</div><div class="progress-stat-big-label">${lang === 'es' ? 'Promedio examen' : 'Avg exam score'}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val">${avgScore}%</div><div class="progress-stat-big-label">${i18n.t('avg_exam_score_label')}</div></div>
     `;
 
     const colors = ["#6C63FF","#00D2FF","#FF6B6B","#FFC107","#4CAF50","#9C27B0"];
@@ -931,7 +931,7 @@ const App = {
             </div>`;
           }).join('')}
         </div>
-        <div style="text-align:center;margin-top:8px;font-size:0.75rem;color:var(--text3)">${lang === 'es' ? 'Línea de aprobado: 65%' : 'Pass line: 65%'}</div>`;
+        <div style="text-align:center;margin-top:8px;font-size:0.75rem;color:var(--text3)">${i18n.t('pass_line_label')}</div>`;
     } else {
       document.getElementById('examPerformanceChart').innerHTML = `<div class="empty-state"><p>${i18n.t('no_exams_yet')}</p></div>`;
     }
@@ -955,8 +955,8 @@ const App = {
     document.getElementById('achievementsSummary').innerHTML = `
       <div class="achievements-summary-icon">🏆</div>
       <div class="achievements-summary-text">
-        <h3>${unlocked.length} / ${ACHIEVEMENTS.length} ${lang === 'es' ? 'logros desbloqueados' : 'achievements unlocked'}</h3>
-        <p>${totalXP} XP ${lang === 'es' ? 'ganados en logros' : 'earned from achievements'}</p>
+        <h3>${unlocked.length} / ${ACHIEVEMENTS.length} ${i18n.t('achievements_unlocked_label')}</h3>
+        <p>${totalXP} XP ${i18n.t('earned_from_achievements_label')}</p>
       </div>`;
 
     document.getElementById('achievementsGrid').innerHTML = ACHIEVEMENTS.map(a => {
@@ -996,11 +996,9 @@ const App = {
 
   /* ===== LANGUAGE ===== */
   setLang(lang) {
-    i18n.lang = lang;
-    localStorage.setItem('mycampus_lang', lang);
+    i18n.setLang(lang);
     document.getElementById('btnES').classList.toggle('active', lang === 'es');
     document.getElementById('btnEN').classList.toggle('active', lang === 'en');
-    i18n.apply();
     this.navigate(this.currentView);
   },
 
@@ -1017,12 +1015,11 @@ const App = {
     this._initialized = true;
     this.state = preloadedState || this.loadState();
 
-    // Restore lang
-    const savedLang = localStorage.getItem('mycampus_lang') || 'es';
-    i18n.lang = savedLang;
-    document.getElementById('btnES').classList.toggle('active', savedLang === 'es');
-    document.getElementById('btnEN').classList.toggle('active', savedLang === 'en');
-    i18n.apply();
+    // Restore lang (ya restaurado por Auth.init() antes del login, pero
+    // i18n.restore() es idempotente — re-aplicar aquí es seguro)
+    i18n.restore();
+    document.getElementById('btnES').classList.toggle('active', i18n.lang === 'es');
+    document.getElementById('btnEN').classList.toggle('active', i18n.lang === 'en');
 
     // Restore theme
     const savedTheme = localStorage.getItem('mycampus_theme') || 'dark';
@@ -1080,7 +1077,7 @@ const App = {
     document.getElementById('examNext').addEventListener('click', () => this.examNavNext());
     document.getElementById('examPrev').addEventListener('click', () => this.examNavPrev());
     document.getElementById('endExamBtn').addEventListener('click', () => {
-      if (confirm(i18n.lang === 'es' ? '¿Seguro que deseas finalizar el examen?' : 'Are you sure you want to finish the exam?')) {
+      if (confirm(i18n.t('confirm_finish_exam'))) {
         this.finishExam();
       }
     });

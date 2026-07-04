@@ -6,50 +6,68 @@ const AVATARS = [
   {
     id: 'meticuloso',
     emoji: '🧐',
-    name: 'El Meticuloso',
-    badge: 'Validación profunda',
+    name: { es: 'El Meticuloso', en: 'The Meticulous One' },
+    badge: { es: 'Validación profunda', en: 'Deep validation' },
     color: '#6C63FF',
-    desc: 'Se toma su tiempo y revisa cada detalle como si fuera crítico. Puede parecer lento, pero detecta defectos sutiles que otros pasan por alto. Es clave en fases de validación profunda y pruebas de regresión complejas.',
+    desc: {
+      es: 'Se toma su tiempo y revisa cada detalle como si fuera crítico. Puede parecer lento, pero detecta defectos sutiles que otros pasan por alto. Es clave en fases de validación profunda y pruebas de regresión complejas.',
+      en: "Takes their time and reviews every detail as if it were critical. May seem slow, but catches subtle defects others miss. Key during deep validation phases and complex regression testing."
+    },
   },
   {
     id: 'tenaz',
     emoji: '🦊',
-    name: 'El Tenaz',
-    badge: 'Bugs difíciles',
+    name: { es: 'El Tenaz', en: 'The Tenacious One' },
+    badge: { es: 'Bugs difíciles', en: 'Tough bugs' },
     color: '#FF6B35',
-    desc: 'No suelta un bug hasta entenderlo completamente. Reproduce errores difíciles, insiste donde otros abandonan y documenta con precisión. Es ideal para issues intermitentes o difíciles de replicar.',
+    desc: {
+      es: 'No suelta un bug hasta entenderlo completamente. Reproduce errores difíciles, insiste donde otros abandonan y documenta con precisión. Es ideal para issues intermitentes o difíciles de replicar.',
+      en: "Won't let go of a bug until they fully understand it. Reproduces hard-to-catch errors, keeps pushing where others give up, and documents with precision. Ideal for intermittent or hard-to-reproduce issues."
+    },
   },
   {
     id: 'explorador',
     emoji: '🧭',
-    name: 'El Explorador',
-    badge: 'Testing creativo',
+    name: { es: 'El Explorador', en: 'The Explorer' },
+    badge: { es: 'Testing creativo', en: 'Creative testing' },
     color: '#00C896',
-    desc: 'Disfruta el testing no estructurado. Navega el sistema de forma creativa, buscando comportamientos inesperados. Es excelente encontrando bugs fuera de los casos de prueba tradicionales.',
+    desc: {
+      es: 'Disfruta el testing no estructurado. Navega el sistema de forma creativa, buscando comportamientos inesperados. Es excelente encontrando bugs fuera de los casos de prueba tradicionales.',
+      en: "Enjoys unstructured testing. Navigates the system creatively, looking for unexpected behavior. Excellent at finding bugs outside traditional test cases."
+    },
   },
   {
     id: 'esceptico',
     emoji: '🦉',
-    name: 'El Escéptico',
-    badge: 'Prevención de errores',
+    name: { es: 'El Escéptico', en: 'The Skeptic' },
+    badge: { es: 'Prevención de errores', en: 'Error prevention' },
     color: '#9B59B6',
-    desc: 'No confía en nada hasta probarlo. Cuestiona requisitos, valida supuestos y desafía implementaciones. Ayuda a prevenir errores conceptuales antes de que lleguen a producción.',
+    desc: {
+      es: 'No confía en nada hasta probarlo. Cuestiona requisitos, valida supuestos y desafía implementaciones. Ayuda a prevenir errores conceptuales antes de que lleguen a producción.',
+      en: "Trusts nothing until it's proven. Questions requirements, validates assumptions, and challenges implementations. Helps prevent conceptual errors before they reach production."
+    },
   },
   {
     id: 'automatizador',
     emoji: '🤖',
-    name: 'El Automatizador',
-    badge: 'Eficiencia y escala',
+    name: { es: 'El Automatizador', en: 'The Automator' },
+    badge: { es: 'Eficiencia y escala', en: 'Efficiency at scale' },
     color: '#00B4D8',
-    desc: 'Piensa en términos de eficiencia y repetibilidad. Busca constantemente qué se puede automatizar y cómo optimizar los pipelines de testing. Reduce esfuerzo manual y mejora cobertura a largo plazo.',
+    desc: {
+      es: 'Piensa en términos de eficiencia y repetibilidad. Busca constantemente qué se puede automatizar y cómo optimizar los pipelines de testing. Reduce esfuerzo manual y mejora cobertura a largo plazo.',
+      en: "Thinks in terms of efficiency and repeatability. Constantly looks for what can be automated and how to optimize testing pipelines. Reduces manual effort and improves coverage over time."
+    },
   },
   {
     id: 'empatico',
     emoji: '🌟',
-    name: 'El Usuario Empático',
-    badge: 'Visión del usuario',
+    name: { es: 'El Usuario Empático', en: 'The Empathetic User' },
+    badge: { es: 'Visión del usuario', en: 'User perspective' },
     color: '#FF9F43',
-    desc: 'Se pone en la piel del usuario final. Detecta problemas de usabilidad, flujos confusos y errores que afectan la experiencia. Aporta una visión más humana al proceso de calidad.',
+    desc: {
+      es: 'Se pone en la piel del usuario final. Detecta problemas de usabilidad, flujos confusos y errores que afectan la experiencia. Aporta una visión más humana al proceso de calidad.',
+      en: "Puts themselves in the end user's shoes. Spots usability issues, confusing flows, and errors that affect the experience. Brings a more human perspective to the quality process."
+    },
   },
 ];
 
@@ -69,7 +87,7 @@ const AvatarSelector = {
     const avatarEl = document.getElementById('userAvatar');
     if (avatarEl) {
       avatarEl.style.cursor = 'pointer';
-      avatarEl.title = 'Cambiar avatar';
+      avatarEl.title = i18n.t('change_avatar_title');
       avatarEl.addEventListener('click', () => this.openModal());
     }
 
@@ -92,7 +110,7 @@ const AvatarSelector = {
       const btn = document.createElement('button');
       btn.className = 'name-edit-btn';
       btn.innerHTML = '✏️';
-      btn.title = 'Editar nombre';
+      btn.title = i18n.t('edit_name_title');
       nameEl.insertAdjacentElement('afterend', btn);
       btn.addEventListener('click', (e) => { e.stopPropagation(); this._openNameEdit(); });
     }
@@ -151,9 +169,9 @@ const AvatarSelector = {
            style="--av-color: ${a.color}">
         <div class="av-emoji">${a.emoji}</div>
         <div class="av-info">
-          <div class="av-name">${a.name}</div>
-          <div class="av-badge">${a.badge}</div>
-          <div class="av-desc">${a.desc}</div>
+          <div class="av-name">${a.name[i18n.lang]}</div>
+          <div class="av-badge">${a.badge[i18n.lang]}</div>
+          <div class="av-desc">${a.desc[i18n.lang]}</div>
         </div>
         <div class="av-check">✓</div>
       </div>
@@ -175,7 +193,7 @@ const AvatarSelector = {
     this._applyToSidebar(avatar);
     this.closeModal();
     if (typeof App !== 'undefined' && App.showToast) {
-      App.showToast(`Avatar: ${avatar.name} 🎭`, 'success');
+      App.showToast(`Avatar: ${avatar.name[i18n.lang]} 🎭`, 'success');
     }
   },
 
