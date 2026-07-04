@@ -50,7 +50,7 @@
     ternaries in `app.js` were consolidated into `TRANSLATIONS`. The second pass caught
     the survivors the first one missed (visible "Salir" logout label, sidebar/topbar
     tooltips — now via `data-i18n-title` —, the streak toast suffix, the 'Estudiante'
-    fallback, the glossary "Cap.N" tag), leaving **159 keys, all ES/EN paired**, enforced
+    fallback, the glossary "Cap.N" tag), leaving **160 keys, all ES/EN paired**, enforced
     by `scripts/verify-runtime.js`. The auth screen needed its own standalone language
     switcher since it renders before `App` exists — see `i18n.setLang()`/`i18n.restore()`
     in `js/i18n.js`.
@@ -58,6 +58,14 @@
 ## Project Overview
 
 MyCampus ISTQB is a **vanilla JavaScript SPA** — no framework, no build system, no package manager. Browser-based study platform for ISTQB CTFL v4.0.
+
+`privacy.html` is a standalone bilingual static page (deliberately self-contained: own inline
+CSS/JS, doesn't load `styles.css` or the app modules, so it works even if the app breaks). It
+reuses the `mycampus_lang`/`mycampus_theme` localStorage keys so language and theme stay
+coherent when navigating from the app. Linked from the auth screen and the sidebar footer via
+the `privacy_link` i18n key. **Its statements about data handling must stay true to the code**
+— if sync, auth providers, storage, or third-party services (CDN, fonts) change, update the
+policy in the same commit and bump its "last updated" date.
 
 ## Running
 
@@ -128,7 +136,7 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
 - `data-i18n-placeholder="key"` for input placeholders
 - Default language is Spanish (`i18n.lang = 'es'`)
 - `data-i18n-title="key"` for `title` tooltips
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 159 keys, all ES/EN paired,
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 160 keys, all ES/EN paired,
   enforced by `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
   hardcoded-language residues)
 - `i18n.restore()` reads the saved language from `localStorage` and applies it; `i18n.setLang(lang)`

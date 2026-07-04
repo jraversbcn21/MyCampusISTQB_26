@@ -1908,3 +1908,27 @@ body {
   0%, 100% { box-shadow: 0 0 0 0 rgba(76,175,80,0.4); }
   50%      { box-shadow: 0 0 0 8px rgba(76,175,80,0); }
 }
+
+/* ===== PRIVACY POLICY LINKS ===== */
+.auth-privacy-link {
+  display: block;
+  margin-top: 18px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.auth-privacy-link:hover { color: var(--primary); }
+
+.sidebar-privacy-link {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.sidebar-privacy-link:hover { color: var(--primary); }
+.sidebar.collapsed .sidebar-privacy-link { display: none; }

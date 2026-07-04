@@ -159,6 +159,7 @@ const TRANSLATIONS = {
     streak_keep_going: "¡Sigue así!",
     student_fallback: "Estudiante",
     glossary_ch_tag: "Cap.",
+    privacy_link: "Política de privacidad",
 
     // AUTH
     auth_login_tab: "Iniciar sesión",
@@ -342,6 +343,7 @@ const TRANSLATIONS = {
     streak_keep_going: "Keep it up!",
     student_fallback: "Student",
     glossary_ch_tag: "Ch.",
+    privacy_link: "Privacy policy",
 
     // AUTH
     auth_login_tab: "Log in",

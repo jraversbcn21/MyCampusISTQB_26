@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidad — MyCampus ISTQB</title>
+  <meta name="description" content="Política de privacidad de MyCampus ISTQB: qué datos guardamos, dónde y para qué." />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E" />
+  <style>
+    /* Página estática autocontenida: no carga styles.css a propósito, para
+       que funcione aunque el resto de la app cambie o falle. */
+    :root {
+      --bg: #0B0B14; --card: #14141F; --text: #E8E8F0; --text2: #A0A0B8;
+      --primary: #6C63FF; --border: rgba(255,255,255,0.08);
+    }
+    [data-theme="light"] {
+      --bg: #F4F4FA; --card: #FFFFFF; --text: #1A1A2E; --text2: #55556B;
+      --border: rgba(0,0,0,0.10);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.65; padding: 24px 16px 64px;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    .top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .brand .logo { font-size: 1.6rem; }
+    .brand .name { font-weight: 800; }
+    .brand .sub { display: block; font-size: 0.7rem; color: var(--text2); }
+    .lang { display: flex; gap: 6px; }
+    .lang button {
+      background: var(--card); color: var(--text2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 12px; cursor: pointer; font-weight: 700; font-size: 0.8rem;
+    }
+    .lang button.active { color: #fff; background: var(--primary); border-color: var(--primary); }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px 26px;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 4px; }
+    .updated { color: var(--text2); font-size: 0.8rem; margin-bottom: 22px; }
+    h2 { font-size: 1.05rem; margin: 24px 0 8px; color: var(--primary); }
+    p, li { color: var(--text); font-size: 0.92rem; margin-bottom: 8px; }
+    ul { padding-left: 20px; margin-bottom: 8px; }
+    a { color: var(--primary); }
+    .muted { color: var(--text2); font-size: 0.85rem; }
+    .back { display: inline-block; margin-top: 26px; font-size: 0.9rem; }
+    [lang-block] { display: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="brand" href="index.html">
+        <span class="logo">🎓</span>
+        <span><span class="name">MyCampus</span><span class="sub">ISTQB Foundation Level v4.0</span></span>
+      </a>
+      <div class="lang">
+        <button id="btnES">ES</button>
+        <button id="btnEN">EN</button>
+      </div>
+    </div>
+
+    <!-- ==================== ESPAÑOL ==================== -->
+    <div class="card" lang-block="es">
+      <h1>Política de Privacidad</h1>
+      <p class="updated">Última actualización: 4 de julio de 2026</p>
+
+      <p>MyCampus ISTQB es una plataforma gratuita de estudio para la certificación
+      ISTQB® Certified Tester Foundation Level v4.0. Esta política explica, de forma
+      honesta y sin letra pequeña, qué datos tratamos, dónde y para qué.</p>
+
+      <h2>1. Responsable del tratamiento</h2>
+      <p>Jorge Carreño (desarrollador individual del proyecto).<br />
+      Contacto para cualquier asunto de privacidad:
+      <a href="mailto:jorgeborn3@gmail.com">jorgeborn3@gmail.com</a>.</p>
+
+      <h2>2. Qué datos tratamos</h2>
+      <ul>
+        <li><strong>Datos de cuenta:</strong> tu dirección de email y una contraseña
+        (almacenada con hash por nuestro proveedor de autenticación; nunca la vemos ni
+        la guardamos en claro). Opcionalmente, el nombre que indiques al registrarte.</li>
+        <li><strong>Si eliges "Continuar con Google":</strong> Google nos comparte tu
+        nombre, email y foto de perfil. No accedemos a nada más de tu cuenta de Google.</li>
+        <li><strong>Progreso de estudio:</strong> puntos de experiencia, lecciones
+        completadas, historial de simulacros, racha de estudio, logros y registro de
+        actividad — vinculados a tu identificador de usuario para poder sincronizarlos
+        entre dispositivos.</li>
+        <li><strong>Preferencias locales:</strong> idioma, tema claro/oscuro, avatar,
+        nombre mostrado y si ya viste el tour de bienvenida se guardan <em>solo en el
+        almacenamiento local de tu navegador</em> (localStorage) y no salen de tu
+        dispositivo.</li>
+      </ul>
+      <p>No recogemos datos de pago (la plataforma es gratuita), no usamos herramientas
+      de analítica ni publicidad, no creamos perfiles con fines comerciales y no
+      vendemos ni cedemos tus datos a terceros.</p>
+
+      <h2>3. Para qué y con qué base legal</h2>
+      <p>Usamos tus datos exclusivamente para prestarte el servicio que solicitas:
+      autenticarte y sincronizar tu progreso de estudio entre dispositivos
+      (art. 6.1.b RGPD — ejecución del servicio solicitado).</p>
+
+      <h2>4. Dónde se almacenan y quién más interviene</h2>
+      <ul>
+        <li><strong>Supabase</strong> — proveedor de autenticación y base de datos donde
+        se almacenan tu cuenta y tu progreso. Actúa como encargado del tratamiento.</li>
+        <li><strong>Google</strong> — solo si eliges iniciar sesión con Google (OAuth).</li>
+        <li><strong>jsDelivr</strong> (CDN) y <strong>Google Fonts</strong> — al cargar
+        la aplicación, tu navegador descarga de estos servicios un componente de
+        software y las fuentes tipográficas; en esa descarga dichos servicios reciben
+        tu dirección IP, como en cualquier descarga web.</li>
+      </ul>
+      <p>El acceso a tus datos de progreso está restringido a nivel de base de datos:
+      cada usuario solo puede leer y escribir su propia fila (políticas de seguridad a
+      nivel de fila, verificadas).</p>
+
+      <h2>5. Cookies y almacenamiento local</h2>
+      <p>No usamos cookies de seguimiento ni de publicidad. La aplicación usa el
+      almacenamiento local del navegador (localStorage) para funcionar sin conexión y
+      recordar tus preferencias, y el almacenamiento técnico de sesión de Supabase para
+      mantenerte con la sesión iniciada.</p>
+
+      <h2>6. Conservación</h2>
+      <p>Conservamos tus datos mientras tu cuenta exista. Si la eliminas (ver punto 7),
+      se eliminan tu cuenta y tu progreso asociado.</p>
+
+      <h2>7. Tus derechos</h2>
+      <p>Puedes ejercer tus derechos de acceso, rectificación, supresión, portabilidad,
+      limitación y oposición escribiendo a
+      <a href="mailto:jorgeborn3@gmail.com">jorgeborn3@gmail.com</a>.
+      La eliminación de la cuenta se realiza actualmente bajo petición por email y se
+      atiende en un plazo máximo de 30 días. También tienes derecho a reclamar ante la
+      Agencia Española de Protección de Datos (<a href="https://www.aepd.es" rel="noopener">aepd.es</a>).</p>
+
+      <h2>8. Menores</h2>
+      <p>La plataforma está dirigida a la preparación de una certificación profesional
+      y no está destinada a menores de 14 años.</p>
+
+      <h2>9. Cambios en esta política</h2>
+      <p>Si esta política cambia, actualizaremos la fecha de esta página. Los cambios
+      relevantes se comunicarán dentro de la propia aplicación.</p>
+
+      <a class="back" href="index.html">← Volver a MyCampus ISTQB</a>
+    </div>
+
+    <!-- ==================== ENGLISH ==================== -->
+    <div class="card" lang-block="en">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: July 4, 2026</p>
+
+      <p>MyCampus ISTQB is a free study platform for the ISTQB® Certified Tester
+      Foundation Level v4.0 certification. This policy explains, honestly and without
+      fine print, what data we process, where, and why.</p>
+
+      <h2>1. Data controller</h2>
+      <p>Jorge Carreño (individual developer of the project).<br />
+      Contact for any privacy matter:
+      <a href="mailto:jorgeborn3@gmail.com">jorgeborn3@gmail.com</a>.</p>
+
+      <h2>2. What data we process</h2>
+      <ul>
+        <li><strong>Account data:</strong> your email address and a password (stored
+        hashed by our authentication provider; we never see or store it in plain text).
+        Optionally, the name you provide at sign-up.</li>
+        <li><strong>If you choose "Continue with Google":</strong> Google shares your
+        name, email, and profile picture with us. We access nothing else from your
+        Google account.</li>
+        <li><strong>Study progress:</strong> experience points, completed lessons, exam
+        history, study streak, achievements, and activity log — linked to your user ID
+        so they can sync across devices.</li>
+        <li><strong>Local preferences:</strong> language, light/dark theme, avatar,
+        display name, and whether you've seen the welcome tour are stored <em>only in
+        your browser's local storage</em> (localStorage) and never leave your device.</li>
+      </ul>
+      <p>We collect no payment data (the platform is free), use no analytics or
+      advertising tools, build no commercial profiles, and never sell or share your
+      data with third parties.</p>
+
+      <h2>3. Why, and on what legal basis</h2>
+      <p>We use your data exclusively to provide the service you request:
+      authenticating you and syncing your study progress across devices
+      (Art. 6(1)(b) GDPR — performance of the requested service).</p>
+
+      <h2>4. Where it's stored and who else is involved</h2>
+      <ul>
+        <li><strong>Supabase</strong> — the authentication and database provider where
+        your account and progress are stored. It acts as a data processor.</li>
+        <li><strong>Google</strong> — only if you choose to sign in with Google (OAuth).</li>
+        <li><strong>jsDelivr</strong> (CDN) and <strong>Google Fonts</strong> — when the
+        app loads, your browser downloads a software component and the typefaces from
+        these services; during that download they receive your IP address, as with any
+        web download.</li>
+      </ul>
+      <p>Access to your progress data is restricted at the database level: each user
+      can only read and write their own row (row-level security policies, verified).</p>
+
+      <h2>5. Cookies and local storage</h2>
+      <p>We use no tracking or advertising cookies. The app uses the browser's local
+      storage (localStorage) to work offline and remember your preferences, plus
+      Supabase's technical session storage to keep you signed in.</p>
+
+      <h2>6. Retention</h2>
+      <p>We keep your data for as long as your account exists. If you delete it (see
+      section 7), your account and associated progress are removed.</p>
+
+      <h2>7. Your rights</h2>
+      <p>You can exercise your rights of access, rectification, erasure, portability,
+      restriction, and objection by writing to
+      <a href="mailto:jorgeborn3@gmail.com">jorgeborn3@gmail.com</a>.
+      Account deletion is currently handled on request by email, within 30 days at
+      most. You also have the right to lodge a complaint with your data protection
+      authority (in Spain, the AEPD — <a href="https://www.aepd.es" rel="noopener">aepd.es</a>).</p>
+
+      <h2>8. Minors</h2>
+      <p>The platform targets preparation for a professional certification and is not
+      intended for children under 14.</p>
+
+      <h2>9. Changes to this policy</h2>
+      <p>If this policy changes, we will update the date on this page. Relevant changes
+      will be announced inside the app itself.</p>
+
+      <a class="back" href="index.html">← Back to MyCampus ISTQB</a>
+    </div>
+  </div>
+
+  <script>
+    // Reutiliza las mismas claves de localStorage que la app para que idioma
+    // y tema sean coherentes al navegar entre index.html y esta página.
+    (function () {
+      var lang = 'es', theme = 'dark';
+      try {
+        lang = localStorage.getItem('mycampus_lang') || 'es';
+        theme = localStorage.getItem('mycampus_theme') || 'dark';
+      } catch (e) {}
+      document.body.setAttribute('data-theme', theme);
+
+      function apply(l) {
+        document.documentElement.lang = l;
+        document.querySelectorAll('[lang-block]').forEach(function (el) {
+          el.style.display = el.getAttribute('lang-block') === l ? 'block' : 'none';
+        });
+        document.getElementById('btnES').classList.toggle('active', l === 'es');
+        document.getElementById('btnEN').classList.toggle('active', l === 'en');
+        document.title = l === 'es'
+          ? 'Política de Privacidad — MyCampus ISTQB'
+          : 'Privacy Policy — MyCampus ISTQB';
+      }
+      function setLang(l) {
+        try { localStorage.setItem('mycampus_lang', l); } catch (e) {}
+        apply(l);
+      }
+      document.getElementById('btnES').addEventListener('click', function () { setLang('es'); });
+      document.getElementById('btnEN').addEventListener('click', function () { setLang('en'); });
+      apply(lang);
+    })();
+  </script>
+</body>
+</html>
