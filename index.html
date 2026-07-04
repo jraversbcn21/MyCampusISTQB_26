@@ -471,7 +471,11 @@
 
   </div><!-- end #app-container -->
 
-  <!-- SCRIPTS -->
+  <!-- SCRIPTS — ORDEN CRÍTICO, NO REORDENAR (ver AGENTS.md "Script Load Order").
+       Son <script> síncronos sin defer/async: cada uno debe poder ejecutarse
+       de arriba a abajo sin depender de que uno posterior ya haya cargado.
+       Auth._onAuthSuccess() valida los globals esperados y avisa con un
+       mensaje si alguno falta, en vez de romper en silencio más adelante. -->
   <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/content.js"></script>

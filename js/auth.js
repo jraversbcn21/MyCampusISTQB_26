@@ -96,6 +96,20 @@ const Auth = {
     if (this._authInProgress) return;
     this._authInProgress = true;
 
+    // Si algún <script> de index.html falló al cargar (reordenado, bloqueado,
+    // 404), mejor avisar aquí con un mensaje claro que dejar que App.init()
+    // reviente más adelante con un error críptico a mitad de un render.
+    const required = { App: typeof App, i18n: typeof i18n, CHAPTERS: typeof CHAPTERS,
+      QUESTIONS: typeof QUESTIONS, Gamification: typeof Gamification,
+      AvatarSelector: typeof AvatarSelector, Onboarding: typeof Onboarding };
+    const missing = Object.keys(required).filter(k => required[k] === 'undefined');
+    if (missing.length) {
+      console.error('[Auth] Módulos requeridos no cargados (¿se reordenó o falló algún <script> de index.html?):', missing.join(', '));
+      this._showMessage('Error al cargar la aplicación. Recarga la página; si el problema persiste, contacta soporte.', 'error');
+      this._authInProgress = false;
+      return;
+    }
+
     this._hideAuthScreen();
     this._updateUserUI(user);
     window.CAMPUS_USER_ID = user.id;
