@@ -139,13 +139,19 @@ const Auth = {
       AvatarSelector.init(user.id);
       setTimeout(() => Onboarding.start(user.id), 600);
 
-      // Sincronizar con Supabase en segundo plano sin bloquear la UI
+      // Sincronizar con Supabase en segundo plano sin bloquear la UI.
+      // loadState ya resolvió qué copia gana (frescura por _updatedAt) y dejó
+      // la caché localStorage coherente; aquí solo queda no pisar progreso
+      // que el usuario haya hecho MIENTRAS resolvía este fetch (su App.state
+      // en memoria tendría un sello más nuevo) y no re-navegar si hay un
+      // examen en marcha.
       Sync.loadState(user.id).then(cloudState => {
-        if (cloudState) {
+        if (cloudState && (cloudState._updatedAt || 0) >= ((App.state && App.state._updatedAt) || 0)) {
           App.state = cloudState;
-          localStorage.setItem(`mycampus_istqb_v1_${user.id}`, JSON.stringify(cloudState));
           App.updateSidebar();
-          App.navigate(App.currentView || 'dashboard');
+          const examEl = document.getElementById('examMode');
+          const examRunning = examEl && examEl.style.display === 'block';
+          if (!examRunning) App.navigate(App.currentView || 'dashboard');
         }
       }).catch(e => {
         console.warn('[Auth] Sync en segundo plano falló:', e.message);
