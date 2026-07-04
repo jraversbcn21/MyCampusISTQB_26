@@ -53,6 +53,10 @@ User Action → App.* method → mutate App.state → App.saveState()
 
 All views are HTML sections in `index.html` toggled via `display` style. Navigation is handled by `App.navigate(viewName)` — valid names: `dashboard`, `curriculum`, `flashcards`, `simulator`, `glossary`, `progress`, `achievements`, `lesson`.
 
+### Privacy Policy
+
+`privacy.html` is a standalone bilingual (ES/EN) static page — deliberately self-contained (own inline CSS/JS, no `styles.css`, no app modules) so it renders even if the app itself breaks. It reuses the `mycampus_lang`/`mycampus_theme` localStorage keys for a coherent language/theme, and is linked from the auth screen and sidebar footer via the `privacy_link` i18n key. Its claims about data handling (providers, storage region, retention) must stay accurate to the code — update it in the same commit as any change to sync, auth providers, or third-party services. Full detail (controller identity, EU data residency): `AGENTS.md` → "Production Readiness".
+
 ### Backend (Supabase)
 
 - Config in `js/config.js` — contains the Supabase URL and anon key.
@@ -107,3 +111,7 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
 - `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys, ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
+
+## Production Readiness — Pending Items
+
+Two items from that same conversation are planned but **not yet implemented**: error monitoring (Sentry free tier) and a review of Supabase Auth's native signup rate-limiting (adding a captcha only if needed). Full step-by-step plan, including manual prerequisites and a decision gate for the captcha: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`. See `AGENTS.md` → "Production Readiness — Status & Next Session" for the current status summary.

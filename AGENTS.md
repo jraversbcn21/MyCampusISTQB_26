@@ -55,6 +55,27 @@
     switcher since it renders before `App` exists — see `i18n.setLang()`/`i18n.restore()`
     in `js/i18n.js`.
 
+## Production Readiness — Status & Next Session
+
+Full assessment and the two open items came out of the same 2026-07-04 conversation as the
+audit above. Status:
+
+- **Privacy policy: DONE.** `privacy.html` (see "Project Overview" below), linked from the
+  auth screen and sidebar footer. Controller: Sid Maier (sidmaierlabs@gmail.com). Data
+  residency: EU, West EU (Paris) Supabase region — confirmed, no international-transfer
+  clause needed.
+- **Error monitoring (Sentry free tier): NOT STARTED.** Plan ready to execute:
+  `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md` (Part A). Needs a
+  user-provided Sentry DSN before it can begin.
+- **Signup rate-limiting/captcha: NOT STARTED.** Same plan document, Part B — starts with
+  a read-only audit of the Supabase dashboard's native rate limits and SMTP email caps
+  (flagged in the plan as a possible production blocker on its own, independent of any
+  captcha), then an explicit gate: soft launch stops there, public launch adds Cloudflare
+  Turnstile.
+
+**To resume:** open the plan doc above and follow it top to bottom; both parts list their
+manual prerequisites (Sentry account, Cloudflare account) up front.
+
 ## Project Overview
 
 MyCampus ISTQB is a **vanilla JavaScript SPA** — no framework, no build system, no package manager. Browser-based study platform for ISTQB CTFL v4.0.
