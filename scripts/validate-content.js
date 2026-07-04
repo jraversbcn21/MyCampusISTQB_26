@@ -1,21 +1,9 @@
 /* Validador de auditoría de contenido — arnés de desarrollo (no se sirve al navegador). */
-const fs = require('fs');
 const path = require('path');
+const { FL_RE, loadGlobals, checkBilingualText, report } = require('./lib/validate-utils');
 
 const SRC = path.join(__dirname, '..', 'js', 'content.js');
-const src = fs.readFileSync(SRC, 'utf8');
-
-let CHAPTERS, LESSONS, GLOSSARY, FLASHCARDS;
-try {
-  const result = new Function(src + '\n; return {CHAPTERS, LESSONS, GLOSSARY, FLASHCARDS};')();
-  CHAPTERS = result.CHAPTERS;
-  LESSONS = result.LESSONS;
-  GLOSSARY = result.GLOSSARY;
-  FLASHCARDS = result.FLASHCARDS;
-} catch (e) {
-  console.error('❌ content.js no parsea:', e.message);
-  process.exit(1);
-}
+const { CHAPTERS, LESSONS, GLOSSARY, FLASHCARDS } = loadGlobals(SRC, ['CHAPTERS', 'LESSONS', 'GLOSSARY', 'FLASHCARDS']);
 
 const TARGET_TOPIC_COUNT = { 0: 5, 1: 4, 2: 2, 3: 5, 4: 5, 5: 1 };
 let errors = [];
@@ -37,7 +25,7 @@ CHAPTERS.forEach((ch, chIdx) => {
       errors.push(`${tag}: falta lo (array de códigos FL-x.y.z)`);
     } else {
       topic.lo.forEach(code => {
-        if (!/^FL-\d+\.\d+\.\d+$/.test(code)) errors.push(`${tag}: código lo inválido "${code}"`);
+        if (!FL_RE.test(code)) errors.push(`${tag}: código lo inválido "${code}"`);
       });
     }
     if (!topic.source || !topic.source.trim()) errors.push(`${tag}: source vacío`);
@@ -95,11 +83,8 @@ const seenTerms = new Set();
 GLOSSARY.forEach((g, i) => {
   const label = g.term ? `${g.term.es || '?'} / ${g.term.en || '?'}` : '(sin term)';
   const tag = `glossary[${i}] "${label.slice(0, 45)}"`;
-  if (!g.term || !g.term.es || !g.term.es.trim()) errors.push(`${tag}: falta term.es`);
-  if (!g.term || !g.term.en || !g.term.en.trim()) errors.push(`${tag}: falta term.en`);
-  for (const lang of ['es', 'en']) {
-    if (!g.def || !g.def[lang] || !g.def[lang].trim()) errors.push(`${tag}: falta def.${lang}`);
-  }
+  checkBilingualText(g, 'term', tag, errors);
+  checkBilingualText(g, 'def', tag, errors);
   if (!['1','2','3','4','5','6'].includes(g.chapter)) errors.push(`${tag}: chapter inválido "${g.chapter}"`);
   if (!g.source || !g.source.trim()) errors.push(`${tag}: source vacío`);
   const key = g.term ? `${(g.term.es || '').toLowerCase().trim()}|${(g.term.en || '').toLowerCase().trim()}` : '';
@@ -125,15 +110,8 @@ FLASHCARDS.forEach(f => {
   const tag = `flashcard id ${f.id}`;
   if (fcIds.has(f.id)) errors.push(`${tag}: id duplicado`);
   fcIds.add(f.id);
-  for (const lang of ['es', 'en']) {
-    if (!f.q || !f.q[lang] || !f.q[lang].trim()) errors.push(`${tag}: falta q.${lang}`);
-    if (!f.a || !f.a[lang] || !f.a[lang].trim()) errors.push(`${tag}: falta a.${lang}`);
-  }
+  checkBilingualText(f, 'q', tag, errors);
+  checkBilingualText(f, 'a', tag, errors);
 });
 
-if (errors.length) {
-  console.error(`\n❌ ${errors.length} problema(s):`);
-  for (const e of errors) console.error('  - ' + e);
-  process.exit(1);
-}
-console.log('\n✅ Todas las validaciones pasan.');
+report(errors);
