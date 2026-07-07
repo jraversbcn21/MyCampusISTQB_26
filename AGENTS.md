@@ -64,17 +64,19 @@ audit above. Status:
   auth screen and sidebar footer. Controller: Sid Maier (sidmaierlabs@gmail.com). Data
   residency: EU, West EU (Paris) Supabase region — confirmed, no international-transfer
   clause needed.
-- **Error monitoring (Sentry free tier): NOT STARTED.** Plan ready to execute:
-  `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md` (Part A). Needs a
-  user-provided Sentry DSN before it can begin.
+- **Error monitoring (Sentry free tier): DONE (2026-07-07).** Plan executed:
+  `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md` (Part A). See
+  "Error Monitoring (Sentry)" above for the implementation; `privacy.html` (ES/EN)
+  updated in the same commit.
 - **Signup rate-limiting/captcha: NOT STARTED.** Same plan document, Part B — starts with
   a read-only audit of the Supabase dashboard's native rate limits and SMTP email caps
   (flagged in the plan as a possible production blocker on its own, independent of any
   captcha), then an explicit gate: soft launch stops there, public launch adds Cloudflare
   Turnstile.
 
-**To resume:** open the plan doc above and follow it top to bottom; both parts list their
-manual prerequisites (Sentry account, Cloudflare account) up front.
+**To resume:** Part A is done; open the plan doc above and follow Part B (B1 first — the
+dashboard audit — then the gate, then B2 only if it applies). B1 needs the Supabase
+dashboard open; B2 needs a Cloudflare account.
 
 ## Project Overview
 
@@ -103,10 +105,10 @@ No `npm install`, no compilation, no build step.
 
 ### Script Load Order (Critical)
 
-Scripts are loaded sequentially near the end of `<body>` in `index.html` (a code comment there points back to this section). Each exposes a global that later scripts depend on:
+The Sentry CDN bundle loads in `<head>`, before supabase-js, so it can capture errors thrown by every script that loads after it (see "Error Monitoring (Sentry)" below). The rest load sequentially near the end of `<body>` in `index.html` (a code comment there points back to this section). Each exposes a global that later scripts depend on:
 
 ```
-config.js → i18n.js → content.js → questions.js → gamification.js → app.js → onboarding.js → avatar.js → sync.js → auth.js
+sentry-cdn (in <head>) → config.js → monitoring.js → i18n.js → content.js → questions.js → gamification.js → app.js → onboarding.js → avatar.js → sync.js → auth.js
 ```
 
 **Do not reorder these.** Earlier modules are dependencies of later ones. In practice, reordering the current scripts among themselves wouldn't break anything today (they're all synchronous, no `defer`/`async`, so everything has executed by the time `DOMContentLoaded` fires regardless of order) — the real risk is one of them failing to load entirely (blocked, 404). `Auth._onAuthSuccess()` guards against that: it checks that `App`/`i18n`/`CHAPTERS`/`QUESTIONS`/`Gamification`/`AvatarSelector`/`Onboarding`/`Sync` are actually defined and shows a clear message instead of letting `App.init()` crash with an uncaught `ReferenceError` mid-render; a missing/failed `config.js` is covered separately by the top-level guard in `auth.js` (it feeds the same `_showLoadFailure()` path as a failed CDN load). Don't treat those guards as permission to actually reorder things, though — a future change could easily introduce a real top-level dependency.
@@ -119,6 +121,7 @@ Every module is a **global singleton object**. Naming is inconsistent:
 |--------|------|-------|
 | `App` | `js/app.js` | Main controller. Also holds `_expandedChapters` (Set), `_currentCard` (TTS), `currentLesson` |
 | `Auth` | `js/auth.js` | Entry point on DOMContentLoaded |
+| `Monitoring` | `js/monitoring.js` | Sentry error monitoring, no-op if Sentry/DSN missing |
 | `Sync` | `js/sync.js` | Cloud sync (4s debounce) |
 | `Gamification` | `js/gamification.js` | XP, levels, badges |
 | `AvatarSelector` | `js/avatar.js` | Avatar picker |
@@ -266,6 +269,46 @@ presence for `id > 50`. Treat a failing run as a blocker, not a warning.
 - Supabase client loaded from CDN in `index.html`, pinned to an exact version + SRI hash (not a floating `@2` tag):
   `<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js" integrity="sha384-..." crossorigin="anonymous">`.
   To bump the version: resolve the new version, fetch the exact `/dist/umd/supabase.js` file (not the bare `@x.y.z` URL — jsdelivr's own file header warns "do NOT use SRI with dynamically generated files"), compute its sha384, cross-check the hash against a second CDN (e.g. unpkg) before trusting it, then update both the version and `integrity` attribute together.
+
+### Error Monitoring (Sentry)
+
+- `js/monitoring.js` (`Monitoring` global) wraps `@sentry/browser`, loaded as a pinned
+  CDN bundle in `index.html`'s `<head>`, before supabase-js, so it can capture errors
+  thrown by any script that loads after it.
+- **Never a hard dependency.** Same degradation pattern as the Supabase CDN guard in
+  `auth.js`: if `window.Sentry` is missing (CDN blocked, offline, SRI mismatch) or
+  `SENTRY_DSN` is undefined, `Monitoring.init()` no-ops silently and every other
+  `Monitoring.*` call becomes a no-op too. The app must never depend on monitoring to
+  function — verified by `scripts/verify-runtime.js`'s N9 checks.
+- `SENTRY_DSN` lives in `js/config.js` next to the Supabase credentials — it's public by
+  design, same class of secret as the Supabase anon key.
+- `Sentry.init()` is called with `sendDefaultPii: false` and a `beforeSend` scrubber
+  (`Monitoring._scrub`) that strips `user.email`/`user.username`/`user.ip_address` and
+  redacts any email-shaped substring found anywhere in the event (message, breadcrumbs,
+  extra context). Users are identified to Sentry **only** by their Supabase UUID
+  (`Monitoring.identify(user.id)`, called from `auth.js`'s `_onAuthSuccess`); the
+  UUID is cleared on `SIGNED_OUT` (`Monitoring.clearUser()`). Never email or name.
+- **CDN pin (2026-07-07):** `https://browser.sentry-cdn.com/10.63.0/bundle.min.js`,
+  `sha384-DK4NLLOVDh6BGBXQ48eIAFQ6DET3Y3pPMh/1xZBluw9YlZC9d51bMNXIerBn9sQM`. This is the
+  minimal error-only bundle — no tracing, no session replay, consistent with the
+  minimal-data-collection stance in `privacy.html`.
+- **SRI verification method — documented deviation from the Supabase procedure above.**
+  The Supabase pin is cross-checked against a second CDN (jsdelivr vs. unpkg) because the
+  npm tarball is mirrored on both. `@sentry/browser`'s prebuilt CDN bundles are **not**
+  published to the npm package (confirmed: no `bundle*.js` under the jsdelivr file
+  listing for the package, only ESM/CJS builds) — the only official host is
+  `browser.sentry-cdn.com` (Sentry's own Fastly-backed CDN), so there is no independent
+  second mirror to diff against. Verified instead by: (1) fetching the file twice
+  independently and confirming byte-identical content, and (2) matching the version+commit
+  comment embedded in the bundle header (`/*! @sentry/browser 10.63.0 (2362e9f) | ... */`)
+  against the commit SHA of the `10.63.0` tag in the public `getsentry/sentry-javascript`
+  GitHub repo (`git ls-remote`/`git show-ref --tags`, or the GitHub API `git/refs/tags/…`).
+  Pinned to `10.63.0` rather than the newer `10.64.0` published the same day this was
+  written: the CDN returned `403` for `10.64.0` (propagation lag between npm publish and
+  the Fastly-backed bundle host), confirmed by probing several adjacent versions.
+- Any future version bump should repeat this same verification (double-fetch +
+  GitHub tag match), not silently assume a second-CDN cross-check is available like the
+  Supabase procedure — it isn't, for this package.
 
 ### Offline
 

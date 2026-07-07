@@ -41,6 +41,7 @@ User Action → App.* method → mutate App.state → App.saveState()
 |------|--------|----------------|
 | `js/app.js` | `App` | Main controller: state, navigation, view rendering |
 | `js/auth.js` | `Auth` | Supabase auth (email + Google OAuth), session handling |
+| `js/monitoring.js` | `Monitoring` | Sentry error monitoring; no-op if the CDN/DSN is missing |
 | `js/sync.js` | `Sync` | Debounced cloud save/load to Supabase `user_progress` table |
 | `js/content.js` | *(data)* | Curriculum chapters, lessons, glossary |
 | `js/questions.js` | *(data)* | Exam question bank (120 questions) |
@@ -64,6 +65,10 @@ All views are HTML sections in `index.html` toggled via `display` style. Navigat
 - Row Level Security enabled and verified (2026-07-02): `SELECT`/`INSERT`/`UPDATE` policies all scope on `auth.uid() = user_id`, no `DELETE` policy (default-deny).
 - Client script pinned to an exact version + SRI hash in `index.html` (not a floating CDN tag) — see `AGENTS.md` for the exact update procedure when bumping it.
 - Google OAuth redirect URL is handled and cleaned by `auth.js` to prevent hash pollution in the URL after login.
+
+### Error Monitoring (Sentry)
+
+`js/monitoring.js` (`Monitoring`) wraps a pinned Sentry Browser SDK CDN bundle (loaded in `<head>`, before supabase-js, so it captures errors from every later script). It is never a hard dependency — same no-op degradation pattern as the Supabase CDN guard — and it never reports email/name, only the Supabase UUID (`Monitoring.identify()`/`clearUser()`, called from `auth.js`). Full detail, including the SRI verification method (documented deviation from the Supabase cross-CDN procedure — Sentry's prebuilt bundles have no second mirror): `AGENTS.md` → "Error Monitoring (Sentry)".
 
 ### Offline / Graceful Degradation
 
@@ -114,4 +119,4 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 
 ## Production Readiness — Pending Items
 
-Two items from that same conversation are planned but **not yet implemented**: error monitoring (Sentry free tier) and a review of Supabase Auth's native signup rate-limiting (adding a captcha only if needed). Full step-by-step plan, including manual prerequisites and a decision gate for the captcha: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`. See `AGENTS.md` → "Production Readiness — Status & Next Session" for the current status summary.
+Two items came out of that same 2026-07-04 conversation. **Error monitoring (Sentry free tier) is now DONE (2026-07-07)** — see "Error Monitoring (Sentry)" above. **Still not implemented:** a review of Supabase Auth's native signup rate-limiting (adding a captcha only if needed). Full step-by-step plan, including manual prerequisites and a decision gate for the captcha: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md` (Part B). See `AGENTS.md` → "Production Readiness — Status & Next Session" for the current status summary.

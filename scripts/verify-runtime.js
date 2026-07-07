@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const ORDER = ['config.js', 'i18n.js', 'content.js', 'questions.js', 'gamification.js',
+const ORDER = ['config.js', 'monitoring.js', 'i18n.js', 'content.js', 'questions.js', 'gamification.js',
   'app.js', 'onboarding.js', 'avatar.js', 'sync.js', 'auth.js'];
 
 /* ===== Mock DOM mínimo ===== */
@@ -92,6 +92,16 @@ function makeSupabaseMock(opts = {}) {
   return client;
 }
 
+function makeSentryMock() {
+  const calls = { inits: [], setUsers: [] };
+  const client = {
+    _calls: calls,
+    init(opts) { calls.inits.push(opts); },
+    setUser(u) { calls.setUsers.push(u); },
+  };
+  return client;
+}
+
 /* ===== Carga de módulos con scope compartido (emula <script> secuenciales) ===== */
 function loadApp(opts = {}) {
   const exclude = opts.exclude || [];
@@ -101,10 +111,12 @@ function loadApp(opts = {}) {
   const doc = makeDocument();
   const ls = opts.localStorage || makeLocalStorage();
   const sb = 'supabase' in opts ? opts.supabase : makeSupabaseMock();
+  const sentry = 'sentry' in opts ? opts.sentry : undefined;
   const calls = { fetches: [] };
 
   const win = {
     supabase: sb ? { createClient: () => sb } : undefined,
+    Sentry: sentry,
     location: { origin: 'http://localhost', pathname: '/', hash: '', href: 'http://localhost/' },
     speechSynthesis: { cancel() {}, speak() {}, getVoices() { return []; }, speaking: false },
     innerWidth: 1280, innerHeight: 800,
@@ -115,6 +127,7 @@ function loadApp(opts = {}) {
     App: typeof App !== 'undefined' ? App : undefined,
     Auth: typeof Auth !== 'undefined' ? Auth : undefined,
     Sync: typeof Sync !== 'undefined' ? Sync : undefined,
+    Monitoring: typeof Monitoring !== 'undefined' ? Monitoring : undefined,
     i18n: typeof i18n !== 'undefined' ? i18n : undefined,
     TRANSLATIONS: typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS : undefined
   };`;
@@ -269,6 +282,36 @@ const SAMPLE_Q = {
     }
     check('N8d glosario: 4 pulsaciones de una misma búsqueda cuentan 1, no 4',
       ctx.App.state.glossarySearches - before === 1);
+  }
+
+  /* ---- N9: Monitoring (Sentry) nunca puede tumbar la app ni filtrar PII ---- */
+  {
+    const ctx = loadApp({ sentry: undefined });
+    let threw = false;
+    try { ctx.App.init(null); } catch (e) { threw = true; }
+    check('N9 monitoring: sin window.Sentry, la app carga sin excepción y App inicializa',
+      !threw && ctx.App._initialized === true);
+    check('N9 monitoring: Monitoring queda deshabilitado sin window.Sentry',
+      !!ctx.Monitoring && ctx.Monitoring._enabled === false);
+  }
+  {
+    const sentry = makeSentryMock();
+    const ctx = loadApp({ sentry });
+    const init = sentry._calls.inits[0];
+    check('N9 monitoring: con window.Sentry presente, init() llama a Sentry.init con el DSN y sin PII por defecto',
+      sentry._calls.inits.length === 1 && typeof init.dsn === 'string' && init.dsn.length > 0 &&
+      init.sendDefaultPii === false && typeof init.beforeSend === 'function');
+    const event = {
+      user: { id: 'u1', email: 'real-user@example.com', username: 'realuser' },
+      message: 'Fallo al procesar contacto: real-user@example.com',
+      extra: { note: 'contactar a otro-user@example.com por favor' },
+    };
+    const scrubbed = ctx.Monitoring._scrub(event);
+    check('N9 monitoring: beforeSend elimina el email/username del evento de usuario',
+      !scrubbed.user.email && !scrubbed.user.username);
+    check('N9 monitoring: beforeSend redacta emails incrustados en mensaje/contexto',
+      !scrubbed.message.includes('real-user@example.com') &&
+      !scrubbed.extra.note.includes('otro-user@example.com'));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

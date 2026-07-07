@@ -1,7 +1,10 @@
 # Plan de ejecución: monitoreo de errores + protección anti-abuso en el signup
 
-**Estado: PENDIENTE DE EJECUTAR** (este documento es el plan, nada de lo descrito aquí
-está implementado todavía). Escrito el 2026-07-04 para ejecutarse en una sesión futura.
+**Estado: Parte A DONE (2026-07-07). Parte B PENDIENTE DE EJECUTAR.** Escrito el
+2026-07-04 para ejecutarse en una sesión futura; la Parte A (monitoreo de errores con
+Sentry) se ejecutó completa el 2026-07-07 — ver `AGENTS.md` → "Error Monitoring (Sentry)"
+para el estado resultante. La Parte B (rate-limiting/captcha del signup) sigue sin
+empezar.
 
 ## Contexto
 

@@ -59,6 +59,7 @@ const Auth = {
       } else if (event === 'SIGNED_OUT') {
         this.user = null;
         this._authInProgress = false;
+        if (typeof Monitoring !== 'undefined') Monitoring.clearUser();
         this._showAuthScreen();
       }
     });
@@ -140,6 +141,7 @@ const Auth = {
     this._hideAuthScreen();
     this._updateUserUI(user);
     window.CAMPUS_USER_ID = user.id;
+    if (typeof Monitoring !== 'undefined') Monitoring.identify(user.id);
 
     // Limpiar tokens OAuth del URL para no contaminar futuros logins
     if (window.location.hash) {

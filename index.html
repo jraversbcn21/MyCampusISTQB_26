@@ -14,6 +14,11 @@
   <meta name="twitter:description" content="Prepara la certificación ISTQB CTFL v4.0 con lecciones, glosario, flashcards y simulacros de examen." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="css/styles.css" />
+  <!-- Sentry va primero: tiene que estar listo para capturar errores de los
+       <script> que se cargan después (ver AGENTS.md "Script Load Order"). -->
+  <script src="https://browser.sentry-cdn.com/10.63.0/bundle.min.js"
+    integrity="sha384-DK4NLLOVDh6BGBXQ48eIAFQ6DET3Y3pPMh/1xZBluw9YlZC9d51bMNXIerBn9sQM"
+    crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js"
     integrity="sha384-3wY11tldQ5+yWqAvmTN4XtQvnjoTva0cV15O/O/O5NTtp0ivVopSzLOzsVXWZse9"
     crossorigin="anonymous"></script>
@@ -485,6 +490,7 @@
        Auth._onAuthSuccess() valida los globals esperados y avisa con un
        mensaje si alguno falta, en vez de romper en silencio más adelante. -->
   <script src="js/config.js"></script>
+  <script src="js/monitoring.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/content.js"></script>
   <script src="js/questions.js"></script>
