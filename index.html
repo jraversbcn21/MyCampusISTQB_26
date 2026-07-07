@@ -14,16 +14,23 @@
   <meta name="twitter:description" content="Prepara la certificación ISTQB CTFL v4.0 con lecciones, glosario, flashcards y simulacros de examen." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="css/styles.css" />
-  <!-- Sentry va primero: tiene que estar listo para capturar errores de los
-       <script> que se cargan después (ver AGENTS.md "Script Load Order"). -->
+  <!-- El preconnect va antes de los <script> síncronos de abajo: no depende
+       de su ejecución y así el navegador puede empezar el handshake con
+       fonts.googleapis.com en paralelo en vez de esperar a que ambos
+       scripts bloqueantes terminen. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Sentry va primero de los dos scripts síncronos: en cuanto carga, deja
+       window.Sentry listo para que monitoring.js pueda inicializarlo. Ese
+       init real ocurre más abajo en <body> (ver AGENTS.md "Script Load
+       Order") — un error síncrono del propio <script> de supabase-js aquí
+       en <head>, antes de ese init, no llegaría a capturarse. -->
   <script src="https://browser.sentry-cdn.com/10.63.0/bundle.min.js"
     integrity="sha384-DK4NLLOVDh6BGBXQ48eIAFQ6DET3Y3pPMh/1xZBluw9YlZC9d51bMNXIerBn9sQM"
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js"
     integrity="sha384-3wY11tldQ5+yWqAvmTN4XtQvnjoTva0cV15O/O/O5NTtp0ivVopSzLOzsVXWZse9"
     crossorigin="anonymous"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 </head>
 <body>
 

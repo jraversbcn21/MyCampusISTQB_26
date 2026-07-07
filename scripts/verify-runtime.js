@@ -75,8 +75,8 @@ function makeSupabaseMock(opts = {}) {
   const client = {
     _calls: calls,
     auth: {
-      onAuthStateChange() { return { data: { subscription: {} } }; },
-      getSession: async () => ({ data: { session: opts.session || { access_token: 'tok-mock' } } }),
+      onAuthStateChange(cb) { calls.authStateCb = cb; return { data: { subscription: {} } }; },
+      getSession: async () => ({ data: { session: 'session' in opts ? opts.session : { access_token: 'tok-mock' } } }),
       signOut: async () => ({ error: null }),
     },
     from() {
@@ -92,11 +92,14 @@ function makeSupabaseMock(opts = {}) {
   return client;
 }
 
-function makeSentryMock() {
+function makeSentryMock(opts = {}) {
   const calls = { inits: [], setUsers: [] };
   const client = {
     _calls: calls,
-    init(opts) { calls.inits.push(opts); },
+    init(initOpts) {
+      calls.inits.push(initOpts);
+      if (opts.throwOnInit) throw new Error('sdk-init-boom');
+    },
     setUser(u) { calls.setUsers.push(u); },
   };
   return client;
@@ -295,6 +298,18 @@ const SAMPLE_Q = {
       !!ctx.Monitoring && ctx.Monitoring._enabled === false);
   }
   {
+    // Sentry.init() puede reventar (SDK con bug, opción inesperada tras un
+    // bump de versión) — no debe tumbar la carga de la app.
+    const sentry = makeSentryMock({ throwOnInit: true });
+    let threw = false;
+    const ctx = loadApp({ sentry });
+    try { ctx.App.init(null); } catch (e) { threw = true; }
+    check('N9 monitoring: si Sentry.init() lanza excepción, la app carga igual',
+      !threw && ctx.App._initialized === true);
+    check('N9 monitoring: Monitoring queda deshabilitado si Sentry.init() lanza excepción',
+      ctx.Monitoring._enabled === false);
+  }
+  {
     const sentry = makeSentryMock();
     const ctx = loadApp({ sentry });
     const init = sentry._calls.inits[0];
@@ -304,14 +319,52 @@ const SAMPLE_Q = {
     const event = {
       user: { id: 'u1', email: 'real-user@example.com', username: 'realuser' },
       message: 'Fallo al procesar contacto: real-user@example.com',
-      extra: { note: 'contactar a otro-user@example.com por favor' },
+      extra: {
+        note: 'contactar a otro-user@example.com por favor',
+        // Cadena real que aparecería en un stack frame de nuestra propia
+        // dependencia CDN: no debe confundirse con un email (regresión real,
+        // encontrada en code review).
+        stackUrl: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js:12:34',
+      },
     };
-    const scrubbed = ctx.Monitoring._scrub(event);
+    // A través de init.beforeSend, no de Monitoring._scrub directamente: así
+    // el chequeo falla si Sentry.init() se llega a conectar a un scrubber
+    // distinto del que _scrub implementa.
+    const scrubbed = init.beforeSend(event);
     check('N9 monitoring: beforeSend elimina el email/username del evento de usuario',
       !scrubbed.user.email && !scrubbed.user.username);
     check('N9 monitoring: beforeSend redacta emails incrustados en mensaje/contexto',
       !scrubbed.message.includes('real-user@example.com') &&
       !scrubbed.extra.note.includes('otro-user@example.com'));
+    check('N9 monitoring: beforeSend NO corrompe una URL de CDN versionada (falso positivo real)',
+      scrubbed.extra.stackUrl === 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js:12:34');
+  }
+  {
+    // A diferencia del bloque N3 (que excluye sync.js a propósito para
+    // probar la guarda de módulos faltantes), este recorre el camino feliz
+    // completo de auth.js para comprobar que identify()/clearUser() se
+    // conectan de verdad — antes de este chequeo, ningún test llegaba a
+    // ejecutar esas dos líneas de auth.js.
+    const sentry = makeSentryMock();
+    // session: null → Auth.init() toma la rama _showAuthScreen() (sin
+    // autologin), dejando solo registrado el listener de onAuthStateChange
+    // que necesitamos para disparar SIGNED_OUT manualmente más abajo.
+    const sb = makeSupabaseMock({ session: null });
+    const ctx = loadApp({ sentry, supabase: sb });
+    await ctx.Auth.init();
+
+    // App ya "inicializada": toma la rama corta de _onAuthSuccess y evita
+    // recorrer todo App.init() (fuera de alcance de este chequeo — el mock
+    // de DOM mínimo no modela cada elemento que ese render toca).
+    ctx.App._initialized = true;
+    const user = { id: 'uuid-1234', email: 'test@example.com', user_metadata: {} };
+    await ctx.Auth._onAuthSuccess(user);
+    check('N9 monitoring: identify() se llama con el UUID de Supabase tras un login correcto',
+      sentry._calls.setUsers.some(u => u && u.id === 'uuid-1234' && !u.email));
+
+    sb._calls.authStateCb('SIGNED_OUT', null);
+    check('N9 monitoring: clearUser() se llama al cerrar sesión (SIGNED_OUT)',
+      sentry._calls.setUsers[sentry._calls.setUsers.length - 1] === null);
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

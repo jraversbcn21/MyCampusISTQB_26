@@ -105,7 +105,7 @@ No `npm install`, no compilation, no build step.
 
 ### Script Load Order (Critical)
 
-The Sentry CDN bundle loads in `<head>`, before supabase-js, so it can capture errors thrown by every script that loads after it (see "Error Monitoring (Sentry)" below). The rest load sequentially near the end of `<body>` in `index.html` (a code comment there points back to this section). Each exposes a global that later scripts depend on:
+The Sentry CDN bundle loads in `<head>`, before supabase-js, so `window.Sentry` is defined as early as possible (see "Error Monitoring (Sentry)" below). **Loading the bundle only defines the global — it does not yet capture anything.** Actual capture only starts once `Monitoring.init()` runs, which happens when `js/monitoring.js` executes in `<body>`, after `config.js`. That leaves a real gap: a synchronous top-level error thrown by the `<head>` supabase-js `<script>` itself, before `Monitoring.init()` has run, is not captured. Known and accepted for now (closing it would mean moving `config.js`/`monitoring.js` into `<head>`, ahead of supabase-js — a bigger reordering than this pass took on) — don't describe Sentry as covering the whole page lifecycle without this caveat. The rest load sequentially near the end of `<body>` in `index.html` (a code comment there points back to this section). Each exposes a global that later scripts depend on:
 
 ```
 sentry-cdn (in <head>) → config.js → monitoring.js → i18n.js → content.js → questions.js → gamification.js → app.js → onboarding.js → avatar.js → sync.js → auth.js

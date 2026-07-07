@@ -11,14 +11,21 @@ const Monitoring = {
 
   init() {
     if (this._enabled) return;
-    if (!window.Sentry || typeof SENTRY_DSN === 'undefined') return;
-    window.Sentry.init({
-      dsn: SENTRY_DSN,
-      sendDefaultPii: false,
-      sampleRate: 1.0,
-      beforeSend: (event) => Monitoring._scrub(event),
-    });
-    this._enabled = true;
+    if (!window.Sentry || typeof SENTRY_DSN === 'undefined') {
+      console.warn('[Monitoring] Sentry no disponible (CDN bloqueado/offline o falta SENTRY_DSN) — monitoreo desactivado, la app sigue funcionando con normalidad.');
+      return;
+    }
+    try {
+      window.Sentry.init({
+        dsn: SENTRY_DSN,
+        sendDefaultPii: false,
+        sampleRate: 1.0,
+        beforeSend: (event) => Monitoring._scrub(event),
+      });
+      this._enabled = true;
+    } catch (e) {
+      console.warn('[Monitoring] Sentry.init() falló, monitoreo desactivado:', e.message);
+    }
   },
 
   // Identifica al usuario SOLO por su UUID de Supabase (pseudónimo) —
@@ -33,7 +40,14 @@ const Monitoring = {
     window.Sentry.setUser(null);
   },
 
-  _EMAIL_RE: /[^\s@'"<>]+@[^\s@'"<>]+\.[^\s@'"<>]+/g,
+  // Requiere un TLD alfabético tras el punto (".com", ".es"...) para no
+  // confundir URLs de CDN versionadas (".../paquete@1.2.3/archivo.js") con
+  // un email real: un número de versión nunca termina en letras. Contrapartida
+  // conocida: una dirección sin punto en el dominio (p.ej. "user@localhost")
+  // no se detecta — priorizado sobre el falso positivo real (corromper
+  // stacktraces de nuestra propia dependencia CDN) frente al falso negativo
+  // raro (un host interno sin TLD).
+  _EMAIL_RE: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g,
 
   // Scrubbing de PII antes de enviar cualquier evento: quita el email/username
   // que Sentry pudiera adjuntar automáticamente y redacta cualquier string
