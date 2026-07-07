@@ -68,15 +68,21 @@ audit above. Status:
   `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md` (Part A). See
   "Error Monitoring (Sentry)" above for the implementation; `privacy.html` (ES/EN)
   updated in the same commit.
-- **Signup rate-limiting/captcha: NOT STARTED.** Same plan document, Part B — starts with
-  a read-only audit of the Supabase dashboard's native rate limits and SMTP email caps
-  (flagged in the plan as a possible production blocker on its own, independent of any
-  captcha), then an explicit gate: soft launch stops there, public launch adds Cloudflare
-  Turnstile.
+- **Signup rate-limiting/captcha: B1 DONE (2026-07-07), gate resolved to soft launch —
+  stopping here, no captcha.** Same plan document, Part B. The dashboard audit found:
+  native rate limits (sign-ups/sign-ins 30 per 5 min, token refresh 150 per 5 min, OTP/
+  magic-link verification 30 per 5 min) are adequate for a soft launch; native captcha
+  and leaked-password protection are both off. The one real finding — the built-in email
+  service's 2 emails/hour cap, which with "Confirm email" enabled would have blocked real
+  signups from ever confirming — was **fixed** via custom SMTP (Brevo), see "Supabase
+  Backend" above. Per the plan's own gate criterion, a soft launch (hand-shared link, no
+  public announcement) doesn't need Cloudflare Turnstile — B2 is intentionally not done
+  and shouldn't be started unless the launch plan changes to public/announced.
 
-**To resume:** Part A is done; open the plan doc above and follow Part B (B1 first — the
-dashboard audit — then the gate, then B2 only if it applies). B1 needs the Supabase
-dashboard open; B2 needs a Cloudflare account.
+**To resume:** Parts A and B1 are both done; the plan is fully executed for a soft
+launch. Only reopen Part B2 (Cloudflare Turnstile) if the launch plan changes to
+public/announced — it needs a Cloudflare account and re-reading B2's deployment-order
+warning in the plan doc before starting.
 
 ## Project Overview
 
@@ -269,12 +275,26 @@ presence for `id > 50`. Treat a failing run as a blocker, not a warning.
 - Supabase client loaded from CDN in `index.html`, pinned to an exact version + SRI hash (not a floating `@2` tag):
   `<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js" integrity="sha384-..." crossorigin="anonymous">`.
   To bump the version: resolve the new version, fetch the exact `/dist/umd/supabase.js` file (not the bare `@x.y.z` URL — jsdelivr's own file header warns "do NOT use SRI with dynamically generated files"), compute its sha384, cross-check the hash against a second CDN (e.g. unpkg) before trusting it, then update both the version and `integrity` attribute together.
+- **Custom SMTP (2026-07-07): Brevo, resolves a real production blocker.** Supabase's
+  built-in email service is rate-limited to **2 emails/hour** — with "Confirm email"
+  enabled (it is, for this project), that ceiling meant real signups past the second
+  in an hour would never receive their confirmation email. Configured under
+  Authentication → Emails → SMTP Settings: host `smtp-relay.brevo.com`, port `587`,
+  sender `sidmaierlabs@gmail.com` ("My Campus ISTQB"), username `b13600001@smtp-brevo.com`
+  (Brevo's SMTP login, **not** the Supabase project name — that was a real mistake made
+  and caught while setting this up, worth flagging if this is ever reconfigured). No
+  custom domain was available, so Brevo was chosen over Resend specifically because its
+  free tier verifies a single sender email (a verification link to that inbox) instead of
+  requiring full domain DNS/DKIM verification. Verified end-to-end: a real signup's
+  confirmation email arrived via Brevo's relay (`@<id>.brevosend.com` envelope domain)
+  and the confirmation link worked.
 
 ### Error Monitoring (Sentry)
 
 - `js/monitoring.js` (`Monitoring` global) wraps `@sentry/browser`, loaded as a pinned
-  CDN bundle in `index.html`'s `<head>`, before supabase-js, so it can capture errors
-  thrown by any script that loads after it.
+  CDN bundle in `index.html`'s `<head>`, before supabase-js. Capture only starts once
+  `Monitoring.init()` runs in `<body>` (see "Script Load Order" above for the known gap
+  this leaves for the `<head>`'s own supabase-js `<script>`).
 - **Never a hard dependency.** Same degradation pattern as the Supabase CDN guard in
   `auth.js`: if `window.Sentry` is missing (CDN blocked, offline, SRI mismatch) or
   `SENTRY_DSN` is undefined, `Monitoring.init()` no-ops silently and every other

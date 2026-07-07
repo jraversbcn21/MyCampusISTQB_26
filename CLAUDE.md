@@ -65,6 +65,7 @@ All views are HTML sections in `index.html` toggled via `display` style. Navigat
 - Row Level Security enabled and verified (2026-07-02): `SELECT`/`INSERT`/`UPDATE` policies all scope on `auth.uid() = user_id`, no `DELETE` policy (default-deny).
 - Client script pinned to an exact version + SRI hash in `index.html` (not a floating CDN tag) — see `AGENTS.md` for the exact update procedure when bumping it.
 - Google OAuth redirect URL is handled and cleaned by `auth.js` to prevent hash pollution in the URL after login.
+- Custom SMTP via Brevo (2026-07-07) — the built-in email service's 2/hour cap was blocking real signup confirmations. Full detail: `AGENTS.md` → "Supabase Backend".
 
 ### Error Monitoring (Sentry)
 
@@ -117,6 +118,6 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys, ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
-## Production Readiness — Pending Items
+## Production Readiness — Status
 
-Two items came out of that same 2026-07-04 conversation. **Error monitoring (Sentry free tier) is now DONE (2026-07-07)** — see "Error Monitoring (Sentry)" above. **Still not implemented:** a review of Supabase Auth's native signup rate-limiting (adding a captcha only if needed). Full step-by-step plan, including manual prerequisites and a decision gate for the captcha: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md` (Part B). See `AGENTS.md` → "Production Readiness — Status & Next Session" for the current status summary.
+Both items from the 2026-07-04 conversation are resolved as of 2026-07-07. **Error monitoring (Sentry free tier): DONE** — see "Error Monitoring (Sentry)" above. **Signup rate-limiting/captcha review: DONE, resolved to soft launch** — the dashboard audit found native rate limits adequate and caught a real blocker (built-in email service capped at 2/hour with "Confirm email" on, meaning real signups couldn't confirm), fixed via custom SMTP (Brevo) — see "Backend (Supabase)" above. Captcha (Cloudflare Turnstile) was deliberately **not** added — the plan's own gate says a soft launch doesn't need it. Full detail and the decision gate: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`; current status summary: `AGENTS.md` → "Production Readiness — Status & Next Session".

@@ -1,10 +1,13 @@
 # Plan de ejecución: monitoreo de errores + protección anti-abuso en el signup
 
-**Estado: Parte A DONE (2026-07-07). Parte B PENDIENTE DE EJECUTAR.** Escrito el
-2026-07-04 para ejecutarse en una sesión futura; la Parte A (monitoreo de errores con
-Sentry) se ejecutó completa el 2026-07-07 — ver `AGENTS.md` → "Error Monitoring (Sentry)"
-para el estado resultante. La Parte B (rate-limiting/captcha del signup) sigue sin
-empezar.
+**Estado: Parte A DONE (2026-07-07). Parte B1 DONE (2026-07-07), gate resuelto a
+lanzamiento soft — Parte B2 no ejecutada, no necesaria mientras el lanzamiento siga
+siendo soft.** Escrito el 2026-07-04 para ejecutarse en una sesión futura; la Parte A
+(monitoreo de errores con Sentry) se ejecutó completa el 2026-07-07 — ver `AGENTS.md` →
+"Error Monitoring (Sentry)". La Parte B1 (auditoría de rate-limits/SMTP) encontró un
+bloqueante real (SMTP integrado a 2 emails/hora con "Confirm email" activo) que se
+resolvió con SMTP custom (Brevo) el mismo día — ver `AGENTS.md` → "Supabase Backend" y
+la sección B1 más abajo para el detalle completo.
 
 ## Contexto
 
@@ -109,11 +112,17 @@ Requiere que el usuario tenga el dashboard abierto (o que dé acceso). Checklist
 mirar y **anotar en este mismo documento** al ejecutar:
 
 - **Authentication → Rate Limits:** anotar los umbrales vigentes por endpoint (emails
-  por hora, peticiones de token, verificaciones, SMS/MFA). Rellenar aquí:
+  por hora, peticiones de token, verificaciones, SMS/MFA). Rellenado el 2026-07-07:
 
   | Endpoint | Límite vigente | ¿Suficiente para el lanzamiento previsto? |
   |---|---|---|
-  | *(rellenar al ejecutar)* | | |
+  | Envío de emails | 2/hora (SMTP integrado, antes de la Parte B1) | ❌ No — ver punto crítico abajo |
+  | Envío de SMS | 30/hora | No aplica (Phone auth desactivado) |
+  | Refresco de tokens | 150/5min (1800/h) | ✅ Suficiente |
+  | Verificación de tokens (OTP/magic link) | 30/5min (360/h) | ✅ Suficiente |
+  | Sign-up/sign-in | 30/5min (360/h) | ✅ Suficiente para lanzamiento soft |
+  | Anonymous sign-ins | 30/h | No aplica (deshabilitado) |
+  | Web3 sign-ups/sign-ins | 30/5min | No aplica (deshabilitado) |
 
 - **Authentication → Emails / SMTP — PUNTO CRÍTICO:** los proyectos Supabase con el SMTP
   integrado tienen el envío de emails severamente restringido (límite bajísimo por hora
@@ -124,11 +133,31 @@ mirar y **anotar en este mismo documento** al ejecutar:
     el email de confirmación → **bloqueante de producción independiente del captcha**.
     Opciones: SMTP custom gratuito (Resend, Brevo free tier) o desactivar la confirmación
     de email asumiendo el trade-off (cuentas sin verificar). Decidir con el usuario.
+
+  **Resultado (2026-07-07):** "Confirm email" estaba activo y **sin** SMTP propio — el
+  banner del propio dashboard de Supabase lo confirmaba explícitamente ("You're using the
+  built-in email service. This service has rate limits and is not meant to be used for
+  production apps."). Bloqueante real, confirmado. Sin dominio propio disponible, se
+  eligió **Brevo** sobre Resend (Resend exige verificar un dominio completo vía DNS;
+  Brevo permite verificar un único remitente por email, sin DNS). Configurado en
+  Authentication → Emails → SMTP Settings y **verificado con un registro real**: el email
+  de confirmación llegó vía el relay de Brevo y el enlace de confirmación funcionó.
+  Detalle completo (host, sender, username): `AGENTS.md` → "Supabase Backend".
+
 - **Authentication → Attack protection:** comprobar qué ofrece el plan free (protección
   de contraseñas filtradas, captcha nativo) y si "Enable Captcha protection" está
   disponible/activo (a fecha de este plan: no está activo).
 
+  **Resultado (2026-07-07):** "Enable Captcha protection" — desactivado. "Prevent use of
+  leaked passwords" — desactivado (el dashboard pide configurar un proveedor de email
+  primero; no revisitado tras resolver el SMTP, no bloqueante para el gate de abajo).
+
 ### Gate de decisión (criterio, no intuición)
+
+**Decisión tomada (2026-07-07): lanzamiento soft.** Con el bloqueante de SMTP resuelto y
+los límites nativos de la tabla de arriba, el gate de abajo aplica tal cual — **Parte B2
+NO se ejecuta.** Revisar de nuevo esta decisión (y entonces sí completar B2) solo si el
+tipo de lanzamiento cambia a público/anunciado.
 
 - **Lanzamiento soft** (link compartido a mano, sin anuncio público): los límites nativos
   anotados en B1 + el SMTP resuelto **bastan**. Documentar los valores en `AGENTS.md`
