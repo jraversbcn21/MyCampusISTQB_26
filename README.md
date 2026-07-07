@@ -1,4 +1,4 @@
-# MyCampus ISTQB — Foundation Level v4.0
+# MyCampus ISTQB Foundation Level v4.0
 
 Plataforma de estudio web para preparar la certificación **ISTQB Certified Tester Foundation Level (CTFL) v4.0**. Incluye lecciones, glosario, flashcards, simulacros de examen, sistema de gamificación y progreso sincronizado en la nube.
 
