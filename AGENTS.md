@@ -54,6 +54,31 @@
     by `scripts/verify-runtime.js`. The auth screen needed its own standalone language
     switcher since it renders before `App` exists — see `i18n.setLang()`/`i18n.restore()`
     in `js/i18n.js`.
+- **UI/UX polish pass (2026-07-07):** user-reported usability issues on small/short viewports,
+  fixed same-day, all in `css/styles.css` unless noted:
+  - **Sidebar clipped on short viewports:** `.sidebar` used `min-height: 100vh` with
+    `overflow: hidden`. Since `min-height` doesn't force a flex container to a fixed size, if
+    header + user-card + nav + footer's combined natural height exceeded the viewport, the
+    whole `position: fixed` sidebar box grew taller than the screen — and since fixed elements
+    don't scroll with the page, the footer (streak counter, **Salir**/logout button, privacy
+    link) became permanently unreachable, with no scrollbar anywhere to get to it. Root-caused
+    and fixed with three changes: `.sidebar` → `height: 100vh` (a real constraint, not a
+    minimum) + `overflow-x: hidden; overflow-y: auto` (a scroll fallback for the sidebar itself,
+    for the rare case even a fully collapsed nav doesn't leave enough room — e.g. a very short
+    landscape-mobile viewport); `.sidebar-nav` → added `min-height: 0` (the classic flexbox
+    gotcha: a flex item with `overflow-y: auto` needs this to actually be allowed to shrink
+    below its content size and scroll internally, otherwise it ignores the constraint and
+    expands anyway). Verified with Playwright reproducing the real sidebar markup at multiple
+    viewport heights (480px, 667px portrait, 375px landscape) — confirmed the pre-fix box grew
+    to 775px on a 480px-tall viewport (footer 295px off-screen, unreachable) and the post-fix
+    box stays exactly at the viewport height with the nav scrolling internally and the footer
+    always pinned/visible. Applies to both the desktop layout and the `≤768px` mobile drawer
+    (`.sidebar.mobile-open`) — same underlying box, same fix.
+  - **Progress view title too close to its content:** `#view-progress > h2` ("Mi Progreso")
+    had no `margin-bottom`, unlike every other view's header wrapper (`.curriculum-header`,
+    `.flashcards-header`, etc., all `margin-bottom: 28px` on the wrapper div) — this view's
+    `<h2>` isn't wrapped in one, so it fell back to the browser's tiny default heading margin.
+    Fixed with a single scoped rule, `#view-progress > h2 { margin-bottom: 20px; }`.
 
 ## Production Readiness — Status & Next Session
 
@@ -194,6 +219,52 @@ Each flashcard has a mute/unmute button (🔇/🔊) on both question and answer 
 - `App.renderFlashcard()` stores card text in `this._currentCard` and renders TTS buttons via `innerHTML`
 - `App.flipFlashcard()` cancels speech and resets all TTS buttons
 - CSS: `.fc-tts-btn` (absolute, bottom-right), `.fc-tts-playing` (green pulse animation via `@keyframes fc-tts-pulse`)
+
+### Flashcard Carousel Animation (2026-07-07)
+
+Clicking the prev/next arrows (`#fcPrev`/`#fcNext`) now slides the current card out and the
+next one in from the opposite side, instead of swapping content instantly. Design:
+`docs/superpowers/specs/2026-07-07-flashcard-carousel-animation-design.md`. Plan (executed via
+subagent-driven-development, task review + final whole-branch review both clean, no
+Critical/Important findings): `docs/superpowers/plans/2026-07-07-flashcard-carousel-animation.md`.
+
+- **Direction:** next (→) slides the current card out **left**, new card enters from the
+  **right**; prev (←) is the exact mirror. 50px distance, 250ms per phase (out, then in) —
+  `App._slideFlashcard(direction, advance)` in `js/app.js`, driven entirely by inline styles
+  (`transform`/`opacity`/`transition`) on `#flashcard`, not CSS classes.
+- **Sequencing is `setTimeout`-based, not `transitionend`-based** — a deliberate, disclosed
+  deviation from the design spec's prose, made during planning to match every other timed-UI
+  call already in `js/app.js` (toasts, unlock notifications) and to stay testable against
+  `scripts/verify-runtime.js`'s mocked DOM (no real CSS engine, no `transitionend` support).
+  On-screen behavior is identical either way.
+- **Independent of the 3D flip:** the slide transforms the outer `#flashcard`; the existing
+  flip (`.flashcard-inner.flipped`, `App.flipFlashcard()`) transforms the inner
+  `#flashcardInner`. Different elements, so the two animations can never conflict — confirmed
+  by both the task and final reviewer.
+- **Reentrancy guard:** `App._fcAnimating` (new state field, alongside `fcCards`/`fcIndex`/etc.)
+  blocks overlapping animations from rapid clicks; reset to `false` in `initFlashcards()` on
+  every view entry.
+- **A real timing bug was found and fixed during planning, not left for a reviewer to catch:**
+  `App.rateFlashcard()` used to synchronously check `fcIndex >= fcCards.length - 1` right after
+  calling `nextFlashcard()` to decide whether to show the "deck completed" toast — this only
+  worked because `nextFlashcard()` used to increment `fcIndex` synchronously. Once navigation
+  became animated/deferred (~250ms), that check would have fired before the index actually
+  moved. Fixed by giving `nextFlashcard(onAdvanced)` an optional callback, invoked once
+  navigation has actually happened — whether that means "after the animated advance" or,
+  at the literal last card, "immediately, since there's nothing to animate" — and moving the
+  boundary check into it.
+- `shuffleFlashcards()` and the deck `<select>` (`filterFlashcards()`) deliberately do **not**
+  animate — they're a session reset, not a sequential navigation.
+- Verified by 12 new `N10` checks in `scripts/verify-runtime.js` (direction, guard reentrancy,
+  both deck boundaries, the `rateFlashcard` retiming) exercising the real loaded module against
+  real timers, plus an ad hoc Playwright smoke check (not committed) confirming the visual
+  direction and that the flip still works, including at the `≤768px` mobile width.
+- Minor, non-blocking, recorded for any future touch to this area: no automated check for
+  `rateFlashcard()` called when `fcIndex` is *already* the literal last card (verified correct
+  by code trace during review, not by the harness); a narrow theoretical race exists if a user
+  switches to a smaller deck within the 250ms out-phase of a pending navigation (pre-existing
+  class of risk in this `setTimeout`-driven file, not newly introduced — a cheap future
+  hardening would be a bounds check at the top of `renderFlashcard()`).
 
 ### Curriculum Expanded State
 

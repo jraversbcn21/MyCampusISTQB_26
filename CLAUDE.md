@@ -121,3 +121,26 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 ## Production Readiness — Status
 
 Both items from the 2026-07-04 conversation are resolved as of 2026-07-07. **Error monitoring (Sentry free tier): DONE** — see "Error Monitoring (Sentry)" above. **Signup rate-limiting/captcha review: DONE, resolved to soft launch** — the dashboard audit found native rate limits adequate and caught a real blocker (built-in email service capped at 2/hour with "Confirm email" on, meaning real signups couldn't confirm), fixed via custom SMTP (Brevo) — see "Backend (Supabase)" above. Captcha (Cloudflare Turnstile) was deliberately **not** added — the plan's own gate says a soft launch doesn't need it. Full detail and the decision gate: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`; current status summary: `AGENTS.md` → "Production Readiness — Status & Next Session".
+
+## UI/UX Polish & Flashcard Carousel Animation (2026-07-07)
+
+A round of user-reported usability fixes, all in `css/styles.css` unless noted, full detail in
+`AGENTS.md`'s "Repository" and "Architecture" sections:
+
+- **Sidebar clipped on short viewports:** on screens/windows short enough that the sidebar's
+  content (header + user card + nav + footer) exceeded the viewport height, the footer — streak
+  counter, **Salir**/logout button, privacy link — became unreachable, with no scrollbar to get
+  to it. Fixed by constraining `.sidebar` to a real `height: 100vh` (was `min-height`, which
+  doesn't force a fixed size) so the nav list correctly scrolls internally instead, plus a
+  scroll fallback on the sidebar itself for extreme cases. Applies to both desktop and the
+  `≤768px` mobile drawer.
+- **Progress view title spacing:** "Mi Progreso" had no margin below it, unlike every other
+  view's header — added.
+- **Flashcards carousel animation:** clicking the prev/next arrows now slides the current card
+  out and the next one in from the opposite side (50px + fade, 250ms/phase), instead of an
+  instant content swap — independent of the existing 3D flip. Design, plan, and full mechanism
+  detail: `docs/superpowers/specs/2026-07-07-flashcard-carousel-animation-design.md`,
+  `docs/superpowers/plans/2026-07-07-flashcard-carousel-animation.md`, `AGENTS.md` → "Flashcard
+  Carousel Animation". Built via subagent-driven-development; task review and final
+  whole-branch review both came back clean (no Critical/Important findings). Verified by 12 new
+  checks in `scripts/verify-runtime.js` (`N10`).
