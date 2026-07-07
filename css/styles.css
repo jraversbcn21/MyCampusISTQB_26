@@ -1083,6 +1083,7 @@ body {
 .glossary-chapter { font-size: 0.7rem; color: var(--text3); align-self: flex-start; white-space: nowrap; margin-top: 2px; min-width: 60px; text-align: right; }
 
 /* ===== PROGRESS ===== */
+#view-progress > h2 { margin-bottom: 20px; }
 .progress-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .progress-overview { grid-column: span 2; }
 .progress-stats-big { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 8px; }
