@@ -367,6 +367,121 @@ const SAMPLE_Q = {
       sentry._calls.setUsers[sentry._calls.setUsers.length - 1] === null);
   }
 
+  /* ---- N10: carrusel de flashcards (slide direccional en next/prev) ---- */
+  const FC = (n) => ({
+    id: 9000 + n, chapter: 0,
+    q: { es: `pregunta ${n}`, en: `question ${n}` },
+    a: { es: `respuesta ${n}`, en: `answer ${n}` },
+    chapterTag: { es: `Cap. ${n}`, en: `Ch. ${n}` },
+  });
+  {
+    const ctx = loadApp();
+    ctx.App.initFlashcards();
+    check('N10 init: _fcAnimating arranca en false tras initFlashcards()',
+      ctx.App._fcAnimating === false);
+  }
+  {
+    const ctx = loadApp();
+    ctx.App.fcCards = [FC(1), FC(2), FC(3)];
+    ctx.App.fcIndex = 0;
+    ctx.App.fcStats = { hard: 0, ok: 0, easy: 0 };
+    ctx.App._fcAnimating = false;
+    const card = ctx.document.getElementById('flashcard');
+
+    ctx.App.nextFlashcard();
+    check('N10 next: activa el guard y desplaza la card actual hacia la izquierda',
+      ctx.App._fcAnimating === true && card.style.transform === 'translateX(-50px)' && card.style.opacity === '0');
+    check('N10 next: el índice no avanza hasta que termina la salida', ctx.App.fcIndex === 0);
+
+    await new Promise(r => setTimeout(r, 260));
+    check('N10 next: tras la salida, el índice avanza', ctx.App.fcIndex === 1);
+    check('N10 next: la nueva card entra desde la derecha hacia el centro',
+      card.style.transform === 'translateX(0)' && card.style.opacity === '1');
+    check('N10 next: el guard sigue activo mientras entra', ctx.App._fcAnimating === true);
+
+    await new Promise(r => setTimeout(r, 260));
+    check('N10 next: al terminar de entrar, el guard se libera', ctx.App._fcAnimating === false);
+  }
+  {
+    const ctx = loadApp();
+    ctx.App.fcCards = [FC(1), FC(2), FC(3)];
+    ctx.App.fcIndex = 2;
+    ctx.App.fcStats = { hard: 0, ok: 0, easy: 0 };
+    ctx.App._fcAnimating = false;
+    const card = ctx.document.getElementById('flashcard');
+
+    ctx.App.prevFlashcard();
+    check('N10 prev: desplaza la card actual hacia la derecha (espejo de next)',
+      card.style.transform === 'translateX(50px)' && card.style.opacity === '0');
+
+    await new Promise(r => setTimeout(r, 260));
+    check('N10 prev: el índice retrocede', ctx.App.fcIndex === 1);
+    await new Promise(r => setTimeout(r, 260));
+    check('N10 prev: el guard se libera al terminar', ctx.App._fcAnimating === false);
+  }
+  {
+    const ctx = loadApp();
+    ctx.App.fcCards = [FC(1), FC(2), FC(3)];
+    ctx.App.fcIndex = 0;
+    ctx.App.fcStats = { hard: 0, ok: 0, easy: 0 };
+    ctx.App._fcAnimating = false;
+
+    ctx.App.nextFlashcard(); // arranca animación, guard activo
+    ctx.App.nextFlashcard(); // debe ignorarse por el guard
+    check('N10 guard: un segundo clic mientras anima no avanza el índice dos veces',
+      ctx.App.fcIndex === 0);
+    await new Promise(r => setTimeout(r, 520)); // deja terminar el ciclo completo
+    check('N10 guard: tras el ciclo completo, solo avanzó una vez', ctx.App.fcIndex === 1);
+  }
+  {
+    const ctx = loadApp();
+    ctx.App.fcCards = [FC(1), FC(2)];
+    ctx.App.fcIndex = ctx.App.fcCards.length - 1;
+    ctx.App._fcAnimating = false;
+    ctx.App.nextFlashcard(); // última card: no debe iniciar animación
+    check('N10 límite: flecha siguiente en la última card no activa el guard ni mueve el índice',
+      ctx.App._fcAnimating === false && ctx.App.fcIndex === 1);
+  }
+  {
+    const ctx = loadApp();
+    ctx.App.fcCards = [FC(1), FC(2)];
+    ctx.App.fcIndex = 0;
+    ctx.App._fcAnimating = false;
+    ctx.App.prevFlashcard(); // primera card: no debe iniciar animación
+    check('N10 límite: flecha anterior en la primera card no activa el guard ni mueve el índice',
+      ctx.App._fcAnimating === false && ctx.App.fcIndex === 0);
+  }
+  {
+    // rateFlashcard() llama internamente a nextFlashcard() — debe heredar la misma
+    // animación, y el aviso de "mazo completado" debe esperar a que el índice avance
+    // de verdad, no evaluarse antes de que la animación lo mueva (el bug real que
+    // Step 5b corrige: hoy ese chequeo es síncrono justo después de la llamada).
+    const ctx = loadApp();
+    ctx.App.fcCards = [FC(1), FC(2)]; // 2 cards: calificar la 1ª debe llegar a la última
+    ctx.App.fcIndex = 0;
+    ctx.App.fcStats = { hard: 0, ok: 0, easy: 0 };
+    ctx.App.fcReviewed = new Set();
+    ctx.App._fcAnimating = false;
+    ctx.App.state = { flashcardsReviewed: 0 };
+    ctx.App.saveState = () => {};
+    ctx.App.checkAchievements = () => {};
+    const toasts = [];
+    ctx.App.showToast = (msg, kind) => toasts.push({ msg, kind });
+    const card = ctx.document.getElementById('flashcard');
+
+    ctx.App.rateFlashcard('easy');
+    check('N10 rateFlashcard: hereda la animación de nextFlashcard()',
+      ctx.App._fcAnimating === true && card.style.transform === 'translateX(-50px)');
+    check('N10 rateFlashcard: el aviso de mazo completado NO se dispara antes de que el índice avance',
+      toasts.length === 0);
+
+    await new Promise(r => setTimeout(r, 260));
+    check('N10 rateFlashcard: al llegar a la última card, se dispara el aviso de mazo completado',
+      ctx.App.fcIndex === 1 && toasts.length === 1);
+
+    await new Promise(r => setTimeout(r, 260));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

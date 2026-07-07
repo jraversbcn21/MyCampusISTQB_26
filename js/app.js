@@ -23,6 +23,7 @@ const App = {
   fcFlipped: false,
   fcStats: { hard: 0, ok: 0, easy: 0 },
   fcReviewed: new Set(),
+  _fcAnimating: false,
 
   /* ===== STATE MANAGEMENT ===== */
   loadState() {
@@ -447,6 +448,7 @@ const App = {
     this.fcIndex = 0;
     this.fcFlipped = false;
     this.fcStats = { hard: 0, ok: 0, easy: 0 };
+    this._fcAnimating = false;
     this.filterFlashcards();
     this.renderFlashcard();
   },
@@ -508,17 +510,58 @@ const App = {
     inner.classList.toggle('flipped', this.fcFlipped);
   },
 
-  nextFlashcard() {
+  _slideFlashcard(direction, advance) {
+    if (this._fcAnimating) return;
+    this._fcAnimating = true;
+    const card = document.getElementById('flashcard');
+    const dist = 50;
+    const dur = 250;
+
+    card.style.transition = `transform ${dur}ms ease, opacity ${dur}ms ease`;
+    card.style.transform = `translateX(${direction > 0 ? -dist : dist}px)`;
+    card.style.opacity = '0';
+
+    setTimeout(() => {
+      advance();
+
+      // Snap to the opposite edge with no transition, then force a reflow so the
+      // browser registers that position before animating back to center — otherwise
+      // it would just animate from the old (already translateX:0) state and never
+      // look like it entered from the other side.
+      card.style.transition = 'none';
+      card.style.transform = `translateX(${direction > 0 ? dist : -dist}px)`;
+      card.style.opacity = '0';
+      void card.offsetWidth;
+
+      card.style.transition = `transform ${dur}ms ease, opacity ${dur}ms ease`;
+      card.style.transform = 'translateX(0)';
+      card.style.opacity = '1';
+
+      setTimeout(() => {
+        card.style.transition = '';
+        this._fcAnimating = false;
+      }, dur);
+    }, dur);
+  },
+
+  nextFlashcard(onAdvanced) {
     if (this.fcIndex < this.fcCards.length - 1) {
-      this.fcIndex++;
-      this.renderFlashcard();
+      this._slideFlashcard(1, () => {
+        this.fcIndex++;
+        this.renderFlashcard();
+        if (onAdvanced) onAdvanced();
+      });
+    } else if (onAdvanced) {
+      onAdvanced();
     }
   },
 
   prevFlashcard() {
     if (this.fcIndex > 0) {
-      this.fcIndex--;
-      this.renderFlashcard();
+      this._slideFlashcard(-1, () => {
+        this.fcIndex--;
+        this.renderFlashcard();
+      });
     }
   },
 
@@ -534,10 +577,11 @@ const App = {
       }
       this.checkAchievements();
     }
-    this.nextFlashcard();
-    if (this.fcIndex >= this.fcCards.length - 1) {
-      this.showToast(i18n.t('deck_completed_toast'), 'success');
-    }
+    this.nextFlashcard(() => {
+      if (this.fcIndex >= this.fcCards.length - 1) {
+        this.showToast(i18n.t('deck_completed_toast'), 'success');
+      }
+    });
   },
 
   /* ===== SIMULATOR ===== */
