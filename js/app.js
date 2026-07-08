@@ -1116,6 +1116,22 @@ const App = {
     panel.style.display = 'block';
   },
 
+  _gsToggleTerm(i) {
+    this._gsExpanded = this._gsExpanded === i ? null : i;
+    this._renderGlobalSearch();
+  },
+
+  _gsGoGlossary() {
+    document.getElementById('glossarySearch').value = this._gsQuery;
+    this._closeGlobalSearch(true);
+    this.navigate('glossary');
+  },
+
+  _gsGoLesson(chapterId, topicId) {
+    this._closeGlobalSearch(true);
+    this.navigateToLesson(chapterId, topicId);
+  },
+
   _closeGlobalSearch(clearInput = false) {
     const panel = document.getElementById('globalSearchResults');
     panel.style.display = 'none';

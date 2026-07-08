@@ -536,6 +536,55 @@ const SAMPLE_Q = {
     check('N11 xss: la consulta del usuario no se interpola en el innerHTML del panel',
       !panel.innerHTML.includes('<img src=x'));
   }
+  {
+    // Expandir/colapsar un término dentro del panel
+    const ctx = loadApp();
+    ctx.App.init(null);
+    const input = ctx.document.getElementById('globalSearch');
+    const panel = ctx.document.getElementById('globalSearchResults');
+    input.value = ctx.GLOSSARY[0].term.es.toLowerCase();
+    fireEl(input, 'input', { target: input });
+
+    ctx.App._gsToggleTerm(0);
+    check('N11 expandir: el clic marca el resultado como expandido y muestra el enlace al glosario',
+      ctx.App._gsExpanded === 0 &&
+      panel.innerHTML.includes('search-result expanded') &&
+      panel.innerHTML.includes(ctx.i18n.t('gs_view_in_glossary')));
+
+    ctx.App._gsToggleTerm(0);
+    check('N11 expandir: un segundo clic colapsa el término',
+      ctx.App._gsExpanded === null && !panel.innerHTML.includes('search-result expanded'));
+  }
+  {
+    // «Ver en glosario»: navega, aplica el filtro y limpia el buscador global
+    const ctx = loadApp();
+    ctx.App.init(null);
+    ctx.App.currentView = 'dashboard';
+    const input = ctx.document.getElementById('globalSearch');
+    const panel = ctx.document.getElementById('globalSearchResults');
+    input.value = ctx.GLOSSARY[0].term.es.toLowerCase();
+    fireEl(input, 'input', { target: input });
+
+    ctx.App._gsGoGlossary();
+    check('N11 ver-en-glosario: navega a la vista de glosario', ctx.App.currentView === 'glossary');
+    check('N11 ver-en-glosario: aplica el filtro en #glossarySearch',
+      ctx.document.getElementById('glossarySearch').value === ctx.GLOSSARY[0].term.es.toLowerCase());
+    check('N11 ver-en-glosario: cierra el panel y limpia el buscador global',
+      panel.style.display === 'none' && input.value === '');
+  }
+  {
+    // Clic en un resultado de Contenido: va directo a la lección
+    const ctx = loadApp();
+    ctx.App.init(null);
+    const panel = ctx.document.getElementById('globalSearchResults');
+    let navArgs = null;
+    ctx.App.navigateToLesson = (c, t) => { navArgs = [c, t]; };
+    const topic = ctx.CHAPTERS[3].topics[0];
+    ctx.App._gsGoLesson(ctx.CHAPTERS[3].id, topic.id);
+    check('N11 lección: el clic llama a navigateToLesson con chapterId/topicId correctos',
+      navArgs !== null && navArgs[0] === ctx.CHAPTERS[3].id && navArgs[1] === topic.id);
+    check('N11 lección: cierra el panel', panel.style.display === 'none');
+  }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
