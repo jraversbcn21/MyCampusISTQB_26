@@ -283,9 +283,13 @@ screen on return to the simulator). Full design:
   (`_gsGoGlossary`) is the *only* path by which the global search box writes into
   `#glossarySearch` (previously it did so on every keystroke). Clicking a content result →
   `_gsGoLesson` → `navigateToLesson()` straight to the lesson.
-- **Exam guard:** `App._examActive` (true in `launchExam()`, false in `finishExam()` and in
-  `renderSimulatorMenu()` — the latter avoids a permanent lock if a chapter exam, which has no
-  timer, is abandoned by navigating away via the sidebar). With the flag active,
+- **Exam guard:** `App._examActive` (true in `launchExam()`, false in `finishExam()`). The plan's
+  original design also reset it in `renderSimulatorMenu()`, but that alone only fires when the
+  destination view is `'simulator'` — a chapter exam (no timer) abandoned via any *other* sidebar
+  link would have left the flag stuck `true` forever, permanently blocking the dropdown app-wide.
+  Fixed during task review by resetting `_examActive = false` unconditionally as the first
+  statement of `App.navigate(view)` itself (`js/app.js`), which covers all 7 destinations;
+  `renderSimulatorMenu()`'s own reset is now redundant but kept, harmless. With the flag active,
   `_gsBlockIfExam()` blocks the two navigating actions with a toast (`gs_exam_block_toast`);
   expanding definitions still works.
 - **XSS:** the user's query is never interpolated into the panel's `innerHTML` — only static
