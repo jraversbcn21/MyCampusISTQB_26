@@ -144,3 +144,18 @@ A round of user-reported usability fixes, all in `css/styles.css` unless noted, 
   Carousel Animation". Built via subagent-driven-development; task review and final
   whole-branch review both came back clean (no Critical/Important findings). Verified by 12 new
   checks in `scripts/verify-runtime.js` (`N10`).
+
+## Global Search Dropdown (2026-07-08)
+
+The topbar's global search box no longer forces navigation to the glossary/curriculum while
+typing (it used to break the user's context and could knock down an in-progress exam screen):
+it now opens a results dropdown (glossary terms expandable in place, plus lesson matches), and
+only navigates on an explicit click — blocked with a toast if an exam is active
+(`App._examActive`). Design: `docs/superpowers/specs/2026-07-08-global-search-dropdown-design.md`;
+full detail: `AGENTS.md` → "Global Search Dropdown". Verified by the `N11` checks in
+`scripts/verify-runtime.js`, plus manual verification in a real Chromium browser (Playwright)
+on 2026-07-08 — which caught a real defect the mocked-DOM harness couldn't: the panel's "click
+outside closes it" listener used `e.target.closest()`, which broke because expanding a term
+replaces the panel's `innerHTML` mid-click and detaches the original target before the event
+reaches `document`; fixed with `e.composedPath()` (unaffected by that mutation) plus a static
+regression check in `scripts/verify-runtime.js` (full mechanism in `AGENTS.md`).

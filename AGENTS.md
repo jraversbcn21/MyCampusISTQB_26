@@ -266,6 +266,60 @@ Critical/Important findings): `docs/superpowers/plans/2026-07-07-flashcard-carou
   class of risk in this `setTimeout`-driven file, not newly introduced — a cheap future
   hardening would be a bounds check at the top of `renderFlashcard()`).
 
+### Global Search Dropdown (2026-07-08)
+
+The global search box in the topbar (`#globalSearch`) no longer **forces navigation** to the
+glossary/curriculum while the user types (the original listener in `App.init()` did this, and
+also persisted the forced view via `_saveCurrentView`, which could break an in-progress exam
+screen on return to the simulator). Full design:
+`docs/superpowers/specs/2026-07-08-global-search-dropdown-design.md`.
+
+- With more than 2 characters, a `#globalSearchResults` panel opens (inside `.search-box`,
+  desktop only — `.search-box` stays hidden at ≤768px) with up to 5 `GLOSSARY` terms
+  (definition clamped to 2 lines via CSS `line-clamp`) and up to 3 `CHAPTERS`/topic matches
+  with a lesson. Logic lives in the `/* ===== GLOBAL SEARCH ===== */` section of `js/app.js`
+  (`_onGlobalSearchInput`, `_renderGlobalSearch`, `_closeGlobalSearch`).
+- Clicking a term **expands it in place** (`_gsToggleTerm`); the "View in glossary" link
+  (`_gsGoGlossary`) is the *only* path by which the global search box writes into
+  `#glossarySearch` (previously it did so on every keystroke). Clicking a content result →
+  `_gsGoLesson` → `navigateToLesson()` straight to the lesson.
+- **Exam guard:** `App._examActive` (true in `launchExam()`, false in `finishExam()` and in
+  `renderSimulatorMenu()` — the latter avoids a permanent lock if a chapter exam, which has no
+  timer, is abandoned by navigating away via the sidebar). With the flag active,
+  `_gsBlockIfExam()` blocks the two navigating actions with a toast (`gs_exam_block_toast`);
+  expanding definitions still works.
+- **XSS:** the user's query is never interpolated into the panel's `innerHTML` — only static
+  `GLOSSARY`/`CHAPTERS` data is. No match highlighting, deliberately. Verified by an `N11` check.
+- i18n: 5 new `gs_*` keys (ES/EN). Verified by the `N11` checks in
+  `scripts/verify-runtime.js` (open/close, no forced navigation, expand, both navigating
+  actions, the guard's lifecycle, XSS); the harness's `loadApp()` now also exposes
+  `CHAPTERS`/`GLOSSARY` for these checks.
+
+**Real defect found and fixed during manual browser verification (2026-07-08), not caught by
+the mocked-DOM harness:** the document-level "click outside closes the panel" listener used
+`e.target.closest('.search-box')`. Clicking a glossary result's `onclick="App._gsToggleTerm(i)"`
+re-renders `#globalSearchResults`' `innerHTML` synchronously *during the click's target phase*
+— which detaches the original clicked node from the DOM tree — *before* the event finishes
+bubbling up to this listener on `document` (bubble phase). By the time the listener ran,
+`e.target` was that now-disconnected node, so `.closest('.search-box')` returned `null` and the
+panel closed immediately after every attempt to expand a term (visually: a flash-open then
+instant close). Confirmed live with a Playwright-driven Chromium session (`e.target.isConnected
+=== false` at the document listener) before fixing. Fixed by switching the check to
+`e.composedPath()`, which is captured before dispatch starts and is unaffected by DOM mutations
+made by earlier handlers in the same dispatch:
+```js
+const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+const insideSearchBox = path.some(el => el.classList && el.classList.contains('search-box'));
+```
+Not reproducible in `scripts/verify-runtime.js`'s mocked DOM: the mock's elements have no real
+parent/child linkage, no `closest()`, no `composedPath()`, and its `fireEl()` helper invokes a
+single element's listeners directly rather than dispatching a bubbling event — so there is no
+way for that harness to observe a node's connectedness changing mid-dispatch. A static regression
+check was added instead (same pattern as the existing `N5`/i18n static checks further down in
+the file): `N11 fix: el listener "clic fuera" del buscador global usa composedPath(), no
+e.target.closest()`, asserting the fixed code is present. Verified red (fails) against the
+pre-fix source, green against the fix.
+
 ### Curriculum Expanded State
 
 Chapters stay expanded when navigating to a lesson and back via `App._expandedChapters` (a `Set` of chapter indices).
