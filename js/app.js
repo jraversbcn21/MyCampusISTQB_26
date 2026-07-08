@@ -17,6 +17,7 @@ const App = {
   examTimeTotal: 0,
   examReviewing: false,
   examChapterId: null,
+  _examActive: false,
   // Flashcard state
   fcCards: [],
   fcIndex: 0,
@@ -591,6 +592,7 @@ const App = {
 
   /* ===== SIMULATOR ===== */
   renderSimulatorMenu() {
+    this._examActive = false;
     document.getElementById('simMenu').style.display = '';
     document.getElementById('examMode').style.display = 'none';
     document.getElementById('examResults').style.display = 'none';
@@ -722,6 +724,7 @@ const App = {
   },
 
   launchExam(title) {
+    this._examActive = true;
     // Guardar el total permite calcular el tiempo usado en finishExam sin
     // depender de examTimeLeft > 0 (que es falso justo cuando el temporizador
     // se agota, y registraba time: 0 en un examen que consumió todo el tiempo).
@@ -838,6 +841,7 @@ const App = {
 
   finishExam() {
     if (this.examTimer) clearInterval(this.examTimer);
+    this._examActive = false;
     const total = this.examQuestions.length;
     let correct = 0;
     this.examQuestions.forEach((q, i) => {
@@ -1121,13 +1125,21 @@ const App = {
     this._renderGlobalSearch();
   },
 
+  _gsBlockIfExam() {
+    if (!this._examActive) return false;
+    this.showToast(i18n.t('gs_exam_block_toast'), 'warning');
+    return true;
+  },
+
   _gsGoGlossary() {
+    if (this._gsBlockIfExam()) return;
     document.getElementById('glossarySearch').value = this._gsQuery;
     this._closeGlobalSearch(true);
     this.navigate('glossary');
   },
 
   _gsGoLesson(chapterId, topicId) {
+    if (this._gsBlockIfExam()) return;
     this._closeGlobalSearch(true);
     this.navigateToLesson(chapterId, topicId);
   },

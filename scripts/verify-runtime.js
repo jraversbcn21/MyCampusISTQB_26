@@ -585,6 +585,52 @@ const SAMPLE_Q = {
       navArgs !== null && navArgs[0] === ctx.CHAPTERS[3].id && navArgs[1] === topic.id);
     check('N11 lección: cierra el panel', panel.style.display === 'none');
   }
+  {
+    // Ciclo de vida del flag _examActive
+    const ctx = loadApp();
+    ctx.App._initialized = true;
+    ctx.App.state = ctx.App.loadState();
+    ctx.App.examQuestions = [SAMPLE_Q]; ctx.App.examAnswers = { 0: 0 };
+    ctx.App.examType = 'chapter'; ctx.App.examChapterId = null;
+    ctx.App.examCurrentQ = 0; ctx.App.examReviewing = false;
+    ctx.App.examTimeLeft = 0; ctx.App.examTimer = null;
+    check('N11 examen: _examActive arranca en false', ctx.App._examActive === false);
+    ctx.App.launchExam('t');
+    check('N11 examen: launchExam activa _examActive', ctx.App._examActive === true);
+    ctx.App.finishExam();
+    check('N11 examen: finishExam desactiva _examActive', ctx.App._examActive === false);
+    ctx.App._examActive = true;
+    ctx.App.renderSimulatorMenu();
+    check('N11 examen: volver al menú del simulador desactiva _examActive (sin bloqueo permanente)',
+      ctx.App._examActive === false);
+  }
+  {
+    // Con examen activo, las acciones que navegan quedan bloqueadas con toast
+    const ctx = loadApp();
+    ctx.App.init(null);
+    ctx.App.currentView = 'simulator';
+    const input = ctx.document.getElementById('globalSearch');
+    input.value = ctx.GLOSSARY[0].term.es.toLowerCase();
+    fireEl(input, 'input', { target: input });
+
+    ctx.App._examActive = true;
+    const toasts = [];
+    ctx.App.showToast = (msg, kind) => toasts.push({ msg, kind });
+    let navCalled = false;
+    ctx.App.navigateToLesson = () => { navCalled = true; };
+
+    ctx.App._gsGoGlossary();
+    check('N11 guard: con examen activo, «Ver en glosario» no navega y avisa con toast',
+      ctx.App.currentView === 'simulator' && toasts.length === 1 &&
+      toasts[0].msg === ctx.i18n.t('gs_exam_block_toast'));
+
+    ctx.App._gsGoLesson(0, ctx.CHAPTERS[0].topics[0].id);
+    check('N11 guard: con examen activo, un resultado de lección tampoco navega',
+      navCalled === false && toasts.length === 2);
+
+    check('N11 guard: consultar el dropdown durante el examen sigue funcionando (no navega, no bloquea)',
+      ctx.document.getElementById('globalSearchResults').innerHTML.length > 0);
+  }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
