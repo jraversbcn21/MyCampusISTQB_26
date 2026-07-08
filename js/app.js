@@ -121,6 +121,7 @@ const App = {
 
   /* ===== NAVIGATION ===== */
   navigate(view, extra) {
+    this._examActive = false;
     this.currentView = view;
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));

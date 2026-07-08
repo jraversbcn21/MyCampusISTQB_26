@@ -603,6 +603,10 @@ const SAMPLE_Q = {
     ctx.App.renderSimulatorMenu();
     check('N11 examen: volver al menú del simulador desactiva _examActive (sin bloqueo permanente)',
       ctx.App._examActive === false);
+    ctx.App._examActive = true;
+    ctx.App.navigate('progress');
+    check('N11 examen: navegar a otra vista desactiva _examActive (no quedar bloqueado permanente)',
+      ctx.App._examActive === false);
   }
   {
     // Con examen activo, las acciones que navegan quedan bloqueadas con toast
