@@ -161,6 +161,13 @@ const TRANSLATIONS = {
     glossary_ch_tag: "Cap.",
     privacy_link: "Política de privacidad",
 
+    // GLOBAL SEARCH
+    gs_glossary_header: "Glosario",
+    gs_content_header: "Contenido",
+    gs_no_results: "Sin resultados",
+    gs_view_in_glossary: "Ver en glosario →",
+    gs_exam_block_toast: "Termina o abandona el examen antes de navegar",
+
     // AUTH
     auth_login_tab: "Iniciar sesión",
     auth_register_tab: "Registrarse",
@@ -344,6 +351,13 @@ const TRANSLATIONS = {
     student_fallback: "Student",
     glossary_ch_tag: "Ch.",
     privacy_link: "Privacy policy",
+
+    // GLOBAL SEARCH
+    gs_glossary_header: "Glossary",
+    gs_content_header: "Content",
+    gs_no_results: "No results",
+    gs_view_in_glossary: "View in glossary →",
+    gs_exam_block_toast: "Finish or quit the exam before navigating",
 
     // AUTH
     auth_login_tab: "Log in",

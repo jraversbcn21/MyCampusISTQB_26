@@ -24,6 +24,11 @@ const App = {
   fcStats: { hard: 0, ok: 0, easy: 0 },
   fcReviewed: new Set(),
   _fcAnimating: false,
+  // Global search
+  _gsQuery: '',
+  _gsGlossary: [],
+  _gsContent: [],
+  _gsExpanded: null,
 
   /* ===== STATE MANAGEMENT ===== */
   loadState() {
@@ -1052,6 +1057,73 @@ const App = {
     setTimeout(() => { popup.style.display = 'none'; }, 700);
   },
 
+  /* ===== GLOBAL SEARCH (dropdown del topbar) ===== */
+  _onGlobalSearchInput(e) {
+    const q = e.target.value.toLowerCase().trim();
+    if (q.length <= 2) { this._closeGlobalSearch(); return; }
+    const lang = i18n.lang;
+    this._gsQuery = q;
+    this._gsExpanded = null;
+    this._gsGlossary = GLOSSARY.filter(g =>
+      g.term[lang].toLowerCase().includes(q) || g.def[lang].toLowerCase().includes(q)
+    ).slice(0, 5);
+    const content = [];
+    CHAPTERS.forEach(ch => {
+      const topics = ch.topics.filter(t => LESSONS[t.id]);
+      if (!topics.length) return;
+      if (ch.title[lang].toLowerCase().includes(q)) {
+        content.push({ chapterId: ch.id, topicId: topics[0].id, icon: ch.icon, title: ch.title[lang] });
+      }
+      topics.forEach(t => {
+        if (t.title[lang].toLowerCase().includes(q)) {
+          content.push({ chapterId: ch.id, topicId: t.id, icon: ch.icon, title: t.title[lang] });
+        }
+      });
+    });
+    this._gsContent = content.slice(0, 3);
+    this._renderGlobalSearch();
+  },
+
+  _renderGlobalSearch() {
+    const panel = document.getElementById('globalSearchResults');
+    const lang = i18n.lang;
+    if (!this._gsGlossary.length && !this._gsContent.length) {
+      panel.innerHTML = `<div class="search-no-results">${i18n.t('gs_no_results')}</div>`;
+      panel.style.display = 'block';
+      return;
+    }
+    let html = '';
+    if (this._gsGlossary.length) {
+      html += `<div class="search-results-header">${i18n.t('gs_glossary_header')}</div>`;
+      html += this._gsGlossary.map((g, i) => {
+        const expanded = this._gsExpanded === i;
+        return `
+        <div class="search-result${expanded ? ' expanded' : ''}" onclick="App._gsToggleTerm(${i})">
+          <div class="search-result-term">${g.term[lang]}</div>
+          <div class="search-result-def">${g.def[lang]}</div>
+          ${expanded ? `<a class="search-result-link" onclick="event.stopPropagation();App._gsGoGlossary()">${i18n.t('gs_view_in_glossary')}</a>` : ''}
+        </div>`;
+      }).join('');
+    }
+    if (this._gsContent.length) {
+      html += `<div class="search-results-header">${i18n.t('gs_content_header')}</div>`;
+      html += this._gsContent.map(c => `
+        <div class="search-result search-result-lesson" onclick="App._gsGoLesson(${c.chapterId}, '${c.topicId}')">
+          <span>${c.icon}</span><span>${c.title}</span>
+        </div>`).join('');
+    }
+    panel.innerHTML = html;
+    panel.style.display = 'block';
+  },
+
+  _closeGlobalSearch(clearInput = false) {
+    const panel = document.getElementById('globalSearchResults');
+    panel.style.display = 'none';
+    panel.innerHTML = '';
+    this._gsExpanded = null;
+    if (clearInput) document.getElementById('globalSearch').value = '';
+  },
+
   /* ===== LANGUAGE ===== */
   setLang(lang) {
     i18n.setLang(lang);
@@ -1158,37 +1230,14 @@ const App = {
       }
     });
 
-    document.getElementById('globalSearch').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      const glossarySearchEl = document.getElementById('glossarySearch');
-
-      if (q.length <= 2) {
-        // Bug fix: limpiar el glosario cuando se borra la búsqueda
-        if (glossarySearchEl.value) {
-          glossarySearchEl.value = '';
-          if (this.currentView === 'glossary') this.renderGlossary();
-        }
-        return;
-      }
-
-      // Buscar en términos Y definiciones del glosario
-      const glossaryMatch = GLOSSARY.find(g =>
-        g.term[i18n.lang].toLowerCase().includes(q) || g.def[i18n.lang].toLowerCase().includes(q)
-      );
-      if (glossaryMatch) {
-        // Bug fix: setear el valor ANTES de navegar para evitar flash sin filtro
-        glossarySearchEl.value = q;
-        this.navigate('glossary');
-        return;
-      }
-
-      // Buscar en títulos de capítulos y temas del curriculum
-      const chapterMatch = CHAPTERS.find(ch =>
-        ch.title[i18n.lang].toLowerCase().includes(q) ||
-        ch.topics.some(t => t.title[i18n.lang].toLowerCase().includes(q))
-      );
-      if (chapterMatch) {
-        this.navigate('curriculum');
+    const gsInput = document.getElementById('globalSearch');
+    gsInput.addEventListener('input', (e) => this._onGlobalSearchInput(e));
+    gsInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') this._closeGlobalSearch();
+    });
+    document.addEventListener('click', (e) => {
+      if (!(e.target && e.target.closest && e.target.closest('.search-box'))) {
+        this._closeGlobalSearch();
       }
     });
 

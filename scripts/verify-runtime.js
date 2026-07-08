@@ -132,7 +132,9 @@ function loadApp(opts = {}) {
     Sync: typeof Sync !== 'undefined' ? Sync : undefined,
     Monitoring: typeof Monitoring !== 'undefined' ? Monitoring : undefined,
     i18n: typeof i18n !== 'undefined' ? i18n : undefined,
-    TRANSLATIONS: typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS : undefined
+    TRANSLATIONS: typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS : undefined,
+    CHAPTERS: typeof CHAPTERS !== 'undefined' ? CHAPTERS : undefined,
+    GLOSSARY: typeof GLOSSARY !== 'undefined' ? GLOSSARY : undefined
   };`;
   const fn = new Function('window', 'document', 'localStorage', 'history', 'fetch', 'confirm', 'navigator',
     `${src}\n;${ret}`);
@@ -480,6 +482,59 @@ const SAMPLE_Q = {
       ctx.App.fcIndex === 1 && toasts.length === 1);
 
     await new Promise(r => setTimeout(r, 260));
+  }
+
+  /* ---- N11: buscador global — dropdown sin navegación forzada ---- */
+  {
+    // Teclear >2 chars con match de glosario: abre el panel, NO navega, NO toca #glossarySearch
+    const ctx = loadApp();
+    ctx.App.init(null);
+    ctx.App.currentView = 'dashboard';
+    const input = ctx.document.getElementById('globalSearch');
+    const panel = ctx.document.getElementById('globalSearchResults');
+    input.value = ctx.GLOSSARY[0].term.es.toLowerCase();
+    fireEl(input, 'input', { target: input });
+    check('N11 dropdown: teclear >2 chars con match abre el panel',
+      panel.style.display === 'block' && panel.innerHTML.length > 0);
+    check('N11 dropdown: el panel lista el término del glosario que coincide',
+      ctx.App._gsGlossary.length > 0 && panel.innerHTML.includes(ctx.GLOSSARY[0].term.es));
+    check('N11 dropdown: teclear NO cambia de vista (antes navegaba a glosario)',
+      ctx.App.currentView === 'dashboard');
+    check('N11 dropdown: teclear NO escribe en #glossarySearch',
+      ctx.document.getElementById('glossarySearch').value === '');
+
+    // Bajar a ≤2 chars cierra el panel
+    input.value = 'pr';
+    fireEl(input, 'input', { target: input });
+    check('N11 dropdown: bajar a ≤2 chars cierra el panel',
+      panel.style.display === 'none' && panel.innerHTML === '');
+  }
+  {
+    // Match de curriculum: la sección Contenido lista el topic (con lección) correcto
+    const ctx = loadApp();
+    ctx.App.init(null);
+    ctx.App.currentView = 'flashcards';
+    const topic = ctx.CHAPTERS[3].topics[0];
+    const input = ctx.document.getElementById('globalSearch');
+    input.value = topic.title.es.toLowerCase();
+    fireEl(input, 'input', { target: input });
+    check('N11 contenido: un título de topic aparece en la sección Contenido',
+      ctx.App._gsContent.some(c => c.topicId === topic.id && c.chapterId === ctx.CHAPTERS[3].id));
+    check('N11 contenido: tampoco navega (antes saltaba a curriculum)',
+      ctx.App.currentView === 'flashcards');
+  }
+  {
+    // Sin matches: mensaje "sin resultados"; la consulta del usuario NUNCA acaba en innerHTML
+    const ctx = loadApp();
+    ctx.App.init(null);
+    const input = ctx.document.getElementById('globalSearch');
+    const panel = ctx.document.getElementById('globalSearchResults');
+    input.value = '<img src=x onerror=alert(1)>zzz';
+    fireEl(input, 'input', { target: input });
+    check('N11 vacío: sin matches muestra el mensaje de sin resultados',
+      panel.innerHTML.includes(ctx.i18n.t('gs_no_results')));
+    check('N11 xss: la consulta del usuario no se interpola en el innerHTML del panel',
+      !panel.innerHTML.includes('<img src=x'));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
