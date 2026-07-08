@@ -1265,7 +1265,17 @@ const App = {
       if (e.key === 'Escape') this._closeGlobalSearch();
     });
     document.addEventListener('click', (e) => {
-      if (!(e.target && e.target.closest && e.target.closest('.search-box'))) {
+      // composedPath(), no e.target.closest(): un clic en un término del
+      // dropdown dispara su onclick inline (_gsToggleTerm), que reemplaza
+      // el innerHTML de #globalSearchResults *durante la fase de target*,
+      // antes de que este listener (fase bubble en document) se ejecute.
+      // Eso deja e.target — el nodo original ya sustituido — desconectado
+      // del árbol, así que closest('.search-box') daba false y este
+      // listener cerraba el panel justo al expandirlo. composedPath() se
+      // captura antes del dispatch y no se ve afectado por esa mutación.
+      const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+      const insideSearchBox = path.some(el => el.classList && el.classList.contains('search-box'));
+      if (!insideSearchBox) {
         this._closeGlobalSearch();
       }
     });

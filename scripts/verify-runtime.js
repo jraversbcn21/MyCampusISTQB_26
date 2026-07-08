@@ -635,6 +635,23 @@ const SAMPLE_Q = {
     check('N11 guard: consultar el dropdown durante el examen sigue funcionando (no navega, no bloquea)',
       ctx.document.getElementById('globalSearchResults').innerHTML.length > 0);
   }
+  {
+    // Fix 2026-07-08 encontrado en verificación manual con navegador real
+    // (no reproducible en el DOM mockeado de este arnés, que no linka
+    // padres/hijos ni soporta bubbling real): el listener de "clic fuera"
+    // del buscador global usaba e.target.closest('.search-box'), pero el
+    // onclick inline de un resultado (_gsToggleTerm) reemplaza el innerHTML
+    // de #globalSearchResults *durante la fase de target*, antes de que
+    // este listener (fase bubble, en document) llegue a ejecutarse. Eso
+    // deja e.target — el nodo ya sustituido — desconectado del árbol para
+    // cuando el bubble llega a document, así que closest() daba false y el
+    // propio clic para expandir un término cerraba el panel al instante.
+    // composedPath() se captura antes del dispatch, así que no le afecta
+    // esa mutación. Chequeo estático porque el runtime no es reproducible aquí.
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    check('N11 fix: el listener "clic fuera" del buscador global usa composedPath(), no e.target.closest()',
+      /composedPath/.test(appSrc) && !/e\.target\.closest\('\.search-box'\)/.test(appSrc));
+  }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
