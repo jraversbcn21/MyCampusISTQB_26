@@ -17,10 +17,8 @@
   re-audit (second pass, addendum in that same doc) found two of the closures partial and
   several sibling risks the first pass missed; all were fixed the same day** — the summary
   below describes the state after both passes:
-  - The pre-commit gate is now **version-controlled** in `.githooks/pre-commit` and
-    validates the **staged** copy of `js/questions.js`/`js/content.js` (not the working
-    tree). A fresh clone activates it with `git config core.hooksPath .githooks` — that
-    one command is the only per-clone setup this repo has.
+  - The pre-commit gate became **version-controlled** in `.githooks/pre-commit` this pass
+    (see "No Tests or Linter" below for the activation command and what it validates).
   - `auth.js`: closed a refocus race where a repeated `SIGNED_IN` event for the same user
     (supabase-js can re-emit it on tab focus) overwrote `App.state` with a stale cloud copy
     and could cut off an in-progress exam; fixed a self-XSS via `avatar_url` (built the
@@ -42,8 +40,7 @@
     already purged from the lesson itself but not from the chapter description.
   - `scripts/validate-questions.js` and `scripts/validate-content.js` stay separate entry
     points (unchanged, still correct — see "Lesson Content Schema" below) but now share
-    `scripts/lib/validate-utils.js` for the parts that were genuinely duplicated (loading
-    browser globals from Node, the `FL-x.y.z` regex, the bilingual-field check).
+    `scripts/lib/validate-utils.js` (see "No Tests or Linter" below for what it covers).
   - i18n now genuinely covers the whole app: `onboarding.js`, `avatar.js`, and the auth
     screen were 100% hardcoded Spanish before this pass (contradicting the "i18n" section
     below, which was aspirational until now); ~35 ad-hoc `i18n.lang === 'es' ? ... : ...`
@@ -191,9 +188,10 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
 - `data-i18n-placeholder="key"` for input placeholders
 - Default language is Spanish (`i18n.lang = 'es'`)
 - `data-i18n-title="key"` for `title` tooltips
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 160 keys, all ES/EN paired,
-  enforced by `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
-  hardcoded-language residues)
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 165 keys (160 after the
+  2026-07-04 remediation, +5 `gs_*` keys added for the 2026-07-08 global search dropdown),
+  all ES/EN paired, enforced by `scripts/verify-runtime.js` (parity, no used-but-undefined
+  keys, no known hardcoded-language residues)
 - `i18n.restore()` reads the saved language from `localStorage` and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
   (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore); the
@@ -483,9 +481,10 @@ Manual browser testing only for app behavior/UI. There is no linter config, no t
 Three exceptions, all Node, dev-only, never served to the browser:
 - `scripts/validate-questions.js` gates `js/questions.js` (see "Question Bank Schema" above).
 - `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS` in `js/content.js` (see "Lesson
-  Content Schema" above). Both share `scripts/lib/validate-utils.js` for the parts that
-  overlap, and both accept an optional file path argument (used by the pre-commit hook to
-  validate the staged copy).
+  Content Schema" above). Both share `scripts/lib/validate-utils.js` for the parts that were
+  genuinely duplicated (loading browser globals from Node, the `FL-x.y.z` regex, the
+  bilingual-field check), and both accept an optional file path argument (used by the
+  pre-commit hook to validate the staged copy).
 - `scripts/verify-runtime.js` loads the real `js/` modules into a mocked minimal DOM (no
   browser, no npm install) and exercises the behaviors fixed in the 2026-07-04 passes:
   sync freshness/flush, the script-load guards, the CDN-failure auth screen, state-derived
