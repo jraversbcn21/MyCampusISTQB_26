@@ -106,6 +106,15 @@ launch. Only reopen Part B2 (Cloudflare Turnstile) if the launch plan changes to
 public/announced — it needs a Cloudflare account and re-reading B2's deployment-order
 warning in the plan doc before starting.
 
+**Pre-soft-production review (2026-07-10):** spot-checked every "Cerrado"/CONFIRMADO
+fix from the 2026-07-04 audit (both passes) against the current code — not just
+reread the doc — plus a fresh run of all three harnesses (`verify-runtime.js`,
+`validate-questions.js`, `validate-content.js`), all green. No new findings; every
+prior closure still holds. Full detail: `docs/audit-2026-07-04-architecture-security.md`
+→ "Adéndum: revisión pre-soft-production (2026-07-10)". **Verdict: ready for soft
+production** under the existing gate (soft launch = hand-shared link, no public
+announcement; B2/captcha intentionally still not implemented under that gate).
+
 ## Project Overview
 
 MyCampus ISTQB is a **vanilla JavaScript SPA** — no framework, no build system, no package manager. Browser-based study platform for ISTQB CTFL v4.0.

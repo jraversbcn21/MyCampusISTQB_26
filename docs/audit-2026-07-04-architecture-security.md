@@ -158,3 +158,41 @@ contra el código previo a la segunda pasada y pasan tras ella (24/24 con los
 controles); el hook de pre-commit lo ejecuta automáticamente cuando se stagea
 `js/` o `index.html`. Para re-verificar cualquier fila de esta tabla:
 `node scripts/verify-runtime.js`.
+
+---
+
+## Adéndum: revisión pre-soft-production (2026-07-10)
+
+Revisión puntual (no una re-auditoría independiente completa) para confirmar
+que los cierres de ambas pasadas siguen presentes en el código antes de salir
+a soft production. Se verificó cada fila "Cerrado"/CONFIRMADO de este
+documento contra el código actual (no solo se releyó el doc):
+
+- `sameUserAlreadyLoaded` (carrera de refocus, P2): presente, `js/auth.js:55-57`.
+- Sello `_updatedAt` y comparación de frescura (N1): presente, `js/sync.js:40-41,73`.
+- Listener `visibilitychange` + push `keepalive` (N2): presente, `js/sync.js:119,138`.
+- XSS del avatar (P2): `createElement('img')` en vez de `innerHTML`, `js/auth.js:211`.
+- `escapeHtml()` en los sinks de `activityLog`/`examHistory` (N4): presente en
+  `js/app.js` (historial de exámenes, gráfico de progreso, log de actividad).
+- Guarda de scripts/config caídos (P6/N3/N7): guard `typeof SUPABASE_URL` en
+  `js/auth.js:12`, `_bindEvents()` antes del early-return, `_showLoadFailure()`
+  en las tres rutas de submit.
+- Cap de `examHistory` a 50 (P3): presente, `js/app.js:859`.
+- Hook de pre-commit versionado (N6): `.githooks/pre-commit` existe y
+  `core.hooksPath` está activado en este clon.
+
+**Resultado de los tres harnesses, ejecutados en esta revisión (2026-07-10):**
+`node scripts/verify-runtime.js` (todos los chequeos en verde, incluyendo los
+`N1`–`N11` de este doc más los del carrusel de flashcards y el dropdown de
+búsqueda global, añadidos después de esta auditoría), `node
+scripts/validate-questions.js` (120/120) y `node scripts/validate-content.js`
+(22/22 temas, 97/97 keywords) — los tres en verde.
+
+**Veredicto: sin hallazgos nuevos, todos los cierres previos siguen vigentes.
+Listos para soft production** en los términos ya acordados en
+`docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md` (soft
+launch = enlace compartido a mano, sin anuncio público; captcha B2 sigue
+intencionalmente sin implementar bajo ese gate). Limitaciones conocidas y
+aceptadas, sin cambios desde la pasada original: el hueco de Sentry en
+`<head>` (ver "Script Load Order" en `AGENTS.md`), y que B2 debe reabrirse si
+el lanzamiento pasa a ser público/anunciado.
