@@ -782,7 +782,7 @@ const App = {
             else if (i === selected && selected !== q.correct) cls = 'wrong';
           } else if (i === selected) cls = 'selected';
           return `
-            <div class="exam-option ${cls}" onclick="${isReviewing ? '' : `App.selectAnswer(${i})`}" id="opt${i}">
+            <div class="exam-option ${cls}" ${isReviewing ? '' : `onclick="App.selectAnswer(${i})" role="button" tabindex="0" aria-pressed="${i === selected}"`} id="opt${i}">
               <div class="exam-option-letter">${letters[i]}</div>
               ${opt}
             </div>`;
@@ -806,7 +806,7 @@ const App = {
     const dots = document.getElementById('examDots');
     dots.innerHTML = this.examQuestions.map((_, i) => {
       const cls = i === this.examCurrentQ ? 'current' : (this.examAnswers[i] !== undefined ? 'answered' : '');
-      return `<div class="exam-dot ${cls}" onclick="App.goToQuestion(${i})">${i + 1}</div>`;
+      return `<div class="exam-dot ${cls}" onclick="App.goToQuestion(${i})" role="button" tabindex="0" aria-label="${i18n.t('goto_question_aria')} ${i + 1}">${i + 1}</div>`;
     }).join('');
   },
 
@@ -814,6 +814,11 @@ const App = {
     this.examAnswers[this.examCurrentQ] = optIndex;
     this.renderExamQuestion();
     this.renderExamDots();
+    // C1: renderExamQuestion regenera el innerHTML y destruye el nodo enfocado —
+    // sin esto, responder con Enter devolvía el foco al body y el usuario de
+    // teclado tenía que tabular desde el principio en cada pregunta.
+    const opt = document.getElementById('opt' + optIndex);
+    if (opt && typeof opt.focus === 'function') opt.focus();
   },
 
   goToQuestion(i) {
@@ -1218,6 +1223,17 @@ const App = {
       }
     });
     document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+
+    // Teclado (C1): los controles renderizados por plantilla son divs con
+    // role="button" — innerHTML los regenera constantemente, así que un único
+    // listener delegado en document los cubre todos, actuales y futuros.
+    document.addEventListener('keydown', (e) => {
+      const t = e.target;
+      if ((e.key === 'Enter' || e.key === ' ') && t && t.getAttribute && t.getAttribute('role') === 'button' && typeof t.click === 'function') {
+        e.preventDefault(); // evita el scroll de Espacio y el doble disparo
+        t.click();
+      }
+    });
 
     document.querySelectorAll('.nav-item[data-view]').forEach(el => {
       el.addEventListener('click', (e) => {

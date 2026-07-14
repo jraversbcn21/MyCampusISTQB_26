@@ -706,6 +706,24 @@ const SAMPLE_Q = {
     }
   }
 
+  /* ---- N14: teclado (C1, revisión UI 2026-07-14) — chequeos estáticos ---- */
+  {
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    // Un único listener delegado en document cubre todos los divs role="button"
+    // de las plantillas innerHTML (que se regeneran constantemente).
+    check('N14 teclado: handler delegado Enter/Espacio→click sobre [role="button"] en app.js',
+      /e\.key === 'Enter'/.test(appSrc) && /getAttribute\('role'\) === 'button'/.test(appSrc));
+    check('N14 teclado: las opciones del examen llevan role/tabindex/aria-pressed cuando son interactivas',
+      /onclick="App\.selectAnswer\(\$\{i\}\)" role="button" tabindex="0" aria-pressed="\$\{i === selected\}"/.test(appSrc));
+    check('N14 teclado: los dots del examen llevan role/tabindex y aria-label i18n',
+      /onclick="App\.goToQuestion\(\$\{i\}\)" role="button" tabindex="0" aria-label="\$\{i18n\.t\('goto_question_aria'\)\} \$\{i \+ 1\}"/.test(appSrc));
+    check('N14 teclado: selectAnswer restaura el foco tras regenerar el innerHTML',
+      /getElementById\('opt' \+ optIndex\)/.test(appSrc));
+    check('N14 teclado: styles.css define :focus-visible con outline visible',
+      /:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--primary\)/.test(cssSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

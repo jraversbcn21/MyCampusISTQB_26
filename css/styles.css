@@ -2005,3 +2005,12 @@ body {
 }
 .sidebar-privacy-link:hover { color: var(--primary); }
 .sidebar.collapsed .sidebar-privacy-link { display: none; }
+
+/* ===== FOCO VISIBLE (C1, revisión UI 2026-07-14) =====
+   Al final del fichero a propósito: varias reglas de inputs declaran
+   outline: none con la misma especificidad (0-1-0) — al ir después, esta
+   regla gana la propiedad outline cuando el foco viene de teclado. */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
