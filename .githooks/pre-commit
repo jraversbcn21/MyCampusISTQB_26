@@ -30,6 +30,7 @@ check() {
 
 check "js/questions.js" "scripts/validate-questions.js"
 check "js/content.js" "scripts/validate-content.js"
+check "css/styles.css" "scripts/validate-contrast.js"
 
 # Arnés de runtime: barato (<5s, sin red) y cubre sync/auth/escape/i18n.
 # Corre sobre el working tree (carga varios módulos entrelazados); es un

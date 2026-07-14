@@ -79,10 +79,11 @@ The app is fully functional without cloud sync. If Supabase is unavailable or th
 
 There is no test suite and no linter configuration for the application itself. Manual browser testing remains the primary mechanism for UI changes.
 
-Three exceptions, all Node-only dev scripts never served to the browser:
+Four exceptions, all Node-only dev scripts never served to the browser:
 - `scripts/validate-questions.js` gates `js/questions.js` — per-chapter question counts, structural integrity (bilingual fields, 4 options, valid `correct` index, unique ids), traceability (`lo`/`k`/`source` for every question added after id 50).
 - `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` — topic counts, `lo`/`source` presence, glossary keyword-completeness against the syllabus.
 - `scripts/verify-runtime.js` — behavior harness: loads the real `js/` modules into a mocked minimal DOM (no browser, no npm install) and exercises sync freshness/flush, the script-load guards, the CDN-failure auth screen, `innerHTML` escaping of state-derived values, and i18n parity/residue checks. Run it after any change to `js/` or `index.html`; add a check when you fix a runtime behavior.
+- `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the theme token blocks and asserts WCAG AA 4.5:1 for every status-text/background pair in both themes, including `rgba()`-tinted backgrounds alpha-blended over the surface. Run it after any change to theme tokens or status-text colors.
 
 Run the relevant one after any change:
 
@@ -90,9 +91,10 @@ Run the relevant one after any change:
 node scripts/validate-questions.js
 node scripts/validate-content.js
 node scripts/verify-runtime.js
+node scripts/validate-contrast.js
 ```
 
-The pre-commit gate is version-controlled at `.githooks/pre-commit` — activate it once per clone with `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the **staged** copy of the two data files and runs the runtime harness when `js/` or `index.html` is staged; the commit is blocked on failure.
+The pre-commit gate is version-controlled at `.githooks/pre-commit` — activate it once per clone with `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the **staged** copy of the three data files and runs the runtime harness when `js/` or `index.html` is staged; the commit is blocked on failure.
 
 ## ISTQB Content Fidelity Effort (complete, all 3 phases merged)
 
@@ -159,3 +161,18 @@ outside closes it" listener used `e.target.closest()`, which broke because expan
 replaces the panel's `innerHTML` mid-click and detaches the original target before the event
 reaches `document`; fixed with `e.composedPath()` (unaffected by that mutation) plus a static
 regression check in `scripts/verify-runtime.js` (full mechanism in `AGENTS.md`).
+
+## Contrast Remediation (2026-07-14)
+
+Fixed two findings from a UI/UX review done with the `ui-ux-pro-max` skill: **C2** — status-feedback
+text (badges, daily-challenge feedback, flashcard ratings, exam-history scores, results verdicts,
+streak counter) was reusing the raw `--success`/`--warning`/`--danger`/`--primary` tokens as text
+color, legible in the dark theme but only 1.27–2.37:1 contrast in the light theme; and **I1** —
+`--text3` was below AA in both themes. Fixed via four new semantic `--success-text`/`--warning-text`/
+`--danger-text`/`--primary-text` tokens (dark keeps its existing values plus one new one for
+primary; light gets four new darker values) swapped into all 25 status-text `color:` usages, plus a
+`--text3` bump in both themes — no change to `background:`/`border-color:`. Gated by
+`scripts/validate-contrast.js` in the pre-commit hook (see "No Tests, No Linter" above) and verified
+visually with Playwright in both themes. Plan and full detail (exact hex values, the dark
+`--text2`/`--text3` hierarchy check): `docs/superpowers/plans/2026-07-14-contrast-remediation.md`,
+`AGENTS.md` → "Contrast remediation (2026-07-14)".

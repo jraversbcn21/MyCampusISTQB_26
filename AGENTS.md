@@ -76,6 +76,42 @@
     `.flashcards-header`, etc., all `margin-bottom: 28px` on the wrapper div) — this view's
     `<h2>` isn't wrapped in one, so it fell back to the browser's tiny default heading margin.
     Fixed with a single scoped rule, `#view-progress > h2 { margin-bottom: 20px; }`.
+- **Contrast remediation (2026-07-14):** fixed two findings from a UI/UX review done with the
+  `ui-ux-pro-max` skill (plan: `docs/superpowers/plans/2026-07-14-contrast-remediation.md`),
+  via subagent-driven-development in 4 tasks:
+  - **C2 — status-feedback text illegible in the light theme:** badges, daily-challenge
+    feedback (`.dc-option.correct`/`.wrong`), flashcard ratings, exam-history scores,
+    results verdicts, and the streak counter all reused the raw `--success`/`--warning`/
+    `--danger`/`--primary` base tokens as `color:` on light tinted backgrounds — fine in the
+    dark theme (those tokens were tuned for it) but 1.27–2.37:1 in the light theme, near
+    invisible. Fixed by introducing four semantic `*-text` tokens
+    (`--success-text`/`--warning-text`/`--danger-text`/`--primary-text`), defined per theme
+    and swapped into all 25 `color:` usages that were status feedback (`background:` and
+    `border-color:` untouched — no visual redesign of fills/borders, only the text color).
+    Dark keeps its existing values (`#81C784`/`#FFD54F`/`#EF9A9A`, already passing) plus one
+    new value (`--primary-text: #A29DFF`, since the old `--primary`/`#8b85ff` only reached
+    4.21:1 on the badge tint); light gets four new dark-enough values:
+    `--success-text: #1B5E20`, `--warning-text: #7A5600`, `--danger-text: #B71C1C`,
+    `--primary-text: #4F46C4`.
+  - **I1 — `--text3` below AA in both themes:** bumped `--text3` from `#6666AA` to
+    `#8C8CC8` (dark) and from `#8888AA` to `#666688` (light), clearing 4.5:1 against both
+    `--surface` and the worst-case `--bg4` background in both themes.
+  - **Validator:** `scripts/validate-contrast.js` (written first, red against the
+    pre-remediation palette, then green — see "No Tests or Linter" below) now gates
+    `css/styles.css` in the pre-commit hook, same staged-copy pattern as the other two
+    validators.
+  - **Visual verification:** Playwright screenshots of the auth screen and a throwaway
+    representative-elements page (badges, `dc-option`, ratings, streak widget, exam-history/
+    verdict, `--text2` vs `--text3`) in both themes, reviewed by eye. Confirmed status text
+    legible in light and dark visually unchanged. The dark `--text2`/`--text3` pair
+    (`#9999BB`/`#8C8CC8`) was checked specifically for the hierarchy-compression risk the
+    plan flagged: at equal font size the two raw tokens read as similarly prominent (`
+    --text3`'s slightly more saturated blue-purple hue can make it look as vivid as
+    `--text2` despite its lower luminance-contrast ratio, 5.18:1 vs 5.89:1) — but every real
+    usage in the app pairs `--text3` with a smaller font-size (e.g. `.activity-time`
+    0.72rem next to `.activity-text`'s default size), which restores the intended
+    dimmer/secondary read. No fallback needed; the plan's documented fallback
+    (`#8484C4`) was not applied. Screenshots were scratchpad-only, not committed.
 
 ## Production Readiness — Status & Next Session
 
@@ -499,9 +535,17 @@ Three exceptions, all Node, dev-only, never served to the browser:
   sync freshness/flush, the script-load guards, the CDN-failure auth screen, state-derived
   `innerHTML` escaping, and the i18n residue/parity checks. If you fix a runtime behavior,
   add a check for it there.
+- `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the
+  `:root` and `[data-theme="light"]` custom-property blocks and asserts WCAG AA 4.5:1 for
+  every status-text/background pair in **both** themes, including `rgba()`-tinted
+  backgrounds alpha-blended over `--surface` (the same real-render math a CSS engine would
+  use, not a naive token-vs-token check). Same family as the other two: Node stdlib only,
+  optional file-path argument for the staged copy, exit 1 on failure. Run it after any
+  change to theme tokens or status-text colors. See "Contrast remediation (2026-07-14)"
+  below for what it was built to catch.
 
 The pre-commit gate is version-controlled at `.githooks/pre-commit` (activate once per clone:
-`git config core.hooksPath .githooks`). It validates the **staged** copy of the two data
+`git config core.hooksPath .githooks`). It validates the **staged** copy of the three data
 files — not the working tree — and runs `verify-runtime.js` whenever `js/`, `index.html`, or
 the harness itself is staged. Commit is blocked on failure.
 
