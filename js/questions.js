@@ -307,7 +307,7 @@ const QUESTIONS = [
     },
     correct: 2,
     explanation: {
-      es: "En el BVA de 3 valores, cada valor límite tiene tres elementos de cobertura: el propio valor límite y sus dos vecinos. Para el valor límite 10, son 9 (su vecino en la partición inválida), 10 y 11 (su vecino dentro de la partición válida). Obsérvese que en el BVA de 3 valores algunos elementos de cobertura pueden no ser valores límite (aquí, el 11). En el BVA de 2 valores serían solo 10 y su vecino más próximo de la partición adyacente (9).",
+      es: "En el BVA de 3 valores, cada valor límite tiene tres elementos de cobertura: el propio valor límite y sus dos vecinos. Para el valor límite 10, son 9 (su vecino en la partición inválida), 10, y 11 (este último, su vecino dentro de la partición válida). Obsérvese que en el BVA de 3 valores algunos elementos de cobertura pueden no ser valores límite (aquí, el 11). En el BVA de 2 valores serían solo 10 y su vecino más próximo de la partición adyacente (9).",
       en: "In 3-value BVA, each boundary value has three coverage items: the boundary value itself and both its neighbors. For the boundary value 10, these are 9 (its neighbor in the invalid partition), 10, and 11 (its neighbor inside the valid partition). Note that in 3-value BVA some coverage items may not be boundary values (here, 11). In 2-value BVA, the items would be just 10 and its closest neighbor in the adjacent partition (9)."
     }
   },
