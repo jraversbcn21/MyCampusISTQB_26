@@ -137,6 +137,41 @@
     hex used as text and fail AA in the light theme — pre-existing, not addressed by either
     gate, pending a future pass. Full detail: `.superpowers/sdd/task-4-report.md` → "Fix wave
     (final review)".
+- **A11y quick wins (2026-07-14):** fixed three more findings from the same `ui-ux-pro-max`
+  review that produced the contrast remediation above (plan:
+  `docs/superpowers/plans/2026-07-14-a11y-quickwins.md`), via subagent-driven-development:
+  - **I6 — exam-guard toast invisible to screen readers:** the toast shown when navigation
+    is blocked during an active exam was the *only* feedback the user got, and with no live
+    region a screen reader never announced it. Added `aria-live="polite"` to
+    `#toastContainer`. Alongside it, `#xpPopup` — a decorative visual flourish whose
+    information (XP gained) already reaches the user through toasts/counters — got
+    `aria-hidden="true"` so it doesn't duplicate announcements or add noise.
+  - **I5 — five icon-only controls with no accessible name:** `#sidebarToggle`,
+    `#mobileMenuBtn`, `#fcPrev`, `#fcNext`, and `#avatarModalClose` render only a glyph
+    (`☰`, `←`, `→`, `✕`), so screen readers had nothing to announce. Fixed by introducing
+    `data-i18n-aria="key"` as a fourth i18n attribute mechanism, alongside `data-i18n`/
+    `data-i18n-placeholder`/`data-i18n-title` — a fourth block in `i18n.apply()` that does
+    `el.setAttribute('aria-label', this.t(key))`, so the label re-applies on every language
+    switch like the other three. `#sidebarToggle` reuses the existing `collapse_menu_title`
+    key; the other four needed new keys (`mobile_menu_aria`, `fc_prev_aria`, `fc_next_aria`,
+    `close_label`), and `#mobileMenuBtn` also gained a matching `title` via
+    `data-i18n-title="mobile_menu_aria"` (it previously had no tooltip at all). See "i18n"
+    below for the full attribute list and the resulting 169-key count.
+  - **I4 — iOS focus auto-zoom on form inputs:** `.search-input`, `.select-input`,
+    `.search-input-full`, and `.auth-field input` were below 16px, which makes iOS Safari
+    auto-zoom the viewport on focus (a jarring, disorienting UX on mobile). Raised all four
+    to `font-size: 1rem` (16px at the app's base font size).
+  - **Gate:** all of the above is regression-guarded by 12 new `N13` static checks in
+    `scripts/verify-runtime.js` — the live region and `aria-hidden` attributes, the
+    `data-i18n-aria` mechanism itself, each of the five controls' `data-i18n-aria`, and each
+    of the four inputs' `font-size: 1rem`.
+  - **Out of scope, still open (tracked here so these pending blocks stay visible):**
+    `#themeToggle` is still a `<div>` rather than a real button/checkbox, so it's not
+    reachable or operable by keyboard alone — finding **C1**, blocked, not part of this
+    pass. `.name-edit-input` stays at `0.85rem` (below the 16px iOS threshold) — deliberately
+    excluded from the I4 fix above because it's a hover-only-revealed edit affordance, not a
+    primary input; finding **I3**, pending. The global search box is still hidden entirely at
+    `≤768px` (no mobile equivalent) — finding **I7**, pending.
 
 ## Production Readiness — Status & Next Session
 
@@ -258,10 +293,16 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
 - `data-i18n-placeholder="key"` for input placeholders
 - Default language is Spanish (`i18n.lang = 'es'`)
 - `data-i18n-title="key"` for `title` tooltips
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — 165 keys (160 after the
-  2026-07-04 remediation, +5 `gs_*` keys added for the 2026-07-08 global search dropdown),
-  all ES/EN paired, enforced by `scripts/verify-runtime.js` (parity, no used-but-undefined
-  keys, no known hardcoded-language residues)
+- `data-i18n-aria="key"` for `aria-label` (added 2026-07-14, I5 of the a11y quick wins
+  block below) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
+  `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like
+  every other `data-i18n-*` mechanism
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **169 keys** (160 after
+  the 2026-07-04 remediation, +5 `gs_*` keys for the 2026-07-08 global search dropdown →
+  165, +4 more — `mobile_menu_aria`, `fc_prev_aria`, `fc_next_aria`, `close_label` — added
+  2026-07-14 for the `data-i18n-aria` rollout above → 169), all ES/EN paired, enforced by
+  `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
+  hardcoded-language residues)
 - `i18n.restore()` reads the saved language from `localStorage` and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
   (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore); the

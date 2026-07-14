@@ -193,3 +193,24 @@ open:** `var(--secondary)` (progress view's exams-completed stat) and the chapte
 arrays (curriculum/progress bars and percentage labels) are still used as text and fail AA in the
 light theme — pre-existing, deliberately out of this remediation's scope, not covered by either
 gate. Full detail: `.superpowers/sdd/task-4-report.md` → "Fix wave (final review)".
+
+## A11y Quick Wins (2026-07-14)
+
+Fixed three more findings from the same `ui-ux-pro-max` review as the contrast remediation
+above: **I6** — the exam-guard toast (the only feedback when navigation is blocked mid-exam)
+had no live region, so screen readers never announced it (`aria-live="polite"` on
+`#toastContainer`, plus `aria-hidden="true"` on the purely decorative `#xpPopup`); **I5** —
+five icon-only controls (`#sidebarToggle`, `#mobileMenuBtn`, `#fcPrev`, `#fcNext`,
+`#avatarModalClose`) had no accessible name, fixed via a new i18n attribute,
+`data-i18n-aria="key"`, applied by `i18n.apply()` as `aria-label` (mirrors
+`data-i18n-title`, re-applies on language switch); and **I4** — four form inputs
+(`.search-input`, `.select-input`, `.search-input-full`, `.auth-field input`) were below
+16px, triggering iOS Safari's focus auto-zoom, fixed by raising them to `font-size: 1rem`.
+`i18n`'s attribute list is now four mechanisms — `data-i18n`, `data-i18n-placeholder`,
+`data-i18n-title`, `data-i18n-aria` — and `TRANSLATIONS` now totals **169 keys**, up from
+165 (the 4 new `*_aria`/`close_label` keys), ES/EN paired. Gated by 12 new `N13` checks in
+`scripts/verify-runtime.js`. **Still open, out of scope:** `#themeToggle` remains a
+non-keyboard-operable `<div>` (C1); `.name-edit-input` stays below 16px, a hover-only edit
+affordance (I3); the global search box is still hidden entirely at `≤768px` (I7). Plan and
+full detail: `docs/superpowers/plans/2026-07-14-a11y-quickwins.md`, `AGENTS.md` → "A11y
+quick wins (2026-07-14)".
