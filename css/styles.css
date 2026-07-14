@@ -24,7 +24,7 @@
   --border: rgba(255,255,255,0.08);
   --text: #E8E8F4;
   --text2: #9999BB;
-  --text3: #6666AA;
+  --text3: #8C8CC8;
   --sidebar-w: 260px;
   --topbar-h: 64px;
   --radius: 12px;
@@ -47,7 +47,7 @@
   --border: rgba(0,0,0,0.08);
   --text: #1A1A2E;
   --text2: #555577;
-  --text3: #8888AA;
+  --text3: #666688;
   --success-text: #1B5E20;
   --warning-text: #7A5600;
   --danger-text: #B71C1C;
