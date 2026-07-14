@@ -262,7 +262,7 @@ Closed finding **I2** of the same `ui-ux-pro-max` review: nothing in the app hon
 `prefers-reduced-motion`. Two mechanisms: (1) a global "blunt" media block in
 `css/styles.css` — under `@media (prefers-reduced-motion: reduce)`, every element gets
 `animation-duration`/`transition-duration: 0.01ms !important`,
-`animation-iteration-count: 1 !important`, and `scroll-behavior: auto` — neutralizing every
+`animation-iteration-count: 1 !important`, and `scroll-behavior: auto !important` — neutralizing every
 current AND future animation/transition (the stylesheet `!important` beats even the
 carousel's inline styles); placed immediately BEFORE the `:focus-visible` section, which
 must stay last in the file (its cascade rationale — see "Keyboard Operability" above).
@@ -280,7 +280,8 @@ changes (170 keys stays the total). Verified in a real Chromium browser (Playwri
 2026-07-14) in both modes: with `emulateMedia({ reducedMotion: 'reduce' })` — flip 0.01ms,
 carousel 7.2ms end-to-end, timer/onboarding 0.01ms, `#xpPopup` never lingers; without
 (no-regression) — flip 0.5s, carousel 515.9ms with a mid-flight `translateX` proving the
-slide still animates, timer 1s, onboarding 2s. **I2 is now closed; I3, I7, and I8 from the
-same review stay open**, plus the recorded follow-ups in the sections above. Plan and full
+slide still animates, timer 1s, onboarding 2s. **I2 is now closed; I3 (sub-44px touch targets), I7 (search
+hidden on mobile), and I8 (emoji as structural icons → SVG sprite) from the same review stay
+open**, plus the recorded follow-ups in the sections above. Plan and full
 detail: `docs/superpowers/plans/2026-07-14-reduced-motion.md`, `AGENTS.md` → "Reduced
 motion — I2 (2026-07-14)".

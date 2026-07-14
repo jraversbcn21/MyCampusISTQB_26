@@ -286,9 +286,14 @@
     flip 0.5s, carousel 515.9ms total with a mid-flight `translateX` sample proving the
     slide genuinely still animates, timer pulse 1s, onboarding pulse 2s/infinite. No
     regressions.
-  - **Pending blocks from the 2026-07-14 review:** **I2 is now closed.** **I3**, **I7**,
-    and **I8** stay open, along with the recorded follow-ups above (the C1 follow-up list
-    and the contrast fix wave's raw `--secondary`/chapter-accent text colors).
+  - **Pending blocks from the 2026-07-14 review:** **I2 is now closed.** **I3** (touch
+    targets under 44px: lang switcher ~24px, exam dots 28px; plus the hover-only name-edit
+    button, invisible on touch), **I7** (global search hidden at ≤768px with no mobile
+    alternative), and **I8** (emojis used as structural icons — nav/topbar/stats/logo; the
+    review's pragmatic fix is an inline SVG sprite, e.g. Lucide, keeping decorative emojis
+    with `aria-hidden`) stay open, along with the recorded follow-ups above (the C1
+    follow-up list and the contrast fix wave's raw `--secondary`/chapter-accent text
+    colors).
 
 ## Production Readiness — Status & Next Session
 
