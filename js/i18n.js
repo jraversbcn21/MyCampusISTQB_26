@@ -155,6 +155,10 @@ const TRANSLATIONS = {
     logout_label: "Salir",
     logout_title: "Cerrar sesión",
     collapse_menu_title: "Colapsar menú",
+    mobile_menu_aria: "Abrir menú móvil",
+    fc_prev_aria: "Tarjeta anterior",
+    fc_next_aria: "Siguiente tarjeta",
+    close_label: "Cerrar",
     theme_toggle_title: "Cambiar tema",
     streak_keep_going: "¡Sigue así!",
     student_fallback: "Estudiante",
@@ -346,6 +350,10 @@ const TRANSLATIONS = {
     logout_label: "Log out",
     logout_title: "Log out",
     collapse_menu_title: "Collapse menu",
+    mobile_menu_aria: "Open mobile menu",
+    fc_prev_aria: "Previous card",
+    fc_next_aria: "Next card",
+    close_label: "Close",
     theme_toggle_title: "Toggle theme",
     streak_keep_going: "Keep it up!",
     student_fallback: "Student",
@@ -405,6 +413,10 @@ const i18n = {
     document.querySelectorAll('[data-i18n-title]').forEach(el => {
       const key = el.getAttribute('data-i18n-title');
       el.title = this.t(key);
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+      const key = el.getAttribute('data-i18n-aria');
+      el.setAttribute('aria-label', this.t(key));
     });
     document.documentElement.lang = this.lang;
   },

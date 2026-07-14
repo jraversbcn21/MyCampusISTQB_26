@@ -668,6 +668,35 @@ const SAMPLE_Q = {
       !/color:\s*var\(--(success|warning|danger)\)/.test(appSrc));
   }
 
+  /* ---- N13: accesibilidad — live region, nombres accesibles (I6+I5, revisión UI 2026-07-14) ---- */
+  {
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const i18nSrc = fs.readFileSync(path.join(ROOT, 'js', 'i18n.js'), 'utf8');
+
+    // I6: el toast del guard de examen es el ÚNICO feedback cuando se bloquea la
+    // navegación — sin live region, un lector de pantalla no se entera de nada.
+    check('N13 a11y: #toastContainer es live region (aria-live="polite")',
+      /id="toastContainer"[^>]*aria-live="polite"|aria-live="polite"[^>]*id="toastContainer"/.test(htmlSrc));
+    // El popup de XP es decorativo (su información llega también por toasts/contadores);
+    // sin aria-hidden duplicaría anuncios o metería ruido en el lector.
+    check('N13 a11y: #xpPopup está oculto para lectores (aria-hidden="true")',
+      /id="xpPopup"[^>]*aria-hidden="true"|aria-hidden="true"[^>]*id="xpPopup"/.test(htmlSrc));
+    // I5: mecanismo data-i18n-aria — cuarto bloque del applier, espejo de data-i18n-title.
+    check('N13 a11y: i18n.apply() aplica data-i18n-aria como aria-label',
+      /data-i18n-aria/.test(i18nSrc) && /setAttribute\('aria-label'/.test(i18nSrc));
+    // I5: los cinco controles icon-only llevan nombre accesible i18n.
+    for (const [id, key] of [
+      ['mobileMenuBtn', 'mobile_menu_aria'],
+      ['fcPrev', 'fc_prev_aria'],
+      ['fcNext', 'fc_next_aria'],
+      ['avatarModalClose', 'close_label'],
+      ['sidebarToggle', 'collapse_menu_title'],
+    ]) {
+      const re = new RegExp(`id="${id}"[^>]*data-i18n-aria="${key}"|data-i18n-aria="${key}"[^>]*id="${id}"`);
+      check(`N13 a11y: #${id} lleva data-i18n-aria="${key}"`, re.test(htmlSrc));
+    }
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
