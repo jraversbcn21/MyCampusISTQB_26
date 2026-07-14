@@ -295,19 +295,20 @@ const QUESTIONS = [
     }
   },
   {
-    id: 17, chapter: 3,
+    id: 122, chapter: 3, lo: "FL-4.2.2", k: 3,
+    source: "Syllabus v4.0 §4.2.2",
     q: {
-      es: "¿Cuántas reglas tiene una tabla de decisión con 3 condiciones independientes?",
-      en: "How many rules does a decision table have with 3 independent conditions?"
+      es: "Un campo acepta enteros válidos de 10 a 50 (los enteros fuera de ese rango son inválidos). Según el BVA (análisis de valores límite) de 3 valores, ¿qué elementos de cobertura corresponden al valor límite 10?",
+      en: "A field accepts valid integers from 10 to 50 (integers outside that range are invalid). According to 3-value BVA (boundary value analysis), which coverage items correspond to the boundary value 10?"
     },
     options: {
-      es: ["3", "6", "8", "9"],
-      en: ["3", "6", "8", "9"]
+      es: ["10 y 11", "9 y 10", "9, 10 y 11", "8, 9, 10 y 11"],
+      en: ["10 and 11", "9 and 10", "9, 10 and 11", "8, 9, 10 and 11"]
     },
     correct: 2,
     explanation: {
-      es: "Con n condiciones binarias (Sí/No), el número máximo de reglas es 2^n. Con 3 condiciones: 2^3 = 8 reglas. En la práctica, las reglas con el mismo resultado pueden combinarse.",
-      en: "With n binary conditions (Yes/No), the maximum number of rules is 2^n. With 3 conditions: 2^3 = 8 rules. In practice, rules with the same outcome can be combined."
+      es: "En el BVA de 3 valores, cada valor límite tiene tres elementos de cobertura: el propio valor límite y sus dos vecinos. Para el valor límite 10, son 9 (su vecino en la partición inválida), 10 y 11 (su vecino dentro de la partición válida). Obsérvese que en el BVA de 3 valores algunos elementos de cobertura pueden no ser valores límite (aquí, el 11). En el BVA de 2 valores serían solo 10 y su vecino más próximo de la partición adyacente (9).",
+      en: "In 3-value BVA, each boundary value has three coverage items: the boundary value itself and both its neighbors. For the boundary value 10, these are 9 (its neighbor in the invalid partition), 10, and 11 (its neighbor inside the valid partition). Note that in 3-value BVA some coverage items may not be boundary values (here, 11). In 2-value BVA, the items would be just 10 and its closest neighbor in the adjacent partition (9)."
     }
   },
   {
@@ -612,19 +613,20 @@ const QUESTIONS = [
     }
   },
   {
-    id: 31, chapter: 3,
+    id: 123, chapter: 3, lo: "FL-4.2.2", k: 3,
+    source: "Syllabus v4.0 §4.2.2",
     q: {
-      es: "Un sistema de cajero automático (ATM) tiene los estados: Inactivo, Leyendo Tarjeta, Validando PIN, Menú Principal. ¿Qué técnica es más apropiada para probar este sistema?",
-      en: "An ATM system has states: Idle, Reading Card, Validating PIN, Main Menu. Which technique is most appropriate to test this system?"
+      es: "La condición «if (x ≤ 10)» se implementó por error como «if (x = 10)». Con el BVA de 2 valores se prueban x = 10 y x = 11, y ninguno de los dos detecta el defecto. ¿Qué valor de prueba derivado del BVA de 3 valores probablemente SÍ detectaría el defecto?",
+      en: "The condition \"if (x ≤ 10)\" was implemented by mistake as \"if (x = 10)\". With 2-value BVA, x = 10 and x = 11 are tested, and neither detects the defect. Which test value derived from 3-value BVA would likely detect the defect?"
     },
     options: {
-      es: ["Partición de equivalencia", "Análisis de valor límite", "Prueba de transición de estado", "Tabla de decisión"],
-      en: ["Equivalence partitioning", "Boundary value analysis", "State transition testing", "Decision table"]
+      es: ["x = 9", "x = 10", "x = 11", "x = 12"],
+      en: ["x = 9", "x = 10", "x = 11", "x = 12"]
     },
-    correct: 2,
+    correct: 0,
     explanation: {
-      es: "La prueba de transición de estado es ideal para sistemas donde el comportamiento depende del estado actual. El ATM cambia de comportamiento según el estado en que se encuentre (Inactivo, Leyendo tarjeta, etc.).",
-      en: "State transition testing is ideal for systems where behavior depends on current state. The ATM changes behavior based on the state it's in (Idle, Reading card, etc.)."
+      es: "Es el ejemplo del propio syllabus (§4.2.2) de por qué el BVA de 3 valores es más riguroso que el de 2 valores. Con x = 10, tanto el código correcto (10 ≤ 10) como el defectuoso (10 = 10) ejecutan la rama; con x = 11 y x = 12, ninguno de los dos la ejecuta: resultados idénticos, el defecto pasa inadvertido. Con x = 9 el comportamiento difiere: el código correcto entra en la rama (9 ≤ 10) pero el defectuoso no (9 = 10 es falso). x = 9 es precisamente un elemento de cobertura del BVA de 3 valores (vecino del valor límite 10) que el BVA de 2 valores no incluye.",
+      en: "This is the syllabus's own example (§4.2.2) of why 3-value BVA is more rigorous than 2-value BVA. With x = 10, both the correct code (10 ≤ 10) and the defective one (10 = 10) execute the branch; with x = 11 and x = 12, neither does — identical results, so the defect goes unnoticed. With x = 9 the behavior differs: the correct code takes the branch (9 ≤ 10) while the defective one does not (9 = 10 is false). x = 9 is precisely a 3-value BVA coverage item (a neighbor of the boundary value 10) that 2-value BVA does not include."
     }
   },
   {
