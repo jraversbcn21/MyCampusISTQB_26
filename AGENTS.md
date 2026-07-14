@@ -112,6 +112,31 @@
     0.72rem next to `.activity-text`'s default size), which restores the intended
     dimmer/secondary read. No fallback needed; the plan's documented fallback
     (`#8484C4`) was not applied. Screenshots were scratchpad-only, not committed.
+  - **Fix wave (final whole-branch review, same day):** the CSS-token pass above only swapped
+    `color:` usages inside `css/styles.css`; `scripts/validate-contrast.js` can't see JS-inline
+    text colors, so it missed a sibling problem: 7 places in `js/app.js` set
+    `style="color:..."` (or `.style.color =`) directly to a raw `--success`/`--warning`/
+    `--danger` token as *text* — progress-view Level and 🔥 streak big-stats (~967/970),
+    daily-challenge "completed today" caption (~244), exam results score (~893), exam-
+    performance bar-chart value labels (~995/997), achievement "unlocked" caption (~1039).
+    Same failure mode as C2, just invisible to a CSS-only validator. Swapped each to the
+    matching `--success-text`/`--warning-text`/`--danger-text` token, or to the existing
+    `.text-success`/`.text-warning` utility class where a sibling stat already used that idiom
+    (the two big-stats). `background:`/`border-color:` (e.g. the exam-performance bar fill)
+    were deliberately left on the raw tokens — only text color was in scope, no visual
+    redesign of fills. Regression-guarded by a new `N12` static check in
+    `scripts/verify-runtime.js` (TDD: red against pre-fix `app.js`, green after), asserting
+    `js/app.js` contains no `color:var(--success|warning|danger)` (optional whitespace after
+    the colon) as inline text. **The gate for this whole remediation is therefore two-part:**
+    `scripts/validate-contrast.js` for the CSS token pairs (hooked on staged `css/styles.css`)
+    and `N12` in `scripts/verify-runtime.js` for JS-inline status text (hooked on staged
+    `js/`) — neither alone covers both surfaces. **Known follow-up, still open and out of
+    scope:** `var(--secondary)` (the progress view's exams-completed stat, ~969) and the
+    chapter accent-color arrays (`colors = ["#6C63FF", ...]`, used as text in the curriculum
+    continue-list percentage and the progress chapter-bar percentage) are still raw tokens/
+    hex used as text and fail AA in the light theme — pre-existing, not addressed by either
+    gate, pending a future pass. Full detail: `.superpowers/sdd/task-4-report.md` → "Fix wave
+    (final review)".
 
 ## Production Readiness — Status & Next Session
 
@@ -541,8 +566,10 @@ Three exceptions, all Node, dev-only, never served to the browser:
   backgrounds alpha-blended over `--surface` (the same real-render math a CSS engine would
   use, not a naive token-vs-token check). Same family as the other two: Node stdlib only,
   optional file-path argument for the staged copy, exit 1 on failure. Run it after any
-  change to theme tokens or status-text colors. See "Contrast remediation (2026-07-14)"
-  below for what it was built to catch.
+  change to theme tokens or status-text colors. It only sees `css/styles.css`, though — it
+  cannot detect JS-inline `style="color:..."` set from `js/app.js` templates; that surface
+  is covered by the `N12` check in `verify-runtime.js` below. See "Contrast remediation
+  (2026-07-14)" below for what both were built to catch.
 
 The pre-commit gate is version-controlled at `.githooks/pre-commit` (activate once per clone:
 `git config core.hooksPath .githooks`). It validates the **staged** copy of the three data

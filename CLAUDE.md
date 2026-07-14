@@ -83,7 +83,7 @@ Four exceptions, all Node-only dev scripts never served to the browser:
 - `scripts/validate-questions.js` gates `js/questions.js` — per-chapter question counts, structural integrity (bilingual fields, 4 options, valid `correct` index, unique ids), traceability (`lo`/`k`/`source` for every question added after id 50).
 - `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` — topic counts, `lo`/`source` presence, glossary keyword-completeness against the syllabus.
 - `scripts/verify-runtime.js` — behavior harness: loads the real `js/` modules into a mocked minimal DOM (no browser, no npm install) and exercises sync freshness/flush, the script-load guards, the CDN-failure auth screen, `innerHTML` escaping of state-derived values, and i18n parity/residue checks. Run it after any change to `js/` or `index.html`; add a check when you fix a runtime behavior.
-- `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the theme token blocks and asserts WCAG AA 4.5:1 for every status-text/background pair in both themes, including `rgba()`-tinted backgrounds alpha-blended over the surface. Run it after any change to theme tokens or status-text colors.
+- `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the theme token blocks and asserts WCAG AA 4.5:1 for every status-text/background pair in both themes, including `rgba()`-tinted backgrounds alpha-blended over the surface. It cannot see JS-inline text colors (`style="color:..."` set from `js/app.js` templates) — those are covered separately by the `N12` static check in `scripts/verify-runtime.js` (asserts `js/app.js` never sets `color:` to a raw `--success`/`--warning`/`--danger` token as text). Together the two gate the full surface; run both after any change to theme tokens or status-text colors.
 
 Run the relevant one after any change:
 
@@ -176,3 +176,20 @@ primary; light gets four new darker values) swapped into all 25 status-text `col
 visually with Playwright in both themes. Plan and full detail (exact hex values, the dark
 `--text2`/`--text3` hierarchy check): `docs/superpowers/plans/2026-07-14-contrast-remediation.md`,
 `AGENTS.md` → "Contrast remediation (2026-07-14)".
+
+**Fix wave (final whole-branch review, same day):** the CSS-token pass above left the CSS
+validator blind to a sibling problem — 7 places in `js/app.js` set inline `style="color:..."`
+directly to a raw `--success`/`--warning`/`--danger` token as *text* color (progress-view Level/
+streak big-stats, daily-challenge "completed today" caption, exam results score, exam-performance
+bar-chart value labels, achievement "unlocked" caption) — illegible in the light theme for the
+same reason as the CSS cases. Swapped each to the matching `--success-text`/`--warning-text`/
+`--danger-text` token (or the existing `.text-success`/`.text-warning` utility class where a
+sibling element already used that idiom); `background:`/`border-color:` values (e.g. the exam bar
+fill) were deliberately left on the raw tokens — only text color was in scope. The gate is now
+two-part: `scripts/validate-contrast.js` for CSS token pairs (hooked on staged `css/styles.css`)
+plus the new `N12` check in `scripts/verify-runtime.js` (hooked on staged `js/`) guarding against
+raw `color:var(--success|warning|danger)` reappearing as JS-inline text. **Known follow-up, still
+open:** `var(--secondary)` (progress view's exams-completed stat) and the chapter accent-color
+arrays (curriculum/progress bars and percentage labels) are still used as text and fail AA in the
+light theme — pre-existing, deliberately out of this remediation's scope, not covered by either
+gate. Full detail: `.superpowers/sdd/task-4-report.md` → "Fix wave (final review)".

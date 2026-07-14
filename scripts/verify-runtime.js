@@ -653,6 +653,21 @@ const SAMPLE_Q = {
       /composedPath/.test(appSrc) && !/e\.target\.closest\('\.search-box'\)/.test(appSrc));
   }
 
+  /* ---- N12: contraste — texto inline en app.js no usa tokens raw success/warning/danger ---- */
+  {
+    // scripts/validate-contrast.js sólo ve los pares de tokens de css/styles.css;
+    // no ve el color de texto inline que ponen las plantillas de app.js (style="color:...").
+    // Este chequeo estático es su complemento: guarda que ningún span/div de texto en
+    // app.js vuelva a usar var(--success)/var(--warning)/var(--danger) —que sólo cumplen
+    // AA en dark— como color de TEXTO; debe usarse el token *-text (o su clase .text-*).
+    // Deliberadamente NO cubre var(--secondary) ni los arrays de color de acento de
+    // capítulo/progreso: siguen usándose como texto y no cumplen AA en claro, pero es
+    // un follow-up pre-existente fuera del alcance de esta pasada (ver AGENTS.md).
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    check('N12 contraste: app.js no usa color:var(--success|warning|danger) crudo como texto inline',
+      !/color:\s*var\(--(success|warning|danger)\)/.test(appSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

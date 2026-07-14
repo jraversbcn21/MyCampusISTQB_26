@@ -241,7 +241,7 @@ const App = {
     const isDone = this.state.dailyChallengeDate === today && this.state.dailyChallengeCompleted;
 
     if (isDone) {
-      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--success)">✅ ${i18n.t('challenge_completed_today')}</div>`;
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--success-text)">✅ ${i18n.t('challenge_completed_today')}</div>`;
       return;
     }
 
@@ -890,7 +890,7 @@ const App = {
     document.getElementById('examResults').style.display = 'block';
     document.getElementById('resultsEmoji').textContent = passed ? '🎉' : '💪';
     document.getElementById('resultsScore').textContent = score + '%';
-    document.getElementById('resultsScore').style.color = passed ? 'var(--success)' : 'var(--danger)';
+    document.getElementById('resultsScore').style.color = passed ? 'var(--success-text)' : 'var(--danger-text)';
     const verdict = document.getElementById('resultsVerdict');
     verdict.textContent = passed ? i18n.t('exam_passed') : i18n.t('exam_failed');
     verdict.className = 'results-verdict ' + (passed ? 'pass' : 'fail');
@@ -964,10 +964,10 @@ const App = {
 
     document.getElementById('progressStatsBig').innerHTML = `
       <div class="progress-stat-big"><div class="progress-stat-big-val text-primary">${this.state.xp}</div><div class="progress-stat-big-label">XP ${i18n.t('total_label')}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--warning)">${lvl.icon} ${i18n.t('level_label')} ${lvl.level}</div><div class="progress-stat-big-label">${lvl.name[lang]}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val text-warning">${lvl.icon} ${i18n.t('level_label')} ${lvl.level}</div><div class="progress-stat-big-label">${lvl.name[lang]}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val text-success">${done}/${totalLessons}</div><div class="progress-stat-big-label">${i18n.t('lessons_label')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--secondary)">${this.state.examsCompleted}</div><div class="progress-stat-big-label">${i18n.t('nav_simulator')}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--warning)">🔥 ${this.state.streak}</div><div class="progress-stat-big-label">${i18n.t('streak_label')}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val text-warning">🔥 ${this.state.streak}</div><div class="progress-stat-big-label">${i18n.t('streak_label')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val">${avgScore}%</div><div class="progress-stat-big-label">${i18n.t('avg_exam_score_label')}</div></div>
     `;
 
@@ -993,8 +993,9 @@ const App = {
           ${recent.map((e, i) => {
             const h = Math.round((e.score / 100) * 100);
             const color = e.score >= 65 ? 'var(--success)' : 'var(--danger)';
+            const textColor = e.score >= 65 ? 'var(--success-text)' : 'var(--danger-text)';
             return `<div style="flex:1;height:${h}px;background:${color};border-radius:4px 4px 0 0;position:relative;min-width:20px" title="${escapeHtml(e.score)}%">
-              <span style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:0.6rem;font-weight:700;color:${color};white-space:nowrap">${escapeHtml(e.score)}%</span>
+              <span style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:0.6rem;font-weight:700;color:${textColor};white-space:nowrap">${escapeHtml(e.score)}%</span>
               <span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:var(--text3);white-space:nowrap">${escapeHtml(String(e.date).split('/').slice(0,2).join('/'))}</span>
             </div>`;
           }).join('')}
@@ -1036,7 +1037,7 @@ const App = {
           <div class="achievement-name">${a.name[lang]}</div>
           <div class="achievement-desc">${a.desc[lang]}</div>
           <div class="achievement-xp">+${a.xp} XP</div>
-          <div style="font-size:0.7rem;color:${isUnlocked ? 'var(--success)' : 'var(--text3)'}">${isUnlocked ? '✓ ' + i18n.t('unlocked_on') : '🔒 ' + i18n.t('locked')}</div>
+          <div style="font-size:0.7rem;color:${isUnlocked ? 'var(--success-text)' : 'var(--text3)'}">${isUnlocked ? '✓ ' + i18n.t('unlocked_on') : '🔒 ' + i18n.t('locked')}</div>
         </div>`;
     }).join('');
   },
