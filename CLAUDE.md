@@ -117,7 +117,7 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
 - No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
 - A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
-- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys, ES/EN paired, enforced by `scripts/verify-runtime.js`.
+- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (170 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
 ## Production Readiness — Status
@@ -162,127 +162,51 @@ replaces the panel's `innerHTML` mid-click and detaches the original target befo
 reaches `document`; fixed with `e.composedPath()` (unaffected by that mutation) plus a static
 regression check in `scripts/verify-runtime.js` (full mechanism in `AGENTS.md`).
 
-## Contrast Remediation (2026-07-14)
+## UI/UX Remediation — ui-ux-pro-max Review (2026-07-14)
 
-Fixed two findings from a UI/UX review done with the `ui-ux-pro-max` skill: **C2** — status-feedback
-text (badges, daily-challenge feedback, flashcard ratings, exam-history scores, results verdicts,
-streak counter) was reusing the raw `--success`/`--warning`/`--danger`/`--primary` tokens as text
-color, legible in the dark theme but only 1.27–2.37:1 contrast in the light theme; and **I1** —
-`--text3` was below AA in both themes. Fixed via four new semantic `--success-text`/`--warning-text`/
-`--danger-text`/`--primary-text` tokens (dark keeps its existing values plus one new one for
-primary; light gets four new darker values) swapped into all 25 status-text `color:` usages, plus a
-`--text3` bump in both themes — no change to `background:`/`border-color:`. Gated by
-`scripts/validate-contrast.js` in the pre-commit hook (see "No Tests, No Linter" above) and verified
-visually with Playwright in both themes. Plan and full detail (exact hex values, the dark
-`--text2`/`--text3` hierarchy check): `docs/superpowers/plans/2026-07-14-contrast-remediation.md`,
-`AGENTS.md` → "Contrast remediation (2026-07-14)".
+A full UI/UX review of the app (done with the `ui-ux-pro-max` skill) produced a prioritized
+findings list; four blocks were remediated the same day via subagent-driven-development, each
+with its own plan, per-task reviews, a final whole-branch review (all four found and fixed
+real issues), and real-browser Playwright verification. **This section is a summary only —
+mechanisms, exact hex values, verification evidence, and the complete follow-up lists live in
+`AGENTS.md`'s four matching entries and the four plan docs under `docs/superpowers/plans/`.**
 
-**Fix wave (final whole-branch review, same day):** the CSS-token pass above left the CSS
-validator blind to a sibling problem — 7 places in `js/app.js` set inline `style="color:..."`
-directly to a raw `--success`/`--warning`/`--danger` token as *text* color (progress-view Level/
-streak big-stats, daily-challenge "completed today" caption, exam results score, exam-performance
-bar-chart value labels, achievement "unlocked" caption) — illegible in the light theme for the
-same reason as the CSS cases. Swapped each to the matching `--success-text`/`--warning-text`/
-`--danger-text` token (or the existing `.text-success`/`.text-warning` utility class where a
-sibling element already used that idiom); `background:`/`border-color:` values (e.g. the exam bar
-fill) were deliberately left on the raw tokens — only text color was in scope. The gate is now
-two-part: `scripts/validate-contrast.js` for CSS token pairs (hooked on staged `css/styles.css`)
-plus the new `N12` check in `scripts/verify-runtime.js` (hooked on staged `js/`) guarding against
-raw `color:var(--success|warning|danger)` reappearing as JS-inline text. **Known follow-up, still
-open:** `var(--secondary)` (progress view's exams-completed stat) and the chapter accent-color
-arrays (curriculum/progress bars and percentage labels) are still used as text and fail AA in the
-light theme — pre-existing, deliberately out of this remediation's scope, not covered by either
-gate.
+| Block | Findings closed | Summary | Gate |
+|-------|-----------------|---------|------|
+| Contrast | C2 + I1 | Semantic `--success-text`/`--warning-text`/`--danger-text`/`--primary-text` tokens per theme (light-theme status text was 1.27–2.37:1); `--text3` raised to AA in both themes; a fix wave swapped 7 JS-inline text colors the CSS validator couldn't see | `validate-contrast.js` (pre-commit, staged CSS) + `N12` (JS-inline status text) |
+| A11y quick wins | I6 + I5 + I4 | `aria-live="polite"` on `#toastContainer` (+ `aria-hidden` on the decorative `#xpPopup`); new `data-i18n-aria` mechanism naming five icon-only controls; four form inputs to 16px (kills iOS focus auto-zoom) | 12 `N13` checks |
+| Keyboard operability | C1 | `#themeToggle` → real `<button>`; `role="button" tabindex="0"` on template-rendered divs + ONE delegated document keydown handler; global `:focus-visible`; `selectAnswer` focus restore; flashcard flip made keyboard-operable in the fix wave | 11 `N14` checks |
+| Reduced motion | I2 | Global `prefers-reduced-motion` blunt block (durations + delays → 0.01ms `!important`, beats inline styles) + `matchMedia` guard collapsing the carousel's `setTimeout` sequencing | 2 `N15` checks |
 
-## A11y Quick Wins (2026-07-14)
+**Editing constraints an agent must know (load-bearing):**
 
-Fixed three more findings from the same `ui-ux-pro-max` review as the contrast remediation
-above: **I6** — the exam-guard toast (the only feedback when navigation is blocked mid-exam)
-had no live region, so screen readers never announced it (`aria-live="polite"` on
-`#toastContainer`, plus `aria-hidden="true"` on the purely decorative `#xpPopup`); **I5** —
-five icon-only controls (`#sidebarToggle`, `#mobileMenuBtn`, `#fcPrev`, `#fcNext`,
-`#avatarModalClose`) had no accessible name, fixed via a new i18n attribute,
-`data-i18n-aria="key"`, applied by `i18n.apply()` as `aria-label` (mirrors
-`data-i18n-title`, re-applies on language switch); and **I4** — four form inputs
-(`.search-input`, `.select-input`, `.search-input-full`, `.auth-field input`) were below
-16px, triggering iOS Safari's focus auto-zoom, fixed by raising them to `font-size: 1rem`.
-`i18n`'s attribute list is now four mechanisms — `data-i18n`, `data-i18n-placeholder`,
-`data-i18n-title`, `data-i18n-aria` — and `TRANSLATIONS` grew to **169 keys** with this
-block, up from 165 (the 4 new `*_aria`/`close_label` keys); the C1 block below added one
-more → **170**, the current total, ES/EN paired. Gated by 12 new `N13` checks in
-`scripts/verify-runtime.js`. **Out of scope at the time:** `#themeToggle` remained a
-non-keyboard-operable `<div>` (C1 — since closed, see "Keyboard Operability" below);
-`.name-edit-input` stays below 16px, a hover-only edit
-affordance (I3, still open); the global search box is still hidden entirely at `≤768px`
-(I7, still open). Plan and
-full detail: `docs/superpowers/plans/2026-07-14-a11y-quickwins.md`, `AGENTS.md` → "A11y
-quick wins (2026-07-14)".
+- The tail of `css/styles.css` is ordered on purpose: the reduced-motion media block, then
+  `:focus-visible` **literally last** (it must win the `outline` property over earlier
+  equal-specificity `outline: none` input rules). Don't append CSS after it without reading
+  both blocks' comments.
+- New interactive elements in `innerHTML` templates: give them `role="button" tabindex="0"`
+  — the delegated keydown listener in `App.init()` makes them keyboard-operable
+  automatically; never add per-element key listeners (the templates are regenerated
+  constantly).
+- New icon-only controls: name them with `data-i18n-aria="key"` (the fourth i18n attribute
+  mechanism — see `AGENTS.md` → "i18n").
+- Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
+  `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
+  the two-part gate blocks the commit otherwise.
+- `TRANSLATIONS` currently has **170 keys** (ES/EN paired, harness-enforced).
+- The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
+  assertions).
+- Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated
+  (decorative, `aria-hidden`, XP info duplicated in the sidebar counter and toasts), not a bug.
+- Nothing in `js/` may rely on `transitionend`/`animationend` without re-verifying under
+  reduced motion (today everything is `setTimeout`-driven — that property is what makes the
+  blunt block safe).
 
-## Keyboard Operability — C1 (2026-07-14)
-
-Closed finding **C1** of the same `ui-ux-pro-max` review: neither the theme toggle nor any
-template-rendered control (exam options/dots, daily-challenge options, dashboard stat-cards,
-curriculum chapter headers and topic items) was keyboard-operable, and there was no visible
-focus indicator. Three mechanisms: (1) `#themeToggle` is now a real `<button>` (a `.theme-btn`
-CSS reset — `background: none; border: none` — keeps it visually identical); (2) the
-template-rendered interactive divs carry `role="button" tabindex="0"` (exam options only when
-not reviewing, plus `aria-pressed`; exam dots with an i18n `aria-label`; topic items only when
-they have a lesson), activated by ONE delegated document-level `keydown` listener in
-`App.init()` (Enter/Space over `[role="button"]` → `preventDefault()` + `.click()`) —
-delegation is load-bearing because `innerHTML` re-renders constantly destroy these divs, and a
-single document listener survives every regeneration; (3) a global `:focus-visible` outline
-(2px solid `var(--primary)`) deliberately at the very END of `css/styles.css`, so it wins the
-`outline` property over the file's earlier equal-specificity `outline: none` input rules.
-`selectAnswer()` also restores focus to the answered option after its `innerHTML` re-render
-(answering with Enter used to dump focus back to `<body>`). Gated by 11 new `N14` static
-checks in `scripts/verify-runtime.js`; `TRANSLATIONS` is now **170 keys** (new key:
-`goto_question_aria`, the exam dots' label). Verified in a real Chromium browser (Playwright,
-real key presses, 2026-07-14): all 5 surfaces plus a 21-Tab walk with no focus traps (note:
-the `data-theme` attribute lives on `<body>`, not `<html>`). The final whole-branch review
-found the flashcard flip keyboard-dead (`#flashcard` was a click-only div) — FIXED same day:
-`role="button" tabindex="0" data-i18n-aria="click_to_flip"` on `#flashcard`, covered by the
-block's delegated handler and existing i18n mechanisms (11th `N14` check; the inner TTS
-buttons are unaffected — no `role` attribute plus `stopPropagation()` in `_handleTTS`).
-Recorded follow-ups, still open:
-`aria-expanded` on chapter headers (needs a state sync in `toggleChapter`), focus management
-in `goToQuestion()`, keyboard support inside the global-search dropdown (folded into I7),
-answered daily-challenge options staying focusable-but-inert (mouse-parity cosmetic nit),
-avatar personalization keyboard-inaccessible end-to-end (`#userAvatar` opens the modal via a
-JS click listener only; the `.av-card` selection cards are click-only divs — Save/Cancel/Close
-are real buttons), `.name-edit-btn` as an invisible tab stop (`opacity: 0` outside hover hides
-even the focus ring — queue with I3), the dashboard `continue-item` divs being click-only
-(keyboard-equivalent paths exist via the curriculum; consistency nit), and roving tabindex +
-`aria-current` for the exam dots as future polish. Plan
-and full detail: `docs/superpowers/plans/2026-07-14-keyboard-operability.md`, `AGENTS.md` →
-"Keyboard operability — C1 (2026-07-14)".
-
-## Reduced Motion — I2 (2026-07-14)
-
-Closed finding **I2** of the same `ui-ux-pro-max` review: nothing in the app honored
-`prefers-reduced-motion`. Two mechanisms: (1) a global "blunt" media block in
-`css/styles.css` — under `@media (prefers-reduced-motion: reduce)`, every element gets
-`animation-duration`/`transition-duration: 0.01ms !important`,
-`animation-iteration-count: 1 !important`, `scroll-behavior: auto !important`, and the
-`animation-delay`/`transition-delay` pair (future-proofing) — neutralizing every
-current AND future animation/transition (the stylesheet `!important` beats even the
-carousel's inline styles); placed immediately BEFORE the `:focus-visible` section, which
-must stay last in the file (its cascade rationale — see "Keyboard Operability" above).
-(2) `_slideFlashcard`'s `dur` is now `matchMedia('(prefers-reduced-motion: reduce)')`-guarded
-(0 vs 250ms) — the CSS kills the motion but not the two sequencing `setTimeout`s, which
-otherwise left ~500ms of dead delay per arrow click; the `typeof matchMedia` guard keeps the
-mocked harness (no `matchMedia`) on the 250ms path, so the `N10` carousel timing checks run
-unchanged. Intentional, adjudicated behavior: under reduced motion `#xpPopup` never becomes
-visible (its finite `forwards` animation completes instantly at the final keyframe,
-opacity 0) — acceptable because it is purely decorative, `aria-hidden`, and the XP info is
-duplicated in the sidebar counter and toasts; recorded so it isn't filed as a bug later. The
-exam timer's danger state stays distinguishable without its pulse (color + tinted
-background). Gated by 2 new `N15` static checks in `scripts/verify-runtime.js`; no i18n
-changes (170 keys stays the total). Verified in a real Chromium browser (Playwright,
-2026-07-14) in both modes: with `emulateMedia({ reducedMotion: 'reduce' })` — flip 0.01ms,
-carousel 7.2ms end-to-end, timer/onboarding 0.01ms, `#xpPopup` never lingers; without
-(no-regression) — flip 0.5s, carousel 515.9ms with a mid-flight `translateX` proving the
-slide still animates, timer 1s, onboarding 2s. **I2 is now closed; I3 (sub-44px touch targets), I7 (search
-hidden on mobile), and I8 (emoji as structural icons → SVG sprite) from the same review stay
-open**, plus the recorded follow-ups in the sections above. Plan and full
-detail: `docs/superpowers/plans/2026-07-14-reduced-motion.md`, `AGENTS.md` → "Reduced
-motion — I2 (2026-07-14)".
+**Still open from the review:** **I3** (sub-44px touch targets: lang switcher ~24px, exam
+dots 28px, hover-only name-edit button), **I7** (global search hidden at ≤768px with no
+mobile alternative; includes dropdown keyboard support and a real accessible name for
+`#globalSearch`), **I8** (emoji as structural icons → inline SVG sprite, keeping decorative
+emojis with `aria-hidden`), plus the per-block recorded follow-ups (avatar modal keyboard
+access, `aria-expanded` on chapter headers, raw `--secondary`/chapter-accent text colors,
+toast emoji not `aria-hidden`, type-aware toast politeness, roving-tabindex exam dots, the
+nested-TTS AT nit) — all enumerated with detail and file pointers in `AGENTS.md`.

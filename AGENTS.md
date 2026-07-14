@@ -51,6 +51,17 @@
     by `scripts/verify-runtime.js`. The auth screen needed its own standalone language
     switcher since it renders before `App` exists — see `i18n.setLang()`/`i18n.restore()`
     in `js/i18n.js`.
+- **2026-07-14 session index** (detail in the four entries below plus the ISTQB section):
+  the two Phase-1 question-bank gaps were closed (ids 43/17/31 → 121/122/123 — see "ISTQB
+  Content Fidelity Effort" below); a full UI/UX review with the `ui-ux-pro-max` skill
+  produced a prioritized findings list, and four remediation blocks were executed the same
+  day — **contrast (C2+I1)**, **a11y quick wins (I6+I5+I4)**, **keyboard operability (C1)**,
+  **reduced motion (I2)** — each via subagent-driven-development with per-task reviews, a
+  final whole-branch review, and real-browser Playwright verification. Net new permanent
+  gates: `scripts/validate-contrast.js` (hooked on staged CSS) and the `N12`–`N15` check
+  families in `scripts/verify-runtime.js`; i18n grew to 170 keys. **Still open from that
+  review:** I3, I7, I8 plus the per-block recorded follow-ups — the consolidated pending
+  list lives at the end of the "Reduced motion — I2" entry below.
 - **UI/UX polish pass (2026-07-07):** user-reported usability issues on small/short viewports,
   fixed same-day, all in `css/styles.css` unless noted:
   - **Sidebar clipped on short viewports:** `.sidebar` used `min-height: 100vh` with
@@ -173,6 +184,17 @@
     excluded from the I4 fix above because it's a hover-only-revealed edit affordance, not a
     primary input; finding **I3**, pending. The global search box is still hidden entirely at
     `≤768px` (no mobile equivalent) — finding **I7**, pending.
+  - **Minors from this block's final whole-branch review (recorded, still open):** the toast
+    icon emoji is not hidden from the live region (`showToast`'s template renders
+    `<span>${icon}</span>` without `aria-hidden`, so screen readers announce e.g. "warning
+    sign" before the message — mildly noisy); `#toastContainer`'s `polite` politeness defers
+    the exam-guard block toast until the reader is idle — `polite` is a defensible
+    non-interrupting default, but a type-aware map (`warning`/`error` → assertive) would
+    surface genuinely blocking messages faster; `#globalSearch` has no accessible name beyond
+    its placeholder (placeholder-as-label anti-pattern — the name disappears once the user
+    types; adjacent to **I7**, fold into that block); `mobile_menu_aria`'s static "Abrir
+    menú"/"Open menu" label is slightly inaccurate when the drawer is already open (it's a
+    toggle).
 - **Keyboard operability — C1 (2026-07-14):** closed finding **C1** of the same
   `ui-ux-pro-max` review: neither the theme toggle nor any of the app's template-rendered
   controls (exam options/dots, daily-challenge options, dashboard stat-cards, curriculum
@@ -242,9 +264,13 @@
     one-liner: `.user-card:focus-within .name-edit-btn, .name-edit-btn:focus-visible {
     opacity: 0.7; }`); the dashboard `continue-item` divs are click-only, though
     keyboard-equivalent paths exist via the curriculum (consistency nit); roving tabindex +
-    `aria-current` for the exam dots as future polish. The prior blocks' recorded minors
-    (I3, I7, the raw `--secondary`/chapter-accent text colors from the contrast fix wave)
-    stay open.
+    `aria-current` for the exam dots as future polish. From the fix wave's re-review:
+    `#flashcard` is now the one `role="button"` element with focusable descendants (the TTS
+    buttons) — functionally safe (verified: no double-fire, native TTS operation unaffected)
+    but ARIA authoring practice discourages nested interactive content and some AT may
+    expose the inner buttons inconsistently; revisit alongside the other AT nits. The prior
+    blocks' recorded minors (I3, I7, the raw `--secondary`/chapter-accent text colors from
+    the contrast fix wave) stay open.
 - **Reduced motion — I2 (2026-07-14):** closed finding **I2** of the same `ui-ux-pro-max`
   review: nothing in the app honored `prefers-reduced-motion` — three infinite pulse
   animations (onboarding highlight, TTS button, exam-timer danger), the 3D flashcard flip,
