@@ -106,7 +106,7 @@ The question bank, lessons, and glossary were brought into closer alignment with
 | 2. Lesson content audit | ✅ Done | All 22 lessons in `js/content.js` audited against the syllabus; every topic has `lo`/`source`; every lesson has a `.lesson-source` footer. Real errors found and fixed (test-level count, review roles, a non-syllabus technique, a non-official tool taxonomy) — detail in `AGENTS.md`. Gate: `node scripts/validate-content.js`. |
 | 3. Glossary expansion | ✅ Done | `GLOSSARY` expanded to 107 terms, all 97/97 official v4.0 keywords covered. `FLASHCARDS` swept term-by-term for v4.0 fidelity. `GLOSSARY.term` is `{es, en}`, not a plain string. |
 
-Known non-blocking gaps (light BVA question coverage in Ch.4, no dedicated question for FL-2.1.2) are tracked in `AGENTS.md`, not repeated here.
+The two known minor gaps from Phase 1 (light BVA question coverage in Ch.4, no dedicated question for FL-2.1.2) were closed on 2026-07-14 by replacing three redundant questions (ids 43/17/31 → 121/122/123, all with official `lo`/`k`/`source`) — detail in `AGENTS.md`.
 
 ## Reliability & Security Remediation Pass (2026-07-04)
 

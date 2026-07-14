@@ -537,14 +537,25 @@ to official ISTQB material (syllabus PDFs, official sample exams) — never inve
 **To resume this effort:** all three phases are content-complete and merged to `master`.
 Post-merge, a separate maintenance pass (2026-07-02, not part of the content-fidelity effort)
 fixed the glossary's ES/EN display and did a production-readiness pass — see "Repository"
-section above for what changed and why. Remaining optional follow-up work is the Phase 1
-minor gaps below (light BVA question coverage, missing FL-2.1.2 dedicated question) — not
-blocking, just noted for a future content pass.
+section above for what changed and why. The Phase 1
+minor gaps (light BVA question coverage, missing FL-2.1.2 dedicated question) were closed
+on 2026-07-14 — see below. No follow-up content work is currently pending.
 
-**Known minor gaps from Phase 1** (non-blocking, optional future cleanup):
-- Chapter 4 (Test Analysis & Design) is light on boundary-value-analysis questions (only
-  id 80, reusing the "1–100" domain already used by pre-existing id 15).
-- Learning objective FL-2.1.2 has no dedicated question (folded into id 66's explanation).
+**Phase 1 minor gaps — CLOSED (2026-07-14).** Both gaps were resolved by **replacing three
+redundant/flawed questions** (bank stays at 120, per-chapter distribution intact, validator
+unchanged — new ids are > 50 so the `lo`/`k`/`source` rule covers them automatically).
+Design: `docs/superpowers/specs/2026-07-14-question-bank-gap-closure-design.md`.
+- **BVA in Ch.4:** the original gap note undercounted — ids 15, 80 *and* 38 were all BVA,
+  but all three were 2-value BVA (two on the same 1–100 domain). Replaced id 17 (decision
+  tables were over-represented at 6 questions, and it carried the same unqualified
+  "2^n rules" imprecision Phase 3 fixed in FLASHCARDS id 18) with id 122 (3-value BVA
+  applied, fresh 10–50 domain), and id 31 (near-duplicate of id 20) with id 123 (the
+  syllabus's own "x ≤ 10 miscoded as x = 10" defect-detection example). Both FL-4.2.2/K3,
+  source "Syllabus v4.0 §4.2.2". BVA now has 5 questions; state transition keeps 4.
+- **FL-2.1.2:** replaced id 43 (a literal duplicate of id 11 — same stem, same essential
+  answer) with id 121 (FL-2.1.2/K1, the four good testing practices of §2.1.2; the three
+  distractors are direct negations of the other three official practices).
+  Source "Syllabus v4.0 §2.1.2".
 
 **Real errors found and fixed during Phase 2** (useful precedent for how thorough the audit needs to be):
 - Ch.2 lesson: false "4 test levels" claim (syllabus defines 5) — corrected.
