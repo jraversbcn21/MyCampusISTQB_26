@@ -906,29 +906,30 @@ const QUESTIONS = [
     }
   },
   {
-    id: 43, chapter: 1,
+    id: 121, chapter: 1, lo: "FL-2.1.2", k: 1,
+    source: "Syllabus v4.0 §2.1.2",
     q: {
-      es: "¿Cuál de los siguientes es un tipo de prueba NO FUNCIONAL?",
-      en: "Which of the following is a NON-FUNCTIONAL test type?"
+      es: "Según el syllabus, ¿cuál de las siguientes es una buena práctica de prueba aplicable a TODOS los ciclos de vida de desarrollo de software (CVDS)?",
+      en: "According to the syllabus, which of the following is a good testing practice that applies to ALL software development lifecycles (SDLC)?"
     },
     options: {
       es: [
-        "Prueba de regresión",
-        "Prueba de rendimiento",
-        "Prueba de humo (smoke testing)",
-        "Prueba de integración"
+        "La prueba dinámica debe comenzar únicamente cuando todo el código del sistema está completo",
+        "Para cada actividad de desarrollo de software existe una actividad de prueba correspondiente",
+        "Todos los niveles de prueba deben compartir exactamente los mismos objetivos de prueba",
+        "Los probadores deben esperar a la versión final de los productos de trabajo antes de revisarlos"
       ],
       en: [
-        "Regression testing",
-        "Performance testing",
-        "Smoke testing",
-        "Integration testing"
+        "Dynamic testing should start only once all the system's code is complete",
+        "For every software development activity, there is a corresponding test activity",
+        "All test levels should share exactly the same test objectives",
+        "Testers should wait for the final version of work products before reviewing them"
       ]
     },
     correct: 1,
     explanation: {
-      es: "Las pruebas de rendimiento (performance testing) son pruebas no funcionales que evalúan características como velocidad, escalabilidad y estabilidad bajo carga. Las otras opciones son tipos de pruebas funcionales o de niveles de prueba.",
-      en: "Performance testing is a non-functional test type that evaluates characteristics like speed, scalability, and stability under load. The other options are functional test types or test levels."
+      es: "El syllabus (§2.1.2) enumera cuatro buenas prácticas de prueba independientes del CVDS elegido: (1) para cada actividad de desarrollo hay una actividad de prueba correspondiente, de modo que todas las actividades de desarrollo quedan sujetas a control de calidad; (2) cada nivel de prueba tiene objetivos específicos y diferentes, lo que permite una cobertura adecuada sin redundancia; (3) el análisis y diseño de prueba de un nivel comienza durante la fase de desarrollo correspondiente (prueba temprana); y (4) los probadores participan en la revisión de los productos de trabajo en cuanto hay borradores disponibles (shift left). Las otras tres opciones contradicen directamente las prácticas 3, 2 y 4 respectivamente.",
+      en: "The syllabus (§2.1.2) lists four good testing practices independent of the chosen SDLC: (1) for every software development activity there is a corresponding test activity, so all development activities are subject to quality control; (2) different test levels have specific and different test objectives, allowing appropriate coverage while avoiding redundancy; (3) test analysis and design for a given test level begins during the corresponding development phase (early testing); and (4) testers are involved in reviewing work products as soon as drafts are available (shift left). The other three options directly contradict practices 3, 2 and 4 respectively."
     }
   },
 
