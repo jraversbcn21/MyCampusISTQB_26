@@ -737,6 +737,20 @@ const SAMPLE_Q = {
       /id="flashcard"[^>]*role="button" tabindex="0" data-i18n-aria="click_to_flip"|role="button" tabindex="0" data-i18n-aria="click_to_flip"[^>]*id="flashcard"/.test(htmlSrc));
   }
 
+  /* ---- N15: prefers-reduced-motion (I2, revisión UI 2026-07-14) ---- */
+  {
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    // Bloque global "blunt": neutraliza toda animación/transición actual Y futura
+    // (el !important gana incluso a los estilos inline del carrusel).
+    check('N15 motion: styles.css define el bloque global prefers-reduced-motion',
+      /@media \(prefers-reduced-motion: reduce\)[\s\S]{0,400}animation-duration:\s*0\.01ms !important[\s\S]{0,400}transition-duration:\s*0\.01ms !important/.test(cssSrc));
+    // El CSS mata el movimiento pero no los setTimeout: sin esto el carrusel
+    // metía ~500ms de retardo muerto con reduced-motion activo.
+    check('N15 motion: el carrusel de flashcards colapsa su duración con prefers-reduced-motion',
+      /matchMedia\('\(prefers-reduced-motion: reduce\)'\)/.test(appSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

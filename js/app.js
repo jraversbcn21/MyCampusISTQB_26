@@ -522,7 +522,10 @@ const App = {
     this._fcAnimating = true;
     const card = document.getElementById('flashcard');
     const dist = 50;
-    const dur = 250;
+    // I2: con prefers-reduced-motion, el CSS ya anula el movimiento — esto
+    // elimina además el retardo muerto de los dos setTimeout. El typeof
+    // protege el arnés mockeado (sin matchMedia), que se queda en 250ms.
+    const dur = (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 0 : 250;
 
     card.style.transition = `transform ${dur}ms ease, opacity ${dur}ms ease`;
     card.style.transform = `translateX(${direction > 0 ? -dist : dist}px)`;

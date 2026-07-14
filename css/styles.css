@@ -2008,6 +2008,21 @@ body {
 .sidebar-privacy-link:hover { color: var(--primary); }
 .sidebar.collapsed .sidebar-privacy-link { display: none; }
 
+/* ===== MOVIMIENTO REDUCIDO (I2, revisión UI 2026-07-14) =====
+   Bloque global estándar: con prefers-reduced-motion activo, toda animación y
+   transición (actuales y futuras) colapsa a efectivamente-instantánea. El
+   !important gana también a los estilos inline del carrusel de flashcards.
+   El estado de peligro del timer sigue distinguible sin su pulso (color +
+   fondo tintado). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ===== FOCO VISIBLE (C1, revisión UI 2026-07-14) =====
    Al final del fichero a propósito: varias reglas de inputs declaran
    outline: none con la misma especificidad (0-1-0) — al ir después, esta
