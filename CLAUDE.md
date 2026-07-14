@@ -207,10 +207,40 @@ five icon-only controls (`#sidebarToggle`, `#mobileMenuBtn`, `#fcPrev`, `#fcNext
 (`.search-input`, `.select-input`, `.search-input-full`, `.auth-field input`) were below
 16px, triggering iOS Safari's focus auto-zoom, fixed by raising them to `font-size: 1rem`.
 `i18n`'s attribute list is now four mechanisms — `data-i18n`, `data-i18n-placeholder`,
-`data-i18n-title`, `data-i18n-aria` — and `TRANSLATIONS` now totals **169 keys**, up from
-165 (the 4 new `*_aria`/`close_label` keys), ES/EN paired. Gated by 12 new `N13` checks in
-`scripts/verify-runtime.js`. **Still open, out of scope:** `#themeToggle` remains a
-non-keyboard-operable `<div>` (C1); `.name-edit-input` stays below 16px, a hover-only edit
-affordance (I3); the global search box is still hidden entirely at `≤768px` (I7). Plan and
+`data-i18n-title`, `data-i18n-aria` — and `TRANSLATIONS` grew to **169 keys** with this
+block, up from 165 (the 4 new `*_aria`/`close_label` keys); the C1 block below added one
+more → **170**, the current total, ES/EN paired. Gated by 12 new `N13` checks in
+`scripts/verify-runtime.js`. **Out of scope at the time:** `#themeToggle` remained a
+non-keyboard-operable `<div>` (C1 — since closed, see "Keyboard Operability" below);
+`.name-edit-input` stays below 16px, a hover-only edit
+affordance (I3, still open); the global search box is still hidden entirely at `≤768px`
+(I7, still open). Plan and
 full detail: `docs/superpowers/plans/2026-07-14-a11y-quickwins.md`, `AGENTS.md` → "A11y
 quick wins (2026-07-14)".
+
+## Keyboard Operability — C1 (2026-07-14)
+
+Closed finding **C1** of the same `ui-ux-pro-max` review: neither the theme toggle nor any
+template-rendered control (exam options/dots, daily-challenge options, dashboard stat-cards,
+curriculum chapter headers and topic items) was keyboard-operable, and there was no visible
+focus indicator. Three mechanisms: (1) `#themeToggle` is now a real `<button>` (a `.theme-btn`
+CSS reset — `background: none; border: none` — keeps it visually identical); (2) the
+template-rendered interactive divs carry `role="button" tabindex="0"` (exam options only when
+not reviewing, plus `aria-pressed`; exam dots with an i18n `aria-label`; topic items only when
+they have a lesson), activated by ONE delegated document-level `keydown` listener in
+`App.init()` (Enter/Space over `[role="button"]` → `preventDefault()` + `.click()`) —
+delegation is load-bearing because `innerHTML` re-renders constantly destroy these divs, and a
+single document listener survives every regeneration; (3) a global `:focus-visible` outline
+(2px solid `var(--primary)`) deliberately at the very END of `css/styles.css`, so it wins the
+`outline` property over the file's earlier equal-specificity `outline: none` input rules.
+`selectAnswer()` also restores focus to the answered option after its `innerHTML` re-render
+(answering with Enter used to dump focus back to `<body>`). Gated by 10 new `N14` static
+checks in `scripts/verify-runtime.js`; `TRANSLATIONS` is now **170 keys** (new key:
+`goto_question_aria`, the exam dots' label). Verified in a real Chromium browser (Playwright,
+real key presses, 2026-07-14): all 5 surfaces plus a 21-Tab walk with no focus traps (note:
+the `data-theme` attribute lives on `<body>`, not `<html>`). Recorded follow-ups, still open:
+`aria-expanded` on chapter headers (needs a state sync in `toggleChapter`), focus management
+in `goToQuestion()`, keyboard support inside the global-search dropdown (folded into I7), and
+answered daily-challenge options staying focusable-but-inert (mouse-parity cosmetic nit). Plan
+and full detail: `docs/superpowers/plans/2026-07-14-keyboard-operability.md`, `AGENTS.md` →
+"Keyboard operability — C1 (2026-07-14)".
