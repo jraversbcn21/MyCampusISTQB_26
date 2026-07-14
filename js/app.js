@@ -258,7 +258,7 @@ const App = {
       <div class="dc-question">${q.q[lang]}</div>
       <div class="dc-options" id="dcOptions">
         ${q.options[lang].map((opt, i) => `
-          <div class="dc-option" onclick="App.answerDailyChallenge(${i})" id="dcOpt${i}">
+          <div class="dc-option" onclick="App.answerDailyChallenge(${i})" id="dcOpt${i}" role="button" tabindex="0">
             <span class="dc-label">${letters[i]}</span>${opt}
           </div>`).join('')}
       </div>`;
@@ -342,7 +342,7 @@ const App = {
         const statusClass = isCompleted ? 'done' : (hasLesson ? 'in-progress' : 'locked');
         const statusIcon = isCompleted ? '✓' : (hasLesson ? '▶' : '🔒');
         return `
-          <div class="topic-item" onclick="${hasLesson ? `App.navigateToLesson(${ch.id}, '${t.id}')` : ''}">
+          <div class="topic-item" ${hasLesson ? `onclick="App.navigateToLesson(${ch.id}, '${t.id}')" role="button" tabindex="0"` : ''}>
             <div class="topic-status ${statusClass}">${statusIcon}</div>
             <span class="topic-title">${t.title[i18n.lang]}</span>
             <span class="topic-xp">+${t.xp} XP</span>
@@ -351,7 +351,7 @@ const App = {
 
       return `
         <div class="chapter-card" id="chapter-${i}">
-          <div class="chapter-card-header" onclick="App.toggleChapter(${i})">
+          <div class="chapter-card-header" onclick="App.toggleChapter(${i})" role="button" tabindex="0">
             <div class="chapter-number" style="background:${colorsBg[i]};color:${colors[i]}">${i + 1}</div>
             <div class="chapter-info">
               <div class="chapter-title">${ch.icon} ${ch.title[i18n.lang]}</div>

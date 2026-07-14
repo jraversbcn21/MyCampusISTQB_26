@@ -187,7 +187,7 @@
           <button class="lang-btn active" id="btnES" onclick="App.setLang('es')">ES</button>
           <button class="lang-btn" id="btnEN" onclick="App.setLang('en')">EN</button>
         </div>
-        <div class="theme-btn" id="themeToggle" title="Cambiar tema" data-i18n-title="theme_toggle_title">🌙</div>
+        <button class="theme-btn" id="themeToggle" title="Cambiar tema" data-i18n-title="theme_toggle_title" data-i18n-aria="theme_toggle_title">🌙</button>
       </div>
     </header>
 
@@ -205,7 +205,7 @@
         </div>
 
         <div class="stats-grid">
-          <div class="stat-card" onclick="App.navigate('curriculum')">
+          <div class="stat-card" onclick="App.navigate('curriculum')" role="button" tabindex="0">
             <div class="stat-icon">📚</div>
             <div class="stat-value" id="statTopics">0/6</div>
             <div class="stat-label" data-i18n="stat_chapters">Capítulos</div>
@@ -213,17 +213,17 @@
               <div class="stat-progress-fill" id="statTopicsFill"></div>
             </div>
           </div>
-          <div class="stat-card" onclick="App.navigate('flashcards')">
+          <div class="stat-card" onclick="App.navigate('flashcards')" role="button" tabindex="0">
             <div class="stat-icon">🃏</div>
             <div class="stat-value" id="statFlashcards">0</div>
             <div class="stat-label" data-i18n="stat_flashcards_studied">Flashcards repasadas</div>
           </div>
-          <div class="stat-card" onclick="App.navigate('simulator')">
+          <div class="stat-card" onclick="App.navigate('simulator')" role="button" tabindex="0">
             <div class="stat-icon">📝</div>
             <div class="stat-value" id="statExams">0</div>
             <div class="stat-label" data-i18n="stat_exams">Simulacros completados</div>
           </div>
-          <div class="stat-card" onclick="App.navigate('progress')">
+          <div class="stat-card" onclick="App.navigate('progress')" role="button" tabindex="0">
             <div class="stat-icon">⭐</div>
             <div class="stat-value" id="statXP">0 XP</div>
             <div class="stat-label" data-i18n="stat_xp">Experiencia total</div>

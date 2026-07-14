@@ -722,6 +722,17 @@ const SAMPLE_Q = {
       /getElementById\('opt' \+ optIndex\)/.test(appSrc));
     check('N14 teclado: styles.css define :focus-visible con outline visible',
       /:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--primary\)/.test(cssSrc));
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    check('N14 teclado: las opciones del desafío diario llevan role/tabindex',
+      /id="dcOpt\$\{i\}" role="button" tabindex="0"/.test(appSrc));
+    check('N14 teclado: los topics del curriculum llevan role/tabindex SOLO cuando tienen lección',
+      /navigateToLesson\(\$\{ch\.id\}, '\$\{t\.id\}'\)" role="button" tabindex="0"/.test(appSrc));
+    check('N14 teclado: las cabeceras de capítulo llevan role/tabindex',
+      /toggleChapter\(\$\{i\}\)" role="button" tabindex="0"/.test(appSrc));
+    check('N14 teclado: las 4 stat-cards del dashboard llevan role/tabindex',
+      (htmlSrc.match(/class="stat-card" onclick="App\.navigate\('[a-z]+'\)" role="button" tabindex="0"/g) || []).length === 4);
+    check('N14 teclado: #themeToggle es un <button> real, no un div',
+      /<button[^>]*id="themeToggle"/.test(htmlSrc) && !/<div[^>]*id="themeToggle"/.test(htmlSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
