@@ -695,6 +695,15 @@ const SAMPLE_Q = {
       const re = new RegExp(`id="${id}"[^>]*data-i18n-aria="${key}"|data-i18n-aria="${key}"[^>]*id="${id}"`);
       check(`N13 a11y: #${id} lleva data-i18n-aria="${key}"`, re.test(htmlSrc));
     }
+
+    // I4: inputs <16px provocan auto-zoom en iOS al enfocar. 1rem = 16px (html base).
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    for (const sel of ['.search-input {', '.select-input {', '.search-input-full {', '.auth-field input {']) {
+      const i = cssSrc.indexOf(sel);
+      const block = i >= 0 ? cssSrc.slice(i, cssSrc.indexOf('}', i)) : '';
+      check(`N13 a11y: ${sel.replace(' {', '')} usa font-size: 1rem (sin auto-zoom iOS)`,
+        /font-size:\s*1rem/.test(block));
+    }
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

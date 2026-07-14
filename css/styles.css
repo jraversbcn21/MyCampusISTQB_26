@@ -294,7 +294,7 @@ body {
   border: none;
   outline: none;
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 1rem;
   width: 200px;
 }
 .search-input::placeholder { color: var(--text3); }
@@ -780,7 +780,7 @@ body {
   color: var(--text);
   padding: 8px 16px;
   font-family: var(--font);
-  font-size: 0.875rem;
+  font-size: 1rem;
   cursor: pointer;
   outline: none;
 }
@@ -1111,7 +1111,7 @@ body {
   border-radius: var(--radius-sm);
   padding: 12px 16px;
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: var(--font);
   outline: none;
   margin-bottom: 16px;
@@ -1483,7 +1483,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-family: var(--font);
   transition: border-color var(--transition);
   outline: none;
