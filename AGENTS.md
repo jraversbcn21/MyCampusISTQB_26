@@ -245,6 +245,50 @@
     `aria-current` for the exam dots as future polish. The prior blocks' recorded minors
     (I3, I7, the raw `--secondary`/chapter-accent text colors from the contrast fix wave)
     stay open.
+- **Reduced motion — I2 (2026-07-14):** closed finding **I2** of the same `ui-ux-pro-max`
+  review: nothing in the app honored `prefers-reduced-motion` — three infinite pulse
+  animations (onboarding highlight, TTS button, exam-timer danger), the 3D flashcard flip,
+  view fades, toast slides, and the JS-driven carousel all ran at full motion regardless of
+  the OS setting. Plan: `docs/superpowers/plans/2026-07-14-reduced-motion.md`, built via
+  subagent-driven-development. Two mechanisms:
+  - **A global "blunt" media block in `css/styles.css`:** under
+    `@media (prefers-reduced-motion: reduce)`, `*, *::before, *::after` get
+    `animation-duration: 0.01ms !important`, `animation-iteration-count: 1 !important`,
+    `transition-duration: 0.01ms !important`, and `scroll-behavior: auto !important` — the
+    industry-standard reset. Chosen over per-animation gating because it neutralizes every
+    current AND future animation/transition, and a stylesheet `!important` beats even the
+    carousel's (non-important) inline styles. Placement is deliberate: immediately BEFORE
+    the `:focus-visible` section, which must stay literally last in the file (the cascade
+    rationale in its own comment — see the C1 block above; the media block only touches
+    durations, so it has no cascade interaction with `outline`).
+  - **A duration guard in `_slideFlashcard` (`js/app.js`):** `dur` is now
+    `(typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 0 : 250`.
+    The CSS block kills the visible motion but not the two `setTimeout`s that sequence the
+    carousel — without this line, reduced-motion users still ate ~500ms of dead delay per
+    arrow click. The `typeof matchMedia` guard is what keeps the mocked harness (which has
+    no `matchMedia`) on the 250ms path, so the `N10` carousel timing checks run unchanged.
+  - **Intentional behavior (adjudicated, not a bug):** under reduced motion, `#xpPopup`
+    never becomes visible — its finite `forwards` animation completes instantly at the
+    final keyframe, which is `opacity: 0`. Accepted deliberately: the popup is purely
+    decorative, `aria-hidden="true"` (a11y quick wins block above), and the XP information
+    is duplicated in the sidebar XP counter and the toasts. Recorded here explicitly so it
+    doesn't get filed as a bug later.
+  - **Not motion-only signaling:** the exam timer's danger state stays distinguishable
+    without its pulse (danger text color + tinted background) — motion was never the only
+    signal, so no extra work was needed there.
+  - **Gate:** 2 new `N15` static checks in `scripts/verify-runtime.js` — the global media
+    block in `css/styles.css`, and the `matchMedia` guard in `js/app.js`.
+  - **Real-browser dual-mode verification (2026-07-14):** Playwright/Chromium, one context
+    with `page.emulateMedia({ reducedMotion: 'reduce' })` and one without. With reduce: flip
+    transition 0.01ms, carousel 7.2ms end-to-end (both `setTimeout`s at 0), timer-danger and
+    onboarding-highlight animations 0.01ms (iteration count capped to 1), and `#xpPopup`
+    never lingers visible (matches the adjudication above). Without (no-regression pass):
+    flip 0.5s, carousel 515.9ms total with a mid-flight `translateX` sample proving the
+    slide genuinely still animates, timer pulse 1s, onboarding pulse 2s/infinite. No
+    regressions.
+  - **Pending blocks from the 2026-07-14 review:** **I2 is now closed.** **I3**, **I7**,
+    and **I8** stay open, along with the recorded follow-ups above (the C1 follow-up list
+    and the contrast fix wave's raw `--secondary`/chapter-accent text colors).
 
 ## Production Readiness — Status & Next Session
 

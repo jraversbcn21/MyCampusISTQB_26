@@ -255,3 +255,32 @@ even the focus ring — queue with I3), the dashboard `continue-item` divs being
 `aria-current` for the exam dots as future polish. Plan
 and full detail: `docs/superpowers/plans/2026-07-14-keyboard-operability.md`, `AGENTS.md` →
 "Keyboard operability — C1 (2026-07-14)".
+
+## Reduced Motion — I2 (2026-07-14)
+
+Closed finding **I2** of the same `ui-ux-pro-max` review: nothing in the app honored
+`prefers-reduced-motion`. Two mechanisms: (1) a global "blunt" media block in
+`css/styles.css` — under `@media (prefers-reduced-motion: reduce)`, every element gets
+`animation-duration`/`transition-duration: 0.01ms !important`,
+`animation-iteration-count: 1 !important`, and `scroll-behavior: auto` — neutralizing every
+current AND future animation/transition (the stylesheet `!important` beats even the
+carousel's inline styles); placed immediately BEFORE the `:focus-visible` section, which
+must stay last in the file (its cascade rationale — see "Keyboard Operability" above).
+(2) `_slideFlashcard`'s `dur` is now `matchMedia('(prefers-reduced-motion: reduce)')`-guarded
+(0 vs 250ms) — the CSS kills the motion but not the two sequencing `setTimeout`s, which
+otherwise left ~500ms of dead delay per arrow click; the `typeof matchMedia` guard keeps the
+mocked harness (no `matchMedia`) on the 250ms path, so the `N10` carousel timing checks run
+unchanged. Intentional, adjudicated behavior: under reduced motion `#xpPopup` never becomes
+visible (its finite `forwards` animation completes instantly at the final keyframe,
+opacity 0) — acceptable because it is purely decorative, `aria-hidden`, and the XP info is
+duplicated in the sidebar counter and toasts; recorded so it isn't filed as a bug later. The
+exam timer's danger state stays distinguishable without its pulse (color + tinted
+background). Gated by 2 new `N15` static checks in `scripts/verify-runtime.js`; no i18n
+changes (170 keys stays the total). Verified in a real Chromium browser (Playwright,
+2026-07-14) in both modes: with `emulateMedia({ reducedMotion: 'reduce' })` — flip 0.01ms,
+carousel 7.2ms end-to-end, timer/onboarding 0.01ms, `#xpPopup` never lingers; without
+(no-regression) — flip 0.5s, carousel 515.9ms with a mid-flight `translateX` proving the
+slide still animates, timer 1s, onboarding 2s. **I2 is now closed; I3, I7, and I8 from the
+same review stay open**, plus the recorded follow-ups in the sections above. Plan and full
+detail: `docs/superpowers/plans/2026-07-14-reduced-motion.md`, `AGENTS.md` → "Reduced
+motion — I2 (2026-07-14)".
