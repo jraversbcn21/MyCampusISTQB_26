@@ -254,7 +254,10 @@
   - **A global "blunt" media block in `css/styles.css`:** under
     `@media (prefers-reduced-motion: reduce)`, `*, *::before, *::after` get
     `animation-duration: 0.01ms !important`, `animation-iteration-count: 1 !important`,
-    `transition-duration: 0.01ms !important`, and `scroll-behavior: auto !important` — the
+    `transition-duration: 0.01ms !important`, `scroll-behavior: auto !important`, plus
+    `animation-delay`/`transition-delay` collapsed too (future-proofing: no delay exists in
+    the file today, but a future `animation: foo .5s 2s` would otherwise still stall 2s
+    under reduce) — the
     industry-standard reset. Chosen over per-animation gating because it neutralizes every
     current AND future animation/transition, and a stylesheet `!important` beats even the
     carousel's (non-important) inline styles. Placement is deliberate: immediately BEFORE
@@ -267,6 +270,11 @@
     carousel — without this line, reduced-motion users still ate ~500ms of dead delay per
     arrow click. The `typeof matchMedia` guard is what keeps the mocked harness (which has
     no `matchMedia`) on the 250ms path, so the `N10` carousel timing checks run unchanged.
+    **Safety property this relies on (verified in the final review):** nothing in `js/`
+    listens to `transitionend`/`animationend` — every animation sequence is
+    `setTimeout`-driven, so collapsing durations can't strand JS waiting on an event. If
+    future work ever adds such a listener, re-verify it under reduce mode (at 0.01ms the
+    event still fires, but it's the one pattern that could make the blunt block subtle).
   - **Intentional behavior (adjudicated, not a bug):** under reduced motion, `#xpPopup`
     never becomes visible — its finite `forwards` animation completes instantly at the
     final keyframe, which is `opacity: 0`. Accepted deliberately: the popup is purely

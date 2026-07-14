@@ -2020,6 +2020,10 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    /* Delays incluidos para que el bloque cubra también animaciones futuras
+       escritas con retardo (hoy no existe ninguno en el fichero). */
+    animation-delay: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }
 

@@ -262,7 +262,8 @@ Closed finding **I2** of the same `ui-ux-pro-max` review: nothing in the app hon
 `prefers-reduced-motion`. Two mechanisms: (1) a global "blunt" media block in
 `css/styles.css` — under `@media (prefers-reduced-motion: reduce)`, every element gets
 `animation-duration`/`transition-duration: 0.01ms !important`,
-`animation-iteration-count: 1 !important`, and `scroll-behavior: auto !important` — neutralizing every
+`animation-iteration-count: 1 !important`, `scroll-behavior: auto !important`, and the
+`animation-delay`/`transition-delay` pair (future-proofing) — neutralizing every
 current AND future animation/transition (the stylesheet `!important` beats even the
 carousel's inline styles); placed immediately BEFORE the `:focus-visible` section, which
 must stay last in the file (its cascade rationale — see "Keyboard Operability" above).
