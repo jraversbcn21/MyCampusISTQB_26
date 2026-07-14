@@ -135,8 +135,7 @@
     chapter accent-color arrays (`colors = ["#6C63FF", ...]`, used as text in the curriculum
     continue-list percentage and the progress chapter-bar percentage) are still raw tokens/
     hex used as text and fail AA in the light theme — pre-existing, not addressed by either
-    gate, pending a future pass. Full detail: `.superpowers/sdd/task-4-report.md` → "Fix wave
-    (final review)".
+    gate, pending a future pass.
 - **A11y quick wins (2026-07-14):** fixed three more findings from the same `ui-ux-pro-max`
   review that produced the contrast remediation above (plan:
   `docs/superpowers/plans/2026-07-14-a11y-quickwins.md`), via subagent-driven-development:
@@ -205,10 +204,11 @@
     destroying the focused node — answering with Enter used to dump focus back to `<body>`,
     forcing a keyboard user to Tab from the top on every question. It now restores focus to
     the answered option (`#optN`) after the re-render.
-  - **Gate:** 10 new `N14` static checks in `scripts/verify-runtime.js` — the delegated
+  - **Gate:** 11 new `N14` static checks in `scripts/verify-runtime.js` — the delegated
     handler, each surface's `role`/`tabindex` (including the not-reviewing and `hasLesson`
     conditions and the dots' i18n `aria-label`), the `selectAnswer` focus restore, the
-    `:focus-visible` rule, and `#themeToggle` being a real `<button>`. `TRANSLATIONS` grew
+    `:focus-visible` rule, `#themeToggle` being a real `<button>`, and the flashcard being
+    keyboard-flippable (see the fix wave below). `TRANSLATIONS` grew
     to **170 keys** (new key: `goto_question_aria`) — see "i18n" below.
   - **Real-browser verification (2026-07-14):** Playwright/Chromium with real key presses
     (`page.keyboard.press`, never `.click()`) confirmed all 5 surfaces — exam option via
@@ -217,16 +217,34 @@
     21-Tab walk over the full cycle (sidebar toggle → nav → logout → privacy link → search →
     lang buttons → theme toggle → stat-cards → card-links → dc-options) with no focus trap,
     and screenshots of the visible 2px outline in both themes. Note for future assertions:
-    the `data-theme` attribute lives on `<body>`, not `<html>`. Full evidence:
-    `.superpowers/sdd/task-3-report.md`.
+    the `data-theme` attribute lives on `<body>`, not `<html>`.
+  - **Fix wave (final whole-branch review, same day):** the review found the flashcard flip
+    keyboard-dead — `#flashcard` was a click-only `<div>` (its click listener is attached in
+    `App.init()`), so a keyboard user could never reveal the answer. **FIXED** riding the
+    block's own machinery: `role="button" tabindex="0" data-i18n-aria="click_to_flip"` on
+    `#flashcard` in `index.html` — the delegated Enter/Space handler covers it for free, and
+    `click_to_flip` is an existing key applied by the existing `data-i18n-aria` mechanism (no
+    new i18n). Safe with the inner TTS `<button>`s: they carry no explicit `role` attribute
+    (the delegated handler ignores them) and `_handleTTS` calls `stopPropagation()`, so their
+    native Enter→click never bubbles into a flip. Guarded by the 11th `N14` check (TDD: red
+    against the pre-fix `index.html`, green after).
   - **Recorded out of scope / follow-ups, still open:** chapter headers carry no
     `aria-expanded` (adding it needs a state sync in `toggleChapter`); `goToQuestion()` does
     no focus management after its re-render (only `selectAnswer` got the repair); the
     global-search dropdown's results have no keyboard support (folded into finding **I7**);
     answered daily-challenge options stay focusable-but-inert (`onclick` is nulled but
-    `role`/`tabindex` remain — exact parity with mouse behavior, a cosmetic AT nit). The
-    prior blocks' recorded minors (I3, I7, the raw `--secondary`/chapter-accent text colors
-    from the contrast fix wave) stay open.
+    `role`/`tabindex` remain — exact parity with mouse behavior, a cosmetic AT nit). Found by
+    the final whole-branch review and recorded here: avatar personalization is
+    keyboard-inaccessible end-to-end (`#userAvatar` is a div opening the modal via a JS click
+    listener only, and the `.av-card` selection cards are click-only divs — only
+    Save/Cancel/Close are real buttons); `.name-edit-btn` is an invisible tab stop
+    (`opacity: 0` outside hover hides even the focus ring — queue with **I3**; suggested
+    one-liner: `.user-card:focus-within .name-edit-btn, .name-edit-btn:focus-visible {
+    opacity: 0.7; }`); the dashboard `continue-item` divs are click-only, though
+    keyboard-equivalent paths exist via the curriculum (consistency nit); roving tabindex +
+    `aria-current` for the exam dots as future polish. The prior blocks' recorded minors
+    (I3, I7, the raw `--secondary`/chapter-accent text colors from the contrast fix wave)
+    stay open.
 
 ## Production Readiness — Status & Next Session
 
@@ -349,7 +367,7 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
 - Default language is Spanish (`i18n.lang = 'es'`)
 - `data-i18n-title="key"` for `title` tooltips
 - `data-i18n-aria="key"` for `aria-label` (added 2026-07-14, I5 of the a11y quick wins
-  block below) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
+  block above) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like
   every other `data-i18n-*` mechanism
 - Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **170 keys** (160 after

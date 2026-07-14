@@ -192,7 +192,7 @@ raw `color:var(--success|warning|danger)` reappearing as JS-inline text. **Known
 open:** `var(--secondary)` (progress view's exams-completed stat) and the chapter accent-color
 arrays (curriculum/progress bars and percentage labels) are still used as text and fail AA in the
 light theme — pre-existing, deliberately out of this remediation's scope, not covered by either
-gate. Full detail: `.superpowers/sdd/task-4-report.md` → "Fix wave (final review)".
+gate.
 
 ## A11y Quick Wins (2026-07-14)
 
@@ -234,13 +234,24 @@ single document listener survives every regeneration; (3) a global `:focus-visib
 (2px solid `var(--primary)`) deliberately at the very END of `css/styles.css`, so it wins the
 `outline` property over the file's earlier equal-specificity `outline: none` input rules.
 `selectAnswer()` also restores focus to the answered option after its `innerHTML` re-render
-(answering with Enter used to dump focus back to `<body>`). Gated by 10 new `N14` static
+(answering with Enter used to dump focus back to `<body>`). Gated by 11 new `N14` static
 checks in `scripts/verify-runtime.js`; `TRANSLATIONS` is now **170 keys** (new key:
 `goto_question_aria`, the exam dots' label). Verified in a real Chromium browser (Playwright,
 real key presses, 2026-07-14): all 5 surfaces plus a 21-Tab walk with no focus traps (note:
-the `data-theme` attribute lives on `<body>`, not `<html>`). Recorded follow-ups, still open:
+the `data-theme` attribute lives on `<body>`, not `<html>`). The final whole-branch review
+found the flashcard flip keyboard-dead (`#flashcard` was a click-only div) — FIXED same day:
+`role="button" tabindex="0" data-i18n-aria="click_to_flip"` on `#flashcard`, covered by the
+block's delegated handler and existing i18n mechanisms (11th `N14` check; the inner TTS
+buttons are unaffected — no `role` attribute plus `stopPropagation()` in `_handleTTS`).
+Recorded follow-ups, still open:
 `aria-expanded` on chapter headers (needs a state sync in `toggleChapter`), focus management
-in `goToQuestion()`, keyboard support inside the global-search dropdown (folded into I7), and
-answered daily-challenge options staying focusable-but-inert (mouse-parity cosmetic nit). Plan
+in `goToQuestion()`, keyboard support inside the global-search dropdown (folded into I7),
+answered daily-challenge options staying focusable-but-inert (mouse-parity cosmetic nit),
+avatar personalization keyboard-inaccessible end-to-end (`#userAvatar` opens the modal via a
+JS click listener only; the `.av-card` selection cards are click-only divs — Save/Cancel/Close
+are real buttons), `.name-edit-btn` as an invisible tab stop (`opacity: 0` outside hover hides
+even the focus ring — queue with I3), the dashboard `continue-item` divs being click-only
+(keyboard-equivalent paths exist via the curriculum; consistency nit), and roving tabindex +
+`aria-current` for the exam dots as future polish. Plan
 and full detail: `docs/superpowers/plans/2026-07-14-keyboard-operability.md`, `AGENTS.md` →
 "Keyboard operability — C1 (2026-07-14)".

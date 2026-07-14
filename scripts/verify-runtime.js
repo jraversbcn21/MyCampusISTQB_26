@@ -733,6 +733,8 @@ const SAMPLE_Q = {
       (htmlSrc.match(/class="stat-card" onclick="App\.navigate\('[a-z]+'\)" role="button" tabindex="0"/g) || []).length === 4);
     check('N14 teclado: #themeToggle es un <button> real, no un div',
       /<button[^>]*id="themeToggle"/.test(htmlSrc) && !/<div[^>]*id="themeToggle"/.test(htmlSrc));
+    check('N14 teclado: la flashcard es volteable por teclado (role/tabindex/aria en #flashcard)',
+      /id="flashcard"[^>]*role="button" tabindex="0" data-i18n-aria="click_to_flip"|role="button" tabindex="0" data-i18n-aria="click_to_flip"[^>]*id="flashcard"/.test(htmlSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
