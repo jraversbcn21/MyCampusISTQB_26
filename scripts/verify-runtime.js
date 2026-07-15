@@ -894,6 +894,8 @@ const SAMPLE_Q = {
       /classList\.contains\('exam-dot'\)/.test(appSrc) && /ArrowRight/.test(appSrc) && /ArrowLeft/.test(appSrc));
     check('N18 dots: goToQuestion restaura el foco tras el re-render',
       /goToQuestion\(i\)\s*\{[\s\S]{0,400}focus\(\)/.test(appSrc));
+    check('N18 toasts: warning/error se anuncian asertivos (role="alert" en el nodo)',
+      /type === 'warning' \|\| type === 'error'/.test(appSrc) && /setAttribute\('role', 'alert'\)/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

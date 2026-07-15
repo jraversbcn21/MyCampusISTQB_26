@@ -1074,6 +1074,10 @@ const App = {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
+    // Un nodo con role="alert" insertado en un live region se anuncia
+    // asertivo — los mensajes bloqueantes (guard de examen, errores) no
+    // esperan a que el lector esté ocioso; success/info siguen polite.
+    if (type === 'warning' || type === 'error') toast.setAttribute('role', 'alert');
     const icons = {
       success: this._icon('check-circle'),
       warning: this._icon('alert-triangle'),
