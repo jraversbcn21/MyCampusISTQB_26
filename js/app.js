@@ -30,6 +30,8 @@ const App = {
   _gsGlossary: [],
   _gsContent: [],
   _gsExpanded: null,
+  _gsItems: [],
+  _gsActive: -1,
 
   /* ===== STATE MANAGEMENT ===== */
   loadState() {
@@ -1078,6 +1080,7 @@ const App = {
     const lang = i18n.lang;
     this._gsQuery = q;
     this._gsExpanded = null;
+    this._gsActive = -1;
     this._gsGlossary = GLOSSARY.filter(g =>
       g.term[lang].toLowerCase().includes(q) || g.def[lang].toLowerCase().includes(q)
     ).slice(0, 5);
@@ -1100,10 +1103,21 @@ const App = {
 
   _renderGlobalSearch() {
     const panel = document.getElementById('globalSearchResults');
+    const input = document.getElementById('globalSearch');
     const lang = i18n.lang;
+    // Lista plana de resultados accionables, en orden de render — es lo que
+    // navegan las flechas (patrón ARIA combobox: el foco DOM no sale del input).
+    this._gsItems = [
+      ...this._gsGlossary.map((g, i) => ({ kind: 'term', idx: i })),
+      ...this._gsContent.map(c => ({ kind: 'lesson', chapterId: c.chapterId, topicId: c.topicId })),
+    ];
+    if (this._gsActive >= this._gsItems.length) this._gsActive = this._gsItems.length - 1;
+    let n = 0;
     if (!this._gsGlossary.length && !this._gsContent.length) {
       panel.innerHTML = `<div class="search-no-results">${i18n.t('gs_no_results')}</div>`;
       panel.style.display = 'block';
+      input.setAttribute('aria-expanded', 'true');
+      input.setAttribute('aria-activedescendant', '');
       return;
     }
     let html = '';
@@ -1111,8 +1125,9 @@ const App = {
       html += `<div class="search-results-header">${i18n.t('gs_glossary_header')}</div>`;
       html += this._gsGlossary.map((g, i) => {
         const expanded = this._gsExpanded === i;
+        const active = this._gsActive === n;
         return `
-        <div class="search-result${expanded ? ' expanded' : ''}" onclick="App._gsToggleTerm(${i})">
+        <div class="search-result${expanded ? ' expanded' : ''}${active ? ' gs-active' : ''}" id="gs-opt-${n++}" role="option" aria-selected="${active}" onclick="App._gsToggleTerm(${i})">
           <div class="search-result-term">${g.term[lang]}</div>
           <div class="search-result-def">${g.def[lang]}</div>
           ${expanded ? `<a class="search-result-link" onclick="event.stopPropagation();App._gsGoGlossary()">${i18n.t('gs_view_in_glossary')}</a>` : ''}
@@ -1121,18 +1136,64 @@ const App = {
     }
     if (this._gsContent.length) {
       html += `<div class="search-results-header">${i18n.t('gs_content_header')}</div>`;
-      html += this._gsContent.map(c => `
-        <div class="search-result search-result-lesson" onclick="App._gsGoLesson(${c.chapterId}, '${c.topicId}')">
+      html += this._gsContent.map(c => {
+        const active = this._gsActive === n;
+        return `
+        <div class="search-result search-result-lesson${active ? ' gs-active' : ''}" id="gs-opt-${n++}" role="option" aria-selected="${active}" onclick="App._gsGoLesson(${c.chapterId}, '${c.topicId}')">
           <span>${c.icon}</span><span>${c.title}</span>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
     panel.innerHTML = html;
     panel.style.display = 'block';
+    input.setAttribute('aria-expanded', 'true');
+    input.setAttribute('aria-activedescendant', this._gsActive >= 0 ? `gs-opt-${this._gsActive}` : '');
   },
 
   _gsToggleTerm(i) {
     this._gsExpanded = this._gsExpanded === i ? null : i;
     this._renderGlobalSearch();
+  },
+
+  // I7 (ronda 2): navegación por teclado del dropdown — patrón ARIA combobox.
+  // El foco DOM permanece en el input; el "activo" es visual + aria-activedescendant.
+  _gsMove(delta) {
+    if (!this._gsItems.length) return;
+    const next = this._gsActive + delta;
+    if (next < 0 || next >= this._gsItems.length) return; // sin wrap: extremos se clavan
+    this._gsActive = next;
+    this._renderGlobalSearch();
+  },
+
+  _gsActivate() {
+    const item = this._gsItems[this._gsActive];
+    if (!item) return;
+    if (item.kind === 'term') {
+      // Primera activación expande; la segunda navega al glosario — así el
+      // enlace "Ver en glosario" (un <a> sin href, no enfocable) tiene ruta
+      // de teclado equivalente.
+      if (this._gsExpanded === item.idx) this._gsGoGlossary();
+      else this._gsToggleTerm(item.idx);
+    } else {
+      this._gsGoLesson(item.chapterId, item.topicId);
+    }
+  },
+
+  _gsKeydown(e) {
+    if (e.key === 'Escape') {
+      this._closeGlobalSearch();
+      this._closeMobileSearch();
+      return;
+    }
+    const panel = document.getElementById('globalSearchResults');
+    if (!panel || panel.style.display === 'none') return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      this._gsMove(e.key === 'ArrowDown' ? 1 : -1);
+    } else if (e.key === 'Enter' && this._gsActive >= 0) {
+      e.preventDefault();
+      this._gsActivate();
+    }
   },
 
   _gsBlockIfExam() {
@@ -1145,12 +1206,14 @@ const App = {
     if (this._gsBlockIfExam()) return;
     document.getElementById('glossarySearch').value = this._gsQuery;
     this._closeGlobalSearch(true);
+    this._closeMobileSearch(false);
     this.navigate('glossary');
   },
 
   _gsGoLesson(chapterId, topicId) {
     if (this._gsBlockIfExam()) return;
     this._closeGlobalSearch(true);
+    this._closeMobileSearch(false);
     this.navigateToLesson(chapterId, topicId);
   },
 
@@ -1159,6 +1222,13 @@ const App = {
     panel.style.display = 'none';
     panel.innerHTML = '';
     this._gsExpanded = null;
+    this._gsActive = -1;
+    this._gsItems = [];
+    const input = document.getElementById('globalSearch');
+    if (input) {
+      input.setAttribute('aria-expanded', 'false');
+      input.setAttribute('aria-activedescendant', '');
+    }
     if (clearInput) document.getElementById('globalSearch').value = '';
   },
 
@@ -1296,12 +1366,7 @@ const App = {
 
     const gsInput = document.getElementById('globalSearch');
     gsInput.addEventListener('input', (e) => this._onGlobalSearchInput(e));
-    gsInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this._closeGlobalSearch();
-        this._closeMobileSearch();
-      }
-    });
+    gsInput.addEventListener('keydown', (e) => this._gsKeydown(e));
     // I7: apertura/cierre de la barra de búsqueda móvil.
     const mobileSearchBtn = document.getElementById('mobileSearchBtn');
     mobileSearchBtn.addEventListener('click', () => {

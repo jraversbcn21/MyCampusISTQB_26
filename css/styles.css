@@ -326,6 +326,13 @@ body {
   cursor: pointer;
 }
 .search-result:hover { background: var(--bg4); }
+/* I7 (ronda 2): resultado activo por teclado (aria-activedescendant). El
+   outline interior lo hace visible también en el tema claro. */
+.search-result.gs-active {
+  background: var(--bg4);
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
 .search-result-term { font-weight: 700; font-size: 0.85rem; }
 .search-result-def {
   font-size: 0.8rem;

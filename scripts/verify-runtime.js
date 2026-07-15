@@ -784,6 +784,34 @@ const SAMPLE_Q = {
       /\.search-box\.mobile-open\s*\{\s*display:\s*flex/.test(cssSrc));
     check('N16 móvil: App._closeMobileSearch existe y devuelve el foco al botón',
       /_closeMobileSearch\(returnFocus = true\)/.test(appSrc) && /_closeMobileSearch/.test(appSrc.slice(appSrc.indexOf("key === 'Escape'"))));
+    check('N16 combobox: #globalSearch declara role/aria-controls/aria-expanded',
+      /id="globalSearch"[^>]*role="combobox"|role="combobox"[^>]*id="globalSearch"/.test(htmlSrc)
+      && /aria-controls="globalSearchResults"/.test(htmlSrc));
+    check('N16 combobox: el panel de resultados es role="listbox"',
+      /id="globalSearchResults"[^>]*role="listbox"|role="listbox"[^>]*id="globalSearchResults"/.test(htmlSrc));
+    check('N16 combobox: los resultados llevan id estable y role="option"',
+      /id="gs-opt-\$\{/.test(appSrc) && /role="option"/.test(appSrc));
+    check('N16 combobox: flechas/Enter/aria-activedescendant implementados',
+      /_gsMove/.test(appSrc) && /_gsActivate/.test(appSrc) && /ArrowDown/.test(appSrc) && /aria-activedescendant/.test(appSrc));
+    check('N16 combobox: estilo visible del resultado activo',
+      /\.search-result\.gs-active/.test(cssSrc));
+  }
+
+  /* ---- N16b: combobox behavioral — flechas mueven el activo, Enter expande ---- */
+  {
+    const ctx = loadApp();
+    ctx.App.state = ctx.App.loadState();
+    const input = ctx.document.getElementById('globalSearch');
+    const term = ctx.GLOSSARY[0].term.es.slice(0, 4).toLowerCase();
+    input.value = term;
+    ctx.App._onGlobalSearchInput({ target: input });
+    const noop = () => {};
+    ctx.App._gsKeydown({ key: 'ArrowDown', preventDefault: noop });
+    check('N16b combobox: ArrowDown activa el primer resultado y actualiza aria-activedescendant',
+      ctx.App._gsActive === 0 && input._attrs['aria-activedescendant'] === 'gs-opt-0');
+    ctx.App._gsKeydown({ key: 'Enter', preventDefault: noop });
+    check('N16b combobox: Enter sobre un término lo expande in place',
+      ctx.App._gsExpanded === 0);
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
