@@ -924,9 +924,10 @@ const SAMPLE_Q = {
       /<a class="bmc-fab"[^>]*href="https:\/\/buymeacoffee\.com\/jorgeborn3m"/.test(htmlSrc)
       && /class="bmc-fab"[^>]*target="_blank"/.test(htmlSrc)
       && /class="bmc-fab"[^>]*rel="noopener noreferrer"/.test(htmlSrc));
-    check('N19 markup: .bmc-fab usa el sprite #i-coffee y la clave i18n (sin emoji)',
+    check('N19 markup: .bmc-fab usa el sprite #i-coffee y la clave i18n en un span (no en el <a>, si no i18n.apply borra el icono; sin emoji)',
       /<a class="bmc-fab"[\s\S]*?<use href="#i-coffee"\/>[\s\S]*?<\/a>/.test(htmlSrc)
-      && /<a class="bmc-fab"[^>]*data-i18n="bmc_label"/.test(htmlSrc)
+      && /<span data-i18n="bmc_label">/.test(htmlSrc)
+      && !/<a class="bmc-fab"[^>]*\sdata-i18n=/.test(htmlSrc)
       && !/<a class="bmc-fab"[^>]*>[\s\S]*?☕/.test(htmlSrc));
     const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
     check('N19 css: .bmc-fab es fixed y usa --primary-dark (AA: blanco sobre él = 5.83:1)',
