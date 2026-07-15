@@ -116,7 +116,7 @@ const App = {
   checkAchievements() {
     Gamification.checkAchievements(this.state, (ach) => {
       this.state.xp += ach.xp;
-      this.showToast(`🏆 Logro: ${ach.name[i18n.lang]} (+${ach.xp} XP)`, 'success');
+      this.showToast(`🏆 ${i18n.t('achievement_toast_prefix')}: ${ach.name[i18n.lang]} (+${ach.xp} XP)`, 'success');
       this.saveState();
     });
   },
@@ -1041,7 +1041,7 @@ const App = {
     const lang = i18n.lang;
 
     document.getElementById('achievementsSummary').innerHTML = `
-      <div class="achievements-summary-icon">🏆</div>
+      <div class="achievements-summary-icon" aria-hidden="true">🏆</div>
       <div class="achievements-summary-text">
         <h3>${unlocked.length} / ${ACHIEVEMENTS.length} ${i18n.t('achievements_unlocked_label')}</h3>
         <p>${totalXP} XP ${i18n.t('earned_from_achievements_label')}</p>

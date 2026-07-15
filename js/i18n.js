@@ -103,6 +103,7 @@ const TRANSLATIONS = {
     // ACHIEVEMENTS
     achievements_title: "Logros y Recompensas",
     achievements_sub: "Desbloquea insignias completando actividades de estudio",
+    achievement_toast_prefix: "Logro",
 
     // MISC
     lesson_complete: "Marcar como completada",
@@ -302,6 +303,7 @@ const TRANSLATIONS = {
     // ACHIEVEMENTS
     achievements_title: "Achievements & Rewards",
     achievements_sub: "Unlock badges by completing study activities",
+    achievement_toast_prefix: "Achievement",
 
     // MISC
     lesson_complete: "Mark as complete",

@@ -117,7 +117,7 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
 - No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
 - A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
-- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (173 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
+- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (174 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
 ## Production Readiness — Status
@@ -179,7 +179,7 @@ mechanisms, exact hex values, verification evidence, and the complete follow-up 
 | Reduced motion | I2 | Global `prefers-reduced-motion` blunt block (durations + delays → 0.01ms `!important`, beats inline styles) + `matchMedia` guard collapsing the carousel's `setTimeout` sequencing | 2 `N15` checks |
 
 **Round 2 (2026-07-15):** everything the review left open — **I3**, **I7**, **I8** and the
-per-block recorded follow-ups — was closed in a second round (commits `2df5af2..fbad8cc`,
+per-block recorded follow-ups — was closed in a second round (commits `2df5af2..4879e14`,
 same methodology). Summary: 44px touch targets via a `@media (pointer: coarse)` block
 (touch only — desktop visuals unchanged); mobile global search (`#mobileSearchBtn` + a
 full-width `.search-box.mobile-open` bar under the topbar, reusing the same
@@ -215,7 +215,9 @@ families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.m
 - Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
   `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
   the two-part gate blocks the commit otherwise.
-- `TRANSLATIONS` currently has **173 keys** (ES/EN paired, harness-enforced).
+- `TRANSLATIONS` currently has **174 keys** (ES/EN paired, harness-enforced; the 174th is
+  `achievement_toast_prefix`, the round-2 final-review fix for the last hardcoded "Logro:"
+  toast residue in `js/app.js`).
 - The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
   assertions).
 - Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated

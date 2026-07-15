@@ -935,6 +935,7 @@ const SAMPLE_Q = {
     check('i18n: sin "¡Sigue así!" hardcodeado en app.js', !appSrc.includes('¡Sigue así!'));
     check('i18n: sin fallback \'Estudiante\' hardcodeado en app.js/auth.js',
       !appSrc.includes("'Estudiante'") && !authSrc.includes("'Estudiante'"));
+    check('i18n: sin "Logro:" hardcodeado en app.js', !appSrc.includes('Logro:'));
     check('i18n: la etiqueta visible del logout usa data-i18n',
       /class="logout-label"[^>]*data-i18n=|data-i18n="[^"]*"[^>]*class="logout-label"/.test(htmlSrc)
       || /<span class="logout-label" data-i18n=/.test(htmlSrc));

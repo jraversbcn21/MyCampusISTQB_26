@@ -346,7 +346,7 @@
     by round 2 — see the next entry.
 - **UI/UX remediation ronda 2 (2026-07-15):** closed everything the 2026-07-14 review left
   open — **I3**, **I7**, **I8** and the per-block minor follow-ups — in four blocks
-  (commits `2df5af2..fbad8cc` on `master`, subagent-driven-development with per-task
+  (commits `2df5af2..4879e14` on `master`, subagent-driven-development with per-task
   reviews, same methodology as round 1). Spec:
   `docs/superpowers/specs/2026-07-15-uiux-remediation-round2-design.md`; plan:
   `docs/superpowers/plans/2026-07-15-uiux-remediation-round2.md`.
@@ -371,8 +371,10 @@
     term is two-phase (first expands in place, second navigates to the glossary — the
     keyboard-equivalent of the non-focusable "Ver en glosario" link), Escape closes.
     Active option styled via `.gs-active`. The exam guard and the `composedPath()`
-    click-outside mechanism are untouched. 3 new i18n keys — `global_search_aria`,
-    `mobile_search_aria`, `close_search_aria` — bring `TRANSLATIONS` to **173 keys**.
+    click-outside mechanism are untouched. 4 new i18n keys — `global_search_aria`,
+    `mobile_search_aria`, `close_search_aria`, plus `achievement_toast_prefix` (added by
+    the final-review fix for the last hardcoded "Logro:" toast residue in `js/app.js`) —
+    bring `TRANSLATIONS` to **174 keys**.
     Gate: 10 `N16 móvil`/`N16 combobox` static checks + 2 `N16b` behavioral checks.
   - **I8 — structural emojis → inline SVG sprite:** a hidden sprite (`display:none`,
     `aria-hidden`) with **26 Lucide-style `#i-*` symbols** as the first element of
@@ -387,8 +389,14 @@
     star, the theme toggle's sun/moon at runtime, and the ✏️ pencil in `avatar.js`).
     Decorative emojis that stay carry `aria-hidden` (`.welcome-emoji`, `.streak-fire`,
     `#resultsEmoji`, the empty-state 🏆); content emojis inside translated toast strings
-    and the gamification/avatar data emojis stay as-is by design. Gate: 13 `N17` checks
+    and the gamification/avatar data emojis stay as-is by design. Gate: 14 `N17` checks
     (including "no structural emojis left on the migrated surfaces").
+    Real-browser verification (Task 13, 41 Playwright checks) found one real I8
+    regression: `.theme-btn` and `.name-edit-btn` declared no `color`, so their
+    `currentColor` SVGs inherited the UA black (1.18:1 in dark theme) — fixed in
+    `4879e14` with an explicit color on both rules plus the 14th `N17` check. The final
+    whole-branch review then audited all 11 icon-hosting `<button>` rules and confirmed
+    every one declares a color.
   - **Minor follow-ups (the ~9 recorded across the 2026-07-14 entries):** avatar modal is
     a `role="dialog" aria-modal="true"` with `aria-labelledby`, Escape-to-close and focus
     returned to `#userAvatar` (launcher and `.av-card`s carry `role="button" tabindex="0"`
@@ -420,7 +428,21 @@
     in CSS, with no `validate-contrast.js` pair); and (4) a new minor follow-up out of
     I8's scope: two **structural ✓/✗ text glyphs** remain — the exam review's
     correct/wrong markers (`js/app.js` ~933–934) and the avatar selection's `.av-check`
-    (`js/avatar.js` ~191) still use text characters as icons.
+    (`js/avatar.js` ~191) still use text characters as icons. The final whole-branch
+    review found more glyphs/emojis to queue with this same follow-up: the TTS buttons'
+    🔇/🔊 (`js/app.js`, genuinely icon-only), the ← arrow of the "Volver al curriculum"
+    button (`index.html` and `js/app.js`), the 🔴🟡🟢 markers of the fc-stats block
+    (`index.html`), and — borderline, data-icon family — the 📋⚡🎯 of the exam history.
+    Additional follow-ups from the final review: (5) `.av-card` does not expose its
+    selected state to AT (only the `selected` class; candidate: `aria-pressed`) — queue
+    with the AT nits; (6) **A2, pre-existing:** the open mobile drawer physically covers
+    `#mobileMenuBtn`, making touch-close impossible (keyboard and nav-item close do
+    work); suggested fix: click-outside closes the drawer; (7) `aria-current="true"` on
+    the exam dots could become the more semantic `"step"` — a one-liner, BUT the `N18`
+    check pins `"true"`: change both at the same time; (8) `.auth-lang-switcher` has no
+    gap between ES/EN at 44px on touch (WCAG-conformant by size; a guideline deviation);
+    (9) generalize the `N17` color check to every button rule hosting an `svg.icon`
+    (today all 11 audited hosts declare a color).
 
 ## Production Readiness — Status & Next Session
 
@@ -546,13 +568,15 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   block above) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like
   every other `data-i18n-*` mechanism
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **173 keys** (160 after
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **174 keys** (160 after
   the 2026-07-04 remediation, +5 `gs_*` keys for the 2026-07-08 global search dropdown →
   165, +4 more — `mobile_menu_aria`, `fc_prev_aria`, `fc_next_aria`, `close_label` — added
   2026-07-14 for the `data-i18n-aria` rollout above → 169, +1 — `goto_question_aria`, the
   exam dots' label from the same day's C1 keyboard-operability block → 170, +3 —
   `global_search_aria`, `mobile_search_aria`, `close_search_aria` — added 2026-07-15 for
-  the I7 mobile-search/combobox block of the UI/UX remediation round 2 → 173), all ES/EN
+  the I7 mobile-search/combobox block of the UI/UX remediation round 2 → 173, +1 —
+  `achievement_toast_prefix`, the round-2 final-review fix for the last hardcoded
+  "Logro:" toast residue → 174), all ES/EN
   paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
   hardcoded-language residues)
