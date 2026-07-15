@@ -64,6 +64,7 @@
     <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></symbol>
   </svg>
 
   <!-- ============ AUTH SCREEN ============ -->
@@ -501,6 +502,13 @@
 
     </div><!-- end views-container -->
   </main>
+
+  <!-- Botón de apoyo (Buy Me a Coffee). Enlace saliente, sin script de terceros.
+       position: fixed global; se oculta en examen vía body.exam-active. -->
+  <a class="bmc-fab" href="https://buymeacoffee.com/jorgeborn3m" target="_blank" rel="noopener noreferrer" data-i18n="bmc_label">
+    <svg class="icon" aria-hidden="true"><use href="#i-coffee"/></svg>
+    <span>Invítame un café</span>
+  </a>
 
   <!-- TOAST NOTIFICATIONS -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>

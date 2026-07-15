@@ -917,6 +917,17 @@ const SAMPLE_Q = {
     check('N19 i18n: bmc_label definido en ES y EN',
       typeof ctx.TRANSLATIONS.es.bmc_label === 'string' && ctx.TRANSLATIONS.es.bmc_label.length > 0
       && typeof ctx.TRANSLATIONS.en.bmc_label === 'string' && ctx.TRANSLATIONS.en.bmc_label.length > 0);
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    check('N19 icono: símbolo #i-coffee presente en el sprite',
+      htmlSrc.includes('id="i-coffee"'));
+    check('N19 markup: .bmc-fab enlaza a buymeacoffee con rel/target seguros',
+      /<a class="bmc-fab"[^>]*href="https:\/\/buymeacoffee\.com\/jorgeborn3m"/.test(htmlSrc)
+      && /class="bmc-fab"[^>]*target="_blank"/.test(htmlSrc)
+      && /class="bmc-fab"[^>]*rel="noopener noreferrer"/.test(htmlSrc));
+    check('N19 markup: .bmc-fab usa el sprite #i-coffee y la clave i18n (sin emoji)',
+      /<a class="bmc-fab"[\s\S]*?<use href="#i-coffee"\/>[\s\S]*?<\/a>/.test(htmlSrc)
+      && /<a class="bmc-fab"[^>]*data-i18n="bmc_label"/.test(htmlSrc)
+      && !/<a class="bmc-fab"[^>]*>[\s\S]*?☕/.test(htmlSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
