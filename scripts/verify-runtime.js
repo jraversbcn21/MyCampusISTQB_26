@@ -945,6 +945,9 @@ const SAMPLE_Q = {
     check('N19 examen: launchExam/finishExam/navigate/renderSimulatorMenu usan el helper',
       (appSrc.match(/this\._setExamActive\((true|false)\)/g) || []).length >= 4
       && !/this\._examActive = true/.test(appSrc));
+    const privacySrc = fs.readFileSync(path.join(ROOT, 'privacy.html'), 'utf8');
+    check('N19 privacidad: privacy.html menciona Buy Me a Coffee (ES y EN)',
+      (privacySrc.match(/Buy Me a Coffee/g) || []).length >= 2);
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
