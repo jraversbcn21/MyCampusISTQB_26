@@ -1300,7 +1300,9 @@ body {
 }
 
 /* ===== TOAST ===== */
-.toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+/* bottom: 80px (no 24px) deja hueco al pill .bmc-fab, que vive en bottom:24px
+   con ~44px de alto. Los toasts (transitorios, aria-live) ganan el rincón. */
+.toast-container { position: fixed; bottom: 80px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
 .toast {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -2108,6 +2110,38 @@ body {
     margin: -17px;
   }
 }
+
+/* ===== BOTÓN DE APOYO (Buy Me a Coffee, 2026-07-15) =====
+   Pill flotante abajo-derecha. Fondo --primary-dark (no --primary): blanco
+   sobre #6C63FF es 4.32:1 (falla AA), sobre #5a52d5 es 5.83:1 (pasa). color:#fff
+   explícito porque el SVG del icono usa currentColor. z-index bajo los toasts
+   (1000). Se oculta en examen vía body.exam-active. Hover solo mueve/sombrea
+   (no aclara el fondo, que bajaría el contraste); reduced-motion lo colapsa. */
+.bmc-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  background: var(--primary-dark);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.bmc-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.bmc-fab .icon { width: 1.15em; height: 1.15em; }
+body.exam-active .bmc-fab { display: none; }
 
 /* ===== MOVIMIENTO REDUCIDO (I2, revisión UI 2026-07-14) =====
    Bloque global estándar: con prefers-reduced-motion activo, toda animación y

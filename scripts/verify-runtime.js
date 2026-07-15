@@ -928,6 +928,17 @@ const SAMPLE_Q = {
       /<a class="bmc-fab"[\s\S]*?<use href="#i-coffee"\/>[\s\S]*?<\/a>/.test(htmlSrc)
       && /<a class="bmc-fab"[^>]*data-i18n="bmc_label"/.test(htmlSrc)
       && !/<a class="bmc-fab"[^>]*>[\s\S]*?☕/.test(htmlSrc));
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    check('N19 css: .bmc-fab es fixed y usa --primary-dark (AA: blanco sobre él = 5.83:1)',
+      /\.bmc-fab\s*\{[^}]*position:\s*fixed/.test(cssSrc)
+      && /\.bmc-fab\s*\{[^}]*background:\s*var\(--primary-dark\)/.test(cssSrc)
+      && /\.bmc-fab\s*\{[^}]*color:\s*#fff/.test(cssSrc));
+    check('N19 css: los toasts se apilan por encima del pill (no en bottom:24px a secas)',
+      /\.toast-container\s*\{[^}]*bottom:\s*80px/.test(cssSrc));
+    check('N19 css: el pill se oculta durante el examen',
+      /body\.exam-active\s+\.bmc-fab\s*\{[^}]*display:\s*none/.test(cssSrc));
+    check('N19 css: las reglas del pill van antes del bloque reduced-motion',
+      cssSrc.indexOf('.bmc-fab') < cssSrc.indexOf('@media (prefers-reduced-motion'));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
