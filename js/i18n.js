@@ -15,6 +15,7 @@ const TRANSLATIONS = {
     nav_progress: "Progreso",
     nav_achievements: "Logros",
     streak_label: "días seguidos",
+    bmc_label: "Invítame un café",
 
     // DASHBOARD
     welcome_title: "¡Bienvenido a MyCampus ISTQB!",
@@ -215,6 +216,7 @@ const TRANSLATIONS = {
     nav_progress: "Progress",
     nav_achievements: "Achievements",
     streak_label: "day streak",
+    bmc_label: "Buy me a coffee",
 
     // DASHBOARD
     welcome_title: "Welcome to MyCampus ISTQB!",

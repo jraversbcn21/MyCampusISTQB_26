@@ -911,6 +911,14 @@ const SAMPLE_Q = {
       !/style="color:\$\{colors\[i\]\}/.test(appSrc));
   }
 
+  /* ---- N19: botón flotante Buy Me a Coffee (2026-07-15) ---- */
+  {
+    const ctx = loadApp();
+    check('N19 i18n: bmc_label definido en ES y EN',
+      typeof ctx.TRANSLATIONS.es.bmc_label === 'string' && ctx.TRANSLATIONS.es.bmc_label.length > 0
+      && typeof ctx.TRANSLATIONS.en.bmc_label === 'string' && ctx.TRANSLATIONS.en.bmc_label.length > 0);
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
