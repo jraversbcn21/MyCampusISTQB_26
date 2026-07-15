@@ -215,9 +215,10 @@ families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.m
 - Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
   `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
   the two-part gate blocks the commit otherwise.
-- `TRANSLATIONS` currently has **174 keys** (ES/EN paired, harness-enforced; the 174th is
+- `TRANSLATIONS` currently has **175 keys** (ES/EN paired, harness-enforced; the 174th is
   `achievement_toast_prefix`, the round-2 final-review fix for the last hardcoded "Logro:"
-  toast residue in `js/app.js`).
+  toast residue in `js/app.js`; the 175th is `bmc_label`, the Buy Me a Coffee button — see
+  the Monetization section below).
 - The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
   assertions).
 - Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated
@@ -234,3 +235,39 @@ upheld: functionally safe, verified no double-fire), and the accent-as-text exce
 and `.lesson-content code`, all pre-existing) — plus one minor follow-up: the structural
 ✓/✗ text glyphs left out of I8's scope (exam review, avatar `av-check`). All enumerated
 with file pointers in `AGENTS.md` → "UI/UX remediation ronda 2 (2026-07-15)".
+
+## Monetization — Buy Me a Coffee button (2026-07-15)
+
+A floating "Invítame un café" / "Buy me a coffee" pill (bottom-right) links to the creator's
+Buy Me a Coffee donations page, for a non-intrusive soft-launch monetization (tips, no content
+gating, no payment infra of our own). Built via subagent-driven-development (spec + plan under
+`docs/superpowers/`, per-task reviews, final whole-branch review, real-browser Playwright
+verification). Design/plan: `docs/superpowers/specs/2026-07-15-buymeacoffee-button-design.md`,
+`docs/superpowers/plans/2026-07-15-buymeacoffee-button.md`.
+
+**Chosen approach: self-hosted outbound link, NOT the official BMC widget script** — avoids a
+new third-party CDN dependency (which the repo's discipline would require pinning + SRI +
+no-op degradation for) and keeps full control over a11y/i18n/theming. It's a plain
+`<a href="https://buymeacoffee.com/jorgeborn3m" target="_blank" rel="noopener noreferrer">`.
+
+Load-bearing details an agent must know:
+- The pill lives **inside `#app-container`** (in `index.html`), so it hides automatically on
+  the login screen (`#app-container` is `display:none` there — desired) and shows once signed
+  in. During an exam it is hidden via `body.exam-active .bmc-fab { display:none }`.
+- Exam visibility is driven by `App._setExamActive(active)` (`js/app.js`), the single point of
+  truth that both sets `this._examActive` and toggles the `exam-active` class on `<body>`. The
+  four former direct `this._examActive = …` assignments (navigate / renderSimulatorMenu /
+  launchExam / finishExam) now route through it. Never reintroduce a direct assignment.
+- Background is `var(--primary-dark)` (`#5a52d5`), **not** `--primary` (`#6C63FF`): white text
+  on `--primary` is only 4.32:1 (fails AA); on `--primary-dark` it's 5.83:1 (passes). `color:#fff`
+  is explicit because the icon `<svg>` uses `currentColor`. This pair is not a `--*-text` token
+  so `validate-contrast.js` doesn't cover it — the AA choice is locked by the `N19` CSS check.
+- The label's `data-i18n="bmc_label"` sits on the **inner `<span>`, never on the `<a>`**: the
+  `<a>` also contains the `#i-coffee` `<svg>`, and `i18n.apply()` does `el.textContent = t(key)`,
+  which would wipe the icon if the attribute were on the `<a>`. This was a real bug caught by the
+  final review and fixed; the `N19` markup check now forbids `data-i18n` on the `<a>`.
+- `.toast-container` was raised to `bottom: 80px` (from 24px) so transient `aria-live` toasts
+  stack **above** the persistent pill instead of overlapping it.
+- Gate: the `N19` check family in `scripts/verify-runtime.js` (i18n key, `#i-coffee` sprite +
+  markup, CSS tokens/offset/exam-hide, `_setExamActive` wiring, `privacy.html` mention).
+  `privacy.html` declares the outbound link in ES and EN.

@@ -652,6 +652,48 @@ Critical/Important findings): `docs/superpowers/plans/2026-07-07-flashcard-carou
   class of risk in this `setTimeout`-driven file, not newly introduced — a cheap future
   hardening would be a bounds check at the top of `renderFlashcard()`).
 
+### Monetization — Buy Me a Coffee button (2026-07-15)
+
+A floating "Invítame un café" / "Buy me a coffee" pill (bottom-right) linking to the creator's
+Buy Me a Coffee donations page (`https://buymeacoffee.com/jorgeborn3m`), for a non-intrusive
+soft-launch monetization: tips only, no content gating, no payment infrastructure of our own
+(BMC handles the charge end to end). Built via subagent-driven-development, subagents on Opus.
+Design/plan: `docs/superpowers/specs/2026-07-15-buymeacoffee-button-design.md`,
+`docs/superpowers/plans/2026-07-15-buymeacoffee-button.md`.
+
+**Approach — self-hosted outbound link, NOT the official BMC widget script.** Rejected the
+widget because it's a third-party CDN script, which this repo's discipline requires pinning +
+SRI + no-op degradation for; a plain `<a target="_blank" rel="noopener noreferrer">` gives full
+control over a11y/i18n/theming and zero new dependency/privacy surface.
+
+Load-bearing mechanics:
+- **Markup** (`index.html`): the pill is an `<a class="bmc-fab">` placed **inside
+  `#app-container`** (right after `</main>`), so `#app-container { display:none }` on the login
+  screen hides it automatically (desired — no pill before sign-in) and it appears once signed in.
+  Its icon is a `#i-coffee` Lucide-style symbol added to the inline SVG sprite (no emoji — the
+  `N17` gate forbids emojis as UI icons).
+- **i18n**: label key `bmc_label` (ES "Invítame un café" / EN "Buy me a coffee"), the 175th
+  `TRANSLATIONS` key. `data-i18n="bmc_label"` sits on the **inner `<span>`, never on the `<a>`** —
+  the `<a>` also wraps the icon `<svg>`, and `i18n.apply()` does `el.textContent = t(key)`, which
+  would delete the icon if the attribute were on the `<a>`. This was a real bug the final
+  whole-branch review caught (the icon vanished at startup and on every language switch); the fix
+  moved the attribute to the span and the `N19` markup check now forbids `data-i18n` on the `<a>`.
+- **Exam hiding**: `App._setExamActive(active)` (`js/app.js`) is the single source of truth — it
+  sets `this._examActive` and toggles `document.body.classList` `exam-active`; CSS
+  `body.exam-active .bmc-fab { display:none }` hides the pill mid-exam. The four former direct
+  `this._examActive = …` assignments (navigate / renderSimulatorMenu / launchExam / finishExam)
+  now route through it; the read-only guard (`if (!this._examActive) return false`) is unchanged.
+- **Contrast**: background `var(--primary-dark)` (`#5a52d5`), not `--primary` (`#6C63FF`): white
+  on `--primary` is 4.32:1 (fails AA), on `--primary-dark` 5.83:1 (passes). `color:#fff` explicit
+  (the icon `<svg>` uses `currentColor`). Not a `--*-text` token pair, so `validate-contrast.js`
+  doesn't cover it — the choice is locked by the `N19` CSS check instead.
+- **Toast overlap**: `.toast-container` raised to `bottom: 80px` (from 24px) so transient
+  `aria-live` toasts stack above the persistent pill rather than colliding at the same corner.
+- **Privacy**: `privacy.html` declares the outbound link to BMC in both ES and EN (section 4).
+- **Gates**: the `N19` check family in `scripts/verify-runtime.js`. **Verification**: 4 validators
+  green + real-browser Playwright (Chrome), 18/18 — including a regression assertion that the
+  `#i-coffee` icon survives `i18n.apply()` and ES↔EN toggling (the exact bug above).
+
 ### Global Search Dropdown (2026-07-08)
 
 The global search box in the topbar (`#globalSearch`) no longer **forces navigation** to the
