@@ -868,6 +868,8 @@ const SAMPLE_Q = {
       /this\._icon\(.{0,40}'sun'.{0,20}'moon'\)/.test(appSrc) && !/'☀️'/.test(appSrc) && !/'🌙'/.test(appSrc));
     check('N17 iconos: el lápiz de editar nombre usa App._icon',
       /App\._icon\('pencil'\)/.test(avSrc) && !/'✏️'/.test(avSrc));
+    check('N17 iconos: .theme-btn y .name-edit-btn declaran color (los SVG currentColor no heredan negro UA)',
+      /\.theme-btn\s*\{[^}]*color:\s*var\(--text\)/.test(cssSrc) && /\.name-edit-btn\s*\{[^}]*color:\s*var\(--text2\)/.test(cssSrc));
   }
 
   /* ---- N18: follow-ups menores (ronda 2, 2026-07-15) ---- */
