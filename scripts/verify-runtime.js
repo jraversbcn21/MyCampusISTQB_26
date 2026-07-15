@@ -831,6 +831,21 @@ const SAMPLE_Q = {
       /_icon\(name\)/.test(appSrc) && /class="icon" aria-hidden="true"><use href="#i-\$\{name\}"/.test(appSrc));
     check('N17 iconos: clase .icon definida (currentColor, 1em)',
       /\.icon\s*\{[^}]*stroke:\s*currentColor/.test(cssSrc) && /\.icon\s*\{[^}]*width:\s*1em/.test(cssSrc));
+    check('N17 iconos: la nav del sidebar usa el sprite (7 nav-icons)',
+      (htmlSrc.match(/class="nav-icon"><svg class="icon" aria-hidden="true"><use href="#i-/g) || []).length === 7);
+    check('N17 iconos: los 4 stat-icons usan el sprite',
+      (htmlSrc.match(/class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-/g) || []).length === 4);
+    check('N17 iconos: logo, toggles, logout, búsqueda y flechas usan el sprite',
+      ['auth-logo-icon', 'logo-icon'].every(c => new RegExp(`class="${c}"><svg class="icon"`).test(htmlSrc))
+      && !/id="sidebarToggle"[^>]*>&#9776;|id="mobileMenuBtn"[^>]*>&#9776;/.test(htmlSrc)
+      && /id="mobileSearchBtn"[^>]*><svg class="icon"/.test(htmlSrc)
+      && /class="logout-icon"><svg class="icon"/.test(htmlSrc)
+      && !/id="fcPrev"[^>]*>&#8592;|id="fcNext"[^>]*>&#8594;/.test(htmlSrc)
+      && !/id="avatarModalClose"[^>]*>✕|id="searchCloseBtn"[^>]*>✕/.test(htmlSrc));
+    check('N17 iconos: los emojis decorativos que se quedan llevan aria-hidden',
+      /class="welcome-emoji" aria-hidden="true"/.test(htmlSrc)
+      && /id="resultsEmoji" aria-hidden="true"|aria-hidden="true"[^>]*id="resultsEmoji"/.test(htmlSrc)
+      && /class="streak-fire" aria-hidden="true"/.test(htmlSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
