@@ -149,10 +149,9 @@ explícitamente sobre la mínima).
    al cerrar, el foco vuelve a `#userAvatar`. **Límite deliberado:** sin focus-trap
    completo (ciclado de Tab dentro del modal) — se documenta como pendiente menor, no se
    implementa en esta ronda.
-2. **`aria-expanded` en cabeceras de capítulo:** el template de `renderCurriculum()` emite
-   `aria-expanded="true|false"` desde `_expandedChapters`. Como cada toggle regenera el
-   HTML completo, el atributo siempre queda fresco — no hace falta sync manual en
-   `toggleChapter()`.
+2. **`aria-expanded` en cabeceras de capítulo:** `renderCurriculum()` emite el atributo
+   desde `_expandedChapters` al renderizar, y `toggleChapter()` lo sincroniza a mano al
+   alternar la clase (no re-renderiza).
 3. **Colores crudos usados como texto:** (a) nuevo token `--secondary-text` por tema para
    el stat de exámenes completados de la vista de progreso (~app.js:969), con valores AA
    validados; **entra en `scripts/validate-contrast.js`** como par adicional. (b) Los

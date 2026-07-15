@@ -117,7 +117,7 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
 - No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
 - A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
-- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (170 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
+- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (173 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
 ## Production Readiness — Status
@@ -178,6 +178,24 @@ mechanisms, exact hex values, verification evidence, and the complete follow-up 
 | Keyboard operability | C1 | `#themeToggle` → real `<button>`; `role="button" tabindex="0"` on template-rendered divs + ONE delegated document keydown handler; global `:focus-visible`; `selectAnswer` focus restore; flashcard flip made keyboard-operable in the fix wave | 11 `N14` checks |
 | Reduced motion | I2 | Global `prefers-reduced-motion` blunt block (durations + delays → 0.01ms `!important`, beats inline styles) + `matchMedia` guard collapsing the carousel's `setTimeout` sequencing | 2 `N15` checks |
 
+**Round 2 (2026-07-15):** everything the review left open — **I3**, **I7**, **I8** and the
+per-block recorded follow-ups — was closed in a second round (commits `2df5af2..fbad8cc`,
+same methodology). Summary: 44px touch targets via a `@media (pointer: coarse)` block
+(touch only — desktop visuals unchanged); mobile global search (`#mobileSearchBtn` + a
+full-width `.search-box.mobile-open` bar under the topbar, reusing the same
+`#globalSearch` and its JS) plus a complete ARIA combobox pattern for the dropdown
+(arrows/Enter/Escape, `aria-activedescendant`, no wrap, two-phase Enter on glossary
+terms); an inline SVG sprite of 26 `#i-*` symbols + `App._icon(name)` replacing every
+structural emoji (decorative emojis that stay carry `aria-hidden`); and the minor
+follow-ups (avatar modal as a keyboard-operable `dialog`, `aria-expanded` on chapter
+headers and `#mobileMenuBtn`, roving tabindex + `aria-current` on exam dots, assertive
+`warning`/`error` toasts, new `--secondary-text` token as an extra
+`validate-contrast.js` pair). New gates: the `N16`/`N16b`, `N17` and `N18` check
+families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.md` →
+"UI/UX remediation ronda 2 (2026-07-15)", plus the spec/plan pair
+`docs/superpowers/specs/2026-07-15-uiux-remediation-round2-design.md` /
+`docs/superpowers/plans/2026-07-15-uiux-remediation-round2.md`.
+
 **Editing constraints an agent must know (load-bearing):**
 
 - The tail of `css/styles.css` is ordered on purpose: the reduced-motion media block, then
@@ -190,10 +208,14 @@ mechanisms, exact hex values, verification evidence, and the complete follow-up 
   constantly).
 - New icon-only controls: name them with `data-i18n-aria="key"` (the fourth i18n attribute
   mechanism — see `AGENTS.md` → "i18n").
+- Structural icons: use the `#i-*` inline sprite in `index.html` (static HTML:
+  `<svg class="icon" aria-hidden="true"><use href="#i-name"/></svg>`) or `App._icon(name)`
+  in JS templates — do not reintroduce emojis as UI icons (the `N17` gate blocks it).
+  Decorative emojis that stay must carry `aria-hidden`.
 - Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
   `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
   the two-part gate blocks the commit otherwise.
-- `TRANSLATIONS` currently has **170 keys** (ES/EN paired, harness-enforced).
+- `TRANSLATIONS` currently has **173 keys** (ES/EN paired, harness-enforced).
 - The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
   assertions).
 - Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated
@@ -202,11 +224,11 @@ mechanisms, exact hex values, verification evidence, and the complete follow-up 
   reduced motion (today everything is `setTimeout`-driven — that property is what makes the
   blunt block safe).
 
-**Still open from the review:** **I3** (sub-44px touch targets: lang switcher ~24px, exam
-dots 28px, hover-only name-edit button), **I7** (global search hidden at ≤768px with no
-mobile alternative; includes dropdown keyboard support and a real accessible name for
-`#globalSearch`), **I8** (emoji as structural icons → inline SVG sprite, keeping decorative
-emojis with `aria-hidden`), plus the per-block recorded follow-ups (avatar modal keyboard
-access, `aria-expanded` on chapter headers, raw `--secondary`/chapter-accent text colors,
-toast emoji not `aria-hidden`, type-aware toast politeness, roving-tabindex exam dots, the
-nested-TTS AT nit) — all enumerated with detail and file pointers in `AGENTS.md`.
+**Still open from the review (after round 2, 2026-07-15):** only three deliberate
+leftovers — the avatar modal has no Tab focus-trap (Escape + focus-return do work; a
+documented deliberate limit of round 2), the nested-TTS AT nit in `#flashcard` (decision
+upheld: functionally safe, verified no double-fire), and the accent-as-text exceptions
+(`.chapter-number` — large/bold text, 3:1 large-text threshold —, `.lesson-chapter-tag`,
+and `.lesson-content code`, all pre-existing) — plus one minor follow-up: the structural
+✓/✗ text glyphs left out of I8's scope (exam review, avatar `av-check`). All enumerated
+with file pointers in `AGENTS.md` → "UI/UX remediation ronda 2 (2026-07-15)".

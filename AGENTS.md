@@ -61,7 +61,9 @@
   gates: `scripts/validate-contrast.js` (hooked on staged CSS) and the `N12`–`N15` check
   families in `scripts/verify-runtime.js`; i18n grew to 170 keys. **Still open from that
   review:** I3, I7, I8 plus the per-block recorded follow-ups — the consolidated pending
-  list lives at the end of the "Reduced motion — I2" entry below.
+  list lives at the end of the "Reduced motion — I2" entry below. **UPDATE 2026-07-15:
+  all of it CLOSED** by round 2 — see the "UI/UX remediation ronda 2 (2026-07-15)" entry
+  below for what closed, the new gates (`N16`–`N18`), and the three deliberate leftovers.
 - **UI/UX polish pass (2026-07-07):** user-reported usability issues on small/short viewports,
   fixed same-day, all in `css/styles.css` unless noted:
   - **Sidebar clipped on short viewports:** `.sidebar` used `min-height: 100vh` with
@@ -146,7 +148,10 @@
     chapter accent-color arrays (`colors = ["#6C63FF", ...]`, used as text in the curriculum
     continue-list percentage and the progress chapter-bar percentage) are still raw tokens/
     hex used as text and fail AA in the light theme — pre-existing, not addressed by either
-    gate, pending a future pass.
+    gate, pending a future pass. **CLOSED 2026-07-15** (round 2: `--secondary-text` token,
+    accent percentages moved to `var(--text2)`/`var(--primary-text)`, `N12` widened to
+    `--secondary`; three deliberate accent-as-text exceptions remain, enumerated in the
+    "UI/UX remediation ronda 2" entry below).
 - **A11y quick wins (2026-07-14):** fixed three more findings from the same `ui-ux-pro-max`
   review that produced the contrast remediation above (plan:
   `docs/superpowers/plans/2026-07-14-a11y-quickwins.md`), via subagent-driven-development:
@@ -183,7 +188,8 @@
     (below the 16px iOS threshold) — deliberately
     excluded from the I4 fix above because it's a hover-only-revealed edit affordance, not a
     primary input; finding **I3**, pending. The global search box is still hidden entirely at
-    `≤768px` (no mobile equivalent) — finding **I7**, pending.
+    `≤768px` (no mobile equivalent) — finding **I7**, pending. **UPDATE 2026-07-15: I3 and
+    I7 both CLOSED** by round 2 — see the "UI/UX remediation ronda 2" entry below.
   - **Minors from this block's final whole-branch review (recorded, still open):** the toast
     icon emoji is not hidden from the live region (`showToast`'s template renders
     `<span>${icon}</span>` without `aria-hidden`, so screen readers announce e.g. "warning
@@ -194,7 +200,10 @@
     its placeholder (placeholder-as-label anti-pattern — the name disappears once the user
     types; adjacent to **I7**, fold into that block); `mobile_menu_aria`'s static "Abrir
     menú"/"Open menu" label is slightly inaccurate when the drawer is already open (it's a
-    toggle).
+    toggle). **UPDATE 2026-07-15: all four minors CLOSED** by round 2 (toast icons are now
+    `aria-hidden` SVGs via `_icon`; `warning`/`error` toasts get `role="alert"`;
+    `#globalSearch` has a real i18n `aria-label`; `#mobileMenuBtn` carries a synced
+    `aria-expanded`) — see the "UI/UX remediation ronda 2" entry below.
 - **Keyboard operability — C1 (2026-07-14):** closed finding **C1** of the same
   `ui-ux-pro-max` review: neither the theme toggle nor any of the app's template-rendered
   controls (exam options/dots, daily-challenge options, dashboard stat-cards, curriculum
@@ -270,7 +279,13 @@
     but ARIA authoring practice discourages nested interactive content and some AT may
     expose the inner buttons inconsistently; revisit alongside the other AT nits. The prior
     blocks' recorded minors (I3, I7, the raw `--secondary`/chapter-accent text colors from
-    the contrast fix wave) stay open.
+    the contrast fix wave) stay open. **UPDATE 2026-07-15: this whole follow-up list is
+    CLOSED** by round 2 (chapter-header `aria-expanded`, `goToQuestion` focus restore,
+    combobox keyboard support, avatar modal + `.av-card` keyboard access, `.name-edit-btn`
+    focus visibility, `continue-item` role/tabindex, roving tabindex + `aria-current` on
+    the dots) — except two upheld decisions: the answered daily-challenge options'
+    focusable-but-inert parity nit and the nested-TTS AT nit, both deliberately kept as-is.
+    See the "UI/UX remediation ronda 2" entry below.
 - **Reduced motion — I2 (2026-07-14):** closed finding **I2** of the same `ui-ux-pro-max`
   review: nothing in the app honored `prefers-reduced-motion` — three infinite pulse
   animations (onboarding highlight, TTS button, exam-timer danger), the 3D flashcard flip,
@@ -327,7 +342,85 @@
     review's pragmatic fix is an inline SVG sprite, e.g. Lucide, keeping decorative emojis
     with `aria-hidden`) stay open, along with the recorded follow-ups above (the C1
     follow-up list and the contrast fix wave's raw `--secondary`/chapter-accent text
-    colors).
+    colors). **UPDATE 2026-07-15: I3, I7, I8 and the recorded follow-ups are all CLOSED**
+    by round 2 — see the next entry.
+- **UI/UX remediation ronda 2 (2026-07-15):** closed everything the 2026-07-14 review left
+  open — **I3**, **I7**, **I8** and the per-block minor follow-ups — in four blocks
+  (commits `2df5af2..fbad8cc` on `master`, subagent-driven-development with per-task
+  reviews, same methodology as round 1). Spec:
+  `docs/superpowers/specs/2026-07-15-uiux-remediation-round2-design.md`; plan:
+  `docs/superpowers/plans/2026-07-15-uiux-remediation-round2.md`.
+  - **I3 — touch targets:** new `@media (pointer: coarse)` block in `css/styles.css`,
+    inserted **before** the reduced-motion block (file-tail ordering constraint holds:
+    reduced-motion, then `:focus-visible` literally last). In it: `.lang-btn` and
+    `.exam-dot` grow to ≥44px, `.lang-switcher`/`.exam-question-dots` gaps to 8px,
+    `.name-edit-btn` always visible on touch. Outside the media query (all devices), the
+    global rule `.user-card:focus-within .name-edit-btn, .name-edit-btn:focus-visible`
+    makes the edit button visible to keyboard focus — it's no longer an invisible tab
+    stop. Desktop with a mouse is visually unchanged. Gate: 7 `N16 táctil` checks.
+  - **I7 — mobile search + combobox keyboard support:** `#mobileSearchBtn` in the topbar
+    (visible ≤768px only, with `data-i18n-aria` and a synced `aria-expanded`) opens
+    `.search-box` as a full-width bar under the topbar via the `.mobile-open` class —
+    **reusing the same `#globalSearch` input and all its existing JS** (zero duplicated
+    state/listeners). `App._closeMobileSearch()` closes it (Escape or `#searchCloseBtn`)
+    and returns focus to the button. The results dropdown got the full ARIA combobox
+    pattern (desktop too): `role="combobox"`/`aria-controls`/`aria-expanded`/
+    `aria-activedescendant` on the input, `role="listbox"` panel with stable `gs-opt-N`
+    `role="option"` ids, state in `App._gsItems`/`_gsActive`, keyboard in
+    `_gsMove`/`_gsActivate`/`_gsKeydown` — arrows move without wrap, Enter on a glossary
+    term is two-phase (first expands in place, second navigates to the glossary — the
+    keyboard-equivalent of the non-focusable "Ver en glosario" link), Escape closes.
+    Active option styled via `.gs-active`. The exam guard and the `composedPath()`
+    click-outside mechanism are untouched. 3 new i18n keys — `global_search_aria`,
+    `mobile_search_aria`, `close_search_aria` — bring `TRANSLATIONS` to **173 keys**.
+    Gate: 10 `N16 móvil`/`N16 combobox` static checks + 2 `N16b` behavioral checks.
+  - **I8 — structural emojis → inline SVG sprite:** a hidden sprite (`display:none`,
+    `aria-hidden`) with **26 Lucide-style `#i-*` symbols** as the first element of
+    `<body>` in `index.html`; `.icon` class (1em, `currentColor` — theme-proof by
+    inheritance); `App._icon(name)` helper for `innerHTML` templates (returns
+    `<svg class="icon" aria-hidden="true"><use href="#i-…"/></svg>`; unknown name →
+    empty string; the name is always an internal literal, never user data — no new XSS
+    surface). Migrated: the static HTML (logo ×2, 7 nav-icons, search icons, sidebar/
+    mobile-menu toggles, logout, avatar-modal and mobile-search ✕, carousel arrows,
+    4 stat-icons) and the JS templates (toast type icons, curriculum check/play/lock +
+    chapter chevron, exam-menu badges, daily-challenge check, lesson-complete/activity
+    star, the theme toggle's sun/moon at runtime, and the ✏️ pencil in `avatar.js`).
+    Decorative emojis that stay carry `aria-hidden` (`.welcome-emoji`, `.streak-fire`,
+    `#resultsEmoji`, the empty-state 🏆); content emojis inside translated toast strings
+    and the gamification/avatar data emojis stay as-is by design. Gate: 13 `N17` checks
+    (including "no structural emojis left on the migrated surfaces").
+  - **Minor follow-ups (the ~9 recorded across the 2026-07-14 entries):** avatar modal is
+    a `role="dialog" aria-modal="true"` with `aria-labelledby`, Escape-to-close and focus
+    returned to `#userAvatar` (launcher and `.av-card`s carry `role="button" tabindex="0"`
+    — covered by the existing delegated handler); `aria-expanded` on chapter headers —
+    `renderCurriculum()` emits it from the `_expandedChapters` Set and `toggleChapter()`
+    syncs it manually (it only toggles the class, it does NOT re-render) — and on
+    `#mobileMenuBtn` (synced in its own listener, in `navigate()`'s drawer-close, and in
+    the `.logo-icon` open path); dashboard `continue-item`s keyboard-operable; roving
+    tabindex + `aria-current="true"` on exam dots with ArrowLeft/ArrowRight navigation (a
+    new branch of the delegated keydown — no per-element listeners) and focus restored to
+    the current dot after `goToQuestion()`'s re-render; `warning`/`error` toasts get
+    `role="alert"` on the node (assertive inside the still-`polite` `#toastContainer`);
+    contrast: new `--secondary-text` token (`#00D2FF` dark / `#007A99` light, added as a
+    pair in `scripts/validate-contrast.js`), curriculum continue-list percentages and
+    `.cpring-text` moved to `var(--text2)`, `.chapter-prog-pct` to `var(--primary-text)`,
+    and the `N12` check widened to also ban `var(--secondary)` as inline text in
+    `app.js`. Gate: 14 `N18` checks.
+  - **Deliberate limits / still open after this round:** (1) the avatar modal has **no
+    Tab focus-trap** (Escape + focus-return work; cycling Tab inside the dialog was a
+    documented deliberate limit of this round — minor pending); (2) the nested-TTS AT nit
+    in `#flashcard` stays as-is — decision upheld (functionally safe, verified no
+    double-fire; restructuring the flashcard DOM is disproportionate); (3) three
+    pre-existing, deliberate **accent/raw-color-as-text exceptions**, outside both
+    contrast gates and enumerated in the `N12` comment in `scripts/verify-runtime.js`:
+    `.chapter-number` (`js/app.js` ~358 — large/bold text on a tint, large-text AA
+    threshold 3:1), `.lesson-chapter-tag` (`js/app.js` ~429 — `color:${color}` chapter-
+    accent hex over its own 0.15 rgba tint; a hex literal, invisible to the `N12` token
+    regex) and `.lesson-content code` (`css/styles.css` ~783 — `color: var(--secondary)`
+    in CSS, with no `validate-contrast.js` pair); and (4) a new minor follow-up out of
+    I8's scope: two **structural ✓/✗ text glyphs** remain — the exam review's
+    correct/wrong markers (`js/app.js` ~933–934) and the avatar selection's `.av-check`
+    (`js/avatar.js` ~191) still use text characters as icons.
 
 ## Production Readiness — Status & Next Session
 
@@ -453,11 +546,13 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   block above) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like
   every other `data-i18n-*` mechanism
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **170 keys** (160 after
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **173 keys** (160 after
   the 2026-07-04 remediation, +5 `gs_*` keys for the 2026-07-08 global search dropdown →
   165, +4 more — `mobile_menu_aria`, `fc_prev_aria`, `fc_next_aria`, `close_label` — added
   2026-07-14 for the `data-i18n-aria` rollout above → 169, +1 — `goto_question_aria`, the
-  exam dots' label from the same day's C1 keyboard-operability block → 170), all ES/EN
+  exam dots' label from the same day's C1 keyboard-operability block → 170, +3 —
+  `global_search_aria`, `mobile_search_aria`, `close_search_aria` — added 2026-07-15 for
+  the I7 mobile-search/combobox block of the UI/UX remediation round 2 → 173), all ES/EN
   paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
   hardcoded-language residues)
