@@ -53,6 +53,7 @@ const PAIRS = [
   ['text3 sobre superficie', 'text3', 'surface'],
   ['text3 sobre bg4 (peor caso)', 'text3', 'bg4'],
   ['text2 sobre superficie (guardia)', 'text2', 'surface'],
+  ['progress exams stat (secondary)', 'secondary-text', 'surface'],
 ];
 
 let errors = [];

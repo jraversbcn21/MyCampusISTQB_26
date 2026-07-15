@@ -660,12 +660,14 @@ const SAMPLE_Q = {
     // Este chequeo estático es su complemento: guarda que ningún span/div de texto en
     // app.js vuelva a usar var(--success)/var(--warning)/var(--danger) —que sólo cumplen
     // AA en dark— como color de TEXTO; debe usarse el token *-text (o su clase .text-*).
-    // Deliberadamente NO cubre var(--secondary) ni los arrays de color de acento de
-    // capítulo/progreso: siguen usándose como texto y no cumplen AA en claro, pero es
-    // un follow-up pre-existente fuera del alcance de esta pasada (ver AGENTS.md).
+    // Desde la ronda 2 (2026-07-15) cubre también var(--secondary); los acentos de
+    // capítulo como texto (continue-list %, cpring %) se migraron a var(--text2) y
+    // los guarda el check N18 de abajo. Única excepción restante, deliberada: el
+    // número de capítulo (.chapter-number) — texto grande/bold sobre tinte (umbral
+    // AA de texto grande, 3:1), registrado en AGENTS.md.
     const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
-    check('N12 contraste: app.js no usa color:var(--success|warning|danger) crudo como texto inline',
-      !/color:\s*var\(--(success|warning|danger)\)/.test(appSrc));
+    check('N12 contraste: app.js no usa color:var(--success|warning|danger|secondary) crudo como texto inline',
+      !/color:\s*var\(--(success|warning|danger|secondary)\)/.test(appSrc));
   }
 
   /* ---- N13: accesibilidad — live region, nombres accesibles (I6+I5, revisión UI 2026-07-14) ---- */
@@ -896,6 +898,8 @@ const SAMPLE_Q = {
       /goToQuestion\(i\)\s*\{[\s\S]{0,400}focus\(\)/.test(appSrc));
     check('N18 toasts: warning/error se anuncian asertivos (role="alert" en el nodo)',
       /type === 'warning' \|\| type === 'error'/.test(appSrc) && /setAttribute\('role', 'alert'\)/.test(appSrc));
+    check('N18 contraste: los porcentajes de continue-list/cpring ya no usan el acento como texto',
+      !/style="color:\$\{colors\[i\]\}/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

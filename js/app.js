@@ -232,7 +232,7 @@ const App = {
               <div class="continue-item-fill" style="width:${pct}%;background:${colors[i]}"></div>
             </div>
           </div>
-          <span style="color:${colors[i]};font-weight:700">${pct}%</span>
+          <span style="color:var(--text2);font-weight:700">${pct}%</span>
         </div>`;
     }).join('');
     container.innerHTML = html;
@@ -370,7 +370,7 @@ const App = {
                     stroke-dasharray="${dash} ${circumference}"
                     style="transform-origin:50% 50%;transform:rotate(-90deg)"/>
                 </svg>
-                <span class="cpring-text" style="color:${colors[i]}">${pct}%</span>
+                <span class="cpring-text">${pct}%</span>
               </div>
               <span class="chapter-chevron">${this._icon('chevron-right')}</span>
             </div>
@@ -985,7 +985,7 @@ const App = {
       <div class="progress-stat-big"><div class="progress-stat-big-val text-primary">${this.state.xp}</div><div class="progress-stat-big-label">XP ${i18n.t('total_label')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val text-warning">${lvl.icon} ${i18n.t('level_label')} ${lvl.level}</div><div class="progress-stat-big-label">${lvl.name[lang]}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val text-success">${done}/${totalLessons}</div><div class="progress-stat-big-label">${i18n.t('lessons_label')}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--secondary)">${this.state.examsCompleted}</div><div class="progress-stat-big-label">${i18n.t('nav_simulator')}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--secondary-text)">${this.state.examsCompleted}</div><div class="progress-stat-big-label">${i18n.t('nav_simulator')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val text-warning">🔥 ${this.state.streak}</div><div class="progress-stat-big-label">${i18n.t('streak_label')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val">${avgScore}%</div><div class="progress-stat-big-label">${i18n.t('avg_exam_score_label')}</div></div>
     `;
