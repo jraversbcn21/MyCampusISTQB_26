@@ -876,6 +876,15 @@ const SAMPLE_Q = {
       /class="av-card[^"]*" role="button" tabindex="0"/.test(avSrc));
     check('N18 avatar: Escape cierra y el foco vuelve al lanzador',
       /key === 'Escape'/.test(avSrc) && /_returnFocusEl/.test(avSrc));
+    check('N18 expanded: las cabeceras de capítulo llevan aria-expanded desde el Set',
+      /toggleChapter\(\$\{i\}\)" role="button" tabindex="0" aria-expanded="\$\{/.test(appSrc));
+    check('N18 expanded: toggleChapter sincroniza aria-expanded (no re-renderiza)',
+      /setAttribute\('aria-expanded', String\(isOpen\)\)/.test(appSrc));
+    check('N18 expanded: #mobileMenuBtn refleja el estado del drawer',
+      /id="mobileMenuBtn"[^>]*aria-expanded="false"|aria-expanded="false"[^>]*id="mobileMenuBtn"/.test(htmlSrc)
+      && /mobileMenuBtn'\)\.setAttribute\('aria-expanded'/.test(appSrc));
+    check('N18 teclado: los continue-item del dashboard llevan role/tabindex',
+      /class="continue-item" onclick="App\.navigate\('curriculum'\)" role="button" tabindex="0"/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

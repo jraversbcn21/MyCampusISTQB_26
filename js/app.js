@@ -222,7 +222,7 @@ const App = {
       const done = ch.topics.filter(t => this.state.completedLessons.includes(t.id)).length;
       const pct = Math.round((done / ch.topics.length) * 100);
       return `
-        <div class="continue-item" onclick="App.navigate('curriculum')">
+        <div class="continue-item" onclick="App.navigate('curriculum')" role="button" tabindex="0">
           <div class="continue-item-icon">${ch.icon}</div>
           <div style="flex:1">
             <div class="continue-item-title">${ch.title[i18n.lang]}</div>
@@ -353,7 +353,7 @@ const App = {
 
       return `
         <div class="chapter-card" id="chapter-${i}">
-          <div class="chapter-card-header" onclick="App.toggleChapter(${i})" role="button" tabindex="0">
+          <div class="chapter-card-header" onclick="App.toggleChapter(${i})" role="button" tabindex="0" aria-expanded="${this._expandedChapters && this._expandedChapters.has(i) ? 'true' : 'false'}">
             <div class="chapter-number" style="background:${colorsBg[i]};color:${colors[i]}">${i + 1}</div>
             <div class="chapter-info">
               <div class="chapter-title">${ch.icon} ${ch.title[i18n.lang]}</div>
@@ -391,6 +391,8 @@ const App = {
   toggleChapter(i) {
     const card = document.getElementById(`chapter-${i}`);
     const isOpen = card.classList.toggle('open');
+    const header = card.querySelector('.chapter-card-header');
+    if (header) header.setAttribute('aria-expanded', String(isOpen));
     if (!this._expandedChapters) this._expandedChapters = new Set();
     if (isOpen) {
       this._expandedChapters.add(i);
@@ -1313,7 +1315,8 @@ const App = {
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
     document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('mobile-open');
+      const open = document.getElementById('sidebar').classList.toggle('mobile-open');
+      document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', String(open));
     });
     document.querySelector('.logo-icon').addEventListener('click', () => {
       const sidebar = document.getElementById('sidebar');
