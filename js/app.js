@@ -1052,6 +1052,14 @@ const App = {
     }).join('');
   },
 
+  /* ===== ICONOS (I8, ronda 2) ===== */
+  // Devuelve el <svg><use> de un símbolo del sprite de index.html, para
+  // interpolar en templates innerHTML. name es SIEMPRE un literal interno,
+  // nunca dato de usuario.
+  _icon(name) {
+    return `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  },
+
   /* ===== TOASTS ===== */
   showToast(msg, type = 'info') {
     const container = document.getElementById('toastContainer');

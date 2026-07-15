@@ -814,6 +814,25 @@ const SAMPLE_Q = {
       ctx.App._gsExpanded === 0);
   }
 
+  /* ---- N17: iconos SVG estructurales (I8) — sprite inline, sin emojis de UI ---- */
+  {
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    const SYMBOLS = ['graduation-cap', 'home', 'book', 'layers', 'file-text', 'book-open',
+      'bar-chart', 'trophy', 'menu', 'search', 'x', 'power', 'arrow-left', 'arrow-right',
+      'star', 'pencil', 'check', 'check-circle', 'alert-triangle', 'x-circle', 'info',
+      'lock', 'play', 'chevron-right', 'sun', 'moon'];
+    check('N17 iconos: sprite inline presente con los 26 símbolos',
+      SYMBOLS.every(s => htmlSrc.includes(`id="i-${s}"`)));
+    check('N17 iconos: el sprite está oculto y fuera del árbol de accesibilidad',
+      /<svg[^>]*style="display:none"[^>]*aria-hidden="true"|<svg[^>]*aria-hidden="true"[^>]*style="display:none"/.test(htmlSrc));
+    check('N17 iconos: App._icon definido con aria-hidden',
+      /_icon\(name\)/.test(appSrc) && /class="icon" aria-hidden="true"><use href="#i-\$\{name\}"/.test(appSrc));
+    check('N17 iconos: clase .icon definida (currentColor, 1em)',
+      /\.icon\s*\{[^}]*stroke:\s*currentColor/.test(cssSrc) && /\.icon\s*\{[^}]*width:\s*1em/.test(cssSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
