@@ -860,6 +860,24 @@ const SAMPLE_Q = {
       /App\._icon\('pencil'\)/.test(avSrc) && !/'✏️'/.test(avSrc));
   }
 
+  /* ---- N18: follow-ups menores (ronda 2, 2026-07-15) ---- */
+  {
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    const avSrc = fs.readFileSync(path.join(ROOT, 'js', 'avatar.js'), 'utf8');
+    // Avatar: apertura por teclado + dialog + Escape + foco de vuelta.
+    check('N18 avatar: #userAvatar es operable por teclado con nombre i18n',
+      /id="userAvatar"[^>]*role="button" tabindex="0"|role="button" tabindex="0"[^>]*id="userAvatar"/.test(htmlSrc)
+      && /id="userAvatar"[^>]*data-i18n-aria="change_avatar_title"|data-i18n-aria="change_avatar_title"[^>]*id="userAvatar"/.test(htmlSrc));
+    check('N18 avatar: el modal declara role="dialog" aria-modal',
+      /id="avatar-modal"[^>]*role="dialog" aria-modal="true"|role="dialog" aria-modal="true"[^>]*id="avatar-modal"/.test(htmlSrc)
+      && /aria-labelledby="avatarModalTitle"/.test(htmlSrc));
+    check('N18 avatar: las av-card llevan role/tabindex (el handler delegado las cubre)',
+      /class="av-card[^"]*" role="button" tabindex="0"/.test(avSrc));
+    check('N18 avatar: Escape cierra y el foco vuelve al lanzador',
+      /key === 'Escape'/.test(avSrc) && /_returnFocusEl/.test(avSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

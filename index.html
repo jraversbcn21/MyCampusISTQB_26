@@ -140,7 +140,7 @@
     </div>
 
     <div class="user-card">
-      <div class="user-avatar" id="userAvatar">👤</div>
+      <div class="user-avatar" id="userAvatar" role="button" tabindex="0" data-i18n-aria="change_avatar_title" data-i18n-title="change_avatar_title">👤</div>
       <div class="user-info">
         <span class="user-name" id="userName">Estudiante</span>
         <span class="user-level" id="userLevel">Nivel 1 · Aprendiz</span>
@@ -509,10 +509,10 @@
   <div class="xp-popup" id="xpPopup" aria-hidden="true"></div>
 
   <!-- AVATAR SELECTOR MODAL -->
-  <div id="avatar-modal" style="display:none">
+  <div id="avatar-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="avatarModalTitle">
     <div class="avatar-modal-card">
       <div class="avatar-modal-header">
-        <h2 data-i18n="avatar_modal_title">Elige tu perfil de tester</h2>
+        <h2 id="avatarModalTitle" data-i18n="avatar_modal_title">Elige tu perfil de tester</h2>
         <button class="avatar-modal-close" id="avatarModalClose" data-i18n-aria="close_label"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <p class="avatar-modal-sub" data-i18n="avatar_modal_sub">Tu avatar refleja tu estilo como tester. Puedes cambiarlo cuando quieras.</p>

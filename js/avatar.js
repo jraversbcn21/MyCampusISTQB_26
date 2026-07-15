@@ -74,6 +74,7 @@ const AVATARS = [
 const AvatarSelector = {
   _userId: null,
   _pendingId: null,
+  _returnFocusEl: null,
 
   /* ===== INIT ===== */
   init(userId) {
@@ -87,7 +88,6 @@ const AvatarSelector = {
     const avatarEl = document.getElementById('userAvatar');
     if (avatarEl) {
       avatarEl.style.cursor = 'pointer';
-      avatarEl.title = i18n.t('change_avatar_title');
       avatarEl.addEventListener('click', () => this.openModal());
     }
 
@@ -98,6 +98,11 @@ const AvatarSelector = {
     document.getElementById('avatarModalClose').addEventListener('click', () => this.closeModal());
     document.getElementById('avatarCancel').addEventListener('click', () => this.closeModal());
     document.getElementById('avatarSave').addEventListener('click', () => this._save());
+
+    // Escape cierra el modal (ronda 2). El foco de vuelta lo gestiona closeModal().
+    document.getElementById('avatar-modal').addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') this.closeModal();
+    });
   },
 
   /* ===== NAME EDIT ===== */
@@ -158,18 +163,24 @@ const AvatarSelector = {
   openModal() {
     this._pendingId = this._getSavedId();
     this._renderGrid();
+    // Guardar el lanzador para devolverle el foco al cerrar (ronda 2).
+    this._returnFocusEl = (typeof document.activeElement === 'object') ? document.activeElement : null;
     document.getElementById('avatar-modal').style.display = 'flex';
+    const closeBtn = document.getElementById('avatarModalClose');
+    if (closeBtn && typeof closeBtn.focus === 'function') closeBtn.focus();
   },
 
   closeModal() {
     document.getElementById('avatar-modal').style.display = 'none';
     this._pendingId = null;
+    if (this._returnFocusEl && typeof this._returnFocusEl.focus === 'function') this._returnFocusEl.focus();
+    this._returnFocusEl = null;
   },
 
   _renderGrid() {
     const grid = document.getElementById('avatarGrid');
     grid.innerHTML = AVATARS.map(a => `
-      <div class="av-card ${this._pendingId === a.id ? 'selected' : ''}" data-id="${a.id}"
+      <div class="av-card ${this._pendingId === a.id ? 'selected' : ''}" role="button" tabindex="0" data-id="${a.id}"
            style="--av-color: ${a.color}">
         <div class="av-emoji">${a.emoji}</div>
         <div class="av-info">
