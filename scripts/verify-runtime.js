@@ -885,6 +885,8 @@ const SAMPLE_Q = {
       && /mobileMenuBtn'\)\.setAttribute\('aria-expanded'/.test(appSrc));
     check('N18 teclado: los continue-item del dashboard llevan role/tabindex',
       /class="continue-item" onclick="App\.navigate\('curriculum'\)" role="button" tabindex="0"/.test(appSrc));
+    check('N18 expanded: navigate() cierra el drawer sincronizando aria-expanded',
+      /remove\('mobile-open'\);?\s*\n?\s*document\.getElementById\('mobileMenuBtn'\)\.setAttribute\('aria-expanded', 'false'\)/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

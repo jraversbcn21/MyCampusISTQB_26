@@ -144,6 +144,7 @@ const App = {
 
     // Close mobile sidebar
     document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'false');
 
     if (view === 'dashboard') this.renderDashboard();
     if (view === 'curriculum') this.renderCurriculum();
@@ -1324,6 +1325,7 @@ const App = {
         sidebar.classList.remove('collapsed');
       } else {
         sidebar.classList.add('mobile-open');
+        document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'true');
       }
     });
     document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
