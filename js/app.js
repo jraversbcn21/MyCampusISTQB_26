@@ -814,7 +814,8 @@ const App = {
     const dots = document.getElementById('examDots');
     dots.innerHTML = this.examQuestions.map((_, i) => {
       const cls = i === this.examCurrentQ ? 'current' : (this.examAnswers[i] !== undefined ? 'answered' : '');
-      return `<div class="exam-dot ${cls}" onclick="App.goToQuestion(${i})" role="button" tabindex="0" aria-label="${i18n.t('goto_question_aria')} ${i + 1}">${i + 1}</div>`;
+      // Roving tabindex: un solo tab stop (el dot actual); las flechas mueven.
+      return `<div class="exam-dot ${cls}" onclick="App.goToQuestion(${i})" role="button" tabindex="${i === this.examCurrentQ ? 0 : -1}"${i === this.examCurrentQ ? ' aria-current="true"' : ''} aria-label="${i18n.t('goto_question_aria')} ${i + 1}">${i + 1}</div>`;
     }).join('');
   },
 
@@ -833,6 +834,11 @@ const App = {
     this.examCurrentQ = i;
     this.renderExamQuestion();
     this.renderExamDots();
+    // Mismo arreglo que selectAnswer: el re-render destruye el nodo enfocado.
+    // El foco va al dot actual — es el tab stop del roving.
+    const dots = document.getElementById('examDots');
+    const dot = dots && dots.children && dots.children[i];
+    if (dot && typeof dot.focus === 'function') dot.focus();
   },
 
   examNavNext() {
@@ -1335,7 +1341,15 @@ const App = {
     // listener delegado en document los cubre todos, actuales y futuros.
     document.addEventListener('keydown', (e) => {
       const t = e.target;
-      if ((e.key === 'Enter' || e.key === ' ') && t && t.getAttribute && t.getAttribute('role') === 'button' && typeof t.click === 'function') {
+      if (!t || !t.getAttribute) return;
+      // Roving de los exam dots: flechas mueven pregunta y foco a la vez.
+      if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && t.classList && t.classList.contains('exam-dot')) {
+        e.preventDefault();
+        const next = this.examCurrentQ + (e.key === 'ArrowRight' ? 1 : -1);
+        if (next >= 0 && next < this.examQuestions.length) this.goToQuestion(next);
+        return;
+      }
+      if ((e.key === 'Enter' || e.key === ' ') && t.getAttribute('role') === 'button' && typeof t.click === 'function') {
         e.preventDefault(); // evita el scroll de Espacio y el doble disparo
         t.click();
       }

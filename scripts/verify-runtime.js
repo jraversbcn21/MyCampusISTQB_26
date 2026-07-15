@@ -716,8 +716,9 @@ const SAMPLE_Q = {
       /e\.key === 'Enter'/.test(appSrc) && /getAttribute\('role'\) === 'button'/.test(appSrc));
     check('N14 teclado: las opciones del examen llevan role/tabindex/aria-pressed cuando son interactivas',
       /onclick="App\.selectAnswer\(\$\{i\}\)" role="button" tabindex="0" aria-pressed="\$\{i === selected\}"/.test(appSrc));
-    check('N14 teclado: los dots del examen llevan role/tabindex y aria-label i18n',
-      /onclick="App\.goToQuestion\(\$\{i\}\)" role="button" tabindex="0" aria-label="\$\{i18n\.t\('goto_question_aria'\)\} \$\{i \+ 1\}"/.test(appSrc));
+    check('N14 teclado: los dots del examen llevan role, tabindex rotativo y aria-label i18n',
+      /onclick="App\.goToQuestion\(\$\{i\}\)" role="button" tabindex="\$\{i === this\.examCurrentQ \? 0 : -1\}"/.test(appSrc)
+      && /aria-label="\$\{i18n\.t\('goto_question_aria'\)\} \$\{i \+ 1\}"/.test(appSrc));
     check('N14 teclado: selectAnswer restaura el foco tras regenerar el innerHTML',
       /getElementById\('opt' \+ optIndex\)/.test(appSrc));
     check('N14 teclado: styles.css define :focus-visible con outline visible',
@@ -887,6 +888,12 @@ const SAMPLE_Q = {
       /class="continue-item" onclick="App\.navigate\('curriculum'\)" role="button" tabindex="0"/.test(appSrc));
     check('N18 expanded: navigate() cierra el drawer sincronizando aria-expanded',
       /remove\('mobile-open'\);?\s*\n?\s*document\.getElementById\('mobileMenuBtn'\)\.setAttribute\('aria-expanded', 'false'\)/.test(appSrc));
+    check('N18 dots: el dot actual lleva aria-current',
+      /aria-current="true"/.test(appSrc));
+    check('N18 dots: flechas Izq/Der navegan entre preguntas desde un dot',
+      /classList\.contains\('exam-dot'\)/.test(appSrc) && /ArrowRight/.test(appSrc) && /ArrowLeft/.test(appSrc));
+    check('N18 dots: goToQuestion restaura el foco tras el re-render',
+      /goToQuestion\(i\)\s*\{[\s\S]{0,400}focus\(\)/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
