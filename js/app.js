@@ -1162,6 +1162,21 @@ const App = {
     if (clearInput) document.getElementById('globalSearch').value = '';
   },
 
+  // I7 (ronda 2): cierra la barra de búsqueda móvil (si está abierta) y
+  // devuelve el foco al botón que la abrió — salvo returnFocus=false (clic
+  // fuera: robar el foco al elemento clicado sería peor que no devolverlo).
+  _closeMobileSearch(returnFocus = true) {
+    const box = document.querySelector('.search-box');
+    if (!box || !box.classList.contains('mobile-open')) return;
+    box.classList.remove('mobile-open');
+    this._closeGlobalSearch();
+    const btn = document.getElementById('mobileSearchBtn');
+    if (btn) {
+      btn.setAttribute('aria-expanded', 'false');
+      if (returnFocus && typeof btn.focus === 'function') btn.focus();
+    }
+  },
+
   /* ===== LANGUAGE ===== */
   setLang(lang) {
     i18n.setLang(lang);
@@ -1282,8 +1297,21 @@ const App = {
     const gsInput = document.getElementById('globalSearch');
     gsInput.addEventListener('input', (e) => this._onGlobalSearchInput(e));
     gsInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this._closeGlobalSearch();
+      if (e.key === 'Escape') {
+        this._closeGlobalSearch();
+        this._closeMobileSearch();
+      }
     });
+    // I7: apertura/cierre de la barra de búsqueda móvil.
+    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+    mobileSearchBtn.addEventListener('click', () => {
+      const box = document.querySelector('.search-box');
+      if (box.classList.contains('mobile-open')) { this._closeMobileSearch(); return; }
+      box.classList.add('mobile-open');
+      mobileSearchBtn.setAttribute('aria-expanded', 'true');
+      if (typeof gsInput.focus === 'function') gsInput.focus();
+    });
+    document.getElementById('searchCloseBtn').addEventListener('click', () => this._closeMobileSearch());
     document.addEventListener('click', (e) => {
       // composedPath(), no e.target.closest(): un clic en un término del
       // dropdown dispara su onclick inline (_gsToggleTerm), que reemplaza
@@ -1295,8 +1323,10 @@ const App = {
       // captura antes del dispatch y no se ve afectado por esa mutación.
       const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
       const insideSearchBox = path.some(el => el.classList && el.classList.contains('search-box'));
-      if (!insideSearchBox) {
+      const onMobileBtn = path.some(el => el.id === 'mobileSearchBtn');
+      if (!insideSearchBox && !onMobileBtn) {
         this._closeGlobalSearch();
+        this._closeMobileSearch(false);
       }
     });
 

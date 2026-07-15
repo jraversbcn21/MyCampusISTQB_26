@@ -172,6 +172,9 @@ const TRANSLATIONS = {
     gs_no_results: "Sin resultados",
     gs_view_in_glossary: "Ver en glosario →",
     gs_exam_block_toast: "Termina o abandona el examen antes de navegar",
+    global_search_aria: "Buscar en el contenido",
+    mobile_search_aria: "Abrir búsqueda",
+    close_search_aria: "Cerrar búsqueda",
 
     // AUTH
     auth_login_tab: "Iniciar sesión",
@@ -368,6 +371,9 @@ const TRANSLATIONS = {
     gs_no_results: "No results",
     gs_view_in_glossary: "View in glossary →",
     gs_exam_block_toast: "Finish or quit the exam before navigating",
+    global_search_aria: "Search the content",
+    mobile_search_aria: "Open search",
+    close_search_aria: "Close search",
 
     // AUTH
     auth_login_tab: "Log in",

@@ -178,9 +178,11 @@
         <h1 class="page-title" id="pageTitle" data-i18n="nav_dashboard">Dashboard</h1>
       </div>
       <div class="topbar-right">
+        <button class="mobile-search-btn" id="mobileSearchBtn" data-i18n-aria="mobile_search_aria" data-i18n-title="mobile_search_aria" aria-expanded="false">🔍</button>
         <div class="search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" id="globalSearch" placeholder="Buscar..." data-i18n-placeholder="search_placeholder" />
+          <input type="text" class="search-input" id="globalSearch" placeholder="Buscar..." data-i18n-placeholder="search_placeholder" data-i18n-aria="global_search_aria" />
+          <button class="search-close-btn" id="searchCloseBtn" data-i18n-aria="close_search_aria">✕</button>
           <div class="search-results" id="globalSearchResults" style="display:none"></div>
         </div>
         <div class="lang-switcher">

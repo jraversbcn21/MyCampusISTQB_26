@@ -771,6 +771,19 @@ const SAMPLE_Q = {
       /\.name-edit-btn\s*\{[^}]*opacity:\s*0\.7/.test(coarse));
     check('N16 táctil: .name-edit-btn visible con foco de teclado (en cualquier dispositivo)',
       /\.user-card:focus-within \.name-edit-btn/.test(cssSrc) && /\.name-edit-btn:focus-visible/.test(cssSrc));
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    check('N16 móvil: #mobileSearchBtn existe con nombre accesible i18n y aria-expanded',
+      /id="mobileSearchBtn"[^>]*data-i18n-aria="mobile_search_aria"|data-i18n-aria="mobile_search_aria"[^>]*id="mobileSearchBtn"/.test(htmlSrc)
+      && /id="mobileSearchBtn"[^>]*aria-expanded="false"|aria-expanded="false"[^>]*id="mobileSearchBtn"/.test(htmlSrc));
+    check('N16 móvil: #searchCloseBtn existe con nombre accesible i18n',
+      /id="searchCloseBtn"[^>]*data-i18n-aria="close_search_aria"|data-i18n-aria="close_search_aria"[^>]*id="searchCloseBtn"/.test(htmlSrc));
+    check('N16 móvil: #globalSearch tiene nombre accesible real (no solo placeholder)',
+      /id="globalSearch"[^>]*data-i18n-aria="global_search_aria"|data-i18n-aria="global_search_aria"[^>]*id="globalSearch"/.test(htmlSrc));
+    check('N16 móvil: .search-box tiene modo móvil (.mobile-open) en vez de display:none a secas',
+      /\.search-box\.mobile-open\s*\{\s*display:\s*flex/.test(cssSrc));
+    check('N16 móvil: App._closeMobileSearch existe y devuelve el foco al botón',
+      /_closeMobileSearch\(returnFocus = true\)/.test(appSrc) && /_closeMobileSearch/.test(appSrc.slice(appSrc.indexOf("key === 'Escape'"))));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
@@ -785,7 +798,7 @@ const SAMPLE_Q = {
     for (const f of uiFiles) {
       const t = fs.readFileSync(path.join(ROOT, f), 'utf8');
       for (const m of t.matchAll(/i18n\.t\('([^']+)'\)/g)) used.add(m[1]);
-      for (const m of t.matchAll(/data-i18n(?:-placeholder|-title)?="([^"]+)"/g)) used.add(m[1]);
+      for (const m of t.matchAll(/data-i18n(?:-placeholder|-title|-aria)?="([^"]+)"/g)) used.add(m[1]);
     }
     const undef = [...used].filter(k => !es.includes(k));
     check(`i18n: sin claves usadas-pero-no-definidas${undef.length ? ' (' + undef.join(', ') + ')' : ''}`,

@@ -360,6 +360,27 @@ body {
   color: var(--text3);
 }
 
+/* I7 (ronda 2): botón que abre la búsqueda en móvil y botón de cierre de la
+   barra. Ocultos en desktop; el bloque de 768px los muestra. */
+.mobile-search-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 8px;
+}
+.search-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
 .lang-switcher {
   display: flex;
   background: var(--bg3);
@@ -1347,7 +1368,25 @@ body {
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .view { padding: 16px; }
   .flashcard { width: 100%; }
-  .search-box { display: none; }
+  /* I7: la búsqueda ya no desaparece — barra a ancho completo bajo el topbar,
+     toggled por #mobileSearchBtn. Mismo #globalSearch, mismo JS. */
+  .mobile-search-btn { display: inline-flex; align-items: center; justify-content: center; }
+  .search-box {
+    display: none;
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 10px 16px;
+  }
+  .search-box.mobile-open { display: flex; }
+  .search-box .search-input { flex: 1; width: auto; }
+  .search-box .search-results { left: 8px; right: 8px; width: auto; }
+  .search-close-btn { display: inline-flex; }
   .readiness-chart { flex-direction: column; }
 }
 
