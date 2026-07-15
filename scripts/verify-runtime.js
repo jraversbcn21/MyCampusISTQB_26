@@ -751,6 +751,28 @@ const SAMPLE_Q = {
       /matchMedia\('\(prefers-reduced-motion: reduce\)'\)/.test(appSrc));
   }
 
+  /* ---- N16: objetivos táctiles (I3) + búsqueda móvil (I7) — ronda 2, 2026-07-15 ---- */
+  {
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    const coarseStart = cssSrc.indexOf('@media (pointer: coarse)');
+    const motionStart = cssSrc.indexOf('@media (prefers-reduced-motion: reduce)');
+    check('N16 táctil: existe el bloque @media (pointer: coarse)', coarseStart >= 0);
+    // Orden de la cola del fichero: coarse ANTES de reduced-motion (y :focus-visible sigue último).
+    check('N16 táctil: el bloque coarse va antes del bloque reduced-motion',
+      coarseStart >= 0 && motionStart > coarseStart);
+    const coarse = coarseStart >= 0 ? cssSrc.slice(coarseStart, motionStart) : '';
+    check('N16 táctil: .lang-btn crece a ≥44px en táctil',
+      /\.lang-btn\s*\{[^}]*min-height:\s*44px/.test(coarse) && /\.lang-btn\s*\{[^}]*min-width:\s*44px/.test(coarse));
+    check('N16 táctil: .exam-dot crece a 44px en táctil',
+      /\.exam-dot\s*\{[^}]*width:\s*44px/.test(coarse) && /\.exam-dot\s*\{[^}]*height:\s*44px/.test(coarse));
+    check('N16 táctil: separación ≥8px entre targets (lang-switcher y exam-question-dots)',
+      /\.lang-switcher\s*\{[^}]*gap:\s*8px/.test(coarse) && /\.exam-question-dots\s*\{[^}]*gap:\s*8px/.test(coarse));
+    check('N16 táctil: .name-edit-btn siempre visible en táctil',
+      /\.name-edit-btn\s*\{[^}]*opacity:\s*0\.7/.test(coarse));
+    check('N16 táctil: .name-edit-btn visible con foco de teclado (en cualquier dispositivo)',
+      /\.user-card:focus-within \.name-edit-btn/.test(cssSrc) && /\.name-edit-btn:focus-visible/.test(cssSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

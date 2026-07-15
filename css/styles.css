@@ -1782,6 +1782,10 @@ body {
 }
 .user-card:hover .name-edit-btn { opacity: 0.7; }
 .name-edit-btn:hover { opacity: 1 !important; }
+/* I3 (ronda 2): el botón deja de ser un tab stop invisible — visible cuando
+   el foco de teclado está en él o dentro del user-card. */
+.user-card:focus-within .name-edit-btn,
+.name-edit-btn:focus-visible { opacity: 0.7; }
 
 .name-edit-input {
   background: var(--bg4);
@@ -2007,6 +2011,36 @@ body {
 }
 .sidebar-privacy-link:hover { color: var(--primary); }
 .sidebar.collapsed .sidebar-privacy-link { display: none; }
+
+/* ===== OBJETIVOS TÁCTILES (I3, revisión UI 2026-07-14, ronda 2) =====
+   El requisito de 44×44px aplica a punteros imprecisos: con pointer: coarse
+   los targets crecen físicamente (expandir el hit-area invisible solaparía
+   los vecinos: ES/EN estaban a 2px, los dots a 6px). En desktop con ratón
+   el visual no cambia. Este bloque va ANTES del de reduced-motion a propósito
+   — reduced-motion y :focus-visible deben seguir siendo los dos últimos. */
+@media (pointer: coarse) {
+  .lang-switcher { gap: 8px; }
+  .lang-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 4px 10px;
+  }
+  .exam-question-dots { gap: 8px; }
+  .exam-dot {
+    width: 44px;
+    height: 44px;
+    font-size: 0.8rem;
+  }
+  /* Sin hover en táctil el botón era invisible e inalcanzable. No se agranda
+     a 44px (rompería el layout inline del user-card): se amplía su hit-area
+     con padding+margen negativo (aquí sí es seguro: no tiene controles
+     adyacentes que solapar). */
+  .name-edit-btn {
+    opacity: 0.7;
+    padding: 17px;
+    margin: -17px;
+  }
+}
 
 /* ===== MOVIMIENTO REDUCIDO (I2, revisión UI 2026-07-14) =====
    Bloque global estándar: con prefers-reduced-motion activo, toda animación y
