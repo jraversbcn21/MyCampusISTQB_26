@@ -109,7 +109,7 @@ const AvatarSelector = {
     if (!nameEl.parentElement.querySelector('.name-edit-btn')) {
       const btn = document.createElement('button');
       btn.className = 'name-edit-btn';
-      btn.innerHTML = '✏️';
+      btn.innerHTML = App._icon('pencil');
       btn.title = i18n.t('edit_name_title');
       nameEl.insertAdjacentElement('afterend', btn);
       btn.addEventListener('click', (e) => { e.stopPropagation(); this._openNameEdit(); });

@@ -243,7 +243,7 @@ const App = {
     const isDone = this.state.dailyChallengeDate === today && this.state.dailyChallengeCompleted;
 
     if (isDone) {
-      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--success-text)">✅ ${i18n.t('challenge_completed_today')}</div>`;
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--success-text)">${this._icon('check-circle')} ${i18n.t('challenge_completed_today')}</div>`;
       return;
     }
 
@@ -312,7 +312,7 @@ const App = {
     const unlocked = this.state.achievements || [];
     const recent = ACHIEVEMENTS.filter(a => unlocked.includes(a.id)).slice(-6);
     if (recent.length === 0) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏆</div><p>${i18n.t('no_achievements')}</p></div>`;
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon" aria-hidden="true">🏆</div><p>${i18n.t('no_achievements')}</p></div>`;
       return;
     }
     container.innerHTML = recent.map(a => `
@@ -342,7 +342,7 @@ const App = {
         const isCompleted = this.state.completedLessons.includes(t.id);
         const hasLesson = LESSONS[t.id];
         const statusClass = isCompleted ? 'done' : (hasLesson ? 'in-progress' : 'locked');
-        const statusIcon = isCompleted ? '✓' : (hasLesson ? '▶' : '🔒');
+        const statusIcon = isCompleted ? this._icon('check') : (hasLesson ? this._icon('play') : this._icon('lock'));
         return `
           <div class="topic-item" ${hasLesson ? `onclick="App.navigateToLesson(${ch.id}, '${t.id}')" role="button" tabindex="0"` : ''}>
             <div class="topic-status ${statusClass}">${statusIcon}</div>
@@ -371,7 +371,7 @@ const App = {
                 </svg>
                 <span class="cpring-text" style="color:${colors[i]}">${pct}%</span>
               </div>
-              <span class="chapter-chevron">▶</span>
+              <span class="chapter-chevron">${this._icon('chevron-right')}</span>
             </div>
           </div>
           <div class="chapter-topics">
@@ -432,7 +432,7 @@ const App = {
         <button class="lesson-complete-btn ${isCompleted ? 'completed' : ''}"
           onclick="App.completeLesson('${topicId}', ${chapterId}, ${topic.xp})"
           id="completeLessonBtn">
-          ${isCompleted ? i18n.t('lesson_completed') : ('⭐ ' + i18n.t('lesson_complete') + ` (+${topic.xp} XP)`)}
+          ${isCompleted ? i18n.t('lesson_completed') : (this._icon('star') + ' ' + i18n.t('lesson_complete') + ` (+${topic.xp} XP)`)}
         </button>
       </div>`;
   },
@@ -661,7 +661,7 @@ const App = {
     if (locked) {
       return `
         <div class="sim-card sim-card-locked">
-          <div class="sim-lock-icon">🔒</div>
+          <div class="sim-lock-icon">${this._icon('lock')}</div>
           <div class="sim-card-icon">${icon}</div>
           <h3>${title}</h3>
           <p class="sim-lock-msg">${lockMsg}</p>
@@ -686,7 +686,7 @@ const App = {
       list.innerHTML = CHAPTERS.map((ch, i) => {
         const isUnlocked = i === 0 || passed[i - 1];
         const isPassed = passed[i];
-        const badge = isPassed ? ' ✅' : (!isUnlocked ? ' 🔒' : '');
+        const badge = isPassed ? ' ' + this._icon('check-circle') : (!isUnlocked ? ' ' + this._icon('lock') : '');
         return `<button class="chapter-sel-btn ${!isUnlocked ? 'locked' : ''}"
           onclick="${isUnlocked ? `App.startChapterExam(${i})` : ''}">
           ${ch.icon} ${ch.title[i18n.lang]}${badge}
@@ -1018,7 +1018,7 @@ const App = {
     const acts = this.state.activityLog;
     document.getElementById('activityLog').innerHTML = acts.length ? acts.map(a => `
       <div class="activity-item">
-        <span class="activity-icon">⭐</span>
+        <span class="activity-icon">${this._icon('star')}</span>
         <span class="activity-text">${escapeHtml(a.text)}</span>
         <span class="activity-xp">+${escapeHtml(a.xp)} XP</span>
         <span class="activity-time">${escapeHtml(a.time)}</span>
@@ -1042,12 +1042,12 @@ const App = {
       const isUnlocked = unlocked.includes(a.id);
       return `
         <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
-          ${isUnlocked ? '<div class="achievement-unlocked-badge">✓</div>' : ''}
+          ${isUnlocked ? `<div class="achievement-unlocked-badge">${this._icon('check')}</div>` : ''}
           <div class="achievement-icon">${a.icon}</div>
           <div class="achievement-name">${a.name[lang]}</div>
           <div class="achievement-desc">${a.desc[lang]}</div>
           <div class="achievement-xp">+${a.xp} XP</div>
-          <div style="font-size:0.7rem;color:${isUnlocked ? 'var(--success-text)' : 'var(--text3)'}">${isUnlocked ? '✓ ' + i18n.t('unlocked_on') : '🔒 ' + i18n.t('locked')}</div>
+          <div style="font-size:0.7rem;color:${isUnlocked ? 'var(--success-text)' : 'var(--text3)'}">${isUnlocked ? this._icon('check') + ' ' + i18n.t('unlocked_on') : this._icon('lock') + ' ' + i18n.t('locked')}</div>
         </div>`;
     }).join('');
   },
@@ -1065,8 +1065,13 @@ const App = {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    const icons = { success: '✅', warning: '⚠️', error: '❌', info: 'ℹ️' };
-    toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
+    const icons = {
+      success: this._icon('check-circle'),
+      warning: this._icon('alert-triangle'),
+      error: this._icon('x-circle'),
+      info: this._icon('info'),
+    };
+    toast.innerHTML = `<span>${icons[type] || this._icon('info')}</span><span>${msg}</span>`;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
   },
@@ -1267,7 +1272,7 @@ const App = {
   toggleTheme() {
     const isDark = document.body.getAttribute('data-theme') !== 'light';
     document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+    document.getElementById('themeToggle').innerHTML = this._icon(isDark ? 'sun' : 'moon');
     try {
       localStorage.setItem('mycampus_theme', isDark ? 'light' : 'dark');
     } catch (e) {}
@@ -1287,7 +1292,7 @@ const App = {
     // Restore theme
     const savedTheme = localStorage.getItem('mycampus_theme') || 'dark';
     document.body.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeToggle').textContent = savedTheme === 'light' ? '☀️' : '🌙';
+    document.getElementById('themeToggle').innerHTML = this._icon(savedTheme === 'light' ? 'sun' : 'moon');
 
     this.updateSidebar();
 

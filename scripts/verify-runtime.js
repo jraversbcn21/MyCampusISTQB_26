@@ -846,6 +846,18 @@ const SAMPLE_Q = {
       /class="welcome-emoji" aria-hidden="true"/.test(htmlSrc)
       && /id="resultsEmoji" aria-hidden="true"|aria-hidden="true"[^>]*id="resultsEmoji"/.test(htmlSrc)
       && /class="streak-fire" aria-hidden="true"/.test(htmlSrc));
+    const avSrc = fs.readFileSync(path.join(ROOT, 'js', 'avatar.js'), 'utf8');
+    check('N17 iconos: showToast usa _icon para el icono de tipo',
+      /success: this\._icon\('check-circle'\)/.test(appSrc) && /warning: this\._icon\('alert-triangle'\)/.test(appSrc)
+      && !/success: '✅'/.test(appSrc));
+    check('N17 iconos: estados del curriculum (check/play/lock) vía _icon',
+      /this\._icon\('check'\)/.test(appSrc) && /this\._icon\('play'\)/.test(appSrc) && /this\._icon\('lock'\)/.test(appSrc));
+    check('N17 iconos: chevron de capítulo vía _icon',
+      /class="chapter-chevron">\$\{this\._icon\('chevron-right'\)\}/.test(appSrc));
+    check('N17 iconos: toggle de tema vía _icon (sun/moon), sin emojis',
+      /this\._icon\(.{0,40}'sun'.{0,20}'moon'\)/.test(appSrc) && !/'☀️'/.test(appSrc) && !/'🌙'/.test(appSrc));
+    check('N17 iconos: el lápiz de editar nombre usa App._icon',
+      /App\._icon\('pencil'\)/.test(avSrc) && !/'✏️'/.test(avSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
