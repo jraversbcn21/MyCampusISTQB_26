@@ -26,9 +26,11 @@ Live at **https://mycampusistqb.vercel.app** (Vercel project `mycampusistqb`). D
 so pushing to GitHub does not deploy. **`.vercelignore` is load-bearing:** the Vercel CLI
 ignores `.gitignore`, and the first deploy briefly exposed the copyrighted `ISTQB 2026/`
 PDFs (fixed same-hour: `.vercelignore` + redeploy + deleted the exposed deployment). Never
-remove the `ISTQB 2026/` line. `privacy.html` declares Vercel as hosting processor. Full
-detail (re-linking a clone, Supabase URL-allowlist requirement): `AGENTS.md` → "Deployment
-(Vercel)".
+remove the `ISTQB 2026/` line. `privacy.html` declares Vercel as hosting processor.
+Supabase Site URL/Redirect URLs point to the production domain (configured 2026-07-20;
+signup + confirmation email + login verified end-to-end on the live URL — note localhost
+is no longer allowlisted for OAuth). Full detail (re-linking a clone, Supabase URL config
+and its follow-ups): `AGENTS.md` → "Deployment (Vercel)".
 
 ## Architecture
 

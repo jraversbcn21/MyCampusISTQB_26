@@ -482,6 +482,13 @@ prior closure still holds. Full detail: `docs/audit-2026-07-04-architecture-secu
 production** under the existing gate (soft launch = hand-shared link, no public
 announcement; B2/captcha intentionally still not implemented under that gate).
 
+**LAUNCHED (2026-07-20):** the soft launch happened — the app is **live at
+https://mycampusistqb.vercel.app** with the auth cycle verified end-to-end on the
+production URL (signup, Brevo confirmation email, login). See "Deployment (Vercel)"
+below for the hosting setup, the `.vercelignore` incident, and the manual-deploy
+workflow. The soft-launch gate above is unchanged: B2/captcha stays not-implemented
+unless the launch becomes public/announced.
+
 ## Deployment (Vercel) — 2026-07-20
 
 The app is in production at **https://mycampusistqb.vercel.app** — Vercel project
@@ -505,12 +512,17 @@ local working copy with the Vercel CLI. Key facts an agent must know:
   `.env.local` with a `VERCEL_OIDC_TOKEN` (gitignored, harmless, not used by the app).
 - **`privacy.html` declares Vercel** as the hosting processor (ES/EN, section 4) as of
   2026-07-20 — hosting is a third-party service, so the same-commit policy rule applied.
-- **Supabase URL configuration is a dashboard task, not code:** `auth.js` builds
-  `redirectTo` from `window.location.origin`, so the code needs no change per-domain —
-  but `https://mycampusistqb.vercel.app` must be present in Supabase → Authentication →
-  URL Configuration (Site URL and/or Redirect URLs allowlist) for Google OAuth returns
-  and email-confirmation links to land on the production domain instead of being
-  rejected or pointed at a stale URL.
+- **Supabase URL configuration: DONE (2026-07-20, dashboard task, not code):** `auth.js`
+  builds `redirectTo` from `window.location.origin`, so the code needs no change
+  per-domain. Jorge set Supabase → Authentication → URL Configuration to the production
+  domain: **Site URL** = `https://mycampusistqb.vercel.app` (was localhost) and the same
+  URL as the single **Redirect URLs** allowlist entry. **Verified end-to-end on the live
+  URL the same day:** signup, confirmation email delivery (Brevo SMTP) and login all
+  work. Two known follow-ups, suggested but not applied: `http://localhost:8000` is no
+  longer allowlisted (add it to Redirect URLs if login needs testing in local dev —
+  until then, local OAuth will bounce to production), and the allowlist entry could be
+  widened to `https://mycampusistqb.vercel.app/**` for robustness (not critical — the
+  Site URL fallback lands on the same domain anyway).
 
 ## Project Overview
 
