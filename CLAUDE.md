@@ -19,6 +19,17 @@ python -m http.server 8000
 
 There is no build step. No `npm install`, no compilation.
 
+## Production Deployment (Vercel, 2026-07-20)
+
+Live at **https://mycampusistqb.vercel.app** (Vercel project `mycampusistqb`). Deploys are
+**manual via the Vercel CLI** (`vercel deploy --prod --yes`) — there is no Git integration,
+so pushing to GitHub does not deploy. **`.vercelignore` is load-bearing:** the Vercel CLI
+ignores `.gitignore`, and the first deploy briefly exposed the copyrighted `ISTQB 2026/`
+PDFs (fixed same-hour: `.vercelignore` + redeploy + deleted the exposed deployment). Never
+remove the `ISTQB 2026/` line. `privacy.html` declares Vercel as hosting processor. Full
+detail (re-linking a clone, Supabase URL-allowlist requirement): `AGENTS.md` → "Deployment
+(Vercel)".
+
 ## Architecture
 
 ### Module Pattern

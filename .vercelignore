@@ -1,0 +1,8 @@
+ISTQB 2026/
+.claude/
+.githooks/
+docs/
+scripts/
+.gitignore
+AGENTS.md
+CLAUDE.md

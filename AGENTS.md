@@ -482,6 +482,36 @@ prior closure still holds. Full detail: `docs/audit-2026-07-04-architecture-secu
 production** under the existing gate (soft launch = hand-shared link, no public
 announcement; B2/captcha intentionally still not implemented under that gate).
 
+## Deployment (Vercel) — 2026-07-20
+
+The app is in production at **https://mycampusistqb.vercel.app** — Vercel project
+`mycampusistqb` under the account `jorgeborn3-3085` (Vercel CLI login), deployed from the
+local working copy with the Vercel CLI. Key facts an agent must know:
+
+- **Deploys are manual, CLI-driven:** `vercel deploy --prod --yes` from the repo root.
+  There is **no Git integration** — pushing to GitHub does *not* deploy anything. After
+  any change that should reach users, deploy explicitly (and only from a clean, committed
+  tree so production matches a commit).
+- **`.vercelignore` is load-bearing — never remove the `ISTQB 2026/` line.** The Vercel
+  CLI does **not** respect `.gitignore` when uploading: the very first production deploy
+  (2026-07-20) publicly exposed the copyrighted PDFs in the local-only `ISTQB 2026/`
+  folder (verified: a direct file URL returned 200). Fixed the same hour by adding
+  `.vercelignore` (which also excludes `docs/`, `scripts/`, `.githooks/`, `.claude/`,
+  `AGENTS.md`, `CLAUDE.md` — nothing the browser needs), redeploying, and **deleting the
+  exposed deployment** (`vercel rm <deployment-url>`; verified 404 afterwards on both the
+  production alias and the removed deployment's own URL).
+- The project is linked via the `.vercel/` folder (gitignored, per-clone). Re-link on a
+  fresh clone with `vercel link --yes --project mycampusistqb`. The CLI also drops a
+  `.env.local` with a `VERCEL_OIDC_TOKEN` (gitignored, harmless, not used by the app).
+- **`privacy.html` declares Vercel** as the hosting processor (ES/EN, section 4) as of
+  2026-07-20 — hosting is a third-party service, so the same-commit policy rule applied.
+- **Supabase URL configuration is a dashboard task, not code:** `auth.js` builds
+  `redirectTo` from `window.location.origin`, so the code needs no change per-domain —
+  but `https://mycampusistqb.vercel.app` must be present in Supabase → Authentication →
+  URL Configuration (Site URL and/or Redirect URLs allowlist) for Google OAuth returns
+  and email-confirmation links to land on the production domain instead of being
+  rejected or pointed at a stale URL.
+
 ## Project Overview
 
 MyCampus ISTQB is a **vanilla JavaScript SPA** — no framework, no build system, no package manager. Browser-based study platform for ISTQB CTFL v4.0.
