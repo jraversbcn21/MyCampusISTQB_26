@@ -805,6 +805,27 @@ body {
 .lesson-complete-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.4); }
 .lesson-complete-btn.completed { background: var(--success); }
 
+/* Primario de avance de lección (2026-07-21). --primary-dark, no --primary:
+   blanco sobre #6C63FF es 4.32:1 (falla AA), sobre #5a52d5 es 5.83:1 (pasa) —
+   mismo criterio que .bmc-fab. Por eso NO reutiliza .btn-primary, que arrastra
+   ese fallo. En el tier 480 se oculta .next-topic-title y queda "Siguiente
+   lección →" a secas (truncar con ellipsis se leía mal). */
+.lesson-next-btn {
+  background: var(--primary-dark);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lesson-next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.4); }
+
 /* ===== FLASHCARDS ===== */
 .flashcards-header { margin-bottom: 24px; }
 .flashcards-header h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
@@ -1443,6 +1464,9 @@ body {
   .rating-btns { flex-wrap: wrap; justify-content: center; }
   .results-actions { flex-wrap: wrap; }
   .lesson-actions { flex-wrap: wrap; gap: 12px; }
+  /* "Siguiente lección: 1.2 ¿Por qué es n…" se lee mal truncado; en teléfono
+     el botón queda "Siguiente lección →" a secas. */
+  .next-topic-title { display: none; }
   .exam-topbar { flex-wrap: wrap; gap: 8px; }
   /* Dots del examen: la parrilla envolvente media 408px de alto a 320px con
      los targets de 44px de I3. En teléfono: tira de una fila con scroll,

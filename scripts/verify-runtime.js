@@ -1256,6 +1256,16 @@ const SAMPLE_Q = {
       /completeAndAdvance\(topicId, chapterId, xp, nextTopicId\)\s*\{[\s\S]{0,400}this\.completeLesson\(/.test(appSrc)
       && /completeAndAdvance[\s\S]{0,400}this\.navigateToLesson\(chapterId, nextTopicId\)/.test(appSrc)
       && /completeAndAdvance[\s\S]{0,400}this\.navigate\('curriculum'\)/.test(appSrc));
+
+    /* --- Task 3: estilo del botón primario --- */
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    check('N21 css: .lesson-next-btn usa --primary-dark (AA: blanco sobre él 5.83:1; sobre --primary sería 4.32:1)',
+      /\.lesson-next-btn\s*\{[^}]*background:\s*var\(--primary-dark\)/.test(cssSrc)
+      && /\.lesson-next-btn\s*\{[^}]*color:\s*#fff/.test(cssSrc));
+    check('N21 css: el título del siguiente tema se oculta en el tier 480',
+      /@media \(max-width: 480px\)[\s\S]*?\.next-topic-title\s*\{[^}]*display:\s*none/.test(cssSrc));
+    check('N21 css: las reglas nuevas van antes del bloque reduced-motion',
+      cssSrc.indexOf('.lesson-next-btn') < cssSrc.indexOf('@media (prefers-reduced-motion'));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
