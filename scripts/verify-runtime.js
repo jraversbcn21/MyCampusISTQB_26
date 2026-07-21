@@ -1257,12 +1257,39 @@ const SAMPLE_Q = {
     const actionsBlock = (appSrc.match(/<div class="lesson-actions">[\s\S]*?<\/div>`/) || [''])[0];
     check('N21 lección: la barra inferior ya no duplica el "Volver al curriculum"',
       actionsBlock.length > 0 && !/App\.navigate\('curriculum'\)/.test(actionsBlock));
-    check('N21 lección: la barra inferior cablea el primario a App.completeAndAdvance',
-      /App\.completeAndAdvance\(/.test(actionsBlock));
-    check('N21 lección: completeAndAdvance delega en completeLesson y bifurca a navigateToLesson/curriculum',
-      /completeAndAdvance\(topicId, chapterId, xp, nextTopicId\)\s*\{[\s\S]{0,400}this\.completeLesson\(/.test(appSrc)
-      && /completeAndAdvance[\s\S]{0,400}this\.navigateToLesson\(chapterId, nextTopicId\)/.test(appSrc)
-      && /completeAndAdvance[\s\S]{0,400}this\.navigate\('curriculum'\)/.test(appSrc));
+    check('N21 lección: la barra inferior cablea el primario a App.advanceLesson',
+      /App\.advanceLesson\(/.test(actionsBlock));
+    check('N21 lección: el primario emite locked/aria-disabled cuando la lección no está completada',
+      /lesson-next-btn \$\{isCompleted \? '' : 'locked'\}/.test(appSrc)
+      && /\$\{isCompleted \? '' : 'aria-disabled="true"'\}/.test(appSrc)
+      && /id="nextLessonBtn"/.test(appSrc));
+    check('N21 lección: advanceLesson NO completa — guard + toast warning + return, sin completeLesson',
+      /advanceLesson\(topicId, chapterId, nextTopicId\)\s*\{[\s\S]{0,200}completedLessons\.includes\(topicId\)[\s\S]{0,160}showToast\(i18n\.t\('lesson_next_locked_toast'\), 'warning'\)[\s\S]{0,60}return;/.test(appSrc)
+      && !/advanceLesson\(topicId, chapterId, nextTopicId\)\s*\{[\s\S]{0,700}this\.completeLesson\(/.test(appSrc)
+      && /advanceLesson[\s\S]{0,700}this\.navigateToLesson\(chapterId, nextTopicId\)/.test(appSrc)
+      && /advanceLesson[\s\S]{0,700}this\.navigate\('curriculum'\)/.test(appSrc));
+    check('N21 lección: completeLesson desbloquea #nextLessonBtn in place',
+      /completeLesson\(topicId, chapterId, xp\)\s*\{[\s\S]{0,900}getElementById\('nextLessonBtn'\)[\s\S]{0,220}classList\.remove\('locked'\)[\s\S]{0,140}removeAttribute\('aria-disabled'\)/.test(appSrc));
+    check('N21 i18n: lesson_next_locked_toast definida en ES y EN',
+      typeof ctx.TRANSLATIONS.es.lesson_next_locked_toast === 'string' && ctx.TRANSLATIONS.es.lesson_next_locked_toast.length > 0
+      && typeof ctx.TRANSLATIONS.en.lesson_next_locked_toast === 'string' && ctx.TRANSLATIONS.en.lesson_next_locked_toast.length > 0);
+
+    // Comportamental (no grep): monkeypatch de navegación/toast sobre el App
+    // cargado y llamada real a advanceLesson en ambos estados.
+    {
+      const ctx2 = loadApp();
+      ctx2.App.state = ctx2.App.loadState();
+      ctx2.App.state.completedLessons = [];
+      let navigated = false, toasted = false;
+      ctx2.App.navigateToLesson = () => { navigated = true; };
+      ctx2.App.showToast = () => { toasted = true; };
+      ctx2.App.advanceLesson('1.1', 0, '1.2');
+      check('N21 comportamiento: sin completar, avanzar no navega y muestra el aviso',
+        !navigated && toasted);
+      ctx2.App.state.completedLessons = ['1.1'];
+      ctx2.App.advanceLesson('1.1', 0, '1.2');
+      check('N21 comportamiento: con la lección completada, avanzar navega', navigated);
+    }
 
     /* --- Task 3: estilo del botón primario --- */
     const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');

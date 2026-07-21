@@ -445,8 +445,10 @@ const App = {
           id="completeLessonBtn">
           ${isCompleted ? i18n.t('lesson_completed') : (this._icon('star') + ' ' + i18n.t('lesson_complete') + ` (+${topic.xp} XP)`)}
         </button>
-        <button class="lesson-next-btn"
-          onclick="App.completeAndAdvance('${topicId}', ${chapterId}, ${topic.xp}, ${nextArg})">
+        <button class="lesson-next-btn ${isCompleted ? '' : 'locked'}"
+          ${isCompleted ? '' : 'aria-disabled="true"'}
+          onclick="App.advanceLesson('${topicId}', ${chapterId}, ${nextArg})"
+          id="nextLessonBtn">
           ${nextLabel}
         </button>
       </div>`;
@@ -481,22 +483,32 @@ const App = {
         btn.textContent = i18n.t('lesson_completed');
         btn.classList.add('completed');
       }
+      const nextBtn = document.getElementById('nextLessonBtn');
+      if (nextBtn && nextBtn.classList) {
+        nextBtn.classList.remove('locked');
+        nextBtn.removeAttribute('aria-disabled');
+      }
     }
   },
 
-  // Completar + avanzar en un clic (2026-07-21). completeLesson es idempotente
-  // (comprueba includes antes de añadir), así que re-pulsarlo en una lección ya
-  // completada avanza sin re-otorgar XP.
-  completeAndAdvance(topicId, chapterId, xp, nextTopicId) {
-    this.completeLesson(topicId, chapterId, xp);
+  // Avanzar SOLO navega (revocación 2026-07-21, spec lesson-advance-gating):
+  // la semántica original completar-y-avanzar regalaba el XP como efecto
+  // colateral y vaciaba de sentido "Marcar como completada". El XP y el
+  // completado viven exclusivamente en completeLesson. Guard primero: sin
+  // lección marcada, toast warning (patrón del bloqueo de búsqueda en examen,
+  // asertivo para AT) y no se navega.
+  advanceLesson(topicId, chapterId, nextTopicId) {
+    if (!this.state.completedLessons.includes(topicId)) {
+      this.showToast(i18n.t('lesson_next_locked_toast'), 'warning');
+      return;
+    }
     if (nextTopicId) {
       this.navigateToLesson(chapterId, nextTopicId);
     } else {
       this.navigate('curriculum');
     }
     // El scroll al top evita aterrizar a media lección nueva (rama avanzar)
-    // o a media pantalla de scroll en el listado de capítulos (rama cerrar
-    // capítulo, hallazgo revisión final 2026-07-21): ambas ramas lo necesitan.
+    // o a media pantalla en el listado de capítulos (rama cerrar capítulo).
     if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
   },
 
