@@ -1459,6 +1459,15 @@ body.drawer-open { overflow: hidden; }
   .exam-topbar { flex-wrap: wrap; gap: 8px; }
   .flashcard-stats-row { flex-wrap: wrap; }
   .achievements-summary { padding: 16px; gap: 16px; }
+  /* Glosario: de fila de 3 columnas (min-widths fijos que desbordaban 320-414px)
+     a apilado — término + chip de capítulo arriba, definición a ancho completo.
+     El DOM renderiza término → definición → chip (renderGlossary, vigilado por
+     N11 — no se toca): `order` recoloca el chip solo visualmente junto al
+     término; los nodos no son interactivos, el orden de lectura AT no cambia. */
+  .glossary-item { flex-direction: column; gap: 6px; }
+  .glossary-term { min-width: 0; order: 1; }
+  .glossary-chapter { min-width: 0; white-space: normal; align-self: flex-start; order: 2; }
+  .glossary-def { order: 3; }
   /* Fusionado del antiguo @media (max-width: 500px): */
   .avatar-grid { grid-template-columns: 1fr; }
 }

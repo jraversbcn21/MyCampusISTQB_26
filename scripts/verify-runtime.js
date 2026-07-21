@@ -1058,6 +1058,11 @@ const SAMPLE_Q = {
       /#sidebarToggle\s*\{[^}]*display:\s*none/.test(m768));
     check('N20 drawer: el topbar queda por encima del drawer (hamburguesa alcanzable)',
       (() => { const m = cssSrc.match(/\.topbar\s*\{[^}]*z-index:\s*(\d+)/); return !!m && Number(m[1]) > 100; })());
+    check('N20 glosario: apilado en el tier 480 sin min-width fijos',
+      /\.glossary-item\s*\{[^}]*flex-direction:\s*column/.test(t480)
+      && /\.glossary-term\s*\{[^}]*min-width:\s*0/.test(t480)
+      && /\.glossary-chapter\s*\{[^}]*white-space:\s*normal/.test(t480)
+      && /\.glossary-chapter\s*\{[^}]*min-width:\s*0/.test(t480));
   }
 
   /* ---- N20b: drawer behavioral — abrir/cerrar solo vía _setDrawerOpen ---- */
