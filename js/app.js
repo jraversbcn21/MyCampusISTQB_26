@@ -429,7 +429,7 @@ const App = {
     const topicIdx = ch.topics.findIndex(t => t.id === topicId);
     const nextTopic = ch.topics[topicIdx + 1] || null;
     const nextLabel = nextTopic
-      ? `${i18n.t('lesson_next')}<span class="next-topic-title">: ${escapeHtml(nextTopic.title[lang])}</span>`
+      ? `${i18n.t('lesson_next')}<span class="next-topic-title">: ${escapeHtml(nextTopic.title[lang])}</span> →`
       : i18n.t('lesson_finish_chapter');
     const nextArg = nextTopic ? `'${nextTopic.id}'` : 'null';
 
@@ -447,7 +447,7 @@ const App = {
         </button>
         <button class="lesson-next-btn"
           onclick="App.completeAndAdvance('${topicId}', ${chapterId}, ${topic.xp}, ${nextArg})">
-          ${nextLabel} →
+          ${nextLabel}
         </button>
       </div>`;
     this._wrapLessonTables();
@@ -486,16 +486,18 @@ const App = {
 
   // Completar + avanzar en un clic (2026-07-21). completeLesson es idempotente
   // (comprueba includes antes de añadir), así que re-pulsarlo en una lección ya
-  // completada avanza sin re-otorgar XP. El scroll al top evita aterrizar a
-  // media lección nueva; el guard es por el DOM mockeado del arnés.
+  // completada avanza sin re-otorgar XP.
   completeAndAdvance(topicId, chapterId, xp, nextTopicId) {
     this.completeLesson(topicId, chapterId, xp);
     if (nextTopicId) {
       this.navigateToLesson(chapterId, nextTopicId);
-      if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
     } else {
       this.navigate('curriculum');
     }
+    // El scroll al top evita aterrizar a media lección nueva (rama avanzar)
+    // o a media pantalla de scroll en el listado de capítulos (rama cerrar
+    // capítulo, hallazgo revisión final 2026-07-21): ambas ramas lo necesitan.
+    if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
   },
 
   /* ===== FLASHCARDS ===== */

@@ -1,10 +1,14 @@
 /* Gate responsive con navegador real — arnés de desarrollo (no se sirve al navegador).
    Levanta un servidor estático propio sobre el root del repo, abre la app en
-   Chromium (Playwright) emulando teléfonos (320/375/414 × 720, táctil) y afirma
-   los invariantes móviles de la ronda 2026-07-21: sin scroll horizontal en las
-   7 vistas + lección con tabla + examen activo, touch targets ≥ 44px, tira de
-   dots ≤ 64px, drawer end-to-end (scrim/inert/hamburguesa), glosario apilado y
-   tour de onboarding íntegramente en viewport.
+   Chromium (Playwright) emulando teléfonos/tablet (320/375/414/600 × 720,
+   táctil — 600 cubre la banda 481-768px, añadida en la revisión final del
+   2026-07-21, sin gate previo) y afirma los invariantes móviles de la ronda
+   2026-07-21: sin scroll horizontal en las 7 vistas + lección con tabla +
+   examen activo, touch targets ≥ 44px, tira de dots ≤ 64px (solo dentro del
+   tier ≤480; a 600 la parrilla envolvente de la regla base es el
+   comportamiento esperado), drawer end-to-end (scrim/inert/hamburguesa),
+   glosario apilado, modal de avatar (1 columna solo ≤480) y tour de
+   onboarding íntegramente en viewport.
 
    POLÍTICA NO-OP (aprobada en la spec): si Playwright no está disponible, el
    script lo dice y sale 0 — NUNCA rompe un entorno sin él. Por eso queda FUERA
@@ -38,7 +42,7 @@ if (!playwright) {
 }
 
 const ROOT = path.join(__dirname, '..');
-const WIDTHS = [320, 375, 414]; // × 720, hasTouch + isMobile
+const WIDTHS = [320, 375, 414, 600]; // × 720, hasTouch + isMobile — 600 cubre la banda 481-768 (hallazgo revisión final, sin gate previo)
 const VIEWS = ['dashboard', 'curriculum', 'flashcards', 'simulator', 'glossary', 'progress', 'achievements'];
 
 const MIME = {
@@ -254,8 +258,15 @@ const measureDoc = () => {
         AvatarSelector.closeModal();
         return { cols, descW: desc ? desc.getBoundingClientRect().width : null, overflow };
       });
-      assert(width, 'modal de avatar: grid a 1 columna y sin scroll horizontal',
-        !!av && av.cols === 1 && av.overflow <= 0,
+      // La regla de 1 columna es del tier ≤480 (#avatar-modal .avatar-grid);
+      // a anchos mayores (p.ej. 600, banda 481-768 añadida en la revisión
+      // final) la base 1fr 1fr aplica legítimamente — solo se exige la
+      // ausencia de scroll horizontal, no el número de columnas.
+      const av1col = width <= 480;
+      assert(width, av1col
+        ? 'modal de avatar: grid a 1 columna y sin scroll horizontal'
+        : 'modal de avatar: sin scroll horizontal (2 columnas es lo esperado fuera del tier 480)',
+        !!av && (!av1col || av.cols === 1) && av.overflow <= 0,
         av ? `${av.cols} col, desc ${Math.round(av.descW)}px, overflow ${av.overflow}` : 'modal no abrió');
 
       /* ---- (a ter + b + c) Examen full activo: overflow, dot ≥ 44, tira ≤ 64 ---- */
@@ -277,8 +288,18 @@ const measureDoc = () => {
       assert(width, 'examen: .exam-dot ≥ 44×44 (tier coarse)',
         !!ex.dot && ex.dot[0] >= 43.5 && ex.dot[1] >= 43.5,
         ex.dot ? `dot ${ex.dot.map(Math.round).join('×')}` : 'sin .exam-dot');
-      assert(width, 'examen: tira .exam-question-dots ≤ 64px de alto',
-        ex.stripH >= 0 && ex.stripH <= 64, `alto ${Math.round(ex.stripH)}px`);
+      // La tira de una sola fila (nowrap + scroll) es una regla del tier
+      // ≤480 (ver comentario junto a .exam-question-dots en styles.css); a
+      // anchos mayores (p.ej. 600, banda 481-768 añadida en la revisión
+      // final) la parrilla envolvente de la regla base es el comportamiento
+      // esperado y crece en alto con los ~40 dots — no es un defecto.
+      if (width <= 480) {
+        assert(width, 'examen: tira .exam-question-dots ≤ 64px de alto',
+          ex.stripH >= 0 && ex.stripH <= 64, `alto ${Math.round(ex.stripH)}px`);
+      } else {
+        assert(width, 'examen: tira .exam-question-dots presente (parrilla envolvente fuera del tier 480, sin límite de alto)',
+          ex.stripH >= 0, `alto ${Math.round(ex.stripH)}px`);
+      }
 
       await page.close();
 
@@ -375,5 +396,5 @@ const measureDoc = () => {
     failures.forEach(f => console.error('  - ' + f));
     process.exit(1);
   }
-  console.log('✅ Todos los chequeos responsive pasan en 320/375/414.');
+  console.log(`✅ Todos los chequeos responsive pasan en ${WIDTHS.join('/')}.`);
 })().catch(e => { console.error('❌ El gate responsive reventó:', e); process.exit(1); });

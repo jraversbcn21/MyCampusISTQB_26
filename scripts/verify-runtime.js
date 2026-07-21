@@ -1272,7 +1272,17 @@ const SAMPLE_Q = {
     /* --- Task 4: FAB del café solo-icono en móvil + colchón --- */
     // El tier 768 se aísla por su cierre a columna 0: las reglas anidadas
     // cierran con "\n  }" (indentado) y no matchean "\n}".
-    const tier768 = (cssSrc.match(/@media \(max-width: 768px\) \{[\s\S]*?\n\}/) || [''])[0];
+    // Hallazgo revisión final (2026-07-21): el override de .bmc-fab vivía
+    // dentro de ESTE primer bloque 768, con la misma especificidad (0,1,0)
+    // que la regla base .bmc-fab (~800 líneas después) — como los media
+    // queries no aportan especificidad, ganaba el orden de aparición y la
+    // base (más tardía) lo machacaba en silencio. El fix lo mueve a un
+    // SEGUNDO bloque "@media (max-width: 768px)" propio, situado DESPUÉS de
+    // la base .bmc-fab (para ganar la cascada de verdad) y ANTES de
+    // reduced-motion. Por eso este check ya no puede mirar solo el primer
+    // bloque 768 — recoge TODOS los bloques 768 del fichero.
+    const tier768Blocks = cssSrc.match(/@media \(max-width: 768px\) \{[\s\S]*?\n\}/g) || [];
+    const tier768 = tier768Blocks.join('\n');
     check('N21 css: en ≤768px el pill del café se reduce a círculo de 48px solo-icono',
       /\.bmc-fab\s*\{[^}]*width:\s*48px/.test(tier768)
       && /\.bmc-fab\s*\{[^}]*height:\s*48px/.test(tier768)
@@ -1280,6 +1290,16 @@ const SAMPLE_Q = {
       && /\.bmc-fab span\s*\{[^}]*display:\s*none/.test(tier768));
     check('N21 css: .lesson-actions gana colchón inferior en ≤768px (safe-area incluida)',
       /\.lesson-actions\s*\{[^}]*padding-bottom:\s*calc\(72px\s*\+\s*env\(safe-area-inset-bottom/.test(tier768));
+    // Prueba directa de la cascada (no solo de que el texto exista, que es
+    // justo lo que el N21 original no distinguía): el override 48px/50% debe
+    // aparecer DESPUÉS de la base .bmc-fab { ... } y ANTES de reduced-motion,
+    // para que su orden de aparición gane de verdad.
+    const idxBaseFabMatch = /\.bmc-fab \{\r?\n\s*position: fixed;/.exec(cssSrc);
+    const idxBaseFab = idxBaseFabMatch ? idxBaseFabMatch.index : -1;
+    const idxOverrideFab = cssSrc.indexOf('.bmc-fab { padding: 0; width: 48px;');
+    const idxReducedMotion = cssSrc.indexOf('@media (prefers-reduced-motion');
+    check('N21 css: el override móvil de .bmc-fab va DESPUÉS de la base y ANTES de reduced-motion (gana la cascada)',
+      idxBaseFab >= 0 && idxOverrideFab > idxBaseFab && idxOverrideFab < idxReducedMotion);
 
     const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     check('N21 a11y: el <a> del café lleva data-i18n-aria (al ocultar el span perdería su nombre accesible)',

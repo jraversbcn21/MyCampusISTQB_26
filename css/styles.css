@@ -800,7 +800,7 @@ body {
   color: var(--text2);
 }
 
-.lesson-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.lesson-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
 .lesson-complete-btn { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 12px 28px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 8px; }
 .lesson-complete-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.4); }
 .lesson-complete-btn.completed { background: var(--success); }
@@ -1439,14 +1439,6 @@ body {
   .search-box .search-results { left: 8px; right: 8px; width: auto; }
   .search-close-btn { display: inline-flex; }
   .readiness-chart { flex-direction: column; }
-  /* El pill solapaba los botones de la lección en móvil (reportado sobre
-     dispositivo real, 2026-07-21): en teléfono/tablet se reduce a un círculo
-     de 48px solo-icono. 48px ≥ 44px (I3). El nombre accesible lo aporta el
-     data-i18n-aria del <a>, porque al ocultar el span el enlace se quedaría
-     sin texto. Selector descendente y no una clase en el span: el check N19
-     exige literalmente <span data-i18n="bmc_label">. */
-  .bmc-fab { padding: 0; width: 48px; height: 48px; border-radius: 50%; justify-content: center; }
-  .bmc-fab span { display: none; }
   /* Colchón para que ningún botón quede bajo el FAB al final del scroll.
      72px = 48 del círculo + 24 de su offset inferior. Deliberadamente solo en
      la lección: extenderlo a otras vistas queda fuera de alcance. */
@@ -2230,6 +2222,11 @@ body {
     margin: -17px;
     margin-left: -9px;
   }
+  /* Botones de la lección (hallazgo revisión final, 2026-07-21): a
+     font-size 0.9rem + padding 12px 28px, .lesson-next-btn medía ~41px de
+     alto — bajo el suelo de 44px. Se incluye también .lesson-complete-btn,
+     con quien queda en fila: deben mantenerse dimensionalmente consistentes. */
+  .lesson-complete-btn, .lesson-next-btn { min-height: 44px; }
 }
 
 /* ===== BOTÓN DE APOYO (Buy Me a Coffee, 2026-07-15) =====
@@ -2263,6 +2260,28 @@ body {
 }
 .bmc-fab .icon { width: 1.15em; height: 1.15em; }
 body.exam-active .bmc-fab { display: none; }
+
+/* ===== FAB DE APOYO EN MÓVIL/TABLET (hallazgo revisión final, 2026-07-21) =====
+   Este override VIVÍA dentro del tier 768 (arriba en el fichero), varias
+   líneas ANTES de la regla base .bmc-fab. Los media queries no aportan
+   especificidad — ambas reglas quedan en (0,1,0) — así que gana el orden de
+   aparición en el fichero, y la base (más tardía) machacaba silenciosamente
+   este padding/border-radius: el círculo de 48px solo parecía funcionar
+   porque 999px de border-radius también clampa a círculo a 48×48. El check
+   N21 solo comprobaba que el texto de la declaración existiera, así que daba
+   verde sobre CSS muerto. Fix: este bloque va DESPUÉS de la base .bmc-fab (y
+   antes del de reduced-motion, que junto con :focus-visible debe seguir
+   siendo el tail del fichero) para que su orden de aparición gane de verdad.
+   El pill solapaba los botones de la lección en móvil (reportado sobre
+   dispositivo real, 2026-07-21): en teléfono/tablet se reduce a un círculo
+   de 48px solo-icono. 48px ≥ 44px (I3). El nombre accesible lo aporta el
+   data-i18n-aria del <a>, porque al ocultar el span el enlace se quedaría
+   sin texto. Selector descendente y no una clase en el span: el check N19
+   exige literalmente <span data-i18n="bmc_label">. */
+@media (max-width: 768px) {
+  .bmc-fab { padding: 0; width: 48px; height: 48px; border-radius: 50%; justify-content: center; }
+  .bmc-fab span { display: none; }
+}
 
 /* ===== MOVIMIENTO REDUCIDO (I2, revisión UI 2026-07-14) =====
    Bloque global estándar: con prefers-reduced-motion activo, toda animación y
