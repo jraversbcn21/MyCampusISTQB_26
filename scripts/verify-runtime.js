@@ -935,7 +935,9 @@ const SAMPLE_Q = {
       && /\.bmc-fab\s*\{[^}]*background:\s*var\(--primary-dark\)/.test(cssSrc)
       && /\.bmc-fab\s*\{[^}]*color:\s*#fff/.test(cssSrc));
     check('N19 css: los toasts se apilan por encima del pill (no en bottom:24px a secas)',
-      /\.toast-container\s*\{[^}]*bottom:\s*80px/.test(cssSrc));
+      // Base 80px, hoy dentro de calc(80px + env(safe-area-inset-bottom))
+      // (safe areas N20, Task 3) — se acepta cualquiera de las dos formas.
+      /\.toast-container\s*\{[^}]*bottom:\s*(?:80px|calc\(80px\s*\+\s*env\(safe-area-inset-bottom)/.test(cssSrc));
     check('N19 css: el pill se oculta durante el examen',
       /body\.exam-active\s+\.bmc-fab\s*\{[^}]*display:\s*none/.test(cssSrc));
     check('N19 css: las reglas del pill van antes del bloque reduced-motion',
@@ -975,7 +977,9 @@ const SAMPLE_Q = {
       ['.rating-btns', '.results-actions', '.lesson-actions', '.exam-topbar', '.flashcard-stats-row']
         .every(s => new RegExp(s.replace('.', '\\.') + '[^{]*\\{[^}]*flex-wrap:\\s*wrap').test(t480)));
     check('N20 tier: paddings reducidos (.view/.topbar/.exam-body/.auth-card)',
-      /\.view\s*\{[^}]*padding:\s*12px/.test(t480) && /\.topbar\s*\{[^}]*padding:/.test(t480)
+      // .topbar usa longhand padding-left/right con base 12px (safe areas,
+      // Task 3): padding(?:-left)? acepta shorthand o longhand, 12px la base.
+      /\.view\s*\{[^}]*padding:\s*12px/.test(t480) && /\.topbar\s*\{[^}]*padding(?:-left)?:[^};]*12px/.test(t480)
       && /\.exam-body\s*\{[^}]*padding:/.test(t480) && /\.auth-card\s*\{[^}]*padding:/.test(t480));
     check('N20 tier: prohibido overflow-x:hidden como mitigación en body/main/views-container',
       !/(?:^|[\s,])(?:body|html|\.main|\.views-container)[^{]*\{[^}]*overflow-x:\s*hidden/m.test(cssSrc));
@@ -999,6 +1003,19 @@ const SAMPLE_Q = {
           cssSrc.slice(m.index + m[0].length, m.index + m[0].length + 140))));
     check('N20 dvh: el modal de avatar usa dvh con fallback',
       /max-height:\s*88vh;[^}]{0,80}max-height:\s*88dvh/.test(cssSrc));
+    /* --- Task 3: safe areas (viewport-fit=cover + env() en los fijos de borde) --- */
+    const htmlSrc20 = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    check('N20 safearea: viewport-fit=cover en el meta viewport',
+      /name="viewport"[^>]*viewport-fit=cover/.test(htmlSrc20));
+    check('N20 safearea: .bmc-fab y .toast-container respetan el inset inferior',
+      /\.bmc-fab\s*\{[^}]*env\(safe-area-inset-bottom/.test(cssSrc)
+      && /\.toast-container\s*\{[^}]*env\(safe-area-inset-bottom/.test(cssSrc));
+    // Anclado con \s*\{: ".sidebar-footer {" no debe casar como ".sidebar {",
+    // y el inset inferior se exige en la regla del footer (no en cualquier
+    // regla posterior del fichero, que daría falso verde con .bmc-fab).
+    check('N20 safearea: el sidebar reserva insets superior (.sidebar) e inferior (.sidebar-footer)',
+      /\.sidebar\s*\{[^}]*env\(safe-area-inset-top/.test(cssSrc)
+      && /\.sidebar-footer\s*\{[^}]*env\(safe-area-inset-bottom/.test(cssSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

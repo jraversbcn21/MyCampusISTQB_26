@@ -95,6 +95,11 @@ body {
   transition: width var(--transition), transform var(--transition);
   overflow-x: hidden;
   overflow-y: auto;
+  /* Safe areas (2026-07-21): viewport-fit=cover en el meta expone los bordes
+     bajo notch/home-bar — cada fijo de borde suma su env(inset, 0px) al valor
+     base (patrón calc(base + env)); en pantallas sin notch env() vale 0.
+     Mismo patrón en .sidebar-footer, .topbar, .toast-container y .bmc-fab. */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .sidebar.collapsed { width: 64px; }
@@ -232,6 +237,7 @@ body {
 
 .sidebar-footer {
   padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border);
 }
 
@@ -267,7 +273,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding-left: calc(24px + env(safe-area-inset-left, 0px));
+  padding-right: calc(24px + env(safe-area-inset-right, 0px));
   position: sticky;
   top: 0;
   z-index: 50;
@@ -1312,9 +1319,10 @@ body {
 }
 
 /* ===== TOAST ===== */
-/* bottom: 80px (no 24px) deja hueco al pill .bmc-fab, que vive en bottom:24px
-   con ~44px de alto. Los toasts (transitorios, aria-live) ganan el rincón. */
-.toast-container { position: fixed; bottom: 80px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+/* Base 80px (no 24px): deja hueco al pill .bmc-fab, de base 24px con ~44px de
+   alto. Ambos suman el mismo env(safe-area-inset-bottom), así que el hueco de
+   56px se conserva. Los toasts (transitorios, aria-live) ganan el rincón. */
+.toast-container { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: calc(24px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
 .toast {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1421,7 +1429,10 @@ body {
    que quedaba ilegible, y envolver las filas que no cabían. */
 @media (max-width: 480px) {
   .view { padding: 12px; }
-  .topbar { padding: 0 12px; }
+  .topbar {
+    padding-left: calc(12px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
+  }
   .topbar-left, .topbar-right { gap: 8px; }
   .card { padding: 16px; }
   .exam-body { padding: 16px; }
@@ -2156,8 +2167,8 @@ body {
    (no aclara el fondo, que bajaría el contraste); reduced-motion lo colapsa. */
 .bmc-fab {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  right: calc(24px + env(safe-area-inset-right, 0px));
   z-index: 900;
   display: inline-flex;
   align-items: center;
