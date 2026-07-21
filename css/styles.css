@@ -1481,6 +1481,10 @@ body.drawer-open { overflow: hidden; }
     padding-bottom: 6px; /* hueco para la scrollbar */
     -webkit-overflow-scrolling: touch;
   }
+  /* En la tira nowrap el flex-shrink por defecto aplastaba los 40 dots a
+     ~11px de ancho (lo cazó validate-responsive.js): el target táctil de
+     44px de I3 es innegociable. */
+  .exam-dot { flex-shrink: 0; }
   .flashcard-stats-row { flex-wrap: wrap; }
   /* Flashcards: las flechas laterales robaban ~140px de ancho a la tarjeta.
      En teléfono, tarjeta a ancho completo y flechas en fila debajo. Las
