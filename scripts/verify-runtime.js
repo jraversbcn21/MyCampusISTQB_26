@@ -1067,6 +1067,34 @@ const SAMPLE_Q = {
       /_wrapLessonTables/.test(appSrc20) && /table-scroll/.test(appSrc20));
     check('N20 tablas: la regla .table-scroll existe con overflow-x auto',
       /\.table-scroll\s*\{[^}]*overflow-x:\s*auto/.test(cssSrc));
+    /* --- Task 7: flashcards — flechas sanas, altura que crece (grid-stack), columna móvil --- */
+    check('N20 flashcards: .fc-arrow no se aplasta (flex-shrink: 0, todos los anchos)',
+      /\.fc-arrow\s*\{[^}]*flex-shrink:\s*0/.test(cssSrc));
+    check('N20 flashcards: la tarjeta usa min-height, no height fija',
+      /\.flashcard\s*\{[^}]*min-height:\s*280px/.test(cssSrc)
+      && !/\.flashcard\s*\{[^}]*[^-]height:\s*280px/.test(cssSrc));
+    // Grid-stack del flip: el rotador real es .flashcard-inner (no .flashcard,
+    // que es el contenedor de perspectiva y el que traslada el carrusel N10).
+    // Las caras dejan el position:absolute (que fijaba la altura) y se apilan
+    // en la misma celda; el mecanismo 3D (preserve-3d, backface-visibility,
+    // rotateY de la cara trasera) debe sobrevivir intacto.
+    check('N20 flashcards: caras apiladas por grid conservando el flip 3D',
+      /\.flashcard-inner\s*\{[^}]*display:\s*grid/.test(cssSrc)
+      && /\.flashcard-inner\s*\{[^}]*transform-style:\s*preserve-3d/.test(cssSrc)
+      && /\.flashcard-front,\s*\.flashcard-back\s*\{[^}]*grid-area:\s*1\s*\/\s*1/.test(cssSrc)
+      && /\.flashcard-front,\s*\.flashcard-back\s*\{[^}]*backface-visibility:\s*hidden/.test(cssSrc)
+      && !/\.flashcard-front,\s*\.flashcard-back\s*\{[^}]*position:\s*absolute/.test(cssSrc)
+      && /\.flashcard-back\s*\{[^}]*transform:\s*rotateY\(180deg\)/.test(cssSrc));
+    // Las flechas son hijos directos de la arena flanqueando la tarjeta (sin
+    // contenedor propio): flex-direction:column las apilaría en vertical una
+    // por línea — el apilado real es wrap + tarjeta a ancho completo (fuerza
+    // el salto de línea) + order para bajar las flechas, sin mover nodos.
+    check('N20 flashcards: tarjeta a ancho completo y flechas en fila debajo en el tier 480 (wrap + order)',
+      /\.flashcard-arena\s*\{[^}]*flex-wrap:\s*wrap/.test(t480)
+      && /\.flashcard\s*\{[^}]*width:\s*100%/.test(t480)
+      && /\.flashcard\s*\{[^}]*order:\s*1/.test(t480)
+      && /\.fc-prev\s*\{[^}]*order:\s*2/.test(t480)
+      && /\.fc-next\s*\{[^}]*order:\s*3/.test(t480));
   }
 
   /* ---- N20b: drawer behavioral — abrir/cerrar solo vía _setDrawerOpen ---- */

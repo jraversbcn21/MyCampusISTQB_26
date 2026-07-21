@@ -857,6 +857,7 @@ body {
 .fc-arrow {
   width: 44px;
   height: 44px;
+  flex-shrink: 0; /* a 320px el flex las aplastaba a 29px de ancho (bug, no tier) */
   border-radius: 50%;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -870,27 +871,35 @@ body {
 }
 .fc-arrow:hover { border-color: var(--primary); color: var(--primary); background: rgba(108,99,255,0.1); }
 
+/* Mecanismo grid-stack del flip (2026-07-21): antes las caras eran
+   position:absolute con height:100%, lo que clavaba la tarjeta a los 280px
+   fijos del contenedor — una respuesta larga desbordaba en vez de crecer.
+   Ahora las dos caras se apilan en la misma celda (grid-area: 1/1) del
+   rotador .flashcard-inner: la fila mide la cara más alta y el contenedor
+   crece con el contenido (min-height: 280px como suelo). El flip 3D es el
+   mismo: .flashcard aporta la perspectiva (y es lo que traslada el carrusel
+   con estilos inline — elementos distintos, transiciones independientes);
+   .flashcard-inner conserva preserve-3d + su transición de rotación; las
+   caras conservan backface-visibility y el rotateY(180deg) de la trasera. */
 .flashcard {
   width: 600px;
   max-width: 100%;
-  height: 280px;
+  min-height: 280px;
+  display: grid; /* la única celda estira .flashcard-inner a la altura total */
   perspective: 1000px;
   cursor: pointer;
 }
 
 .flashcard-inner {
-  width: 100%;
-  height: 100%;
-  position: relative;
+  display: grid; /* apila las caras en la celda 1/1 (sustituye al absolute) */
   transform-style: preserve-3d;
   transition: transform 0.5s ease;
 }
 .flashcard-inner.flipped { transform: rotateY(180deg); }
 
 .flashcard-front, .flashcard-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+  grid-area: 1 / 1;
+  position: relative; /* containing block del .fc-tts-btn absoluto de cada cara */
   backface-visibility: hidden;
   border-radius: var(--radius-lg);
   padding: 32px;
@@ -1463,6 +1472,17 @@ body.drawer-open { overflow: hidden; }
   .lesson-actions { flex-wrap: wrap; gap: 12px; }
   .exam-topbar { flex-wrap: wrap; gap: 8px; }
   .flashcard-stats-row { flex-wrap: wrap; }
+  /* Flashcards: las flechas laterales robaban ~140px de ancho a la tarjeta.
+     En teléfono, tarjeta a ancho completo y flechas en fila debajo. Las
+     flechas son hijos directos de la arena flanqueando la tarjeta (sin
+     contenedor propio), así que flex-direction:column las apilaría una por
+     línea en vertical: el apilado real es wrap + width:100% en la tarjeta
+     (fuerza el salto de línea) + order para bajarlas — solo visual, sin
+     mover nodos ni tocar el orden de tabulación. */
+  .flashcard-arena { flex-wrap: wrap; gap: 12px; }
+  .flashcard { width: 100%; order: 1; }
+  .fc-prev { order: 2; }
+  .fc-next { order: 3; }
   .achievements-summary { padding: 16px; gap: 16px; }
   /* Glosario: de fila de 3 columnas (min-widths fijos que desbordaban 320-414px)
      a apilado — término + chip de capítulo arriba, definición a ancho completo.
