@@ -221,10 +221,20 @@ families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.m
 **Editing constraints an agent must know (load-bearing):**
 
 - The tail of `css/styles.css` is ordered on purpose — today: the `≤480px` tier, then
-  `@media (pointer: coarse)`, then the reduced-motion block, then `:focus-visible`
-  **literally last** (it must win the `outline` property over earlier equal-specificity
-  `outline: none` input rules). Don't append CSS after it without reading those blocks'
-  comments. See the Mobile Adaptability section below for the tier's own cascade caveat.
+  `@media (pointer: coarse)`, then **the `.bmc-fab` `≤768px` override block**, then the
+  reduced-motion block, then `:focus-visible` **literally last** (it must win the `outline`
+  property over earlier equal-specificity `outline: none` input rules). The `.bmc-fab`
+  override sits there — *after* the pill's base rule (~line 2238), not back up in the main
+  `≤768px` tier where it used to live — because media queries add no specificity: two rules
+  at the same specificity resolve by source order, so a same-specificity override placed
+  *before* the rule it's meant to override silently loses to it. That was a real bug (found
+  in the 2026-07-21 final review): the override lived in the main 768px tier, ~800 lines
+  before the base `.bmc-fab` rule, so `padding: 0`/`border-radius: 50%` were dead
+  declarations and the FAB only *looked* like a circle by coincidence (`border-radius: 999px`
+  on a 48px box also clamps to a circle). **Do not "tidy" this block back into the main
+  `≤768px` tier** — that would silently reintroduce the exact bug it fixes. Don't append CSS
+  after it without reading those blocks' comments. See the Mobile Adaptability section below
+  for the tier's own cascade caveat, and `css/styles.css:2264-2280` for the in-file account.
 - New interactive elements in `innerHTML` templates: give them `role="button" tabindex="0"`
   — the delegated keydown listener in `App.init()` makes them keyboard-operable
   automatically; never add per-element key listeners (the templates are regenerated
@@ -310,8 +320,13 @@ findings: `AGENTS.md` → "Mobile adaptability (2026-07-21)".
 
 Load-bearing details an agent must know:
 - **New `@media (max-width: 480px)` tier** in `css/styles.css`, right after the 768px block —
-  the old `@media (max-width: 500px)` (`.avatar-grid` only) is folded into it. File tail order is
-  unchanged: 480 tier → `(pointer: coarse)` → reduced-motion → `:focus-visible` literally last.
+  the old `@media (max-width: 500px)` (`.avatar-grid` only) is folded into it. File tail order
+  (verified 2026-07-21 final-review follow-up): 480 tier (~1453) → `(pointer: coarse)` (~2199)
+  → **`.bmc-fab` `≤768px` override block (~2281)** → reduced-motion (~2292) → `:focus-visible`
+  (~2309, still literally last). The `.bmc-fab` block is a later addition, not part of the
+  original three-block invariant — it must stay *after* the base `.bmc-fab` rule (~2238) for
+  its same-specificity override to win by source order; see the "Editing constraints" note
+  above for why moving it back into the main 768px tier reintroduces a dead-CSS bug.
 - **`App._setDrawerOpen(open)`** (parallel to `_setExamActive`) is the single point of truth for
   the mobile sidebar drawer — scrim, Escape, body scroll-lock, `inert` while closed. Nothing else
   may toggle `mobile-open` via `classList`. **The scrim's visibility/scroll-lock CSS

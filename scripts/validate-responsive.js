@@ -240,6 +240,36 @@ const measureDoc = () => {
         closed1.inert && closed1.aria === 'false',
         `inert:${closed1.inert}, aria-expanded="${closed1.aria}"`);
 
+      /* ---- (h) FAB de apoyo (Buy Me a Coffee): la cascada gana de verdad ----
+         Prueba de regresión permanente para el hallazgo de la revisión final
+         (2026-07-21): el override .bmc-fab del tier ≤768 vivía ANTES de la
+         regla base .bmc-fab en el fichero — misma especificidad (0,1,0), así
+         que ganaba el orden de aparición y la base (más tardía) machacaba en
+         silencio su padding/border-radius. El check N19 de verify-runtime.js
+         solo comprobaba que el TEXTO de la declaración existiera en el
+         fichero fuente, así que daba verde sobre CSS muerto (el círculo de
+         48px solo parecía correcto porque border-radius:999px de la base
+         también clampa a círculo en una caja de 48×48). Esto mide el estilo
+         COMPUTADO real en Chromium, no el texto — la única forma de probar
+         que la cascada gana de verdad. Los cuatro anchos de WIDTHS
+         (320/375/414/600) caen dentro del tier ≤768, así que se comprueban
+         los cuatro; el `width <= 768` explícito evita que un futuro ancho de
+         escritorio añadido a WIDTHS falsee el chequeo en silencio. */
+      if (width <= 768) {
+        const fab = await page.evaluate(() => {
+          const el = document.querySelector('.bmc-fab');
+          if (!el) return null;
+          const cs = getComputedStyle(el);
+          if (cs.display === 'none') return { hidden: true };
+          return { hidden: false, padding: cs.padding, borderRadius: cs.borderRadius };
+        });
+        assert(width, '.bmc-fab móvil: override gana la cascada (padding 0px + border-radius 50%)',
+          !!fab && !fab.hidden && fab.padding === '0px' && fab.borderRadius === '50%',
+          !fab ? 'no se encontró .bmc-fab'
+            : fab.hidden ? 'el FAB está oculto (display:none)'
+            : `padding:${fab.padding}, border-radius:${fab.borderRadius}`);
+      }
+
       /* ---- (g) Modal de avatar: 1 columna en teléfono (≤480) ----
          Cobertura añadida el 2026-07-21 tras una regresión real que este gate
          no vio: la regla del tier perdía la cascada contra la base 1fr 1fr

@@ -1206,8 +1206,34 @@ llevan ahora una guarda `cssSrc.includes(selector) &&` antes de la comparación 
 verificada renombrando temporalmente el selector para confirmar que el check falla. No
 "simplificar" esta guarda de vuelta a la comparación de índices desnuda.
 
-Gate: familia `N21` en `scripts/verify-runtime.js` (10 checks). `privacy.html` no cambia — el
-enlace saliente es el mismo, solo cambia su presentación.
+**La guarda `includes()` seguía siendo vacía (follow-up de la re-revisión final, cerrado en
+esta ronda).** `cssSrc.includes('.bmc-fab')` no exige una *regla* — cualquier *mención* del
+selector la satisface, incluido un comentario. La primera aparición literal de `.bmc-fab` en
+el fichero es precisamente un comentario, `css/styles.css:101` ("Mismo patrón en
+.sidebar-footer, .topbar, .toast-container y .bmc-fab."), ~2100 líneas antes del bloque
+reduced-motion — así que el check pasaba siempre, incluso si se borrasen todas las reglas
+`.bmc-fab` reales, exactamente el mismo defecto que la guarda pretendía cerrar. Fix: el `N19`
+ahora ancla a `/\.bmc-fab \{/` (una regla real, no cualquier mención) — el mismo patrón que ya
+usa el check de cascada `N21` (línea ~1301 de `verify-runtime.js`). Verificado renombrando
+temporalmente las tres apariciones reales de `.bmc-fab {` (la base, `body.exam-active
+.bmc-fab {` y el override del tier 768) y confirmando que el check cae en rojo, luego revertido
+con `git checkout -- css/styles.css`. **Lección para la próxima guarda de este tipo: anclar
+siempre a `/\.selector \{/`, nunca a `includes(selector)` — un comentario puede mencionar
+cualquier selector sin comprometerse a mantener su regla.**
+
+**Prueba de cascada permanente en navegador real (mismo follow-up).** El hallazgo original de
+este bloque — un override que perdía la cascada por vivir antes que la regla base en el
+fichero — solo se había demostrado una vez, a mano, en un script de comprobación que luego se
+borró. `scripts/validate-responsive.js` ya abre Chromium real en los cuatro anchos
+móviles/tablet (320/375/414/600, todos ≤768) con el FAB en pantalla; ahora también lee su
+`getComputedStyle` en cada uno y afirma `padding: 0px` y `border-radius: 50%` — el único modo
+de probar que la cascada gana de verdad, no solo que el texto de la declaración existe en el
+fichero fuente. Sigue el patrón de manejo de "elemento ausente/oculto" del resto del script
+(`!fab` / `fab.hidden` con su propio mensaje).
+
+Gate: familia `N21` en `scripts/verify-runtime.js` (10 checks), más el `N19` reanclado y el
+nuevo assert de cascada en `validate-responsive.js`. `privacy.html` no cambia — el enlace
+saliente es el mismo, solo cambia su presentación.
 
 ## Conventions
 

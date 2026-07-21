@@ -952,8 +952,14 @@ const SAMPLE_Q = {
     check('N19 css: el pill se oculta durante el examen',
       /body\.exam-active\s+\.bmc-fab\s*\{[^}]*display:\s*none/.test(cssSrc));
     check('N19 css: las reglas del pill van antes del bloque reduced-motion',
-      cssSrc.includes('.bmc-fab')
-      && cssSrc.indexOf('.bmc-fab') < cssSrc.indexOf('@media (prefers-reduced-motion'));
+      // Ancla a una regla real (/\.bmc-fab \{/), no a cualquier mención del
+      // selector: la primera aparición literal de ".bmc-fab" en el fichero
+      // es un COMENTARIO (línea ~101, muy anterior a reduced-motion), así
+      // que un includes()/indexOf() sobre el texto plano pasaba siempre —
+      // incluso si se borrasen todas las reglas .bmc-fab reales. Mismo
+      // patrón de ancla que usa el check de cascada N21.
+      /\.bmc-fab \{/.test(cssSrc)
+      && cssSrc.indexOf('.bmc-fab {') < cssSrc.indexOf('@media (prefers-reduced-motion'));
     const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
     check('N19 examen: _setExamActive setea el flag y togglea la clase del body',
       /_setExamActive\(active\)\s*\{[\s\S]{0,160}this\._examActive = active[\s\S]{0,160}document\.body\.classList\.toggle\('exam-active', active\)/.test(appSrc));
