@@ -1241,6 +1241,21 @@ const SAMPLE_Q = {
       ['lesson_next', 'lesson_finish_chapter'].every(k =>
         typeof ctx.TRANSLATIONS.es[k] === 'string' && ctx.TRANSLATIONS.es[k].length > 0
         && typeof ctx.TRANSLATIONS.en[k] === 'string' && ctx.TRANSLATIONS.en[k].length > 0));
+
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+
+    // Acotado al template de renderLesson, NO a app.js entero: completeAndAdvance
+    // llama legítimamente a navigate('curriculum') al cerrar capítulo, y un check
+    // global lo confundiría con el botón duplicado que se eliminó.
+    const actionsBlock = (appSrc.match(/<div class="lesson-actions">[\s\S]*?<\/div>`/) || [''])[0];
+    check('N21 lección: la barra inferior ya no duplica el "Volver al curriculum"',
+      actionsBlock.length > 0 && !/App\.navigate\('curriculum'\)/.test(actionsBlock));
+    check('N21 lección: la barra inferior cablea el primario a App.completeAndAdvance',
+      /App\.completeAndAdvance\(/.test(actionsBlock));
+    check('N21 lección: completeAndAdvance delega en completeLesson y bifurca a navigateToLesson/curriculum',
+      /completeAndAdvance\(topicId, chapterId, xp, nextTopicId\)\s*\{[\s\S]{0,400}this\.completeLesson\(/.test(appSrc)
+      && /completeAndAdvance[\s\S]{0,400}this\.navigateToLesson\(chapterId, nextTopicId\)/.test(appSrc)
+      && /completeAndAdvance[\s\S]{0,400}this\.navigate\('curriculum'\)/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

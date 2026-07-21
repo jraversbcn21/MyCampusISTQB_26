@@ -423,6 +423,16 @@ const App = {
       content: `<div class="highlight-box">📚 ${i18n.t('lesson_content_wip')}</div>`
     };
 
+    // Siguiente tema del capítulo (2026-07-21). Se deriva de ch.topics —
+    // js/content.js no se toca (regla de fidelidad de contenido). Si es el
+    // último del capítulo, el primario cierra el capítulo en vez de avanzar.
+    const topicIdx = ch.topics.findIndex(t => t.id === topicId);
+    const nextTopic = ch.topics[topicIdx + 1] || null;
+    const nextLabel = nextTopic
+      ? `${i18n.t('lesson_next')}<span class="next-topic-title">: ${escapeHtml(nextTopic.title[lang])}</span>`
+      : i18n.t('lesson_finish_chapter');
+    const nextArg = nextTopic ? `'${nextTopic.id}'` : 'null';
+
     document.getElementById('lessonContainer').innerHTML = `
       <div class="lesson-title">${lessonData.title}</div>
       <div class="lesson-chapter-tag" style="background:rgba(${hexToRgb(color)},0.15);color:${color}">
@@ -430,11 +440,14 @@ const App = {
       </div>
       <div class="lesson-content">${lessonData.content}</div>
       <div class="lesson-actions">
-        <button class="btn btn-ghost" onclick="App.navigate('curriculum')">← ${i18n.t('back_curriculum')}</button>
         <button class="lesson-complete-btn ${isCompleted ? 'completed' : ''}"
           onclick="App.completeLesson('${topicId}', ${chapterId}, ${topic.xp})"
           id="completeLessonBtn">
           ${isCompleted ? i18n.t('lesson_completed') : (this._icon('star') + ' ' + i18n.t('lesson_complete') + ` (+${topic.xp} XP)`)}
+        </button>
+        <button class="lesson-next-btn"
+          onclick="App.completeAndAdvance('${topicId}', ${chapterId}, ${topic.xp}, ${nextArg})">
+          ${nextLabel} →
         </button>
       </div>`;
     this._wrapLessonTables();
@@ -468,6 +481,20 @@ const App = {
         btn.textContent = i18n.t('lesson_completed');
         btn.classList.add('completed');
       }
+    }
+  },
+
+  // Completar + avanzar en un clic (2026-07-21). completeLesson es idempotente
+  // (comprueba includes antes de añadir), así que re-pulsarlo en una lección ya
+  // completada avanza sin re-otorgar XP. El scroll al top evita aterrizar a
+  // media lección nueva; el guard es por el DOM mockeado del arnés.
+  completeAndAdvance(topicId, chapterId, xp, nextTopicId) {
+    this.completeLesson(topicId, chapterId, xp);
+    if (nextTopicId) {
+      this.navigateToLesson(chapterId, nextTopicId);
+      if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
+    } else {
+      this.navigate('curriculum');
     }
   },
 
