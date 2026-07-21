@@ -833,6 +833,21 @@ const App = {
       // Roving tabindex: un solo tab stop (el dot actual); las flechas mueven.
       return `<div class="exam-dot ${cls}" onclick="App.goToQuestion(${i})" role="button" tabindex="${i === this.examCurrentQ ? 0 : -1}"${i === this.examCurrentQ ? ' aria-current="true"' : ''} aria-label="${i18n.t('goto_question_aria')} ${i + 1}">${i + 1}</div>`;
     }).join('');
+    // Punto único de auto-centrado: los cuatro flujos que mueven el dot actual
+    // (Siguiente/Anterior, responder, click/teclado en un dot) re-renderizan
+    // los dots pasando por aquí.
+    this._centerExamDot();
+  },
+
+  // Tira de dots (2026-07-21): centra el dot actual en el scroll horizontal
+  // del contenedor (solo hace algo cuando el tier 480 activa la tira; en la
+  // parrilla desktop scrollIntoView con block:'nearest' es un no-op visual).
+  _centerExamDot() {
+    const dot = document.querySelector('.exam-dot.current');
+    if (!dot || typeof dot.scrollIntoView !== 'function') return; // harness mock
+    const reduced = typeof matchMedia === 'function'
+      && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    dot.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
   },
 
   selectAnswer(optIndex) {

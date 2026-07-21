@@ -1471,6 +1471,16 @@ body.drawer-open { overflow: hidden; }
   .results-actions { flex-wrap: wrap; }
   .lesson-actions { flex-wrap: wrap; gap: 12px; }
   .exam-topbar { flex-wrap: wrap; gap: 8px; }
+  /* Dots del examen: la parrilla envolvente media 408px de alto a 320px con
+     los targets de 44px de I3. En teléfono: tira de una fila con scroll,
+     el dot actual se auto-centra desde JS. Touch target intacto. */
+  .exam-question-dots {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 6px; /* hueco para la scrollbar */
+    -webkit-overflow-scrolling: touch;
+  }
   .flashcard-stats-row { flex-wrap: wrap; }
   /* Flashcards: las flechas laterales robaban ~140px de ancho a la tarjeta.
      En teléfono, tarjeta a ancho completo y flechas en fila debajo. Las

@@ -1095,6 +1095,31 @@ const SAMPLE_Q = {
       && /\.flashcard\s*\{[^}]*order:\s*1/.test(t480)
       && /\.fc-prev\s*\{[^}]*order:\s*2/.test(t480)
       && /\.fc-next\s*\{[^}]*order:\s*3/.test(t480));
+    /* --- Task 8: dots del examen — tira horizontal ≤480 + auto-centrado --- */
+    check('N20 dots: tira horizontal en el tier 480 (nowrap + scroll local)',
+      /\.exam-question-dots\s*\{[^}]*flex-wrap:\s*nowrap/.test(t480)
+      && /\.exam-question-dots\s*\{[^}]*overflow-x:\s*auto/.test(t480));
+    // Tres afirmaciones en un check: (a) _centerExamDot existe (el indexOf busca
+    // la DEFINICIÓN '  _centerExamDot() {' — una llamada sería 'this._…' y no
+    // casa); (b) su scrollIntoView condiciona behavior al matchMedia de
+    // prefers-reduced-motion; (c) lo llama renderExamDots o goToQuestion —
+    // renderExamDots es el punto único real: los cuatro flujos que mueven el
+    // dot actual (Siguiente/Anterior, responder, click/teclado en un dot)
+    // pasan por él.
+    const cedStart = appSrc20.indexOf('  _centerExamDot() {');
+    const cedBody = cedStart >= 0
+      ? appSrc20.slice(cedStart, appSrc20.indexOf('\n  },', cedStart)) : '';
+    const methodBody = (name) => {
+      const s = appSrc20.indexOf(name);
+      return s >= 0 ? appSrc20.slice(s, appSrc20.indexOf('\n  },', s)) : '';
+    };
+    check('N20 dots: _centerExamDot (scrollIntoView + guard reduced-motion) llamado desde renderExamDots/goToQuestion',
+      cedBody !== ''
+      && /scrollIntoView\(\{/.test(cedBody)
+      && /matchMedia\('\(prefers-reduced-motion: reduce\)'\)/.test(cedBody)
+      && /behavior:\s*reduced\s*\?\s*'auto'\s*:\s*'smooth'/.test(cedBody)
+      && (/this\._centerExamDot\(\)/.test(methodBody('renderExamDots() {'))
+          || /this\._centerExamDot\(\)/.test(methodBody('goToQuestion(i) {'))));
   }
 
   /* ---- N20b: drawer behavioral — abrir/cerrar solo vía _setDrawerOpen ---- */
