@@ -1063,6 +1063,10 @@ const SAMPLE_Q = {
       && /\.glossary-term\s*\{[^}]*min-width:\s*0/.test(t480)
       && /\.glossary-chapter\s*\{[^}]*white-space:\s*normal/.test(t480)
       && /\.glossary-chapter\s*\{[^}]*min-width:\s*0/.test(t480));
+    check('N20 tablas: renderLesson envuelve las tablas en .table-scroll',
+      /_wrapLessonTables/.test(appSrc20) && /table-scroll/.test(appSrc20));
+    check('N20 tablas: la regla .table-scroll existe con overflow-x auto',
+      /\.table-scroll\s*\{[^}]*overflow-x:\s*auto/.test(cssSrc));
   }
 
   /* ---- N20b: drawer behavioral — abrir/cerrar solo vía _setDrawerOpen ---- */
@@ -1090,6 +1094,51 @@ const SAMPLE_Q = {
     } finally {
       delete global.matchMedia;
     }
+  }
+
+  /* ---- N20c: tablas de lección behavioral — _wrapLessonTables envuelve por DOM ---- */
+  {
+    // El innerHTML del mock es una string inerte (asignarlo no crea nodos), así
+    // que la envoltura real NO es observable vía renderLesson + inspección del
+    // string del contenedor — un check por string sería un check falso. En su
+    // lugar: (a) se espía el cableado renderLesson → _wrapLessonTables, y (b) se
+    // siembra el mock cacheado de '.lesson-content' con una <table> artesanal
+    // (parentNode que graba insertBefore) y se ejercita el método de producción
+    // de verdad: crea el div.table-scroll, lo inserta ante la tabla, la adopta,
+    // y no re-envuelve si el padre ya es .table-scroll.
+    const ctx = loadApp();
+    ctx.App.state = ctx.App.loadState();
+    const has = typeof ctx.App._wrapLessonTables === 'function';
+
+    let wrapCalled = false;
+    if (has) {
+      const orig = ctx.App._wrapLessonTables;
+      ctx.App._wrapLessonTables = function () { wrapCalled = true; return orig.apply(this); };
+      ctx.App.renderLesson(0, ctx.CHAPTERS[0].topics[0].id);
+      ctx.App._wrapLessonTables = orig;
+    }
+    check('N20c tablas: renderLesson invoca _wrapLessonTables tras inyectar la lección',
+      has && wrapCalled);
+
+    const inserted = [];
+    const table = {
+      tagName: 'TABLE', parentElement: null,
+      parentNode: { insertBefore(w, ref) { inserted.push({ w, ref }); } },
+    };
+    const lc = ctx.document.querySelector('.lesson-content'); // mock cacheado en _qs…
+    lc.querySelectorAll = sel => (sel === 'table' ? [table] : []); // …enriquecido aquí
+    if (has) ctx.App._wrapLessonTables();
+    const wrap = inserted.length === 1 ? inserted[0].w : null;
+    check('N20c tablas: la tabla queda envuelta en un div.table-scroll insertado en su lugar',
+      has && wrap !== null && wrap.tagName === 'DIV' && wrap.className === 'table-scroll'
+      && inserted[0].ref === table && wrap._children.includes(table));
+
+    // Idempotencia: padre ya .table-scroll (className en el mock no alimenta
+    // classList, así que se simula el contains de un DOM real).
+    table.parentElement = { classList: { contains: c => c === 'table-scroll' } };
+    if (has) ctx.App._wrapLessonTables();
+    check('N20c tablas: no re-envuelve una tabla ya envuelta (idempotente)',
+      has && inserted.length === 1);
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

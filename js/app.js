@@ -437,6 +437,23 @@ const App = {
           ${isCompleted ? i18n.t('lesson_completed') : (this._icon('star') + ' ' + i18n.t('lesson_complete') + ` (+${topic.xp} XP)`)}
         </button>
       </div>`;
+    this._wrapLessonTables();
+  },
+
+  // Tablas del contenido ISTQB (2026-07-21): js/content.js no se edita (regla
+  // de fidelidad) — el wrapper de scroll se aplica por DOM al inyectar. Cubre
+  // las 11 tablas que desbordaban en móvil y cualquier tabla futura.
+  _wrapLessonTables() {
+    const lc = document.querySelector('.lesson-content');
+    if (!lc || typeof lc.querySelectorAll !== 'function') return; // harness mock
+    lc.querySelectorAll('table').forEach((t) => {
+      if (t.parentElement && t.parentElement.classList
+          && t.parentElement.classList.contains('table-scroll')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'table-scroll';
+      t.parentNode.insertBefore(wrap, t);
+      wrap.appendChild(t);
+    });
   },
 
   completeLesson(topicId, chapterId, xp) {

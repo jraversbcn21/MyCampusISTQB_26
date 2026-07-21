@@ -797,6 +797,11 @@ body {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   margin: 16px 0;
 }
+/* Contenedor de scroll de tablas (aplicado por _wrapLessonTables en render).
+   En desktop es inerte (nada desborda); en móvil da scroll local en vez de
+   desbordar la página entera. */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.table-scroll table { margin: 0; }
 .lesson-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.875rem; }
 .lesson-content th { background: var(--bg3); padding: 10px 14px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); }
 .lesson-content td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
