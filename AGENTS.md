@@ -814,7 +814,7 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   block above) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like
   every other `data-i18n-*` mechanism
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **175 keys** (160 after
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **177 keys** (160 after
   the 2026-07-04 remediation, +5 `gs_*` keys for the 2026-07-08 global search dropdown →
   165, +4 more — `mobile_menu_aria`, `fc_prev_aria`, `fc_next_aria`, `close_label` — added
   2026-07-14 for the `data-i18n-aria` rollout above → 169, +1 — `goto_question_aria`, the
@@ -823,7 +823,8 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   the I7 mobile-search/combobox block of the UI/UX remediation round 2 → 173, +1 —
   `achievement_toast_prefix`, the round-2 final-review fix for the last hardcoded
   "Logro:" toast residue → 174, +1 — `bmc_label`, the Buy Me a Coffee pill added
-  2026-07-15 → **175**), all ES/EN
+  2026-07-15 → 175, +2 — `lesson_next`/`lesson_finish_chapter`, the lesson bottom-bar
+  buttons added 2026-07-21 (see "Flujo de lección y FAB móvil" below) → **177**), all ES/EN
   paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
   hardcoded-language residues)
@@ -1150,6 +1151,63 @@ instead of crashing: if the Supabase CDN script fails to load, `supabaseClient` 
 and `Auth._showLoadFailure()` shows a message instead of an uncaught `TypeError` killing the
 whole app. There's no working offline login, though — Supabase is required to authenticate
 at all; this only prevents a silent, unexplained crash when it can't load.
+
+### Flujo de lección y FAB móvil (2026-07-21)
+
+Reportado sobre dispositivo real tras la ronda de adaptabilidad móvil (see "Mobile
+adaptability (2026-07-21)" in the Repository section above). Spec:
+`docs/superpowers/specs/2026-07-21-lesson-next-button-and-mobile-fab-design.md`; plan:
+`docs/superpowers/plans/2026-07-21-lesson-next-button-and-mobile-fab.md`.
+
+**Barra inferior de la lección.** `renderLesson()` emitía
+`[← Volver al curriculum] [Marcar como completada]`; el "Volver" era un duplicado exacto del
+que vive en `.lesson-nav` (`index.html:342`) y se eliminó. Hoy emite
+`[Marcar como completada] [Siguiente lección: <tema> →]`, con el primario a la derecha.
+
+**`App.completeAndAdvance(topicId, chapterId, xp, nextTopicId)`.** Delega en
+`completeLesson()` (XP, logros, `saveState()` — no duplica nada) y después bifurca:
+`navigateToLesson(chapterId, nextTopicId)` si hay siguiente, o `navigate('curriculum')` si es
+la última lección del capítulo. **Decisión de producto: el flujo para al cerrar capítulo**, no
+encadena con el capítulo siguiente. `completeLesson()` es idempotente, así que avanzar por una
+lección ya completada no re-otorga XP. Hace `window.scrollTo(0, 0)` tras navegar (guardado con
+un `typeof` por el DOM mockeado del arnés) para no aterrizar a media lección.
+
+El siguiente tema se deriva de `ch.topics` dentro de `renderLesson()`: **`js/content.js` no se
+toca**, la regla de fidelidad de contenido queda intacta.
+
+**`.lesson-next-btn` usa `--primary-dark`, no `--primary`.** Blanco sobre `#6C63FF` es 4.32:1
+(falla AA); sobre `#5a52d5` es 5.83:1 (pasa). Por eso **no** reutiliza `.btn-primary`, que
+arrastra ese fallo preexistente en el resto de la app. Mismo criterio que `.bmc-fab`. En el
+tier 480 se oculta `.next-topic-title` y el botón queda "Siguiente lección →" a secas —
+truncar el título con ellipsis se leía mal.
+
+**FAB del café solo-icono en ≤768px.** Con su texto (~200px) solapaba los botones de la
+lección. En el tier 768 pasa a círculo de 48px (≥44px, I3). Dos detalles atados a los gates:
+
+- El nombre accesible pasa a `data-i18n-aria="bmc_label"` **en el `<a>`**. Compatible con el
+  check `N19` que prohíbe `data-i18n` ahí: su regex exige `data-i18n=` con el `=` inmediato,
+  que `data-i18n-aria="` no satisface.
+- El span se oculta con el selector descendente `.bmc-fab span`, **no** con una clase propia:
+  el check `N19` exige literalmente `<span data-i18n="bmc_label">` y cualquier atributo extra
+  lo rompería.
+
+**`.lesson-actions` gana `padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px))`** en
+≤768px (48 del círculo + 24 de su offset). Deliberadamente **solo en la lección**: extenderlo
+a otras vistas quedó fuera de alcance por decisión explícita.
+
+**Guarda de presencia en los checks de orden CSS (`N19`/`N21`, commit `9161acb`).** Durante la
+revisión de la Task 3 se detectó que el check "las reglas nuevas van antes del bloque
+reduced-motion" comparaba únicamente `cssSrc.indexOf(selector) < cssSrc.indexOf('@media
+(prefers-reduced-motion')`: si `selector` no aparece en el CSS, `indexOf` devuelve `-1`, y
+`-1 < <cualquier índice>` es `true` — el check pasaba en vacío aunque la regla completa se
+hubiera borrado. El dueño del repo aprobó explícitamente arreglar también el `N19`
+preexistente, ampliando la restricción original del plan ("`N19` intocable"). Ambos checks
+llevan ahora una guarda `cssSrc.includes(selector) &&` antes de la comparación de índices,
+verificada renombrando temporalmente el selector para confirmar que el check falla. No
+"simplificar" esta guarda de vuelta a la comparación de índices desnuda.
+
+Gate: familia `N21` en `scripts/verify-runtime.js` (10 checks). `privacy.html` no cambia — el
+enlace saliente es el mismo, solo cambia su presentación.
 
 ## Conventions
 

@@ -136,7 +136,7 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
 - No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
 - A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
-- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (175 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
+- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (177 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
 ## Production Readiness — closed 2026-07-07 (pre-launch)
@@ -238,10 +238,11 @@ families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.m
 - Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
   `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
   the two-part gate blocks the commit otherwise.
-- `TRANSLATIONS` currently has **175 keys** (ES/EN paired, harness-enforced). The two most
+- `TRANSLATIONS` currently has **177 keys** (ES/EN paired, harness-enforced). The most
   recent additions were `achievement_toast_prefix` (round-2 final-review fix for the last
-  hardcoded "Logro:" toast residue in `js/app.js`) and `bmc_label` (the Buy Me a Coffee
-  button — see the Monetization section below).
+  hardcoded "Logro:" toast residue in `js/app.js`), `bmc_label` (the Buy Me a Coffee
+  button — see the Monetization section below), and `lesson_next`/`lesson_finish_chapter`
+  (the lesson bottom-bar buttons — see the Lesson Flow & Mobile FAB section below).
 - The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
   assertions).
 - Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated
@@ -333,3 +334,39 @@ Load-bearing details an agent must know:
   viewport meta now has `viewport-fit=cover`, so unprotected edges really do sit under a notch.
 - Gate: `scripts/validate-responsive.js` (real-browser, manual pre-release step — see "No Tests,
   No Linter" above) + the `N20`/`N20b`/`N20c` check families in `verify-runtime.js`.
+
+## Lesson Flow & Mobile FAB (2026-07-21)
+
+Dos defectos de usabilidad reportados sobre dispositivo real, tras la ronda de adaptabilidad
+móvil. Spec: `docs/superpowers/specs/2026-07-21-lesson-next-button-and-mobile-fab-design.md`;
+plan: `docs/superpowers/plans/2026-07-21-lesson-next-button-and-mobile-fab.md`.
+
+- **Barra inferior de la lección**: pasa de `[← Volver] [Completada]` a
+  `[Marcar como completada] [Siguiente lección →]`. El "Volver al curriculum" de abajo era
+  un duplicado del de `.lesson-nav` (`index.html:342`) y se eliminó — el de arriba sigue.
+- **`App.completeAndAdvance(topicId, chapterId, xp, nextTopicId)`** encadena
+  `completeLesson()` + `navigateToLesson()`, o `navigate('curriculum')` si es la última
+  lección del capítulo (decisión de producto: el flujo **para** al cerrar capítulo, no salta
+  al siguiente). El siguiente tema se deriva de `ch.topics` en `renderLesson()` — `js/content.js`
+  no se toca.
+- **`.lesson-next-btn` usa `--primary-dark`, no `--primary`**: blanco sobre `#6C63FF` es
+  4.32:1 (falla AA), sobre `#5a52d5` es 5.83:1 (pasa). Por eso **no** reutiliza `.btn-primary`,
+  que arrastra ese fallo preexistente. Mismo criterio que `.bmc-fab`.
+- **FAB del café solo-icono en ≤768px** (círculo de 48px): con el texto solapaba los botones
+  de la lección. El nombre accesible pasa a `data-i18n-aria="bmc_label"` en el `<a>` —
+  compatible con el gate `N19`, cuyo regex exige `data-i18n=` con el `=` inmediato. El span
+  se oculta con el selector `.bmc-fab span` y **no** con una clase propia, porque `N19` exige
+  literalmente `<span data-i18n="bmc_label">`.
+- **`.lesson-actions` gana `padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px))`**
+  en ≤768px. Deliberadamente solo en la lección.
+- **Guard de presencia en los checks de orden CSS (`N19`/`N21`, commit `9161acb`):** el check
+  "las reglas nuevas van antes del bloque reduced-motion" usaba
+  `cssSrc.indexOf(selector) < cssSrc.indexOf('@media (prefers-reduced-motion')`. Si `selector`
+  no existe en el CSS, `indexOf` devuelve `-1`, y `-1 < <cualquier índice>` es `true` — el check
+  pasaba en vacío aunque la regla entera se hubiera borrado. Se detectó durante la revisión de
+  la Task 3 y el dueño del repo aprobó explícitamente arreglar también el `N19` preexistente
+  (ampliando la restricción original del plan de "`N19` intocable"). Ambos checks llevan ahora
+  una guarda `cssSrc.includes(selector) &&` antes de comparar índices, verificada renombrando
+  temporalmente el selector para confirmar que el check sí falla. No "simplificar" esta guarda
+  de vuelta a la comparación de índices desnuda.
+- Gate: la familia `N21` en `scripts/verify-runtime.js` (10 checks).
