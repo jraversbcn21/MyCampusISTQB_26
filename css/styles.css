@@ -1439,6 +1439,18 @@ body {
   .search-box .search-results { left: 8px; right: 8px; width: auto; }
   .search-close-btn { display: inline-flex; }
   .readiness-chart { flex-direction: column; }
+  /* El pill solapaba los botones de la lección en móvil (reportado sobre
+     dispositivo real, 2026-07-21): en teléfono/tablet se reduce a un círculo
+     de 48px solo-icono. 48px ≥ 44px (I3). El nombre accesible lo aporta el
+     data-i18n-aria del <a>, porque al ocultar el span el enlace se quedaría
+     sin texto. Selector descendente y no una clase en el span: el check N19
+     exige literalmente <span data-i18n="bmc_label">. */
+  .bmc-fab { padding: 0; width: 48px; height: 48px; border-radius: 50%; justify-content: center; }
+  .bmc-fab span { display: none; }
+  /* Colchón para que ningún botón quede bajo el FAB al final del scroll.
+     72px = 48 del círculo + 24 de su offset inferior. Deliberadamente solo en
+     la lección: extenderlo a otras vistas queda fuera de alcance. */
+  .lesson-actions { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ===== TIER TELÉFONO (adaptabilidad móvil, 2026-07-21) =====

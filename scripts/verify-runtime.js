@@ -1268,6 +1268,22 @@ const SAMPLE_Q = {
     check('N21 css: las reglas nuevas van antes del bloque reduced-motion',
       cssSrc.includes('.lesson-next-btn')
       && cssSrc.indexOf('.lesson-next-btn') < cssSrc.indexOf('@media (prefers-reduced-motion'));
+
+    /* --- Task 4: FAB del café solo-icono en móvil + colchón --- */
+    // El tier 768 se aísla por su cierre a columna 0: las reglas anidadas
+    // cierran con "\n  }" (indentado) y no matchean "\n}".
+    const tier768 = (cssSrc.match(/@media \(max-width: 768px\) \{[\s\S]*?\n\}/) || [''])[0];
+    check('N21 css: en ≤768px el pill del café se reduce a círculo de 48px solo-icono',
+      /\.bmc-fab\s*\{[^}]*width:\s*48px/.test(tier768)
+      && /\.bmc-fab\s*\{[^}]*height:\s*48px/.test(tier768)
+      && /\.bmc-fab\s*\{[^}]*border-radius:\s*50%/.test(tier768)
+      && /\.bmc-fab span\s*\{[^}]*display:\s*none/.test(tier768));
+    check('N21 css: .lesson-actions gana colchón inferior en ≤768px (safe-area incluida)',
+      /\.lesson-actions\s*\{[^}]*padding-bottom:\s*calc\(72px\s*\+\s*env\(safe-area-inset-bottom/.test(tier768));
+
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    check('N21 a11y: el <a> del café lleva data-i18n-aria (al ocultar el span perdería su nombre accesible)',
+      /<a class="bmc-fab"[^>]*data-i18n-aria="bmc_label"/.test(htmlSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
