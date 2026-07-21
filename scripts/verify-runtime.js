@@ -1120,6 +1120,32 @@ const SAMPLE_Q = {
       && /behavior:\s*reduced\s*\?\s*'auto'\s*:\s*'smooth'/.test(cedBody)
       && (/this\._centerExamDot\(\)/.test(methodBody('renderExamDots() {'))
           || /this\._centerExamDot\(\)/.test(methodBody('goToQuestion(i) {'))));
+    /* --- Task 9: onboarding móvil — drawer, clamp real del tooltip, resize --- */
+    const obSrc = fs.readFileSync(path.join(ROOT, 'js', 'onboarding.js'), 'utf8');
+    // (a) Los pasos del sidebar abren el drawer en móvil y el tour lo cierra al
+    // salir — siempre vía App._setDrawerOpen con el guard de existencia (regla
+    // N20 drawer: nadie toca 'mobile-open' por classList fuera de app.js).
+    check('N20 onboarding: abre el drawer en pasos del sidebar (móvil) y lo cierra al salir, vía _setDrawerOpen guardado',
+      /App\._setDrawerOpen\(true\)/.test(obSrc)
+      && /App\._setDrawerOpen\(false\)/.test(obSrc)
+      && /typeof App !== 'undefined' && App\._setDrawerOpen/.test(obSrc)
+      && !/classList\.(add|remove|toggle)\('mobile-open'\)/.test(obSrc));
+    // (b) Sin geometría hardcodeada sin clamp: los anchos 340/300 pasan por
+    // Math.min contra el viewport, y el clamp vertical usa el offsetHeight
+    // real del tooltip (medido tras asignar contenido), no el 220 mágico.
+    check('N20 onboarding: anchos clampados (Math.min 340/300) y alto vertical por offsetHeight real, no 220 fijo',
+      !/tw = 340;/.test(obSrc) && !/tw = 300;/.test(obSrc)
+      && !/innerHeight - 220/.test(obSrc)
+      && /Math\.min\(340,/.test(obSrc) && /Math\.min\(300,/.test(obSrc)
+      && /offsetHeight/.test(obSrc.slice(obSrc.indexOf('_positionOnTarget'))));
+    // (c) Reposicionado en vivo: listeners de resize/orientationchange añadidos
+    // en start() y retirados en el punto único de salida (_done) — 1/1 por
+    // evento, simétricos, solo vivos durante el tour.
+    check('N20 onboarding: listeners resize/orientationchange añadidos y retirados simétricamente (1/1 por evento)',
+      (obSrc.match(/addEventListener\('resize'/g) || []).length === 1
+      && (obSrc.match(/removeEventListener\('resize'/g) || []).length === 1
+      && (obSrc.match(/addEventListener\('orientationchange'/g) || []).length === 1
+      && (obSrc.match(/removeEventListener\('orientationchange'/g) || []).length === 1);
   }
 
   /* ---- N20b: drawer behavioral — abrir/cerrar solo vía _setDrawerOpen ---- */

@@ -80,6 +80,7 @@ const ONBOARDING_STEPS = [
 const Onboarding = {
   _step: 0,
   _userId: null,
+  _onResize: null, // handler de resize/orientationchange, solo vivo durante el tour
 
   /* ===== PUBLIC ===== */
   start(userId) {
@@ -88,11 +89,29 @@ const Onboarding = {
     if (localStorage.getItem(key)) return; // Ya vio el tour
 
     this._step = 0;
+    // Reposicionado en vivo (adaptabilidad móvil, 2026-07-21): rotar el móvil
+    // o redimensionar dejaba tooltip y spotlight donde estaban. Se re-muestra
+    // el paso actual; los listeners solo viven durante el tour (_done los
+    // retira — es el punto único de salida: skip, click en overlay y el
+    // "Empezar" final pasan todos por él).
+    this._onResize = () => this._updateStep();
+    window.addEventListener('resize', this._onResize);
+    window.addEventListener('orientationchange', this._onResize);
     this._render();
     this._show();
   },
 
   _done() {
+    // Retirar los listeners de reposicionado (el guard de removeEventListener
+    // cubre el arnés, cuyo mock de window solo tiene addEventListener).
+    if (this._onResize && typeof window.removeEventListener === 'function') {
+      window.removeEventListener('resize', this._onResize);
+      window.removeEventListener('orientationchange', this._onResize);
+    }
+    this._onResize = null;
+    // Si el tour abrió el drawer móvil para señalar el sidebar, cerrarlo al
+    // salir — siempre vía el único punto de verdad (regla _setDrawerOpen).
+    if (typeof App !== 'undefined' && App._setDrawerOpen) App._setDrawerOpen(false);
     // _hide() primero: si setItem revienta (quota llena, modo privado), el
     // tour debe cerrarse igualmente — peor repetirlo mañana que dejarlo
     // pegado en pantalla hoy.
@@ -169,11 +188,53 @@ const Onboarding = {
       `<span class="ob-dot ${i === this._step ? 'active' : ''}"></span>`
     ).join('');
 
-    // Posicionar
-    if (step.target) {
-      this._positionOnTarget(step);
+    // Drawer móvil (2026-07-21): los pasos que señalan ítems del sidebar solo
+    // se ven en móvil con el drawer abierto — abrirlo ANTES de medir y
+    // posicionar. _setDrawerOpen es idempotente: entre pasos consecutivos del
+    // sidebar el drawer no parpadea. Para el paso centrado (bienvenida) y al
+    // volver a un paso no-sidebar, se cierra. Guards: App puede no existir en
+    // el arnés y matchMedia tampoco (patrón del carrusel en app.js).
+    const targetEl = step.target ? document.querySelector(step.target) : null;
+    const inSidebar = !!(targetEl && typeof targetEl.closest === 'function'
+      && targetEl.closest('#sidebar'));
+    const isMobile = typeof matchMedia === 'function'
+      && matchMedia('(max-width: 768px)').matches;
+    let drawerJustOpened = false;
+    if (typeof App !== 'undefined' && App._setDrawerOpen) {
+      if (inSidebar && isMobile) {
+        // Solo si aún no está abierto: _setDrawerOpen(true) roba el foco al
+        // primer .nav-item en cada llamada — repetirla en cada paso del
+        // sidebar se lo quitaría al botón Siguiente entre paso y paso.
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList && !sidebar.classList.contains('mobile-open')) {
+          drawerJustOpened = true;
+          App._setDrawerOpen(true);
+        }
+      } else {
+        App._setDrawerOpen(false);
+      }
+    }
+
+    // Posicionar. Si el drawer se ACABA de abrir, su transform (0.2s) aún no
+    // ha llegado: getBoundingClientRect daría el nav-item fuera de pantalla y
+    // la red de seguridad degradaría el paso a centrado. Se espera a que
+    // asiente con setTimeout (regla del repo: nada de transitionend); con
+    // reduced-motion la transición es ~0 pero el primer recálculo de estilo
+    // puede no haber ocurrido aún — 50ms garantizan un frame pintado.
+    const position = () => {
+      const tooltip = document.getElementById('onboarding-tooltip');
+      if (!tooltip || tooltip.style.display === 'none') return; // el tour se cerró durante la espera
+      const s = ONBOARDING_STEPS[this._step];
+      if (!s) return;
+      if (s.target) this._positionOnTarget(s);
+      else this._positionCenter();
+    };
+    if (drawerJustOpened) {
+      const reduced = typeof matchMedia === 'function'
+        && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      setTimeout(position, reduced ? 50 : 250);
     } else {
-      this._positionCenter();
+      position();
     }
   },
 
@@ -182,11 +243,14 @@ const Onboarding = {
     const tooltip = document.getElementById('onboarding-tooltip');
     highlight.style.display = 'none';
 
-    const tw = 340;
-    const th = tooltip.offsetHeight || 200;
-    tooltip.style.left = `${(window.innerWidth - tw) / 2}px`;
-    tooltip.style.top = `${(window.innerHeight - th) / 2}px`;
+    // Clamp real (2026-07-21): los 340px fijos desbordaban en viewports
+    // <372px. Ancho primero, alto DESPUÉS (offsetHeight depende del ancho
+    // aplicado y del contenido ya asignado en _updateStep).
+    const tw = Math.min(340, window.innerWidth - 32);
     tooltip.style.width = `${tw}px`;
+    const th = tooltip.offsetHeight || 200; // 0 solo en el arnés mockeado
+    tooltip.style.left = `${Math.max(16, (window.innerWidth - tw) / 2)}px`;
+    tooltip.style.top = `${Math.max(16, (window.innerHeight - th) / 2)}px`;
   },
 
   _positionOnTarget(step) {
@@ -194,6 +258,15 @@ const Onboarding = {
     if (!el) { this._positionCenter(); return; }
 
     const rect = el.getBoundingClientRect();
+    // Red de seguridad (2026-07-21): si el target queda completamente fuera
+    // del viewport incluso tras abrir el drawer (o mide 0×0 por estar
+    // oculto), degradar a tooltip centrado sin spotlight en vez de señalar
+    // al vacío (_positionCenter ya oculta el highlight).
+    const offViewport = rect.bottom <= 0 || rect.top >= window.innerHeight
+      || rect.right <= 0 || rect.left >= window.innerWidth
+      || (rect.width === 0 && rect.height === 0);
+    if (offViewport) { this._positionCenter(); return; }
+
     const highlight = document.getElementById('onboarding-highlight');
     const tooltip = document.getElementById('onboarding-tooltip');
     const pad = 6;
@@ -205,20 +278,25 @@ const Onboarding = {
     highlight.style.width  = `${rect.width + pad * 2}px`;
     highlight.style.height = `${rect.height + pad * 2}px`;
 
-    // Posicionar tooltip a la derecha
-    const tw = 300;
+    // Tooltip a la derecha del target. Clamp real (2026-07-21): ancho contra
+    // el viewport, y el alto se mide (offsetHeight, con el contenido y el
+    // ancho ya aplicados) en vez del 220 mágico de antes.
+    const tw = Math.min(300, window.innerWidth - 32);
+    tooltip.style.width = `${tw}px`;
+    const th = tooltip.offsetHeight || 220; // 0 solo en el arnés mockeado
     let left = rect.right + 20;
     let top  = rect.top + rect.height / 2 - 80;
 
-    // Si se sale por la derecha, ponerlo a la izquierda
+    // Si se sale por la derecha, ponerlo a la izquierda…
     if (left + tw > window.innerWidth - 16) {
       left = rect.left - tw - 20;
     }
-    // Ajuste vertical
-    top = Math.max(16, Math.min(top, window.innerHeight - 220));
+    // …y clamp final en ambos ejes: el tooltip ENTERO (botón Siguiente
+    // incluido) queda dentro del viewport, con margen mínimo de 16px.
+    left = Math.max(16, Math.min(left, window.innerWidth - tw - 16));
+    top  = Math.max(16, Math.min(top, window.innerHeight - th - 16));
 
     tooltip.style.left  = `${left}px`;
     tooltip.style.top   = `${top}px`;
-    tooltip.style.width = `${tw}px`;
   },
 };
