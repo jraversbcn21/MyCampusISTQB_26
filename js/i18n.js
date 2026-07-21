@@ -109,6 +109,8 @@ const TRANSLATIONS = {
     // MISC
     lesson_complete: "Marcar como completada",
     lesson_completed: "✓ Completada",
+    lesson_next: "Siguiente lección",
+    lesson_finish_chapter: "Completar capítulo",
     xp_gained: "XP ganados",
     level_up: "¡Subiste de nivel!",
     no_exams_yet: "Aún no has realizado ningún simulacro",
@@ -310,6 +312,8 @@ const TRANSLATIONS = {
     // MISC
     lesson_complete: "Mark as complete",
     lesson_completed: "✓ Completed",
+    lesson_next: "Next lesson",
+    lesson_finish_chapter: "Finish chapter",
     xp_gained: "XP earned",
     level_up: "Level up!",
     no_exams_yet: "You haven't taken any exams yet",

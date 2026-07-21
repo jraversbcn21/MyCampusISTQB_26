@@ -1234,6 +1234,15 @@ const SAMPLE_Q = {
       has && inserted.length === 1);
   }
 
+  /* ---- N21: botón "siguiente lección" + FAB del café en móvil (2026-07-21) ---- */
+  {
+    const ctx = loadApp();
+    check('N21 i18n: lesson_next y lesson_finish_chapter definidas en ES y EN',
+      ['lesson_next', 'lesson_finish_chapter'].every(k =>
+        typeof ctx.TRANSLATIONS.es[k] === 'string' && ctx.TRANSLATIONS.es[k].length > 0
+        && typeof ctx.TRANSLATIONS.en[k] === 'string' && ctx.TRANSLATIONS.en[k].length > 0));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
