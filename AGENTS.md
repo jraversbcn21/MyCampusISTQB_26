@@ -814,7 +814,7 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   block above) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like
   every other `data-i18n-*` mechanism
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **177 keys** (160 after
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **178 keys** (160 after
   the 2026-07-04 remediation, +5 `gs_*` keys for the 2026-07-08 global search dropdown →
   165, +4 more — `mobile_menu_aria`, `fc_prev_aria`, `fc_next_aria`, `close_label` — added
   2026-07-14 for the `data-i18n-aria` rollout above → 169, +1 — `goto_question_aria`, the
@@ -824,8 +824,9 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   `achievement_toast_prefix`, the round-2 final-review fix for the last hardcoded
   "Logro:" toast residue → 174, +1 — `bmc_label`, the Buy Me a Coffee pill added
   2026-07-15 → 175, +2 — `lesson_next`/`lesson_finish_chapter`, the lesson bottom-bar
-  buttons added 2026-07-21 (see "Flujo de lección y FAB móvil" below) → **177**), all ES/EN
-  paired, enforced by
+  buttons added 2026-07-21 morning (see "Flujo de lección y FAB móvil" below) → 177, +1 —
+  `lesson_next_locked_toast`, the same-day gating revocation's warning toast → **178**),
+  all ES/EN paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
   hardcoded-language residues)
 - `i18n.restore()` reads the saved language from `localStorage` and applies it; `i18n.setLang(lang)`
@@ -1164,13 +1165,26 @@ adaptability (2026-07-21)" in the Repository section above). Spec:
 que vive en `.lesson-nav` (`index.html:342`) y se eliminó. Hoy emite
 `[Marcar como completada] [Siguiente lección: <tema> →]`, con el primario a la derecha.
 
-**`App.completeAndAdvance(topicId, chapterId, xp, nextTopicId)`.** Delega en
-`completeLesson()` (XP, logros, `saveState()` — no duplica nada) y después bifurca:
+**`App.advanceLesson(topicId, chapterId, nextTopicId)` (antes `completeAndAdvance`, mismo día,
+tras probar en dispositivo real — revocación consciente).** La semántica de la mañana
+encadenaba `completeLesson()` + `navigateToLesson()` en un único clic; probada en dispositivo
+real esa misma tarde, se descartó deliberadamente: regalaba el XP como efecto colateral de
+"avanzar" y vaciaba de sentido el botón "Marcar como completada" (¿para qué marcarla si
+avanzar ya la completaba?). **No restaurar el encadenamiento.** Hoy `advanceLesson` **solo
+navega, y solo si la lección ya está en `completedLessons`**: si no lo está, guard-clause →
+`showToast(i18n.t('lesson_next_locked_toast'), 'warning')` y `return` sin tocar
+`completeLesson` ni el estado. Si está completada, bifurca igual que antes:
 `navigateToLesson(chapterId, nextTopicId)` si hay siguiente, o `navigate('curriculum')` si es
-la última lección del capítulo. **Decisión de producto: el flujo para al cerrar capítulo**, no
-encadena con el capítulo siguiente. `completeLesson()` es idempotente, así que avanzar por una
-lección ya completada no re-otorga XP. Hace `window.scrollTo(0, 0)` tras navegar (guardado con
-un `typeof` por el DOM mockeado del arnés) para no aterrizar a media lección.
+la última lección del capítulo (**decisión de producto que sigue vigente**: el flujo para al
+cerrar capítulo, no encadena con el capítulo siguiente). El XP y el marcado como completada
+viven **exclusivamente** en `completeLesson()`, nunca en `advanceLesson()`. El primario se
+emite atenuado en el template — `locked` + `aria-disabled="true"` (nunca `disabled` real, para
+que el click siga llegando al guard y dispare el toast) — cuando la lección no está completada,
+y `completeLesson()` lo desbloquea **in place** sobre el mismo `#nextLessonBtn`
+(`classList.remove('locked')` + `removeAttribute('aria-disabled')`), sin re-renderizar
+`renderLesson()`. Hace `window.scrollTo(0, 0)` tras navegar (guardado con un `typeof` por el
+DOM mockeado del arnés) para no aterrizar a media lección. Spec:
+`docs/superpowers/specs/2026-07-21-lesson-advance-gating-design.md`.
 
 El siguiente tema se deriva de `ch.topics` dentro de `renderLesson()`: **`js/content.js` no se
 toca**, la regla de fidelidad de contenido queda intacta.
@@ -1231,7 +1245,11 @@ de probar que la cascada gana de verdad, no solo que el texto de la declaración
 fichero fuente. Sigue el patrón de manejo de "elemento ausente/oculto" del resto del script
 (`!fab` / `fab.hidden` con su propio mensaje).
 
-Gate: familia `N21` en `scripts/verify-runtime.js` (10 checks), más el `N19` reanclado y el
+Gate: familia `N21` en `scripts/verify-runtime.js` (17 checks tras la ronda de gating del
+avance — de los cuales 2 son comportamentales, no grep: cargan un `App` real con `loadApp()`,
+le hacen monkeypatch de `navigateToLesson`/`showToast` y llaman a `App.advanceLesson()` de
+verdad primero con `completedLessons = []` — afirmando que no navega y sí avisa — y luego con
+la lección añadida a `completedLessons` — afirmando que navega), más el `N19` reanclado y el
 nuevo assert de cascada en `validate-responsive.js`. `privacy.html` no cambia — el enlace
 saliente es el mismo, solo cambia su presentación.
 

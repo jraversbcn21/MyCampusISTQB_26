@@ -136,7 +136,7 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
 - No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
 - A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
-- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (177 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
+- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (178 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
 ## Production Readiness — closed 2026-07-07 (pre-launch)
@@ -248,11 +248,12 @@ families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.m
 - Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
   `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
   the two-part gate blocks the commit otherwise.
-- `TRANSLATIONS` currently has **177 keys** (ES/EN paired, harness-enforced). The most
+- `TRANSLATIONS` currently has **178 keys** (ES/EN paired, harness-enforced). The most
   recent additions were `achievement_toast_prefix` (round-2 final-review fix for the last
   hardcoded "Logro:" toast residue in `js/app.js`), `bmc_label` (the Buy Me a Coffee
-  button — see the Monetization section below), and `lesson_next`/`lesson_finish_chapter`
-  (the lesson bottom-bar buttons — see the Lesson Flow & Mobile FAB section below).
+  button — see the Monetization section below), `lesson_next`/`lesson_finish_chapter`
+  (the lesson bottom-bar buttons), and `lesson_next_locked_toast` (the same-day gating
+  revocation's warning toast — see the Lesson Flow & Mobile FAB section below).
 - The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
   assertions).
 - Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated
@@ -359,11 +360,17 @@ plan: `docs/superpowers/plans/2026-07-21-lesson-next-button-and-mobile-fab.md`.
 - **Barra inferior de la lección**: pasa de `[← Volver] [Completada]` a
   `[Marcar como completada] [Siguiente lección →]`. El "Volver al curriculum" de abajo era
   un duplicado del de `.lesson-nav` (`index.html:342`) y se eliminó — el de arriba sigue.
-- **`App.completeAndAdvance(topicId, chapterId, xp, nextTopicId)`** encadena
-  `completeLesson()` + `navigateToLesson()`, o `navigate('curriculum')` si es la última
-  lección del capítulo (decisión de producto: el flujo **para** al cerrar capítulo, no salta
-  al siguiente). El siguiente tema se deriva de `ch.topics` en `renderLesson()` — `js/content.js`
-  no se toca.
+- **`App.advanceLesson(topicId, chapterId, nextTopicId)`** (antes `completeAndAdvance`):
+  **solo navega, y solo si la lección está en `completedLessons`** — sin marcar, toast
+  `warning` (`lesson_next_locked_toast`) y no navega; el primario se emite atenuado
+  (`locked` + `aria-disabled="true"`, nunca `disabled` real) y `completeLesson()` lo
+  desbloquea in place (`#nextLessonBtn`). **Revocación consciente (misma tarde, tras
+  probar en dispositivo real)** de la semántica completar-y-avanzar desplegada por la
+  mañana: regalaba el XP como efecto colateral y vaciaba de sentido "Marcar como
+  completada". El XP vive exclusivamente en `completeLesson`. No restaurar el
+  encadenamiento. Spec: `2026-07-21-lesson-advance-gating-design.md`. Sigue vigente: el
+  flujo **para** al cerrar capítulo, y el siguiente tema se deriva de `ch.topics`
+  (`js/content.js` no se toca).
 - **`.lesson-next-btn` usa `--primary-dark`, no `--primary`**: blanco sobre `#6C63FF` es
   4.32:1 (falla AA), sobre `#5a52d5` es 5.83:1 (pasa). Por eso **no** reutiliza `.btn-primary`,
   que arrastra ese fallo preexistente. Mismo criterio que `.bmc-fab`.
@@ -384,4 +391,6 @@ plan: `docs/superpowers/plans/2026-07-21-lesson-next-button-and-mobile-fab.md`.
   una guarda `cssSrc.includes(selector) &&` antes de comparar índices, verificada renombrando
   temporalmente el selector para confirmar que el check sí falla. No "simplificar" esta guarda
   de vuelta a la comparación de índices desnuda.
-- Gate: la familia `N21` en `scripts/verify-runtime.js` (10 checks).
+- Gate: la familia `N21` en `scripts/verify-runtime.js` (17 checks, incluyendo 2
+  comportamentales que llaman a `App.advanceLesson` real con navegación/toast
+  monkeypatchados, no solo grep).
