@@ -952,7 +952,8 @@ const SAMPLE_Q = {
     check('N19 css: el pill se oculta durante el examen',
       /body\.exam-active\s+\.bmc-fab\s*\{[^}]*display:\s*none/.test(cssSrc));
     check('N19 css: las reglas del pill van antes del bloque reduced-motion',
-      cssSrc.indexOf('.bmc-fab') < cssSrc.indexOf('@media (prefers-reduced-motion'));
+      cssSrc.includes('.bmc-fab')
+      && cssSrc.indexOf('.bmc-fab') < cssSrc.indexOf('@media (prefers-reduced-motion'));
     const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
     check('N19 examen: _setExamActive setea el flag y togglea la clase del body',
       /_setExamActive\(active\)\s*\{[\s\S]{0,160}this\._examActive = active[\s\S]{0,160}document\.body\.classList\.toggle\('exam-active', active\)/.test(appSrc));
@@ -1265,7 +1266,8 @@ const SAMPLE_Q = {
     check('N21 css: el título del siguiente tema se oculta en el tier 480',
       /@media \(max-width: 480px\)[\s\S]*?\.next-topic-title\s*\{[^}]*display:\s*none/.test(cssSrc));
     check('N21 css: las reglas nuevas van antes del bloque reduced-motion',
-      cssSrc.indexOf('.lesson-next-btn') < cssSrc.indexOf('@media (prefers-reduced-motion'));
+      cssSrc.includes('.lesson-next-btn')
+      && cssSrc.indexOf('.lesson-next-btn') < cssSrc.indexOf('@media (prefers-reduced-motion'));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
