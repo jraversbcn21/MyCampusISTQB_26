@@ -840,14 +840,21 @@ const App = {
   },
 
   // Tira de dots (2026-07-21): centra el dot actual en el scroll horizontal
-  // del contenedor (solo hace algo cuando el tier 480 activa la tira; en la
-  // parrilla desktop scrollIntoView con block:'nearest' es un no-op visual).
+  // del PROPIO contenedor (nunca scrollIntoView: arrastra también el scroll
+  // vertical de ancestros —incluida la página— cuando la tira queda fuera de
+  // pantalla, hallazgo I2 de la revisión). scrollTo acotado al contenedor es
+  // un no-op real cuando no hay overflow (parrilla desktop).
   _centerExamDot() {
     const dot = document.querySelector('.exam-dot.current');
-    if (!dot || typeof dot.scrollIntoView !== 'function') return; // harness mock
+    const strip = dot && dot.parentElement;
+    if (!strip || typeof strip.scrollTo !== 'function') return; // harness mock
+    if (strip.scrollWidth <= strip.clientWidth) return; // sin overflow: nada que centrar
     const reduced = typeof matchMedia === 'function'
       && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    dot.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+    strip.scrollTo({
+      left: dot.offsetLeft - (strip.clientWidth - dot.offsetWidth) / 2,
+      behavior: reduced ? 'auto' : 'smooth',
+    });
   },
 
   selectAnswer(optIndex) {
@@ -1396,7 +1403,10 @@ const App = {
       const sidebar = document.getElementById('sidebar');
       if (sidebar.classList.contains('collapsed')) {
         sidebar.classList.remove('collapsed');
-      } else {
+      } else if (typeof matchMedia === 'function' && matchMedia('(max-width: 768px)').matches) {
+        // Solo abre el drawer en móvil (hallazgo C1): en desktop el logo no
+        // colapsado no tiene affordance de apertura — sin el guard, el click
+        // mutaba mobile-open/drawer-open también en desktop.
         this._setDrawerOpen(true);
       }
     });
@@ -1534,6 +1544,11 @@ const App = {
           if (ev.matches) {
             if (!sb.classList.contains('mobile-open')) sb.setAttribute('inert', '');
           } else {
+            // Cruzar a desktop con el drawer abierto (p. ej. rotar una tablet
+            // en 768px) dejaba mobile-open/drawer-open pegados — scrim y
+            // scroll-lock atascados hasta un clic suelto (hallazgo I1). Cerrar
+            // el drawer entero, no solo quitar inert.
+            this._setDrawerOpen(false);
             sb.removeAttribute('inert');
           }
         });

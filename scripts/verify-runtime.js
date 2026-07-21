@@ -1101,7 +1101,9 @@ const SAMPLE_Q = {
       && /\.exam-question-dots\s*\{[^}]*overflow-x:\s*auto/.test(t480));
     // Tres afirmaciones en un check: (a) _centerExamDot existe (el indexOf busca
     // la DEFINICIÓN '  _centerExamDot() {' — una llamada sería 'this._…' y no
-    // casa); (b) su scrollIntoView condiciona behavior al matchMedia de
+    // casa); (b) centra con scrollTo del PROPIO contenedor —no scrollIntoView,
+    // que arrastraba el scroll vertical de la página en desktop (hallazgo I2
+    // de la revisión final)— y condiciona behavior al matchMedia de
     // prefers-reduced-motion; (c) lo llama renderExamDots o goToQuestion —
     // renderExamDots es el punto único real: los cuatro flujos que mueven el
     // dot actual (Siguiente/Anterior, responder, click/teclado en un dot)
@@ -1113,9 +1115,10 @@ const SAMPLE_Q = {
       const s = appSrc20.indexOf(name);
       return s >= 0 ? appSrc20.slice(s, appSrc20.indexOf('\n  },', s)) : '';
     };
-    check('N20 dots: _centerExamDot (scrollIntoView + guard reduced-motion) llamado desde renderExamDots/goToQuestion',
+    check('N20 dots: _centerExamDot centra el contenedor propio (no scrollIntoView) con guard reduced-motion',
       cedBody !== ''
-      && /scrollIntoView\(\{/.test(cedBody)
+      && !/scrollIntoView/.test(cedBody)
+      && /strip\.scrollTo\(\{/.test(cedBody)
       && /matchMedia\('\(prefers-reduced-motion: reduce\)'\)/.test(cedBody)
       && /behavior:\s*reduced\s*\?\s*'auto'\s*:\s*'smooth'/.test(cedBody)
       && (/this\._centerExamDot\(\)/.test(methodBody('renderExamDots() {'))

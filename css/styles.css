@@ -1395,12 +1395,6 @@ body {
   z-index: 99;
 }
 
-/* Drawer móvil (2026-07-21): la visibilidad del scrim y el scroll-lock del
-   fondo cuelgan de la clase drawer-open en <body> — App._setDrawerOpen es el
-   único punto que la pone/quita (regla paralela a exam-active). */
-body.drawer-open .sidebar-overlay { display: block; }
-body.drawer-open { overflow: hidden; }
-
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1417,6 +1411,13 @@ body.drawer-open { overflow: hidden; }
     width: var(--sidebar-w);
   }
   .sidebar.mobile-open { transform: translateX(0); }
+  /* Drawer móvil (2026-07-21): la visibilidad del scrim y el scroll-lock del
+     fondo cuelgan de la clase drawer-open en <body> — App._setDrawerOpen es
+     el único punto que la pone/quita (regla paralela a exam-active). Dentro
+     de este tier a propósito: en desktop el drawer es inerte y no debe
+     oscurecer la página ni bloquear el scroll (hallazgo C1 de la revisión). */
+  body.drawer-open .sidebar-overlay { display: block; }
+  body.drawer-open { overflow: hidden; }
   .main { margin-left: 0; }
   .mobile-menu-btn { display: block; }
   /* El colapso a rail de 64px es affordance de desktop; dentro del drawer
