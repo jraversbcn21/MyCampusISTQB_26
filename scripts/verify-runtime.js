@@ -1146,6 +1146,11 @@ const SAMPLE_Q = {
       && (obSrc.match(/removeEventListener\('resize'/g) || []).length === 1
       && (obSrc.match(/addEventListener\('orientationchange'/g) || []).length === 1
       && (obSrc.match(/removeEventListener\('orientationchange'/g) || []).length === 1);
+    /* --- Task 10: gate con navegador real — existe y degrada no-op --- */
+    const respPath = path.join(ROOT, 'scripts', 'validate-responsive.js');
+    check('N20 gate: validate-responsive.js existe y degrada no-op sin Playwright',
+      fs.existsSync(respPath)
+      && /SKIP: Playwright no disponible/.test(fs.readFileSync(respPath, 'utf8')));
   }
 
   /* ---- N20b: drawer behavioral — abrir/cerrar solo vía _setDrawerOpen ---- */
