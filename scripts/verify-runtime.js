@@ -977,8 +977,12 @@ const SAMPLE_Q = {
     // slice no arrastra CSS ajeno y los checks afirman "dentro del tier".
     const tierEnd = cssSrc.indexOf('/* ===== UTILITY', tier480 >= 0 ? tier480 : 0);
     const t480 = tier480 >= 0 && tierEnd > tier480 ? cssSrc.slice(tier480, tierEnd) : '';
-    check('N20 tier: avatar-grid a 1 columna vive en el tier 480',
-      /\.avatar-grid\s*\{\s*grid-template-columns:\s*1fr/.test(t480));
+    // Con prefijo #avatar-modal obligatorio: la base .avatar-grid { 1fr 1fr }
+    // vive DESPUÉS del tier en el fichero y a igual especificidad ganaba la
+    // cascada (regresión real cazada por el usuario el 2026-07-21: dos
+    // columnas de 155px en un teléfono de 412px).
+    check('N20 tier: avatar-grid a 1 columna en el tier 480, con id que gana la cascada',
+      /#avatar-modal \.avatar-grid\s*\{\s*grid-template-columns:\s*1fr/.test(t480));
     check('N20 tier: stats-grid y results-stats colapsan a 1 columna',
       /\.stats-grid\s*\{[^}]*grid-template-columns:\s*1fr\s*[;}]/.test(t480)
       && /\.results-stats\s*\{[^}]*grid-template-columns:\s*1fr\s*[;}]/.test(t480));

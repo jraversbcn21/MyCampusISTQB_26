@@ -580,6 +580,33 @@
     off the tooltip's Next button — a keyboard user pressing Enter there navigates
     instead of advancing the tour (acknowledged in the code comment; not fixed this
     round).
+  - **User-report fix wave (2026-07-21, same day, real-device findings):** Jorge tested
+    on his phone (~412px) and found three visual defects, all confirmed by measurement
+    and fixed:
+    1. **Avatar modal rendered 2 squeezed columns (155px each, description text one
+       word per line) — a real regression from this round's Task 1:** the old
+       `@media (max-width: 500px)` block sat AFTER the avatar-modal CSS section and won
+       the cascade; the merged 480 tier sits BEFORE it, so at equal specificity the
+       base `.avatar-grid { 1fr 1fr }` (line ~1812) silently won. Fixed by giving the
+       tier rule id specificity (`#avatar-modal .avatar-grid`) — order-independent. The
+       gate missed it because `validate-responsive.js` never opened the avatar modal;
+       it now has a per-width "modal de avatar: 1 columna + sin overflow" assert (via
+       `AvatarSelector.openModal()` — the `#userAvatar` click listener is wired by the
+       auth flow the gate bypasses), and the N20 tier check now requires the
+       `#avatar-modal` prefix. **Lesson recorded: merging a media block changes its
+       cascade position — check what its rules used to beat.**
+    2. **Onboarding tooltip covered 91% of the spotlight on mobile** — the
+       right/left flip in `_positionOnTarget` never fits on a phone (the drawer is
+       nearly full-width), so the final clamp parked the tooltip on top of the very
+       nav item it was highlighting. Added a third placement: below the target (above
+       if no room below) whenever neither side fits; desktop keeps the side placement.
+       New gate assert: tooltip/spotlight overlap ≤25% on every tour step.
+    3. **Name-edit pencil glued to the username on touch:** the coarse block's
+       hit-area expansion (`margin: -17px` shorthand) silently killed the base
+       `margin-left`, leaving a 0px visual gap on phones. Fixed with
+       `margin-left: -9px` after the shorthand (17px padding − 9px = 8px visual gap,
+       matching the desktop gap, which was also bumped 5→8px per the report); hit
+       area stays 44×44.
 
 ## Production Readiness — Status & Next Session
 

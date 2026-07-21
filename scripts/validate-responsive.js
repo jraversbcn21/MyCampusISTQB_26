@@ -236,6 +236,28 @@ const measureDoc = () => {
         closed1.inert && closed1.aria === 'false',
         `inert:${closed1.inert}, aria-expanded="${closed1.aria}"`);
 
+      /* ---- (g) Modal de avatar: 1 columna en teléfono (≤480) ----
+         Cobertura añadida el 2026-07-21 tras una regresión real que este gate
+         no vio: la regla del tier perdía la cascada contra la base 1fr 1fr
+         (que va después en el fichero) y el usuario encontró dos columnas de
+         155px en un teléfono de 412px, con el texto a una palabra por línea. */
+      const av = await page.evaluate(() => {
+        // API real del módulo, no el click en #userAvatar: su listener lo
+        // cablea el flujo de auth que el bypass se salta.
+        AvatarSelector.openModal();
+        const grid = document.querySelector('.avatar-grid');
+        const modal = document.getElementById('avatar-modal');
+        if (!grid || !modal || getComputedStyle(modal).display === 'none') return null;
+        const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+        const desc = document.querySelector('.av-desc');
+        const overflow = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+        AvatarSelector.closeModal();
+        return { cols, descW: desc ? desc.getBoundingClientRect().width : null, overflow };
+      });
+      assert(width, 'modal de avatar: grid a 1 columna y sin scroll horizontal',
+        !!av && av.cols === 1 && av.overflow <= 0,
+        av ? `${av.cols} col, desc ${Math.round(av.descW)}px, overflow ${av.overflow}` : 'modal no abrió');
+
       /* ---- (a ter + b + c) Examen full activo: overflow, dot ≥ 44, tira ≤ 64 ---- */
       await page.evaluate(() => { App.navigate('simulator'); App.startExam('full'); });
       await page.waitForTimeout(500); // render + auto-centrado (smooth) del dot
@@ -277,9 +299,22 @@ const measureDoc = () => {
         const readTour = () => page2.evaluate(() => {
           const t = document.getElementById('onboarding-tooltip');
           const r = t.getBoundingClientRect();
+          // Solape tooltip/spotlight: a 412px el flip derecha/izquierda del
+          // tooltip acababa clampado tapando el 91% del anillo — el usuario
+          // no veía qué módulo se le señalaba (reporte del 2026-07-21). El
+          // modo "debajo del target" lo elimina; este assert lo vigila.
+          const h = document.getElementById('onboarding-highlight');
+          let coverage = 0;
+          if (h && h.style.display !== 'none') {
+            const hr = h.getBoundingClientRect();
+            const ox = Math.max(0, Math.min(r.right, hr.right) - Math.max(r.left, hr.left));
+            const oy = Math.max(0, Math.min(r.bottom, hr.bottom) - Math.max(r.top, hr.top));
+            const hArea = hr.width * hr.height;
+            coverage = hArea > 0 ? (ox * oy) / hArea : 0;
+          }
           return {
             left: r.left, top: r.top, right: r.right, bottom: r.bottom,
-            iw: innerWidth, ih: innerHeight,
+            iw: innerWidth, ih: innerHeight, coverage,
             drawer: document.getElementById('sidebar').classList.contains('mobile-open')
               && document.body.classList.contains('drawer-open'),
           };
@@ -291,7 +326,8 @@ const measureDoc = () => {
         const fmt = r => `rect ${Math.round(r.left)},${Math.round(r.top)}→${Math.round(r.right)},${Math.round(r.bottom)} en ${r.iw}×${r.ih}`;
 
         const steps = await page2.evaluate(() => ONBOARDING_STEPS.length); // 8: bienvenida + 7 sidebar
-        let tourOk = true, drawerOk = true, badStep = -1, badRect = '';
+        let tourOk = true, drawerOk = true, coverOk = true, badStep = -1, badRect = '';
+        let badCover = '';
         const s0 = await readTour();
         if (!inVp(s0)) { tourOk = false; badStep = 0; badRect = fmt(s0); }
         for (let i = 1; i < steps; i++) {
@@ -302,10 +338,15 @@ const measureDoc = () => {
           const s = await readTour();
           if (!inVp(s) && tourOk) { tourOk = false; badStep = i; badRect = fmt(s); }
           if (!s.drawer) drawerOk = false; // pasos 1..7: todos señalan el sidebar
+          if (s.coverage > 0.25 && coverOk) {
+            coverOk = false;
+            badCover = `paso ${i}: tooltip tapa el ${Math.round(s.coverage * 100)}% del spotlight`;
+          }
         }
         assert(width, `onboarding: tooltip íntegro en viewport en los ${steps} pasos`,
           tourOk, `paso ${badStep}: ${badRect}`);
         assert(width, 'onboarding: pasos del sidebar con el drawer abierto', drawerOk);
+        assert(width, 'onboarding: el tooltip no tapa el spotlight (≤25%)', coverOk, badCover);
 
         await page2.click('#obNext'); // último click: "Empezar" → _done()
         await page2.waitForTimeout(300);

@@ -1508,8 +1508,12 @@ body {
   .glossary-term { min-width: 0; order: 1; }
   .glossary-chapter { min-width: 0; white-space: normal; align-self: flex-start; order: 2; }
   .glossary-def { order: 3; }
-  /* Fusionado del antiguo @media (max-width: 500px): */
-  .avatar-grid { grid-template-columns: 1fr; }
+  /* Fusionado del antiguo @media (max-width: 500px). Con prefijo #avatar-modal
+     a propósito: la regla base .avatar-grid { 1fr 1fr } vive DESPUÉS de este
+     tier en el fichero (sección del modal, ~1812) y a igual especificidad
+     ganaba la cascada — el viejo bloque de 500px funcionaba solo porque
+     estaba tras esa sección. El id decide por especificidad, no por orden. */
+  #avatar-modal .avatar-grid { grid-template-columns: 1fr; }
 }
 
 /* ===== UTILITY ===== */
@@ -1948,7 +1952,7 @@ body {
   font-size: 0.65rem;
   opacity: 0;
   padding: 0;
-  margin-left: 5px;
+  margin-left: 8px;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -2211,11 +2215,15 @@ body {
   /* Sin hover en táctil el botón era invisible e inalcanzable. No se agranda
      a 44px (rompería el layout inline del user-card): se amplía su hit-area
      con padding+margen negativo (aquí sí es seguro: no tiene controles
-     adyacentes que solapar). */
+     adyacentes que solapar). margin-left compensado a -9px (no -17px): el
+     margin shorthand machacaba el margin-left base y dejaba el lápiz pegado
+     al nombre en táctil — -9 + 17 de padding = 8px de hueco visual, igual
+     que en desktop. */
   .name-edit-btn {
     opacity: 0.7;
     padding: 17px;
     margin: -17px;
+    margin-left: -9px;
   }
 }
 

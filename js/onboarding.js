@@ -278,20 +278,36 @@ const Onboarding = {
     highlight.style.width  = `${rect.width + pad * 2}px`;
     highlight.style.height = `${rect.height + pad * 2}px`;
 
-    // Tooltip a la derecha del target. Clamp real (2026-07-21): ancho contra
-    // el viewport, y el alto se mide (offsetHeight, con el contenido y el
+    // Tooltip junto al target. Clamp real (2026-07-21): ancho contra el
+    // viewport, y el alto se mide (offsetHeight, con el contenido y el
     // ancho ya aplicados) en vez del 220 mágico de antes.
     const tw = Math.min(300, window.innerWidth - 32);
     tooltip.style.width = `${tw}px`;
     const th = tooltip.offsetHeight || 220; // 0 solo en el arnés mockeado
-    let left = rect.right + 20;
-    let top  = rect.top + rect.height / 2 - 80;
 
-    // Si se sale por la derecha, ponerlo a la izquierda…
-    if (left + tw > window.innerWidth - 16) {
+    // Tres colocaciones, en orden de preferencia: derecha, izquierda, y —
+    // cuando no cabe a ningún lado (móvil: el drawer ocupa casi todo el
+    // ancho) — DEBAJO del target, o encima si no queda alto. Antes el flip
+    // derecha/izquierda acababa clampado ENCIMA del propio target (91% del
+    // spotlight tapado a 412px): el usuario no veía qué módulo se le estaba
+    // señalando.
+    const fitsRight = rect.right + 20 + tw <= window.innerWidth - 16;
+    const fitsLeft  = rect.left - tw - 20 >= 16;
+    let left, top;
+    if (fitsRight) {
+      left = rect.right + 20;
+      top  = rect.top + rect.height / 2 - 80;
+    } else if (fitsLeft) {
       left = rect.left - tw - 20;
+      top  = rect.top + rect.height / 2 - 80;
+    } else {
+      left = rect.left;
+      top  = rect.bottom + pad + 12;
+      if (top + th > window.innerHeight - 16) {
+        top = rect.top - pad - th - 12; // encima si no cabe debajo
+      }
     }
-    // …y clamp final en ambos ejes: el tooltip ENTERO (botón Siguiente
+    // Clamp final en ambos ejes: el tooltip ENTERO (botón Siguiente
     // incluido) queda dentro del viewport, con margen mínimo de 16px.
     left = Math.max(16, Math.min(left, window.innerWidth - tw - 16));
     top  = Math.max(16, Math.min(top, window.innerHeight - th - 16));
