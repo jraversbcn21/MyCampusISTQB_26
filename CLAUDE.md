@@ -92,11 +92,12 @@ The app is fully functional without cloud sync. If Supabase is unavailable or th
 
 There is no test suite and no linter configuration for the application itself. Manual browser testing remains the primary mechanism for UI changes.
 
-Four exceptions, all Node-only dev scripts never served to the browser:
+Five exceptions, all Node-only dev scripts never served to the browser:
 - `scripts/validate-questions.js` gates `js/questions.js` — per-chapter question counts, structural integrity (bilingual fields, 4 options, valid `correct` index, unique ids), traceability (`lo`/`k`/`source` for every question added after id 50).
 - `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` — topic counts, `lo`/`source` presence, glossary keyword-completeness against the syllabus.
 - `scripts/verify-runtime.js` — behavior harness: loads the real `js/` modules into a mocked minimal DOM (no browser, no npm install) and exercises sync freshness/flush, the script-load guards, the CDN-failure auth screen, `innerHTML` escaping of state-derived values, and i18n parity/residue checks. Run it after any change to `js/` or `index.html`; add a check when you fix a runtime behavior.
 - `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the theme token blocks and asserts WCAG AA 4.5:1 for every status-text/background pair in both themes, including `rgba()`-tinted backgrounds alpha-blended over the surface. It cannot see JS-inline text colors (`style="color:..."` set from `js/app.js` templates) — those are covered separately by the `N12` static check in `scripts/verify-runtime.js` (asserts `js/app.js` never sets `color:` to a raw `--success`/`--warning`/`--danger` token as text). Together the two gate the full surface; run both after any change to theme tokens or status-text colors.
+- `scripts/validate-responsive.js` (added 2026-07-21) — the only one needing a real browser: launches Playwright/Chromium at 320/375/414px with touch emulation and asserts zero horizontal overflow across all views, ≥44px touch targets, the exam dot strip's height, the full mobile drawer cycle, and the onboarding tour with its tooltip verified in-viewport at every step. Follows the repo's no-op dependency pattern — if Playwright isn't installed it prints `SKIP: Playwright no disponible` and exits 0. **Deliberately outside the pre-commit hook** (slow, adds a dependency) — run it manually before any release and after any layout change. What it can't see without a browser (the CSS/JS invariants behind the layout) is covered by the `N20`/`N20b`/`N20c` check families in `verify-runtime.js`.
 
 Run the relevant one after any change:
 
@@ -105,6 +106,7 @@ node scripts/validate-questions.js
 node scripts/validate-content.js
 node scripts/verify-runtime.js
 node scripts/validate-contrast.js
+node scripts/validate-responsive.js   # manual pre-release step, not in pre-commit
 ```
 
 The pre-commit gate is version-controlled at `.githooks/pre-commit` — activate it once per clone with `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the **staged** copy of the three data files and runs the runtime harness when `js/` or `index.html` is staged; the commit is blocked on failure.
@@ -284,3 +286,41 @@ Load-bearing details an agent must know:
 - Gate: the `N19` check family in `scripts/verify-runtime.js` (i18n key, `#i-coffee` sprite +
   markup, CSS tokens/offset/exam-hide, `_setExamActive` wiring, `privacy.html` mention).
   `privacy.html` declares the outbound link in ES and EN.
+
+## Mobile Adaptability (2026-07-21)
+
+The app had a tablet breakpoint (≤768px) but no phone one — real-browser measurement (Chromium,
+touch emulation, 320/375/414px) found the glossary, lesson tables, exam dot navigator, flashcard
+flip, sidebar drawer, and onboarding tour all overflowing or unusable below 768px. Fixed via
+subagent-driven-development (11 tasks) plus a final whole-branch review that caught 1 Critical +
+2 Important cross-task bugs (mobile-scoped state leaking into desktop), all fixed same-day. Spec:
+`docs/superpowers/specs/2026-07-21-mobile-adaptability-design.md`; plan:
+`docs/superpowers/plans/2026-07-21-mobile-adaptability.md`; full mechanism detail and the review
+findings: `AGENTS.md` → "Mobile adaptability (2026-07-21)".
+
+Load-bearing details an agent must know:
+- **New `@media (max-width: 480px)` tier** in `css/styles.css`, right after the 768px block —
+  the old `@media (max-width: 500px)` (`.avatar-grid` only) is folded into it. File tail order is
+  unchanged: 480 tier → `(pointer: coarse)` → reduced-motion → `:focus-visible` literally last.
+- **`App._setDrawerOpen(open)`** (parallel to `_setExamActive`) is the single point of truth for
+  the mobile sidebar drawer — scrim, Escape, body scroll-lock, `inert` while closed. Nothing else
+  may toggle `mobile-open` via `classList`. **The scrim's visibility/scroll-lock CSS
+  (`body.drawer-open …`) must stay inside the `≤768px` media block** — it lived outside one until
+  the final review caught a desktop bug (clicking the sidebar logo darkened the whole page).
+- **`App._wrapLessonTables()`**, called at the end of `renderLesson()`, wraps every lesson
+  `<table>` in a `.table-scroll` div by DOM manipulation — this is how mobile table scrolling
+  works without ever editing `js/content.js` (content-fidelity rule stays intact).
+  Do not add scroll wrappers by editing lesson HTML directly.
+- **Flashcard flip is grid-stack, not absolute-positioned faces**: `.flashcard-inner` (not
+  `.flashcard`) is the rotator; `.flashcard` is the perspective container **and** the element the
+  2026-07-07 carousel translates via inline styles — two distinct elements, don't conflate them.
+  Faces use `grid-area: 1/1` so the card grows with long content instead of clipping it.
+- **`App._centerExamDot()`** (called from `renderExamDots()`, the single point all dot-moving
+  flows funnel through) centers the mobile dot strip via `strip.scrollTo()` scoped to the dot
+  container — **never `scrollIntoView`**, which was tried first and reverted because it drags the
+  whole page's scroll position on desktop whenever the strip sits below the fold.
+- Any new fixed-position, edge-anchored element must add `env(safe-area-inset-*)` insets (see
+  `.bmc-fab`/`.toast-container`/`.sidebar` for the `calc(base + env(inset, 0px))` pattern) — the
+  viewport meta now has `viewport-fit=cover`, so unprotected edges really do sit under a notch.
+- Gate: `scripts/validate-responsive.js` (real-browser, manual pre-release step — see "No Tests,
+  No Linter" above) + the `N20`/`N20b`/`N20c` check families in `verify-runtime.js`.

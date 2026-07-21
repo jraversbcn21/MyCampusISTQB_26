@@ -443,6 +443,143 @@
     gap between ES/EN at 44px on touch (WCAG-conformant by size; a guideline deviation);
     (9) generalize the `N17` color check to every button rule hosting an `svg.icon`
     (today all 11 audited hosts declare a color).
+- **Mobile adaptability (2026-07-21):** the app had a tablet breakpoint (≤768px) but no
+  phone one — below it, only a single `.avatar-grid` rule existed, and everything else
+  (glossary rows, lesson tables, the exam dot navigator, flashcard flip, the sidebar
+  drawer, the onboarding tour) was unusable or overflowing on real phones (320–414px),
+  confirmed with a real-browser Chromium audit before any fix (touch emulation,
+  `scrollWidth` measured against viewport across all 7 views + a lesson with a table +
+  an active exam). Spec: `docs/superpowers/specs/2026-07-21-mobile-adaptability-design.md`;
+  plan: `docs/superpowers/plans/2026-07-21-mobile-adaptability.md` (11 tasks,
+  subagent-driven-development, per-task TDD checks + a final whole-branch review that
+  found and fixed 1 Critical + 2 Important cross-task interaction bugs — see below).
+  - **New `@media (max-width: 480px)` tier** in `css/styles.css`, placed right after the
+    768px block (before `(pointer: coarse)` → reduced-motion → `:focus-visible`, which
+    stay the file's last three blocks). The old `@media (max-width: 500px)` block
+    (`.avatar-grid` only) was folded into it. Reduced paddings, `.stats-grid`/
+    `.results-stats` to 1 column, `flex-wrap` on rows that never wrapped
+    (`.rating-btns`, `.results-actions`, `.lesson-actions`, `.exam-topbar`,
+    `.flashcard-stats-row`).
+  - **Text safety net (all widths, not just the new tier):** `overflow-wrap: break-word`
+    on 9 content containers (`.lesson-content`, `.glossary-def`, `.exam-option`, etc.) and
+    `min-width: 0` on 4 flex items that couldn't shrink below their content before
+    (`.topbar-left`, `.chapter-info`, `.glossary-def`, `.activity-text`) — the stylesheet
+    had exactly one `min-width: 0` anywhere before this round. `.page-title` truncates
+    with an ellipsis instead of pushing the topbar wide.
+  - **`100vh` → `dvh` with a fallback pair** (`vh` kept, `dvh` added right after) at the
+    4 sites that had it (`body`, `.sidebar`, `.main`, `#app-container`) plus
+    `.avatar-modal-card`'s `88vh` — `dvh` discounts the mobile browser's dynamic URL bar,
+    so the sidebar footer (streak, logout, privacy link) no longer lands under the
+    browser chrome on a real phone (this was the 2026-07-07 short-viewport fix,
+    reintroduced via the mobile `vh` path).
+  - **Safe areas:** `viewport-fit=cover` added to the viewport meta **in the same commit**
+    as the `env(safe-area-inset-*)` insets on every edge-fixed element
+    (`.bmc-fab`, `.toast-container`, `.sidebar`/`.sidebar-footer`, `.topbar` base and its
+    480-tier override) — activating `cover` without the insets in the same commit would
+    have exposed exactly what the pre-`cover` letterboxing was hiding by accident.
+  - **The mobile drawer got real drawer behavior**, via a single point of truth
+    `App._setDrawerOpen(open)` (parallel to `_setExamActive`) — nothing else may touch
+    `mobile-open` via `classList` (gated). It now: shows a scrim (`#sidebarScrim`,
+    reusing the `.sidebar-overlay` CSS that had been dead code since it was never
+    referenced by any JS), closes on scrim click or Escape (a new branch in the
+    delegated keydown handler, last in priority after search/avatar-modal), locks body
+    scroll while open, sets `inert` on the sidebar while closed on mobile (11 focusables
+    were tabbable off-screen before), and raised `.topbar` to `z-index: 120` so
+    `#mobileMenuBtn` stays reachable with the drawer open — this closes the pre-existing
+    **A2** follow-up from round 2 ("open drawer covers the button that closes it").
+    `#sidebarToggle` (desktop's collapse-to-64px-rail) hides on mobile — collapsing the
+    open drawer to a 64px icon rail was a desktop affordance leaking into mobile.
+  - **Glossary stacks instead of overflowing** at ≤480px: `.glossary-item` was 3 columns
+    with a `min-width: 200px` term + `min-width: 60px; white-space: nowrap` chapter chip
+    that never fit any phone width (measured: 384px of row content in a 286px container
+    at 320px, the definition strangled to 76px wide). Stacked layout keeps desktop
+    unchanged; the chapter chip visually reorders next to the term via CSS `order`
+    (the DOM order — term → definition → chip, guarded by the round-2 `N11` checks — is
+    untouched).
+  - **Lesson tables get a scroll container without touching `js/content.js`:**
+    `App._wrapLessonTables()`, called once at the end of `renderLesson()`, wraps every
+    `<table>` in `.lesson-content` in a `<div class="table-scroll">` (`overflow-x: auto`)
+    by DOM manipulation after the content-fidelity-guarded HTML is injected. A full sweep
+    at 320px found **11 of 16 tabled lessons overflowed** (worst: lesson 3.2, a 4-column
+    table at 427px in a 288px container) — the wrapper fixes all 11 and any future table
+    without a single edit to the syllabus-sourced content.
+  - **Flashcards: grid-stack flip mechanism replaces absolute-positioned faces.** The
+    rotator is `.flashcard-inner` (not `.flashcard`, which is the perspective container
+    **and** the element the 2026-07-07 carousel animation translates via inline styles —
+    two distinct elements, confirmed independent). `.flashcard` went from a fixed
+    `height: 280px` to `min-height: 280px` + `display: grid`; `.flashcard-front`/
+    `-back` went from `position: absolute; height: 100%` to `grid-area: 1 / 1;
+    position: relative` (the `position: relative` keeps each face as the containing
+    block for its `.fc-tts-btn`). The row now measures its tallest face, so long answers
+    grow the card instead of overflowing it (verified in a real browser: a card forced
+    to ~1000+ characters grows from 280px to 1037px with no horizontal overflow); flip,
+    `preserve-3d`, `backface-visibility`, and the carousel/reduced-motion behavior (N10/
+    N15) all re-verified green. `.fc-arrow` gained `flex-shrink: 0` at all widths (was
+    getting crushed to 29px wide at 320px — a bug, not tier-specific). At ≤480px the
+    arrows drop below the now-full-width card via `flex-wrap` + CSS `order` (no DOM
+    moves, so tab order stays prev→card→next — a deliberate, documented mismatch with
+    visual order at that one breakpoint).
+  - **Exam dot navigator becomes a horizontal strip at ≤480px** instead of wrapping into
+    up to 8 rows (measured: 408px tall at 320px for a 40-question exam — more than half
+    the screen). `App._centerExamDot()`, called from the single `renderExamDots()` point
+    all four dot-moving flows funnel through (Siguiente/Anterior, answering, dot
+    click/keyboard), auto-centers the current dot. **It was written first with
+    `scrollIntoView` and fixed to a container-scoped `strip.scrollTo()` after the final
+    review caught it dragging the whole page's vertical scroll on desktop whenever the
+    strip sat below the fold** — see "final review findings" below.
+  - **Onboarding tour is functional on mobile.** 7 of its 8 steps target sidebar nav
+    items; before this round the sidebar was `translateX(-100%)` during the tour on
+    mobile, so the spotlight rendered at `left ≈ -266px` and the tooltip pointed at
+    nothing. Now `_updateStep()` opens the drawer (via `App._setDrawerOpen`, never
+    direct `classList` access — gated) before positioning a sidebar-target step, and
+    closes it for the centered welcome step and on finish/skip (`_done()`, the tour's
+    single shared exit path). The two hardcoded tooltip widths (340px/300px) are clamped
+    to `innerWidth - 32`; the vertical clamp now measures the tooltip's real
+    `offsetHeight` instead of assuming 220px. `resize`/`orientationchange` listeners
+    (this repo's first) live only for the tour's duration, added in `start()` and
+    removed in `_done()`. A drawer-just-opened case needed an extra `setTimeout` (50ms
+    reduced-motion / 250ms normal, never `transitionend`) before measuring — the drawer's
+    CSS transform transition hadn't settled yet when position was computed synchronously.
+  - **Final whole-branch review found 1 Critical + 2 Important bugs**, all
+    cross-task interactions a single-task review couldn't have caught (mobile-scoped
+    state leaking into desktop) — all fixed same-day, re-verified with real-browser
+    Playwright reproductions before and after:
+    - **Critical:** `body.drawer-open`'s scrim-visibility and scroll-lock rules lived
+      **outside any media query** — clicking the sidebar logo on desktop (its "open the
+      drawer" branch fires whenever the sidebar isn't collapsed) darkened the whole page
+      and locked scroll on the primary platform. Fixed by moving the rules inside the
+      `≤768px` block and guarding the logo-icon listener's open branch with
+      `matchMedia('(max-width: 768px)')`.
+    - **Important:** crossing back above 768px (e.g. rotating a tablet) while the drawer
+      was open left `mobile-open`/`drawer-open` stuck — the breakpoint-change listener
+      only removed `inert`, never closed the drawer. Fixed: the listener's desktop
+      branch now calls `App._setDrawerOpen(false)`.
+    - **Important:** `_centerExamDot()`'s original `scrollIntoView({inline:'center',
+      block:'nearest'})` scrolls **all** scrollable ancestors, not just the dot strip —
+      reproduced on a short desktop viewport, starting an exam scrolled the whole page
+      vertically. Fixed with `strip.scrollTo({left: ...})` scoped to the dot container
+      only, a true no-op wherever the strip has no overflow (desktop's wrapping grid).
+  - **New gate: `scripts/validate-responsive.js`** (real-browser, Playwright/Chromium,
+    320/375/414px with touch emulation) — asserts zero horizontal overflow across all 7
+    views + a tabled lesson + an active exam, ≥44px touch targets, the dot strip's
+    height, the full drawer open/scrim/close/inert cycle, and the complete onboarding
+    tour with the tooltip verified in-viewport at every step. Follows the repo's no-op
+    dependency pattern (`SKIP: Playwright no disponible`, exit 0) — **deliberately
+    outside the pre-commit hook** (it's slow and adds a dependency); run it manually
+    before any release and after any layout change. The onboarding leg only runs at
+    320/375 (414 adds no clamp coverage once 320/375 pass; documented in the script).
+    Gate: the `N20`/`N20b`/`N20c` check families in `verify-runtime.js` (static +
+    behavioral) cover everything `validate-responsive.js` can't see without a browser.
+  - **Deliberate leftovers, queued for a future minor pass** (none block this round):
+    (1) flashcard keyboard tab order (prev→card→next) no longer matches visual order
+    (card→arrows) at ≤480px — documented in the CSS comment, a WCAG 2.4.3 nit, same
+    category as the round-2 AT nits above; (2) the flashcard controls row keeps
+    `#cardCounter` in the top toolbar rather than moving it below with the arrows — a
+    spec-vs-implementation deviation, functionally fine; (3) opening the drawer for the
+    first sidebar-targeting onboarding step moves keyboard focus to the first nav item,
+    off the tooltip's Next button — a keyboard user pressing Enter there navigates
+    instead of advancing the tour (acknowledged in the code comment; not fixed this
+    round).
 
 ## Production Readiness — Status & Next Session
 
