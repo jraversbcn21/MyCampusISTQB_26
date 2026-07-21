@@ -979,6 +979,26 @@ const SAMPLE_Q = {
       && /\.exam-body\s*\{[^}]*padding:/.test(t480) && /\.auth-card\s*\{[^}]*padding:/.test(t480));
     check('N20 tier: prohibido overflow-x:hidden como mitigación en body/main/views-container',
       !/(?:^|[\s,])(?:body|html|\.main|\.views-container)[^{]*\{[^}]*overflow-x:\s*hidden/m.test(cssSrc));
+    /* --- Task 2: red de seguridad de texto + dvh + topbar (reglas base, fuera de media queries) --- */
+    check('N20 texto: overflow-wrap en los 9 contenedores de contenido',
+      ['.lesson-content', '.glossary-def', '.search-result-def', '.exam-q-text', '.exam-option',
+       '.fc-question', '.fc-answer', '.review-item-q', '.activity-text']
+        .every(s => new RegExp(s.replace('.', '\\.') + '[^{]*\\{[^}]*overflow-wrap:\\s*break-word').test(cssSrc)));
+    check('N20 texto: .page-title trunca y los flex-items estrechables llevan min-width: 0',
+      /\.page-title\s*\{[^}]*white-space:\s*nowrap/.test(cssSrc)
+      && /\.page-title\s*\{[^}]*text-overflow:\s*ellipsis/.test(cssSrc)
+      && ['.topbar-left', '.chapter-info', '.glossary-def', '.activity-text']
+        .every(s => new RegExp(s.replace('.', '\\.') + '[^{]*\\{[^}]*min-width:\\s*0\\s*[;}]').test(cssSrc)));
+    // Cada declaración vh de altura completa (100vh/88vh) debe ir seguida de su
+    // gemela dvh dentro de la misma regla (patrón fallback: vh para navegadores
+    // sin dvh, dvh moderna que descuenta el chrome del navegador móvil).
+    const vhDecls = [...cssSrc.matchAll(/(min-height|max-height|height):\s*(100|88)vh\b/g)];
+    check('N20 dvh: cada vh lleva su pareja dvh inmediata (body/sidebar/main/app-container/modal)',
+      vhDecls.length >= 5 && vhDecls.every(m =>
+        new RegExp(m[1] + ':\\s*' + m[2] + 'dvh').test(
+          cssSrc.slice(m.index + m[0].length, m.index + m[0].length + 140))));
+    check('N20 dvh: el modal de avatar usa dvh con fallback',
+      /max-height:\s*88vh;[^}]{0,80}max-height:\s*88dvh/.test(cssSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

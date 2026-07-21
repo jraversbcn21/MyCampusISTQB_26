@@ -225,7 +225,7 @@ const App = {
       return `
         <div class="continue-item" onclick="App.navigate('curriculum')" role="button" tabindex="0">
           <div class="continue-item-icon">${ch.icon}</div>
-          <div style="flex:1">
+          <div style="flex:1;min-width:0">
             <div class="continue-item-title">${ch.title[i18n.lang]}</div>
             <div class="continue-item-sub">${done}/${ch.topics.length} ${i18n.t('topics_label')} · ${ch.duration[i18n.lang]}</div>
             <div class="continue-item-progress">
