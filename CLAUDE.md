@@ -29,8 +29,12 @@ PDFs (fixed same-hour: `.vercelignore` + redeploy + deleted the exposed deployme
 remove the `ISTQB 2026/` line. `privacy.html` declares Vercel as hosting processor.
 Supabase Site URL/Redirect URLs point to the production domain (configured 2026-07-20;
 signup + confirmation email + login verified end-to-end on the live URL — note localhost
-is no longer allowlisted for OAuth). Full detail (re-linking a clone, Supabase URL config
-and its follow-ups): `AGENTS.md` → "Deployment (Vercel)".
+is no longer allowlisted for OAuth). **On the Inditex corporate network the CLI dies with
+`TypeError: fetch failed`** — its TLS-inspecting proxy re-signs certificates and Node
+ignores the Windows trust store; prefix the deploy with
+`$env:NODE_EXTRA_CA_CERTS="C:\Users\<user>\.certs\corporate-ca.pem"` (never
+`NODE_TLS_REJECT_UNAUTHORIZED=0`). Full detail (re-linking a clone, Supabase URL config
+and its follow-ups, the CA bundle recipe): `AGENTS.md` → "Deployment (Vercel)".
 
 ## Architecture
 
