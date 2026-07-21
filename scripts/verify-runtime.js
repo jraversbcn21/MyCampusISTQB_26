@@ -951,6 +951,36 @@ const SAMPLE_Q = {
       (privacySrc.match(/Buy Me a Coffee/g) || []).length >= 2);
   }
 
+  /* ---- N20: adaptabilidad móvil (2026-07-21) — tier 480 + invariantes ---- */
+  {
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    const tier480 = cssSrc.indexOf('@media (max-width: 480px)');
+    const coarseStart = cssSrc.indexOf('@media (pointer: coarse)');
+    check('N20 tier: existe @media (max-width: 480px) y va antes del bloque coarse',
+      tier480 >= 0 && coarseStart > tier480);
+    check('N20 tier: el bloque de 500px fue fusionado (ya no existe)',
+      // Con { al final: el tier lo menciona en un comentario (eso está bien),
+      // lo prohibido es que exista como bloque @media real.
+      !/@media \(max-width: 500px\)\s*\{/.test(cssSrc));
+    // El tier acaba donde empieza la sección UTILITY que lo sigue — así el
+    // slice no arrastra CSS ajeno y los checks afirman "dentro del tier".
+    const tierEnd = cssSrc.indexOf('/* ===== UTILITY', tier480 >= 0 ? tier480 : 0);
+    const t480 = tier480 >= 0 && tierEnd > tier480 ? cssSrc.slice(tier480, tierEnd) : '';
+    check('N20 tier: avatar-grid a 1 columna vive en el tier 480',
+      /\.avatar-grid\s*\{\s*grid-template-columns:\s*1fr/.test(t480));
+    check('N20 tier: stats-grid y results-stats colapsan a 1 columna',
+      /\.stats-grid\s*\{[^}]*grid-template-columns:\s*1fr\s*[;}]/.test(t480)
+      && /\.results-stats\s*\{[^}]*grid-template-columns:\s*1fr\s*[;}]/.test(t480));
+    check('N20 tier: filas flex envuelven (rating/results-actions/lesson-actions/exam-topbar/flashcard-stats)',
+      ['.rating-btns', '.results-actions', '.lesson-actions', '.exam-topbar', '.flashcard-stats-row']
+        .every(s => new RegExp(s.replace('.', '\\.') + '[^{]*\\{[^}]*flex-wrap:\\s*wrap').test(t480)));
+    check('N20 tier: paddings reducidos (.view/.topbar/.exam-body/.auth-card)',
+      /\.view\s*\{[^}]*padding:\s*12px/.test(t480) && /\.topbar\s*\{[^}]*padding:/.test(t480)
+      && /\.exam-body\s*\{[^}]*padding:/.test(t480) && /\.auth-card\s*\{[^}]*padding:/.test(t480));
+    check('N20 tier: prohibido overflow-x:hidden como mitigación en body/main/views-container',
+      !/(?:^|[\s,])(?:body|html|\.main|\.views-container)[^{]*\{[^}]*overflow-x:\s*hidden/m.test(cssSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
