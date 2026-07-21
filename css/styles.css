@@ -277,7 +277,9 @@ body {
   padding-right: calc(24px + env(safe-area-inset-right, 0px));
   position: sticky;
   top: 0;
-  z-index: 50;
+  /* 120 > sidebar (100): con el drawer abierto la hamburguesa sigue visible
+     y clicable — siempre hay un control a la vista que cierra (2026-07-21). */
+  z-index: 120;
 }
 
 /* Red de seguridad de texto (2026-07-21): min-width: 0 deja encoger a los
@@ -1379,6 +1381,12 @@ body {
   z-index: 99;
 }
 
+/* Drawer móvil (2026-07-21): la visibilidad del scrim y el scroll-lock del
+   fondo cuelgan de la clase drawer-open en <body> — App._setDrawerOpen es el
+   único punto que la pone/quita (regla paralela a exam-active). */
+body.drawer-open .sidebar-overlay { display: block; }
+body.drawer-open { overflow: hidden; }
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1397,6 +1405,9 @@ body {
   .sidebar.mobile-open { transform: translateX(0); }
   .main { margin-left: 0; }
   .mobile-menu-btn { display: block; }
+  /* El colapso a rail de 64px es affordance de desktop; dentro del drawer
+     móvil solo confunde (2026-07-21). */
+  #sidebarToggle { display: none; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .view { padding: 16px; }
   .flashcard { width: 100%; }

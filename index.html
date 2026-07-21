@@ -127,6 +127,10 @@
   <!-- ============ APP (visible tras login) ============ -->
   <div id="app-container" style="display:none">
 
+  <!-- Scrim del drawer móvil (2026-07-21): aprovecha la clase .sidebar-overlay
+       que existía como CSS muerto. Decorativo: el cierre accesible es Escape. -->
+  <div class="sidebar-overlay" id="sidebarScrim" aria-hidden="true"></div>
+
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">

@@ -33,6 +33,7 @@ function makeEl(id) {
     removeChild() {}, remove() {}, focus() {}, select() {}, blur() {},
     setAttribute(k, v) { el._attrs[k] = v; },
     getAttribute(k) { return k in el._attrs ? el._attrs[k] : null; },
+    removeAttribute(k) { delete el._attrs[k]; },
     querySelector() { return null; },
     querySelectorAll() { return []; },
     insertAdjacentHTML() {}, insertAdjacentElement() {}, replaceWith() {},
@@ -892,13 +893,21 @@ const SAMPLE_Q = {
       /toggleChapter\(\$\{i\}\)" role="button" tabindex="0" aria-expanded="\$\{/.test(appSrc));
     check('N18 expanded: toggleChapter sincroniza aria-expanded (no re-renderiza)',
       /setAttribute\('aria-expanded', String\(isOpen\)\)/.test(appSrc));
+    // Recableado 2026-07-21 (N20): la sincronización de aria-expanded vive
+    // ahora dentro de _setDrawerOpen (único punto de verdad del drawer), no
+    // en cada listener — mismo comportamiento, un solo sitio.
     check('N18 expanded: #mobileMenuBtn refleja el estado del drawer',
       /id="mobileMenuBtn"[^>]*aria-expanded="false"|aria-expanded="false"[^>]*id="mobileMenuBtn"/.test(htmlSrc)
-      && /mobileMenuBtn'\)\.setAttribute\('aria-expanded'/.test(appSrc));
+      && /menuBtn\.setAttribute\('aria-expanded', String\(open\)\)/.test(appSrc));
     check('N18 teclado: los continue-item del dashboard llevan role/tabindex',
       /class="continue-item" onclick="App\.navigate\('curriculum'\)" role="button" tabindex="0"/.test(appSrc));
+    // Recableado 2026-07-21 (N20): navigate() cierra vía _setDrawerOpen(false),
+    // que sincroniza aria-expanded por dentro (antes lo hacía a mano en línea).
     check('N18 expanded: navigate() cierra el drawer sincronizando aria-expanded',
-      /remove\('mobile-open'\);?\s*\n?\s*document\.getElementById\('mobileMenuBtn'\)\.setAttribute\('aria-expanded', 'false'\)/.test(appSrc));
+      (() => {
+        const nav = appSrc.slice(appSrc.indexOf('navigate(view, extra)'), appSrc.indexOf('navigateToLesson'));
+        return /_setDrawerOpen\(false\)/.test(nav);
+      })());
     check('N18 dots: el dot actual lleva aria-current',
       /aria-current="true"/.test(appSrc));
     check('N18 dots: flechas Izq/Der navegan entre preguntas desde un dot',
@@ -1016,6 +1025,66 @@ const SAMPLE_Q = {
     check('N20 safearea: el sidebar reserva insets superior (.sidebar) e inferior (.sidebar-footer)',
       /\.sidebar\s*\{[^}]*env\(safe-area-inset-top/.test(cssSrc)
       && /\.sidebar-footer\s*\{[^}]*env\(safe-area-inset-bottom/.test(cssSrc));
+    /* --- Task 4: drawer real (_setDrawerOpen, scrim, Escape, inert, z-index) --- */
+    const appSrc20 = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    // Único punto de verdad (regla paralela a _setExamActive): fuera del cuerpo
+    // de _setDrawerOpen, las únicas mutaciones de 'mobile-open' permitidas son
+    // las de la barra de búsqueda móvil (I7, receptor `box.`) — el drawer del
+    // sidebar solo muta dentro. El cuerpo usa acceso computado
+    // classList[open ? 'add' : 'remove'], de ahí la alternativa en el regex.
+    const dsStart = appSrc20.indexOf('_setDrawerOpen(open)');
+    const dsEnd = dsStart >= 0 ? appSrc20.indexOf('\n  },', dsStart) : -1;
+    const dsBody = dsStart >= 0 && dsEnd > dsStart ? appSrc20.slice(dsStart, dsEnd) : '';
+    const outsideDs = dsStart >= 0 ? appSrc20.slice(0, dsStart) + appSrc20.slice(dsEnd) : appSrc20;
+    const mobMutRe = /^.*classList(?:\[[^\]]*\]|\.(?:add|remove|toggle))\('mobile-open'\).*$/gm;
+    check('N20 drawer: _setDrawerOpen existe y es el único que muta mobile-open en el sidebar',
+      dsBody !== ''
+      && (dsBody.match(mobMutRe) || []).length >= 1
+      && (outsideDs.match(mobMutRe) || []).every(line => /\bbox\.classList\./.test(line)));
+    check('N20 drawer: el scrim existe en el HTML y deja de ser CSS muerto',
+      (/id="sidebarScrim"[^>]*class="sidebar-overlay"|class="sidebar-overlay"[^>]*id="sidebarScrim"/.test(htmlSrc20))
+      && /sidebarScrim/.test(appSrc20));
+    check('N20 drawer: scroll-lock del body y visibilidad del scrim por clase drawer-open',
+      /body\.drawer-open\s*\{[^}]*overflow:\s*hidden/.test(cssSrc)
+      && /body\.drawer-open\s+\.sidebar-overlay\s*\{[^}]*display:\s*block/.test(cssSrc));
+    check('N20 drawer: Escape cierra el drawer (rama en el keydown delegado)',
+      /Escape[\s\S]{0,400}_setDrawerOpen\(false\)/.test(appSrc20));
+    check('N20 drawer: inert al cerrar en móvil (y retirada al abrir / cruzar a desktop)',
+      /setAttribute\('inert'/.test(appSrc20) && /removeAttribute\('inert'/.test(appSrc20));
+    // El colapso a rail de 64px es affordance de desktop; dentro del drawer
+    // móvil solo confunde — el botón se oculta en el tier 768.
+    const m768 = cssSrc.slice(cssSrc.indexOf('@media (max-width: 768px)'), tier480 >= 0 ? tier480 : cssSrc.length);
+    check('N20 drawer: #sidebarToggle oculto en el tier móvil',
+      /#sidebarToggle\s*\{[^}]*display:\s*none/.test(m768));
+    check('N20 drawer: el topbar queda por encima del drawer (hamburguesa alcanzable)',
+      (() => { const m = cssSrc.match(/\.topbar\s*\{[^}]*z-index:\s*(\d+)/); return !!m && Number(m[1]) > 100; })());
+  }
+
+  /* ---- N20b: drawer behavioral — abrir/cerrar solo vía _setDrawerOpen ---- */
+  {
+    // matchMedia global simulando móvil: dentro de new Function, el `matchMedia`
+    // bare de los módulos resuelve al global de Node — así la rama isMobile
+    // (inert al cerrar) se ejercita de verdad. Se retira en finally para no
+    // contaminar el resto de bloques.
+    global.matchMedia = () => ({ matches: true, addEventListener() {} });
+    try {
+      const ctx = loadApp();
+      ctx.App.state = ctx.App.loadState();
+      const sb = ctx.document.getElementById('sidebar');
+      const body = ctx.document.body;
+      const menuBtn = ctx.document.getElementById('mobileMenuBtn');
+      const has = typeof ctx.App._setDrawerOpen === 'function';
+      if (has) ctx.App._setDrawerOpen(true);
+      check('N20b drawer: abrir pone mobile-open + drawer-open + aria-expanded=true (sin inert)',
+        has && sb.classList.contains('mobile-open') && body.classList.contains('drawer-open')
+        && menuBtn._attrs['aria-expanded'] === 'true' && !('inert' in sb._attrs));
+      if (has) ctx.App._setDrawerOpen(false);
+      check('N20b drawer: cerrar lo revierte, aria-expanded=false y aplica inert (móvil)',
+        has && !sb.classList.contains('mobile-open') && !body.classList.contains('drawer-open')
+        && menuBtn._attrs['aria-expanded'] === 'false' && 'inert' in sb._attrs);
+    } finally {
+      delete global.matchMedia;
+    }
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

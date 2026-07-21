@@ -142,9 +142,8 @@ const App = {
     };
     document.getElementById('pageTitle').textContent = i18n.t(titleMap[view] || view);
 
-    // Close mobile sidebar
-    document.getElementById('sidebar').classList.remove('mobile-open');
-    document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'false');
+    // Cierra el drawer móvil — siempre vía el único punto de verdad (2026-07-21)
+    this._setDrawerOpen(false);
 
     if (view === 'dashboard') this.renderDashboard();
     if (view === 'curriculum') this.renderCurriculum();
@@ -1069,6 +1068,31 @@ const App = {
     document.body.classList.toggle('exam-active', active);
   },
 
+  // Drawer móvil (2026-07-21): único punto de verdad, paralelo a _setExamActive.
+  // Nadie más toca 'mobile-open'. inert al cerrar: el drawer trasladado fuera
+  // de pantalla seguía teniendo 11 focusables tabulables.
+  _setDrawerOpen(open) {
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.getElementById('mobileMenuBtn');
+    if (!sidebar) return;
+    sidebar.classList[open ? 'add' : 'remove']('mobile-open');
+    document.body.classList[open ? 'add' : 'remove']('drawer-open');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', String(open));
+    const isMobile = typeof matchMedia === 'function' && matchMedia('(max-width: 768px)').matches;
+    if (open) {
+      sidebar.removeAttribute('inert');
+      const first = sidebar.querySelector && sidebar.querySelector('.nav-item');
+      if (first && typeof first.focus === 'function') first.focus();
+    } else {
+      // Capturar el foco ANTES de poner inert: inert blurea síncronamente al
+      // descendiente enfocado y el contains posterior ya vería <body>.
+      const hadFocus = !!(document.activeElement && sidebar.contains
+        && sidebar.contains(document.activeElement));
+      if (isMobile) sidebar.setAttribute('inert', '');
+      if (menuBtn && typeof menuBtn.focus === 'function' && hadFocus) menuBtn.focus();
+    }
+  },
+
   /* ===== ICONOS (I8, ronda 2) ===== */
   // Devuelve el <svg><use> de un símbolo del sprite de index.html, para
   // interpolar en templates innerHTML. name es SIEMPRE un literal interno,
@@ -1334,18 +1358,19 @@ const App = {
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
     document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-      const open = document.getElementById('sidebar').classList.toggle('mobile-open');
-      document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', String(open));
+      this._setDrawerOpen(!document.getElementById('sidebar').classList.contains('mobile-open'));
     });
     document.querySelector('.logo-icon').addEventListener('click', () => {
       const sidebar = document.getElementById('sidebar');
       if (sidebar.classList.contains('collapsed')) {
         sidebar.classList.remove('collapsed');
       } else {
-        sidebar.classList.add('mobile-open');
-        document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'true');
+        this._setDrawerOpen(true);
       }
     });
+    // Scrim del drawer (2026-07-21): clic fuera cierra. El scrim es decorativo
+    // (aria-hidden); el cierre accesible es Escape en el keydown delegado.
+    document.getElementById('sidebarScrim').addEventListener('click', () => this._setDrawerOpen(false));
     document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
 
     // Teclado (C1): los controles renderizados por plantilla son divs con
@@ -1364,6 +1389,19 @@ const App = {
       if ((e.key === 'Enter' || e.key === ' ') && t.getAttribute('role') === 'button' && typeof t.click === 'function') {
         e.preventDefault(); // evita el scroll de Espacio y el doble disparo
         t.click();
+        return;
+      }
+      // Drawer móvil (2026-07-21): rama Escape, la ÚLTIMA a propósito — la
+      // búsqueda (#globalSearch, listener propio) y el modal de avatar
+      // (#avatar-modal, listener propio) tienen prioridad y actúan en fases
+      // anteriores; si el evento nace en ellos, aquí no se toca el drawer.
+      if (e.key === 'Escape') {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('mobile-open')
+            && t.id !== 'globalSearch'
+            && !(typeof t.closest === 'function' && t.closest('#avatar-modal'))) {
+          this._setDrawerOpen(false);
+        }
       }
     });
 
@@ -1443,6 +1481,31 @@ const App = {
     this.updateStreakAndDate();
     if (this.state.streak > 1) {
       setTimeout(() => this.showToast(`🔥 ${this.state.streak} ${i18n.t('streak_label')} — ${i18n.t('streak_keep_going')}`, 'success'), 1000);
+    }
+
+    // Drawer móvil (2026-07-21): en móvil el sidebar arranca cerrado (fuera de
+    // pantalla) pero sus focusables seguían siendo tabulables — inert inicial.
+    // Al cruzar el breakpoint se quita/pone: inert en el sidebar visible de
+    // desktop sería un bug. Listener de sistema (no de layout) — permitido.
+    // Guards por el arnés mockeado: sin matchMedia, o con un MediaQueryList
+    // plano sin addEventListener.
+    if (typeof matchMedia === 'function') {
+      const mq = matchMedia('(max-width: 768px)');
+      const sidebar = document.getElementById('sidebar');
+      if (mq.matches && sidebar && !sidebar.classList.contains('mobile-open')) {
+        sidebar.setAttribute('inert', '');
+      }
+      if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', (ev) => {
+          const sb = document.getElementById('sidebar');
+          if (!sb) return;
+          if (ev.matches) {
+            if (!sb.classList.contains('mobile-open')) sb.setAttribute('inert', '');
+          } else {
+            sb.removeAttribute('inert');
+          }
+        });
+      }
     }
   },
 
