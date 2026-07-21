@@ -1251,7 +1251,7 @@ const SAMPLE_Q = {
 
     const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
 
-    // Acotado al template de renderLesson, NO a app.js entero: completeAndAdvance
+    // Acotado al template de renderLesson, NO a app.js entero: advanceLesson
     // llama legítimamente a navigate('curriculum') al cerrar capítulo, y un check
     // global lo confundiría con el botón duplicado que se eliminó.
     const actionsBlock = (appSrc.match(/<div class="lesson-actions">[\s\S]*?<\/div>`/) || [''])[0];
@@ -1296,6 +1296,10 @@ const SAMPLE_Q = {
     check('N21 css: .lesson-next-btn usa --primary-dark (AA: blanco sobre él 5.83:1; sobre --primary sería 4.32:1)',
       /\.lesson-next-btn\s*\{[^}]*background:\s*var\(--primary-dark\)/.test(cssSrc)
       && /\.lesson-next-btn\s*\{[^}]*color:\s*#fff/.test(cssSrc));
+    check('N21 css: estado locked — atenuado, not-allowed, SIN pointer-events none (mataría el toast)',
+      /\.lesson-next-btn\.locked\s*\{[^}]*opacity:\s*0?\.\d+/.test(cssSrc)
+      && /\.lesson-next-btn\.locked\s*\{[^}]*cursor:\s*not-allowed/.test(cssSrc)
+      && !/\.lesson-next-btn\.locked\s*\{[^}]*pointer-events:\s*none/.test(cssSrc));
     check('N21 css: el título del siguiente tema se oculta en el tier 480',
       /@media \(max-width: 480px\)[\s\S]*?\.next-topic-title\s*\{[^}]*display:\s*none/.test(cssSrc));
     check('N21 css: las reglas nuevas van antes del bloque reduced-motion',

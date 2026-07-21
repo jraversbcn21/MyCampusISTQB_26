@@ -826,6 +826,13 @@ body {
 }
 .lesson-next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.4); }
 
+/* Estado bloqueado (gating 2026-07-21): atenuado pero enfocable y clicable —
+   nunca disabled real (no enfocable, no explica el porqué). El clic dispara
+   el toast de aviso desde advanceLesson; por eso NO lleva pointer-events:none.
+   WCAG 1.4.3 exime del ratio AA a controles inactivos (aria-disabled). */
+.lesson-next-btn.locked { opacity: 0.55; cursor: not-allowed; }
+.lesson-next-btn.locked:hover { transform: none; box-shadow: none; }
+
 /* ===== FLASHCARDS ===== */
 .flashcards-header { margin-bottom: 24px; }
 .flashcards-header h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
