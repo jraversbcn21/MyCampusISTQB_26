@@ -46,7 +46,7 @@ User Action → App.* method → mutate App.state → App.saveState()
                                                    └─→ Sync.saveState() (4s debounce → Supabase)
 ```
 
-`App.state` is the single source of truth. All views read from it directly. On page load, state is restored from localStorage first, then optionally overwritten by the cloud copy if the user is authenticated.
+`App.state` is the single source of truth. All views read from it directly. On page load, state is restored from localStorage first, then reconciled with the cloud copy if the user is authenticated — the newer `_updatedAt` stamp wins, so a stale cloud copy never clobbers newer local progress (see the 2026-07-04 section).
 
 ### Key Modules
 
@@ -65,7 +65,7 @@ User Action → App.* method → mutate App.state → App.saveState()
 
 ### Views
 
-All views are HTML sections in `index.html` toggled via `display` style. Navigation is handled by `App.navigate(viewName)` — valid names: `dashboard`, `curriculum`, `flashcards`, `simulator`, `glossary`, `progress`, `achievements`, `lesson`.
+All views are HTML sections in `index.html` toggled via the `.view.active` class (`css/styles.css` does `.view { display: none } / .view.active { display: block }` — nothing sets inline `display` on views). Navigation is handled by `App.navigate(viewName)` — valid names: `dashboard`, `curriculum`, `flashcards`, `simulator`, `glossary`, `progress`, `achievements`, `lesson`.
 
 ### Privacy Policy
 
@@ -96,7 +96,7 @@ Five exceptions, all Node-only dev scripts never served to the browser:
 - `scripts/validate-questions.js` gates `js/questions.js` — per-chapter question counts, structural integrity (bilingual fields, 4 options, valid `correct` index, unique ids), traceability (`lo`/`k`/`source` for every question added after id 50).
 - `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` — topic counts, `lo`/`source` presence, glossary keyword-completeness against the syllabus.
 - `scripts/verify-runtime.js` — behavior harness: loads the real `js/` modules into a mocked minimal DOM (no browser, no npm install) and exercises sync freshness/flush, the script-load guards, the CDN-failure auth screen, `innerHTML` escaping of state-derived values, and i18n parity/residue checks. Run it after any change to `js/` or `index.html`; add a check when you fix a runtime behavior.
-- `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the theme token blocks and asserts WCAG AA 4.5:1 for every status-text/background pair in both themes, including `rgba()`-tinted backgrounds alpha-blended over the surface. It cannot see JS-inline text colors (`style="color:..."` set from `js/app.js` templates) — those are covered separately by the `N12` static check in `scripts/verify-runtime.js` (asserts `js/app.js` never sets `color:` to a raw `--success`/`--warning`/`--danger` token as text). Together the two gate the full surface; run both after any change to theme tokens or status-text colors.
+- `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the theme token blocks and asserts WCAG AA 4.5:1 for every status-text/background pair in both themes, including `rgba()`-tinted backgrounds alpha-blended over the surface. It cannot see JS-inline text colors (`style="color:..."` set from `js/app.js` templates) — those are covered separately by the `N12` static check in `scripts/verify-runtime.js` (asserts `js/app.js` never sets `color:` to a raw `--success`/`--warning`/`--danger`/`--secondary` token as text). Together the two gate the full surface; run both after any change to theme tokens or status-text colors.
 - `scripts/validate-responsive.js` (added 2026-07-21) — the only one needing a real browser: launches Playwright/Chromium at 320/375/414px with touch emulation and asserts zero horizontal overflow across all views, ≥44px touch targets, the exam dot strip's height, the full mobile drawer cycle, and the onboarding tour with its tooltip verified in-viewport at every step. Follows the repo's no-op dependency pattern — if Playwright isn't installed it prints `SKIP: Playwright no disponible` and exits 0. **Deliberately outside the pre-commit hook** (slow, adds a dependency) — run it manually before any release and after any layout change. What it can't see without a browser (the CSS/JS invariants behind the layout) is covered by the `N20`/`N20b`/`N20c` check families in `verify-runtime.js`.
 
 Run the relevant one after any change:
@@ -109,7 +109,7 @@ node scripts/validate-contrast.js
 node scripts/validate-responsive.js   # manual pre-release step, not in pre-commit
 ```
 
-The pre-commit gate is version-controlled at `.githooks/pre-commit` — activate it once per clone with `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the **staged** copy of the three data files and runs the runtime harness when `js/` or `index.html` is staged; the commit is blocked on failure.
+The pre-commit gate is version-controlled at `.githooks/pre-commit` — activate it once per clone with `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the **staged** copy of the three gated files (`js/questions.js`, `js/content.js`, `css/styles.css`) and runs the runtime harness when `js/`, `index.html` or the harness itself is staged; the commit is blocked on failure. `validate-responsive.js` is deliberately not in the hook.
 
 ## ISTQB Content Fidelity Effort (complete, all 3 phases merged)
 
@@ -132,12 +132,14 @@ A follow-up audit (separate from the content-fidelity effort above) covered the 
 - `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
 - No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
 - A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
-- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (174 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
+- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (175 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
 - The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
-## Production Readiness — Status
+## Production Readiness — closed 2026-07-07 (pre-launch)
 
-Both items from the 2026-07-04 conversation are resolved as of 2026-07-07. **Error monitoring (Sentry free tier): DONE** — see "Error Monitoring (Sentry)" above. **Signup rate-limiting/captcha review: DONE, resolved to soft launch** — the dashboard audit found native rate limits adequate and caught a real blocker (built-in email service capped at 2/hour with "Confirm email" on, meaning real signups couldn't confirm), fixed via custom SMTP (Brevo) — see "Backend (Supabase)" above. Captcha (Cloudflare Turnstile) was deliberately **not** added — the plan's own gate says a soft launch doesn't need it. Full detail and the decision gate: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`; current status summary: `AGENTS.md` → "Production Readiness — Status & Next Session".
+Historical: this was the gate for the 2026-07-20 launch, which has since happened — see
+"Production Deployment (Vercel)" above for the live state. Both items from the 2026-07-04
+conversation are resolved as of 2026-07-07. **Error monitoring (Sentry free tier): DONE** — see "Error Monitoring (Sentry)" above. **Signup rate-limiting/captcha review: DONE, resolved to soft launch** — the dashboard audit found native rate limits adequate and caught a real blocker (built-in email service capped at 2/hour with "Confirm email" on, meaning real signups couldn't confirm), fixed via custom SMTP (Brevo) — see "Backend (Supabase)" above. Captcha (Cloudflare Turnstile) was deliberately **not** added — the plan's own gate says a soft launch doesn't need it. Full detail and the decision gate: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`; current status summary: `AGENTS.md` → "Production Readiness — closed 2026-07-07 (pre-launch)".
 
 ## UI/UX Polish & Flashcard Carousel Animation (2026-07-07)
 
@@ -159,8 +161,8 @@ A round of user-reported usability fixes, all in `css/styles.css` unless noted, 
   detail: `docs/superpowers/specs/2026-07-07-flashcard-carousel-animation-design.md`,
   `docs/superpowers/plans/2026-07-07-flashcard-carousel-animation.md`, `AGENTS.md` → "Flashcard
   Carousel Animation". Built via subagent-driven-development; task review and final
-  whole-branch review both came back clean (no Critical/Important findings). Verified by 12 new
-  checks in `scripts/verify-runtime.js` (`N10`).
+  whole-branch review both came back clean (no Critical/Important findings). Verified by the
+  `N10` checks in `scripts/verify-runtime.js`.
 
 ## Global Search Dropdown (2026-07-08)
 
@@ -194,14 +196,15 @@ mechanisms, exact hex values, verification evidence, and the complete follow-up 
 | Reduced motion | I2 | Global `prefers-reduced-motion` blunt block (durations + delays → 0.01ms `!important`, beats inline styles) + `matchMedia` guard collapsing the carousel's `setTimeout` sequencing | 2 `N15` checks |
 
 **Round 2 (2026-07-15):** everything the review left open — **I3**, **I7**, **I8** and the
-per-block recorded follow-ups — was closed in a second round (commits `2df5af2..4879e14`,
+per-block recorded follow-ups — was closed in a second round (commits `2df5af2..2ab887d`,
 same methodology). Summary: 44px touch targets via a `@media (pointer: coarse)` block
 (touch only — desktop visuals unchanged); mobile global search (`#mobileSearchBtn` + a
 full-width `.search-box.mobile-open` bar under the topbar, reusing the same
 `#globalSearch` and its JS) plus a complete ARIA combobox pattern for the dropdown
 (arrows/Enter/Escape, `aria-activedescendant`, no wrap, two-phase Enter on glossary
-terms); an inline SVG sprite of 26 `#i-*` symbols + `App._icon(name)` replacing every
-structural emoji (decorative emojis that stay carry `aria-hidden`); and the minor
+terms); an inline SVG sprite of `#i-*` symbols + `App._icon(name)` replacing every
+structural emoji (26 at the time, 27 today with `#i-coffee`; decorative emojis that stay
+carry `aria-hidden`); and the minor
 follow-ups (avatar modal as a keyboard-operable `dialog`, `aria-expanded` on chapter
 headers and `#mobileMenuBtn`, roving tabindex + `aria-current` on exam dots, assertive
 `warning`/`error` toasts, new `--secondary-text` token as an extra
@@ -213,10 +216,11 @@ families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.m
 
 **Editing constraints an agent must know (load-bearing):**
 
-- The tail of `css/styles.css` is ordered on purpose: the reduced-motion media block, then
-  `:focus-visible` **literally last** (it must win the `outline` property over earlier
-  equal-specificity `outline: none` input rules). Don't append CSS after it without reading
-  both blocks' comments.
+- The tail of `css/styles.css` is ordered on purpose — today: the `≤480px` tier, then
+  `@media (pointer: coarse)`, then the reduced-motion block, then `:focus-visible`
+  **literally last** (it must win the `outline` property over earlier equal-specificity
+  `outline: none` input rules). Don't append CSS after it without reading those blocks'
+  comments. See the Mobile Adaptability section below for the tier's own cascade caveat.
 - New interactive elements in `innerHTML` templates: give them `role="button" tabindex="0"`
   — the delegated keydown listener in `App.init()` makes them keyboard-operable
   automatically; never add per-element key listeners (the templates are regenerated
@@ -230,10 +234,10 @@ families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.m
 - Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
   `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
   the two-part gate blocks the commit otherwise.
-- `TRANSLATIONS` currently has **175 keys** (ES/EN paired, harness-enforced; the 174th is
-  `achievement_toast_prefix`, the round-2 final-review fix for the last hardcoded "Logro:"
-  toast residue in `js/app.js`; the 175th is `bmc_label`, the Buy Me a Coffee button — see
-  the Monetization section below).
+- `TRANSLATIONS` currently has **175 keys** (ES/EN paired, harness-enforced). The two most
+  recent additions were `achievement_toast_prefix` (round-2 final-review fix for the last
+  hardcoded "Logro:" toast residue in `js/app.js`) and `bmc_label` (the Buy Me a Coffee
+  button — see the Monetization section below).
 - The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
   assertions).
 - Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated
@@ -281,7 +285,8 @@ Load-bearing details an agent must know:
   `<a>` also contains the `#i-coffee` `<svg>`, and `i18n.apply()` does `el.textContent = t(key)`,
   which would wipe the icon if the attribute were on the `<a>`. This was a real bug caught by the
   final review and fixed; the `N19` markup check now forbids `data-i18n` on the `<a>`.
-- `.toast-container` was raised to `bottom: 80px` (from 24px) so transient `aria-live` toasts
+- `.toast-container` was raised to a base of `bottom: 80px` (from 24px; today
+  `calc(80px + env(safe-area-inset-bottom, 0px))`) so transient `aria-live` toasts
   stack **above** the persistent pill instead of overlapping it.
 - Gate: the `N19` check family in `scripts/verify-runtime.js` (i18n key, `#i-coffee` sprite +
   markup, CSS tokens/offset/exam-hide, `_setExamActive` wiring, `privacy.html` mention).

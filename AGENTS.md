@@ -172,7 +172,8 @@
     `close_label`), and `#mobileMenuBtn` also gained a matching `title` via
     `data-i18n-title="mobile_menu_aria"` (it previously had no tooltip at all). See "i18n"
     below for the full attribute list and the key-count history (169 after this block; the
-    keyboard-operability block below added one more → 170, the current total).
+    keyboard-operability block below added one more → 170 at the time — see "i18n" for the
+    current total).
   - **I4 — iOS focus auto-zoom on form inputs:** `.search-input`, `.select-input`,
     `.search-input-full`, and `.auth-field input` were below 16px, which makes iOS Safari
     auto-zoom the viewport on focus (a jarring, disorienting UX on mobile). Raised all four
@@ -377,7 +378,9 @@
     bring `TRANSLATIONS` to **174 keys**.
     Gate: 10 `N16 móvil`/`N16 combobox` static checks + 2 `N16b` behavioral checks.
   - **I8 — structural emojis → inline SVG sprite:** a hidden sprite (`display:none`,
-    `aria-hidden`) with **26 Lucide-style `#i-*` symbols** as the first element of
+    `aria-hidden`) with **26 Lucide-style `#i-*` symbols** (27 today — `#i-coffee` was
+    added by the Buy Me a Coffee round; note the `N17` check hardcodes the original 26-name
+    list, so a symbol added later is not gate-protected) as the first element of
     `<body>` in `index.html`; `.icon` class (1em, `currentColor` — theme-proof by
     inheritance); `App._icon(name)` helper for `innerHTML` templates (returns
     `<svg class="icon" aria-hidden="true"><use href="#i-…"/></svg>`; unknown name →
@@ -421,23 +424,27 @@
     double-fire; restructuring the flashcard DOM is disproportionate); (3) three
     pre-existing, deliberate **accent/raw-color-as-text exceptions**, outside both
     contrast gates and enumerated in the `N12` comment in `scripts/verify-runtime.js`:
-    `.chapter-number` (`js/app.js` ~358 — large/bold text on a tint, large-text AA
-    threshold 3:1), `.lesson-chapter-tag` (`js/app.js` ~429 — `color:${color}` chapter-
+    `.chapter-number` (in `renderCurriculum()` — large/bold text on a tint, large-text AA
+    threshold 3:1), `.lesson-chapter-tag` (in `renderLesson()` — `color:${color}` chapter-
     accent hex over its own 0.15 rgba tint; a hex literal, invisible to the `N12` token
-    regex) and `.lesson-content code` (`css/styles.css` ~783 — `color: var(--secondary)`
+    regex) and `.lesson-content code` (in `css/styles.css` — `color: var(--secondary)`
     in CSS, with no `validate-contrast.js` pair); and (4) a new minor follow-up out of
     I8's scope: two **structural ✓/✗ text glyphs** remain — the exam review's
-    correct/wrong markers (`js/app.js` ~933–934) and the avatar selection's `.av-check`
-    (`js/avatar.js` ~191) still use text characters as icons. The final whole-branch
+    correct/wrong markers (in `renderExamReview()`, `js/app.js`) and the avatar selection's
+    `.av-check` (`js/avatar.js`) still use text characters as icons.
+    (Grep-able anchors on purpose: literal line numbers in this file went stale after the
+    2026-07-21 round shifted `js/app.js` by ~55 lines.) The final whole-branch
     review found more glyphs/emojis to queue with this same follow-up: the TTS buttons'
     🔇/🔊 (`js/app.js`, genuinely icon-only), the ← arrow of the "Volver al curriculum"
     button (`index.html` and `js/app.js`), the 🔴🟡🟢 markers of the fc-stats block
     (`index.html`), and — borderline, data-icon family — the 📋⚡🎯 of the exam history.
     Additional follow-ups from the final review: (5) `.av-card` does not expose its
     selected state to AT (only the `selected` class; candidate: `aria-pressed`) — queue
-    with the AT nits; (6) **A2, pre-existing:** the open mobile drawer physically covers
-    `#mobileMenuBtn`, making touch-close impossible (keyboard and nav-item close do
-    work); suggested fix: click-outside closes the drawer; (7) `aria-current="true"` on
+    with the AT nits; (6) **A2, pre-existing — UPDATE 2026-07-21: CLOSED** by the mobile
+    adaptability round (scrim + click-outside + Escape, and `.topbar` raised to
+    `z-index: 120` so the button stays reachable — see "Mobile adaptability" below). Was:
+    the open mobile drawer physically covered `#mobileMenuBtn`, making touch-close
+    impossible; (7) `aria-current="true"` on
     the exam dots could become the more semantic `"step"` — a one-liner, BUT the `N18`
     check pins `"true"`: change both at the same time; (8) `.auth-lang-switcher` has no
     gap between ES/EN at 44px on touch (WCAG-conformant by size; a guideline deviation);
@@ -608,7 +615,7 @@
        matching the desktop gap, which was also bumped 5→8px per the report); hit
        area stays 44×44.
 
-## Production Readiness — Status & Next Session
+## Production Readiness — closed 2026-07-07 (pre-launch)
 
 Full assessment and the two open items came out of the same 2026-07-04 conversation as the
 audit above. Status:
@@ -774,7 +781,7 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   block above) — fourth block in `i18n.apply()`, same shape as `data-i18n-title`:
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like
   every other `data-i18n-*` mechanism
-- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **174 keys** (160 after
+- Translations defined in `TRANSLATIONS` object in `js/i18n.js` — **175 keys** (160 after
   the 2026-07-04 remediation, +5 `gs_*` keys for the 2026-07-08 global search dropdown →
   165, +4 more — `mobile_menu_aria`, `fc_prev_aria`, `fc_next_aria`, `close_label` — added
   2026-07-14 for the `data-i18n-aria` rollout above → 169, +1 — `goto_question_aria`, the
@@ -782,7 +789,8 @@ keepalive REST call so closing the tab inside the 4s debounce doesn't leave the 
   `global_search_aria`, `mobile_search_aria`, `close_search_aria` — added 2026-07-15 for
   the I7 mobile-search/combobox block of the UI/UX remediation round 2 → 173, +1 —
   `achievement_toast_prefix`, the round-2 final-review fix for the last hardcoded
-  "Logro:" toast residue → 174), all ES/EN
+  "Logro:" toast residue → 174, +1 — `bmc_label`, the Buy Me a Coffee pill added
+  2026-07-15 → **175**), all ES/EN
   paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known
   hardcoded-language residues)
@@ -847,7 +855,7 @@ Critical/Important findings): `docs/superpowers/plans/2026-07-07-flashcard-carou
   boundary check into it.
 - `shuffleFlashcards()` and the deck `<select>` (`filterFlashcards()`) deliberately do **not**
   animate — they're a session reset, not a sequential navigation.
-- Verified by 12 new `N10` checks in `scripts/verify-runtime.js` (direction, guard reentrancy,
+- Verified by the `N10` checks in `scripts/verify-runtime.js` (17 today; direction, guard reentrancy,
   both deck boundaries, the `rateFlashcard` retiming) exercising the real loaded module against
   real timers, plus an ad hoc Playwright smoke check (not committed) confirming the visual
   direction and that the flip still works, including at the `≤768px` mobile width.
@@ -908,8 +916,9 @@ also persisted the forced view via `_saveCurrentView`, which could break an in-p
 screen on return to the simulator). Full design:
 `docs/superpowers/specs/2026-07-08-global-search-dropdown-design.md`.
 
-- With more than 2 characters, a `#globalSearchResults` panel opens (inside `.search-box`,
-  desktop only — `.search-box` stays hidden at ≤768px) with up to 5 `GLOSSARY` terms
+- With more than 2 characters, a `#globalSearchResults` panel opens (inside `.search-box`; on
+  mobile that box opens as a full-width bar under the topbar via `#mobileSearchBtn` — see
+  "UI/UX remediation ronda 2" → I7; it used to be hidden outright at ≤768px) with up to 5 `GLOSSARY` terms
   (definition clamped to 2 lines via CSS `line-clamp`) and up to 3 `CHAPTERS`/topic matches
   with a lesson. Logic lives in the `/* ===== GLOBAL SEARCH ===== */` section of `js/app.js`
   (`_onGlobalSearchInput`, `_renderGlobalSearch`, `_closeGlobalSearch`).
@@ -917,13 +926,15 @@ screen on return to the simulator). Full design:
   (`_gsGoGlossary`) is the *only* path by which the global search box writes into
   `#glossarySearch` (previously it did so on every keystroke). Clicking a content result →
   `_gsGoLesson` → `navigateToLesson()` straight to the lesson.
-- **Exam guard:** `App._examActive` (true in `launchExam()`, false in `finishExam()`). The plan's
-  original design also reset it in `renderSimulatorMenu()`, but that alone only fires when the
-  destination view is `'simulator'` — a chapter exam (no timer) abandoned via any *other* sidebar
-  link would have left the flag stuck `true` forever, permanently blocking the dropdown app-wide.
-  Fixed during task review by resetting `_examActive = false` unconditionally as the first
-  statement of `App.navigate(view)` itself (`js/app.js`), which covers all 7 destinations;
-  `renderSimulatorMenu()`'s own reset is now redundant but kept, harmless. With the flag active,
+- **Exam guard:** the flag `App._examActive` is set/cleared **only** through
+  `App._setExamActive(active)` — see "Monetization — Buy Me a Coffee button" below for the
+  canonical description of that helper. **Never write `this._examActive = …` directly**; the
+  `N19` gate asserts no direct assignment survives. Historical note on why the reset lives in
+  `navigate()`: the plan originally reset the flag in `renderSimulatorMenu()` alone, which only
+  fires when the destination view is `'simulator'` — a chapter exam (no timer) abandoned via any
+  *other* sidebar link left the flag stuck `true` forever, permanently blocking the dropdown
+  app-wide. It is now reset unconditionally as the first statement of `App.navigate(view)`
+  (via `_setExamActive(false)`), covering every destination. With the flag active,
   `_gsBlockIfExam()` blocks the two navigating actions with a toast (`gs_exam_block_toast`);
   expanding definitions still works.
 - **XSS:** the user's query is never interpolated into the panel's `innerHTML` — only static
@@ -977,9 +988,13 @@ Saves current view to `localStorage` key `mycampus_current_view`. Restores on in
 - `App.navigate()` — handles `'lesson'` view by calling `renderLesson()` with stored `currentLesson`
 - `auth.js`'s `_onAuthSuccess()` (both the first-init and already-initialized branches) — `App.navigate(App.currentView || 'dashboard')` instead of hardcoded `'dashboard'`
 
-### Sidebar Badge Fix
+### Sidebar Badge — removed 2026-07-21
 
-Empty `.nav-badge` elements (e.g., `#curriculumBadge`) are hidden via CSS: `.nav-badge:empty { display: none; }`
+There used to be an empty `<span class="nav-badge" id="curriculumBadge">` in the sidebar nav,
+hidden by `.nav-badge:empty { display: none }`. **No JS ever wrote to it** — it was scaffolding
+for a counter that was never implemented, so it rendered nothing in every state. Element and
+its three CSS rules deleted in the 2026-07-21 dead-code sweep. If a nav counter is ever wanted,
+recover the markup from history (`git log -S nav-badge`) rather than re-inventing it.
 
 ### Lesson Content Schema (`js/content.js`)
 
@@ -1114,7 +1129,7 @@ at all; this only prevents a silent, unexplained crash when it can't load.
 
 Manual browser testing only for app behavior/UI. There is no linter config, no type checking.
 
-Three exceptions, all Node, dev-only, never served to the browser:
+Five exceptions, all Node, dev-only, never served to the browser:
 - `scripts/validate-questions.js` gates `js/questions.js` (see "Question Bank Schema" above).
 - `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS` in `js/content.js` (see "Lesson
   Content Schema" above). Both share `scripts/lib/validate-utils.js` for the parts that were
@@ -1136,17 +1151,29 @@ Three exceptions, all Node, dev-only, never served to the browser:
   cannot detect JS-inline `style="color:..."` set from `js/app.js` templates; that surface
   is covered by the `N12` check in `verify-runtime.js` below. See "Contrast remediation
   (2026-07-14)" below for what both were built to catch.
+- `scripts/validate-responsive.js` (added 2026-07-21) — **the only gate that needs a real
+  browser.** Launches Playwright/Chromium at 320/375/414px with touch emulation, serves the
+  repo from its own `node:http` server, bypasses the auth gate, and asserts: zero horizontal
+  overflow across the 7 views + a tabled lesson + an active exam, ≥44px touch targets, the
+  exam dot-strip height, the full drawer open/scrim/close/inert cycle, the avatar modal at
+  1 column, and the whole onboarding tour (tooltip inside the viewport and not covering the
+  spotlight at every step). Follows the repo's no-op dependency pattern: without Playwright
+  it prints `SKIP: Playwright no disponible` and exits 0. **Deliberately outside the
+  pre-commit hook** (slow, adds a dependency) — run it manually before any release and after
+  any layout change. What it can't see without a browser is covered by the `N20`/`N20b`/
+  `N20c` families in `verify-runtime.js`. Full rationale: "Mobile adaptability (2026-07-21)".
 
 The pre-commit gate is version-controlled at `.githooks/pre-commit` (activate once per clone:
-`git config core.hooksPath .githooks`). It validates the **staged** copy of the three data
-files — not the working tree — and runs `verify-runtime.js` whenever `js/`, `index.html`, or
-the harness itself is staged. Commit is blocked on failure.
+`git config core.hooksPath .githooks`). It validates the **staged** copy of the three gated
+files (`js/questions.js`, `js/content.js`, `css/styles.css`) — not the working tree — and runs
+`verify-runtime.js` whenever `js/`, `index.html`, or the harness itself is staged. Commit is
+blocked on failure. `validate-responsive.js` is not in the hook (see above).
 
 ## Reference Materials
 
 The `ISTQB 2026/` folder contains official ISTQB PDFs (syllabus, sample exams). Not part of the application code — do not modify. **Not version-controlled** (gitignored — this is copyrighted third-party material and must never be committed/pushed to the public repo). It exists only on this local checkout; a fresh clone won't have it. If a future content-audit session needs it, source your own copies of the PDFs into that folder first.
 
-## ISTQB Content Fidelity Effort — Status & Next Session
+## ISTQB Content Fidelity Effort — complete (all 3 phases merged)
 
 Full spec: `docs/superpowers/specs/2026-07-01-content-and-question-bank-expansion-design.md`.
 Ground rule for all three phases: every content item needs a `source` citation traceable

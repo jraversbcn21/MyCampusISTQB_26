@@ -665,12 +665,14 @@ const SAMPLE_Q = {
     // capítulo como texto (continue-list %, cpring %) se migraron a var(--text2) y
     // los guarda el check N18 de abajo. Tres excepciones restantes, deliberadas y
     // preexistentes (registradas en AGENTS.md → "UI/UX remediation ronda 2"):
-    //   1. .chapter-number (js/app.js ~358) — texto grande/bold sobre tinte, umbral
+    // (Anclas grep-ables, no números de línea: la ronda móvil de 2026-07-21 desplazó
+    //  app.js ~55 líneas y dejó obsoletas las citas literales que había aquí.)
+    //   1. .chapter-number (en renderCurriculum) — texto grande/bold sobre tinte, umbral
     //      AA de texto grande (3:1), no 4.5:1.
-    //   2. .lesson-chapter-tag (js/app.js ~429) — color:${color} hex de acento de
+    //   2. .lesson-chapter-tag (en renderLesson) — color:${color} hex de acento de
     //      capítulo sobre su propio tinte rgba 0.15 (hex literal: este regex de
     //      tokens var() no lo ve).
-    //   3. .lesson-content code (css/styles.css ~783) — color: var(--secondary) en
+    //   3. .lesson-content code (en css/styles.css) — color: var(--secondary) en
     //      CSS, fuera del alcance de este check (solo mira app.js) y sin par en
     //      validate-contrast.js.
     const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
