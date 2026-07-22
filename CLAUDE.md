@@ -50,7 +50,7 @@ User Action → App.* method → mutate App.state → App.saveState()
                                                    └─→ Sync.saveState() (4s debounce → Supabase)
 ```
 
-`App.state` is the single source of truth. All views read from it directly. On page load, state is restored from localStorage first, then reconciled with the cloud copy if the user is authenticated — the newer `_updatedAt` stamp wins, so a stale cloud copy never clobbers newer local progress (see the 2026-07-04 section).
+`App.state` is the single source of truth. All views read from it directly. On page load, state is restored from localStorage first, then reconciled with the cloud copy if the user is authenticated — the newer `_updatedAt` stamp wins, so a stale cloud copy never clobbers newer local progress (see the 2026-07-04 section). **Load-bearing subtlety (2026-07-22 fix):** the "newer local wins" rule must use the local timestamp captured *before* `App.init` runs — `init()` calls `updateStreakAndDate()`, which stamps `App.state._updatedAt` fresh even on an empty default state, so trusting a re-read of localStorage (or `App.state`) during background reconciliation makes a just-booted empty state look newer than the real cloud copy and overwrite it. See the "Persistence — cloud progress loss on re-login (2026-07-22)" section below.
 
 ### Key Modules
 
@@ -394,3 +394,47 @@ plan: `docs/superpowers/plans/2026-07-21-lesson-next-button-and-mobile-fab.md`.
 - Gate: la familia `N21` en `scripts/verify-runtime.js` (17 checks, incluyendo 2
   comportamentales que llaman a `App.advanceLesson` real con navegación/toast
   monkeypatchados, no solo grep).
+
+## Persistence — cloud progress loss on re-login (2026-07-22)
+
+Bug reportado sobre uso real: un usuario con progreso hace **Inspector → Application → Storage →
+Clear site data**, vuelve a iniciar sesión y **su progreso no vuelve** — ni local ni en la nube.
+La copia de Supabase, que debería restaurarlo, quedaba **destruida**. Spec:
+`docs/superpowers/specs/2026-07-22-cloud-progress-loss-on-reauth-fix-design.md`. Ejecución:
+directa con TDD (sin subagentes). Detalle completo: `AGENTS.md` → "Persistencia: pérdida de
+progreso en la nube al re-loguearse (2026-07-22)".
+
+Causa raíz: al re-loguearse con `App._initialized === false`, `App.init()` llama a
+`updateStreakAndDate()` (`app.js:1564`), que **sella un estado vacío con `_updatedAt` fresco y
+lo escribe en localStorage antes** de que la reconciliación con la nube ocurra. Luego el
+mecanismo de frescura (`_updatedAt`, newest wins) veía ese vacío recién sellado como "más
+nuevo" que la nube real y lo subía encima, borrando el progreso. Se manifestaba por **tres
+puertas**: la re-subida interna de `Sync.loadState`, el push del debounce de 4 s (race de red
+lenta), y el `.finally` de `_onAuthSuccess` re-volcando `App.state`.
+
+Fix en tres capas (todas load-bearing, no simplificar a una):
+- **Capa 1 — `Sync.loadState(userId, localTsOverride)`**: la decisión de frescura usa el sello
+  local capturado **antes** de que `App.init` escriba (en arranque limpio = 0), no una relectura
+  del localStorage ya mutado. Sin el override, comportamiento idéntico al previo.
+- **Capa 2 — gate `Sync._reconciled`**: mientras es `false`, `saveState`/`flushNow`/el listener
+  de `visibilitychange` escriben en localStorage pero **no empujan a la nube**. `auth.js` lo pone
+  a `false` antes de reconciliar y a `true` en el `.finally` (también en error → nunca deja el
+  push bloqueado para siempre), y entonces vuelca el estado reconciliado. El `_push` **interno**
+  de `loadState` NO pasa por el gate: es la propia reconciliación.
+- **Capa 3 — `Auth._shouldApplyCloud(cloudState, hadLocalBase, appStateTs, postInitTs)`** (puro,
+  testeable): reemplaza el guard `cloudState._updatedAt >= App.state._updatedAt` del `.then`, que
+  el sello fresco de init también engañaba. En arranque **sin base local** (`preInitLocalTs === 0`,
+  escenario clear) aplica **siempre** la nube; con base local real, la aplica salvo que el usuario
+  haya hecho un cambio genuino en la ventana de reconciliación (`appStateTs > postInitTs`).
+
+Editing constraints an agent must know:
+- **No re-leer localStorage ni `App.state` para la decisión de frescura durante la reconciliación
+  de fondo** — usar siempre el sello pre-init capturado en `auth.js` antes de `App.init`. Añadir
+  cualquier `saveState()` automático nuevo dentro de `App.init` reintroduce la contaminación del
+  sello; si hace falta, debe quedar detrás del gate `_reconciled`.
+- El gate `_reconciled` vive en `saveState`/`flushNow`/`visibilitychange`, **nunca dentro de
+  `_push`** (rompería la re-subida legítima de `loadState`).
+- Gate de regresión: la familia **`N22`** en `scripts/verify-runtime.js` (repro del bug vía
+  `Sync.loadState` con override, gate de push, `_shouldApplyCloud` en sus 4 casos incluido el
+  arranque sin base local, y estáticos del cableado). El check N2 existente ahora fija
+  `Sync._reconciled = true` porque testea el flush del flujo ya reconciliado.

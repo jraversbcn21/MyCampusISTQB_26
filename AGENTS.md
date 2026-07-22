@@ -803,6 +803,74 @@ stamped one; ties go to the cloud, preserving multi-device behavior). A
 `visibilitychange→hidden` listener in `sync.js` flushes a pending debounced save with a
 keepalive REST call so closing the tab inside the 4s debounce doesn't leave the cloud stale.
 
+**Freshness-decision hazard (2026-07-22 fix) — read before touching sync/auth reconciliation.**
+The "newer local wins" rule is only safe if the local timestamp it trusts reflects *real user
+progress*. It does not, by default, at fresh login: `App.init()` calls `updateStreakAndDate()`
+(`app.js:1564`), which for a default/empty state (`lastStudyDate === null`) calls `saveState()`,
+stamping `App.state._updatedAt` fresh **and** writing that empty state to localStorage — all
+synchronously, before the background cloud reconciliation runs. See the dedicated section below.
+
+### Persistencia: pérdida de progreso en la nube al re-loguearse (2026-07-22)
+
+Bug reportado sobre uso real. Un usuario con progreso hace **Clear site data** en el inspector,
+vuelve a iniciar sesión y su progreso **no vuelve** — y la copia de Supabase queda **destruida**.
+Spec: `docs/superpowers/specs/2026-07-22-cloud-progress-loss-on-reauth-fix-design.md`. Ejecución:
+directa con TDD (sin subagentes), aprobada por el dueño; export/import manual descartado como
+follow-up aparte.
+
+**Causa raíz.** Con `App._initialized === false` (`auth.js:_onAuthSuccess`):
+1. `App.loadState()` sobre un localStorage vacío devuelve el estado inicial por defecto **sin
+   `_updatedAt`**.
+2. `App.init(estadoVacío)` corre síncrono; en `app.js:1564` `updateStreakAndDate()` entra en su
+   rama (`lastStudyDate === null`) y llama a `saveState()`.
+3. `Sync.saveState` sella el estado vacío con `_updatedAt = Date.now()` (fresco) y lo escribe en
+   localStorage.
+4. El `Sync.loadState()` de fondo **relee** ese vacío recién sellado (`localTs = ahora`) y lo ve
+   más nuevo que la nube real (`cloudTs` más viejo) → `_push` sube el vacío encima de la nube.
+
+Se manifestaba por **tres puertas**: (a) la re-subida interna de `loadState`; (b) el push del
+debounce de 4 s del `saveState` de init (gana la carrera en redes lentas, antes del `SELECT` de
+`loadState`); (c) el `.finally` de `_onAuthSuccess`, cuyo guard `cloudState._updatedAt >=
+App.state._updatedAt` también era engañado por el sello fresco (nube "más vieja" que el vacío) →
+no aplicaba la nube y re-volcaba `App.state` vacío.
+
+**Fix en tres capas** (todas load-bearing):
+- **Capa 1** — `Sync.loadState(userId, localTsOverride)`: nuevo 2º parámetro opcional; cuando se
+  pasa, se usa como `localTs` en la comparación de frescura en vez de releer `local._updatedAt`.
+  `auth.js` captura `preInitLocalTs` **antes** de `App.init` (un número, no la referencia —
+  `init` muta el objeto) y lo pasa (0 en arranque limpio → gana la nube). Sin el parámetro, el
+  comportamiento es idéntico al previo (ningún otro llamador se rompe).
+- **Capa 2** — gate `Sync._reconciled` (inicial `false`): `saveState` sella y escribe localStorage
+  siempre, pero solo programa el push a la nube si `_reconciled === true`; `flushNow` y el listener
+  de `visibilitychange` idem. `auth.js` pone `_reconciled = false` antes de reconciliar (ambas
+  ramas) y `= true` en el `.finally` (corre también en error → nunca deja el push bloqueado), y
+  entonces hace `App.saveState()` para volcar el estado reconciliado. **El `_push` interno de
+  `loadState` NO pasa por el gate** — es la propia reconciliación; el gate vive únicamente en los
+  pushes originados por `App` (streak de init, cambios de la ventana).
+- **Capa 3** — `Auth._shouldApplyCloud(cloudState, hadLocalBase, appStateTs, postInitTs)`, puro y
+  testeable (el arnés no puede correr `App.init`): reemplaza el guard del `.then`. Sin `cloudState`
+  → no aplicar (usuario nuevo). `hadLocalBase === false` (arranque tras clear, `preInitLocalTs ===
+  0`) → aplicar **siempre** la nube (las acciones de la ventana se hicieron sobre un vacío
+  incompleto). Con base local real → aplicar salvo cambio in-window genuino (`appStateTs >
+  postInitTs`, con `postInitTs` capturado justo tras `App.init`).
+
+**Por qué la app requiere estar online para el escenario problemático:** tras "Clear site data" se
+borra también la sesión; no hay login offline (Supabase es obligatorio para autenticar), así que
+un arranque vacío tras clear siempre es online y con `preInitLocalTs === 0` → la nube gana. No hay
+combinación clear+offline que produzca una sesión vacía autenticada.
+
+**Constraints para un agente:**
+- No re-leer localStorage ni `App.state` para la decisión de frescura durante la reconciliación de
+  fondo; usar el sello pre-init. Cualquier `saveState()` automático nuevo dentro de `App.init`
+  reintroduce la contaminación — debe quedar detrás del gate `_reconciled`.
+- El gate `_reconciled` nunca dentro de `_push` (rompería la re-subida legítima de `loadState`).
+- Gate de regresión: familia **`N22`** en `scripts/verify-runtime.js` — repro del bug vía
+  `Sync.loadState('u1', 0)` con nube poblada (no sube el vacío, la nube gana), gate de push
+  (`_reconciled=false` no deja timer ni keepalive; `=true` sí), `_shouldApplyCloud` en sus 4 casos
+  (incluido arranque sin base local, que el guard viejo fallaba), y estáticos del cableado. El
+  check **N2** existente ahora fija `Sync._reconciled = true` (testea el flush del flujo ya
+  reconciliado). N1 (multi-dispositivo) intacto.
+
 ### i18n
 
 - `i18n.t(key)` in JS code

@@ -151,18 +151,33 @@ const Auth = {
     if (!App._initialized) {
       // Iniciar la app inmediatamente con estado local para que los clicks funcionen
       const localState = App.loadState();
+      // Frescura pre-init (2026-07-22): capturar el sello ANTES de que App.init
+      // escriba. En un arranque limpio (tras "Clear site data") el estado local
+      // real era vacío/sin sello → ts 0. Sin esto, init() reescribe localStorage
+      // con un sello fresco y loadState creería que el vacío es más nuevo que la
+      // nube, subiéndolo encima del progreso real. Es un número, no la referencia:
+      // App.init muta localState.
+      const preInitLocalTs = (localState && localState._updatedAt) || 0;
       App.init(localState);
       AvatarSelector.init(user.id);
       setTimeout(() => Onboarding.start(user.id), 600);
 
+      // Sello de App.state justo DESPUÉS de init: incluye el que init() estampó al
+      // calcular la racha de bienvenida. Sirve para distinguir ese sello de arranque
+      // de un cambio real que el usuario haga MIENTRAS resuelve el fetch de la nube.
+      const postInitTs = (App.state && App.state._updatedAt) || 0;
+      // Gate anti-pérdida: no empujar nada a la nube hasta terminar de reconciliar.
+      Sync._reconciled = false;
+
       // Sincronizar con Supabase en segundo plano sin bloquear la UI.
-      // loadState ya resolvió qué copia gana (frescura por _updatedAt) y dejó
-      // la caché localStorage coherente; aquí solo queda no pisar progreso
-      // que el usuario haya hecho MIENTRAS resolvía este fetch (su App.state
-      // en memoria tendría un sello más nuevo) y no re-navegar si hay un
-      // examen en marcha.
-      Sync.loadState(user.id).then(cloudState => {
-        if (cloudState && (cloudState._updatedAt || 0) >= ((App.state && App.state._updatedAt) || 0)) {
+      // loadState decide qué copia gana usando preInitLocalTs (no lo que init haya
+      // reescrito). _shouldApplyCloud decide si volcar la copia ganadora sobre
+      // App.state: en un arranque SIN base local (escenario "Clear site data") la
+      // nube manda aunque init hubiera sellado el vacío; con base local real se
+      // respetan los cambios in-window. No re-navegar si hay un examen en marcha.
+      Sync.loadState(user.id, preInitLocalTs).then(cloudState => {
+        if (this._shouldApplyCloud(cloudState, preInitLocalTs > 0,
+              (App.state && App.state._updatedAt) || 0, postInitTs)) {
           App.state = cloudState;
           App.updateSidebar();
           const examEl = document.getElementById('examMode');
@@ -172,10 +187,16 @@ const Auth = {
       }).catch(e => {
         console.warn('[Auth] Sync en segundo plano falló:', e.message);
       }).finally(() => {
+        // Reconciliación terminada (éxito o error): reabrir el push a la nube y
+        // volcar el estado ya reconciliado + cualquier cambio hecho en la ventana.
+        Sync._reconciled = true;
+        App.saveState();
         this._authInProgress = false;
       });
     } else {
-      Sync.loadState(user.id).then(cloudState => {
+      const preInitLocalTs = (App.state && App.state._updatedAt) || 0;
+      Sync._reconciled = false;
+      Sync.loadState(user.id, preInitLocalTs).then(cloudState => {
         App.state = cloudState || App.loadState();
         App.updateSidebar();
         App.navigate(App.currentView || 'dashboard');
@@ -184,9 +205,27 @@ const Auth = {
         App.updateSidebar();
         App.navigate(App.currentView || 'dashboard');
       }).finally(() => {
+        Sync._reconciled = true;
+        App.saveState();
         this._authInProgress = false;
       });
     }
+  },
+
+  // ¿Volcar la copia ganadora de la nube sobre App.state tras reconciliar? (2026-07-22)
+  // Puro y testeable (el arnés no puede correr App.init). cloudState es la copia que
+  // loadState eligió como ganadora (nube, o local re-subida). Reglas:
+  //   - Sin cloudState (usuario nuevo, sin fila en la nube): no aplicar, conservar local.
+  //   - Sin base local (arranque tras "Clear site data", preInitLocalTs === 0): aplicar
+  //     SIEMPRE la nube — cualquier acción hecha en la ventana se hizo sobre un estado
+  //     vacío incompleto y no debe pisar el progreso real de la nube.
+  //   - Con base local real: aplicar la nube salvo que el usuario haya hecho un cambio
+  //     genuino en la ventana (su sello supera al de justo-después-de-init).
+  _shouldApplyCloud(cloudState, hadLocalBase, appStateTs, postInitTs) {
+    if (!cloudState) return false;
+    if (!hadLocalBase) return true;
+    const changedInWindow = (appStateTs || 0) > (postInitTs || 0);
+    return !changedInWindow;
   },
 
   _updateUserUI(user) {

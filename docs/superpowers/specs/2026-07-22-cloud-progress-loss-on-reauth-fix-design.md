@@ -89,23 +89,47 @@ localStorage sí (no perdemos nada local); solo se difiere el push a la nube.
 Efecto: aunque el debounce de 4 s del streak de arranque expire, no empuja nada mientras
 `_reconciled` sea `false`; y en cuanto la nube se reconcilia, el estado correcto se vuelca.
 
-### Por qué las dos capas y no una
+### Capa 3 — la decisión de "aplicar la nube" no se deja engañar por el sello de init
+
+Al trazar la ruta real `_onAuthSuccess` → `.then` → `.finally` (que el arnés no puede correr
+entera, porque `App.init` necesita un DOM real) aparece el mismo bug por otra puerta: el guard
+original del `.then` (`cloudState._updatedAt >= App.state._updatedAt`) compara contra
+`App.state`, que init ya selló fresco sobre el vacío (T1) — la nube real es más vieja
+(Tcloud < T1) → el guard es falso → `App.state` se queda vacío → el `.finally` hace
+`App.saveState()` y **re-sube el vacío a la nube**.
+
+Se reemplaza ese guard por `Auth._shouldApplyCloud(cloudState, hadLocalBase, appStateTs,
+postInitTs)`, un helper **puro y testeable**:
+
+- Sin `cloudState` (usuario nuevo, sin fila en la nube): no aplicar, conservar local.
+- **Sin base local** (`preInitLocalTs === 0`, arranque tras "Clear site data"): aplicar
+  **siempre** la nube — cualquier acción hecha en la ventana se hizo sobre un estado vacío
+  incompleto y no debe pisar el progreso real.
+- Con base local real: aplicar la copia ganadora salvo que el usuario haya hecho un cambio
+  genuino en la ventana (`appStateTs > postInitTs`, siendo `postInitTs` el sello de `App.state`
+  capturado justo tras `App.init`).
+
+`postInitTs` se captura en `auth.js` inmediatamente después de `App.init`; `hadLocalBase` es
+`preInitLocalTs > 0`.
+
+### Por qué las capas y no una
 
 - Capa 1 sola: no cubre el race de red lenta (el push con debounce del estado vacío no pasa
-  por `loadState`).
+  por `loadState`), ni la re-subida del vacío por el `.finally`.
 - Capa 2 sola: evita empujar el vacío, pero `loadState` seguiría pudiendo elegir mal si releyera
   el localStorage ya mutado. Capa 1 endurece esa decisión.
+- Capa 3 sola: sin Capa 1, `loadState` ya habría re-subido el vacío antes de decidir aplicar.
 
-Juntas garantizan: **ningún estado local pre-reconciliación puede pisar la nube, y la decisión
-de frescura no se deja engañar por escrituras de `init()`.**
+Juntas garantizan: **ningún estado local pre-reconciliación puede pisar la nube, la decisión
+de frescura no se deja engañar por escrituras de `init()`, y el estado que finalmente se vuelca
+es el reconciliado.**
 
 ## Preservación de comportamientos existentes
 
 - Multi-dispositivo (nube más nueva gana / local real más nuevo gana): intacto — verificado
   por los checks N1 existentes, que deben seguir en verde.
-- Cambios hechos por el usuario en la ventana de reconciliación: preservados por el guard ya
-  existente en `auth.js:165` (`cloudState._updatedAt >= App.state._updatedAt`) más el volcado
-  final de la Capa 2.
+- Cambios hechos por el usuario en la ventana de reconciliación (con base local real):
+  preservados por `Auth._shouldApplyCloud` (Capa 3) más el volcado final de la Capa 2.
 - Racha de bienvenida: se sigue calculando; solo se difiere su push a la nube.
 
 ## Regresión — familia `N22` en `scripts/verify-runtime.js`
@@ -122,11 +146,19 @@ Comportamentales (calcando el patrón de N1, con `makeSupabaseMock({ singleResul
 3. **Multi-dispositivo intacto:** `Sync.loadState('u1', 2000)` con nube en `_updatedAt:1000`
    → gana local (re-sube). (Refuerza N1 con el nuevo parámetro.)
 
+Decisión de aplicar la nube (`Auth._shouldApplyCloud`, puro — cubre la ruta `.then`/`.finally`
+que el arnés no puede correr entera):
+
+4. Arranque sin base local (`hadLocalBase=false`) con la nube sellada más vieja que el vacío
+   de init → aplica la nube (el guard viejo no lo hacía).
+5. Base local real sin cambio in-window → aplica; con cambio in-window → conserva local;
+   sin copia en la nube → conserva local.
+
 Estáticos:
 
-4. `Sync.loadState` acepta y respeta el segundo parámetro (override de `localTs`).
-5. `auth.js` captura el ts pre-init y lo pasa a `loadState`; pone `_reconciled` a `false`
-   antes y a `true` en el `.finally`.
+6. `Sync.loadState` acepta y respeta el segundo parámetro (override de `localTs`).
+7. `auth.js` captura el ts pre-init, lo pasa a `loadState`, usa `_shouldApplyCloud`, y pone
+   `_reconciled` a `false` antes y a `true` en el `.finally`.
 
 ## Fuera de alcance
 

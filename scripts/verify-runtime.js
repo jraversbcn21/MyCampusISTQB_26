@@ -187,6 +187,7 @@ const SAMPLE_Q = {
   {
     const ctx = loadApp();
     ctx.window.CAMPUS_USER_ID = 'u1';
+    ctx.Sync._reconciled = true; // flujo normal: ya reconciliado con la nube
     ctx.App.state = { xp: 42 };
     ctx.Sync.saveState('u1', ctx.App.state); // deja un push pendiente (debounce 4s)
     ctx.document.visibilityState = 'hidden';
@@ -1341,6 +1342,97 @@ const SAMPLE_Q = {
     const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     check('N21 a11y: el <a> del café lleva data-i18n-aria (al ocultar el span perdería su nombre accesible)',
       /<a class="bmc-fab"[^>]*data-i18n-aria="bmc_label"/.test(htmlSrc));
+  }
+
+  /* ---- N22: el estado vacío de un arranque limpio no pisa la nube (2026-07-22) ----
+     Bug: al re-loguearse tras "Clear site data", init() sella un estado vacío con
+     _updatedAt fresco ANTES de reconciliar; loadState lo veía "más nuevo" que la nube
+     y lo subía encima del progreso real. Fix: (1) loadState acepta un override de
+     localTs (el snapshot pre-init, 0 en arranque limpio); (2) gate _reconciled que
+     difiere el push a la nube hasta terminar la reconciliación. */
+  {
+    // (1) Repro: local vacío sellado fresco + nube con progreso real. Con override
+    // ts=0 (arranque limpio) la nube debe ganar y el vacío NO debe subirse.
+    const ls = makeLocalStorage();
+    ls.setItem('mycampus_istqb_v1_u1', JSON.stringify({ xp: 0, completedLessons: [], _updatedAt: 9999 }));
+    const sb = makeSupabaseMock({ singleResult: { data: { data: { xp: 750, _updatedAt: 1000 } }, error: null } });
+    const ctx = loadApp({ supabase: sb, localStorage: ls });
+    const res = await ctx.Sync.loadState('u1', 0);
+    check('N22 sync: con override ts=0 la nube gana pese al vacío recién sellado', !!res && res.xp === 750);
+    check('N22 sync: el estado vacío NO se sube por encima de la nube',
+      !sb._calls.upserts.some(u => u.data && u.data.xp === 0));
+    check('N22 sync: la caché localStorage se corrige con la copia de la nube',
+      JSON.parse(ls.getItem('mycampus_istqb_v1_u1')).xp === 750);
+  }
+  {
+    // (3) Multi-dispositivo con el nuevo parámetro: local genuinamente más nuevo
+    // (su override refleja progreso real) sigue ganando y re-subiéndose.
+    const ls = makeLocalStorage();
+    ls.setItem('mycampus_istqb_v1_u1', JSON.stringify({ xp: 500, _updatedAt: 2000 }));
+    const sb = makeSupabaseMock({ singleResult: { data: { data: { xp: 100, _updatedAt: 1000 } }, error: null } });
+    const ctx = loadApp({ supabase: sb, localStorage: ls });
+    const res = await ctx.Sync.loadState('u1', 2000);
+    check('N22 sync: con override, local realmente más nuevo sigue ganando (multi-dispositivo)',
+      !!res && res.xp === 500 && sb._calls.upserts.some(u => u.data && u.data.xp === 500));
+  }
+  {
+    // (2) Gate de push: con _reconciled=false, saveState persiste en localStorage
+    // pero NO deja push pendiente ni empuja keepalive al ocultar la pestaña.
+    const ctx = loadApp();
+    ctx.window.CAMPUS_USER_ID = 'u1';
+    ctx.Sync._reconciled = false;
+    ctx.Sync._saveTimer = null;
+    ctx.Sync.saveState('u1', { xp: 10 });
+    check('N22 gate: con _reconciled=false, saveState no deja push pendiente', ctx.Sync._saveTimer == null);
+    check('N22 gate: con _reconciled=false, saveState sí persiste en localStorage',
+      JSON.parse(ctx.localStorage.getItem('mycampus_istqb_v1_u1')).xp === 10);
+    ctx.App.state = { xp: 10 };
+    ctx.document.visibilityState = 'hidden';
+    (ctx.document._listeners['visibilitychange'] || []).forEach(fn => fn());
+    await new Promise(r => setTimeout(r, 20));
+    check('N22 gate: con _reconciled=false, ocultar la pestaña no empuja keepalive',
+      ctx.calls.fetches.length === 0);
+    // Reconciliado: sí vuelve a programar push.
+    ctx.Sync._reconciled = true;
+    ctx.Sync.saveState('u1', { xp: 20 });
+    check('N22 gate: con _reconciled=true, saveState vuelve a programar push', ctx.Sync._saveTimer != null);
+    clearTimeout(ctx.Sync._saveTimer);
+  }
+  {
+    // Decisión de aplicar la nube tras reconciliar (Auth._shouldApplyCloud). Puro:
+    // cubre la ruta .then/finally de _onAuthSuccess que el arnés no puede correr
+    // entera (App.init necesita un DOM real). El bug del guard viejo estaba aquí:
+    // el sello fresco que init estampa sobre el vacío hacía la nube "más vieja".
+    const ctx = loadApp();
+    const cloud = { xp: 750, _updatedAt: 1000 };
+    // Arranque limpio: sin base local (preInitTs 0), init selló el vacío fresco
+    // (appStateTs 5000 = postInitTs 5000). El guard viejo NO aplicaba la nube; el
+    // nuevo sí, porque no había base local.
+    check('N22 apply: arranque sin base local → se aplica la nube (aunque init selló el vacío)',
+      ctx.Auth._shouldApplyCloud(cloud, false, 5000, 5000) === true);
+    // Con base local real y sin cambio in-window (appStateTs === postInitTs): aplicar.
+    check('N22 apply: base local real sin cambio in-window → se aplica la copia ganadora',
+      ctx.Auth._shouldApplyCloud(cloud, true, 5000, 5000) === true);
+    // Con base local real y cambio in-window genuino (appStateTs > postInitTs): conservar local.
+    check('N22 apply: base local real con cambio in-window → se conserva el estado local',
+      ctx.Auth._shouldApplyCloud(cloud, true, 6000, 5000) === false);
+    // Usuario nuevo sin fila en la nube: conservar local.
+    check('N22 apply: sin copia en la nube (usuario nuevo) → se conserva el estado local',
+      ctx.Auth._shouldApplyCloud(null, false, 5000, 5000) === false);
+  }
+  {
+    // (4) Estáticos: la firma y el cableado del fix están presentes.
+    const syncSrc = fs.readFileSync(path.join(ROOT, 'js', 'sync.js'), 'utf8');
+    const authSrc = fs.readFileSync(path.join(ROOT, 'js', 'auth.js'), 'utf8');
+    check('N22 estático: loadState acepta el override de localTs',
+      /loadState\(\s*userId\s*,\s*\w+/.test(syncSrc));
+    check('N22 estático: saveState respeta el gate _reconciled',
+      /_reconciled/.test(syncSrc) && /if\s*\(\s*!\s*this\._reconciled\s*\)/.test(syncSrc));
+    check('N22 estático: auth pasa el ts pre-init, usa _shouldApplyCloud y maneja _reconciled',
+      /Sync\.loadState\(\s*user\.id\s*,/.test(authSrc)
+      && /_shouldApplyCloud\(/.test(authSrc)
+      && /Sync\._reconciled\s*=\s*false/.test(authSrc)
+      && /Sync\._reconciled\s*=\s*true/.test(authSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

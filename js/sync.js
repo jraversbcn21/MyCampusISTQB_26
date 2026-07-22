@@ -6,6 +6,14 @@ const Sync = {
   _saveTimer: null,
   _dirty: false, // hay cambios locales aún no confirmados en Supabase
   _DEBOUNCE_MS: 4000, // Espera 4s de inactividad antes de guardar en Supabase
+  // Gate anti-pérdida (2026-07-22): mientras sea false, saveState/flush/visibilitychange
+  // escriben en localStorage pero NO empujan a la nube. Se pone a false justo antes de
+  // reconciliar (auth.js) y a true al terminar. Sin esto, el estado vacío que init()
+  // sella durante el arranque limpio podía subirse por encima del progreso real de la
+  // nube (el push del debounce de 4s ganaba la carrera en redes lentas). El _push
+  // interno de loadState (la re-subida cuando local gana legítimamente) NO pasa por
+  // aquí: es la propia reconciliación.
+  _reconciled: false,
 
   /* ===== LOAD ===== */
   // Carga el progreso desde Supabase. Si no hay datos en la nube,
@@ -13,7 +21,12 @@ const Sync = {
   // Si AMBAS copias existen, gana la más nueva por _updatedAt (sellado en
   // saveState): una nube obsoleta (pushes fallidos en la sesión anterior,
   // pestaña cerrada dentro del debounce) no debe pisar progreso local.
-  async loadState(userId) {
+  // localTsOverride (2026-07-22): frescura autoritativa capturada ANTES de que App.init
+  // pueda escribir. En el arranque limpio el estado local real era vacío/sin sello (ts 0),
+  // pero para cuando este fetch resuelve, init() ya ha reescrito localStorage con un sello
+  // fresco — releerlo aquí engañaría la decisión. Cuando se pasa el override se usa como
+  // localTs; sin él, se mantiene el comportamiento previo (releer de local).
+  async loadState(userId, localTsOverride) {
     const localKey = `mycampus_istqb_v1_${userId}`;
     let local = null;
     try {
@@ -38,7 +51,9 @@ const Sync = {
         // empate (0-0, o misma copia) gana la nube — conserva el
         // comportamiento multi-dispositivo original.
         const cloudTs = cloud._updatedAt || 0;
-        const localTs = (local && local._updatedAt) || 0;
+        const localTs = (localTsOverride !== undefined)
+          ? localTsOverride
+          : ((local && local._updatedAt) || 0);
         if (local && localTs > cloudTs) {
           // La copia local es más nueva: re-subirla en vez de perderla.
           await this._push(userId, local);
@@ -77,6 +92,12 @@ const Sync = {
       localStorage.setItem(`mycampus_istqb_v1_${userId}`, JSON.stringify(state));
     } catch (e) {}
 
+    // Gate anti-pérdida: antes de reconciliar con la nube no se empuja nada (el
+    // estado aún puede ser el vacío/parcial del arranque). localStorage ya quedó
+    // guardado arriba; la próxima carga reconciliará. No se marca _dirty, así el
+    // listener de visibilitychange tampoco empuja.
+    if (!this._reconciled) return;
+
     // Supabase con debounce
     this._dirty = true;
     clearTimeout(this._saveTimer);
@@ -87,6 +108,10 @@ const Sync = {
   // Llamado al cerrar sesión para no perder el último estado
   async flushNow(userId, state) {
     clearTimeout(this._saveTimer);
+    // Gate anti-pérdida: si aún no se reconció con la nube, no empujar el estado
+    // (podría ser el pre-reconciliación y pisaría el progreso real). localStorage
+    // ya está al día por saveState; la próxima carga reconciliará.
+    if (!this._reconciled) return;
     if (state) await this._push(userId, state);
   },
 
@@ -137,7 +162,7 @@ const Sync = {
 // que beforeunload (cubre también móvil/cambio de pestaña).
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'hidden') return;
-  if (!Sync._dirty || !window.CAMPUS_USER_ID) return;
+  if (!Sync._reconciled || !Sync._dirty || !window.CAMPUS_USER_ID) return;
   if (typeof App === 'undefined' || !App.state) return;
   clearTimeout(Sync._saveTimer);
   Sync._pushKeepalive(window.CAMPUS_USER_ID, App.state);
