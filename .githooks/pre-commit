@@ -1,7 +1,7 @@
 #!/bin/sh
 # Pre-commit gate for MyCampusISTQB_26 — VERSIONADO en .githooks/.
 # Se activa con:  git config core.hooksPath .githooks   (una vez por clon;
-# ver AGENTS.md "No Tests or Linter"). Ejecuta el validador correspondiente
+# ver CLAUDE.md "No Tests, No Linter"). Ejecuta el validador correspondiente
 # cuando su fichero de datos está staged, y también el arnés de runtime si
 # se toca cualquier js/ o index.html.
 #

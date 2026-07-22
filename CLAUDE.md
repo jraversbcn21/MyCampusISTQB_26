@@ -1,12 +1,31 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this
+repository. It is the **single official project document** — there is no `AGENTS.md` (it was
+folded into this file on 2026-07-22). Detailed specs/plans/audits still live under `docs/`
+(`docs/superpowers/specs/`, `docs/superpowers/plans/`, `docs/audit-*.md`,
+`docs/content-audit-report.md`) and are pointed to from the relevant sections below.
 
 ## Project Overview
 
-MyCampus ISTQB is a browser-based study platform for the ISTQB Certified Tester Foundation Level (CTFL) v4.0 certification. It is a **vanilla JavaScript SPA** — no framework, no build system, no package manager.
+MyCampus ISTQB is a browser-based study platform for the ISTQB Certified Tester Foundation
+Level (CTFL) v4.0 certification. It is a **vanilla JavaScript SPA** — no framework, no build
+system, no package manager.
 
-**Repo:** https://github.com/jraversbcn21/MyCampusISTQB_26 — public, default branch `master`, no CI/PR workflow (direct commits). Full repo/GitHub notes, security posture, and the 2026-07-02 git-history rewrite (all commit hashes changed that day) are documented in `AGENTS.md` — read that first if you need any pre-2026-07-02 commit reference.
+Live in production at **https://mycampusistqb.vercel.app** (soft launch 2026-07-20).
+
+### Repository
+
+- **GitHub:** https://github.com/jraversbcn21/MyCampusISTQB_26 — **public**, default branch
+  `master`.
+- **No CI/CD, no PR review workflow** — work happens as direct commits to `master` (the repo's
+  actual practice; tracked here so an agent doesn't assume a branch/PR process that isn't there).
+- **Git history was rewritten on 2026-07-02** (`git filter-repo` + force-push) to purge the
+  `ISTQB 2026/` folder — copyrighted third-party PDFs (official syllabus, sample exam, reference
+  book) accidentally tracked since the repo's initial commit. **Every commit hash in the repo
+  changed as a result.** Any SHA cited in this doc from before that date is illustrative only —
+  to find the real current hash for a milestone, use `git log --oneline --grep="<message>"`
+  rather than trusting a literal SHA.
 
 ## Running the Project
 
@@ -21,26 +40,125 @@ There is no build step. No `npm install`, no compilation.
 
 ## Production Deployment (Vercel, 2026-07-20)
 
-Live at **https://mycampusistqb.vercel.app** (Vercel project `mycampusistqb`). Deploys are
-**manual via the Vercel CLI** (`vercel deploy --prod --yes`) — there is no Git integration,
-so pushing to GitHub does not deploy. **`.vercelignore` is load-bearing:** the Vercel CLI
-ignores `.gitignore`, and the first deploy briefly exposed the copyrighted `ISTQB 2026/`
-PDFs (fixed same-hour: `.vercelignore` + redeploy + deleted the exposed deployment). Never
-remove the `ISTQB 2026/` line. `privacy.html` declares Vercel as hosting processor.
-Supabase Site URL/Redirect URLs point to the production domain (configured 2026-07-20;
-signup + confirmation email + login verified end-to-end on the live URL — note localhost
-is no longer allowlisted for OAuth). **On the Inditex corporate network the CLI dies with
-`TypeError: fetch failed`** — its TLS-inspecting proxy re-signs certificates and Node
-ignores the Windows trust store; prefix the deploy with
-`$env:NODE_EXTRA_CA_CERTS="C:\Users\<user>\.certs\corporate-ca.pem"` (never
-`NODE_TLS_REJECT_UNAUTHORIZED=0`). Full detail (re-linking a clone, Supabase URL config
-and its follow-ups, the CA bundle recipe): `AGENTS.md` → "Deployment (Vercel)".
+Live at **https://mycampusistqb.vercel.app** — Vercel project `mycampusistqb` under the account
+`jorgeborn3-3085` (Vercel CLI login), deployed from the local working copy with the Vercel CLI.
+
+- **Deploys are manual, CLI-driven:** `vercel deploy --prod --yes` from the repo root. There is
+  **no Git integration** — pushing to GitHub does *not* deploy anything. After any change that
+  should reach users, deploy explicitly, and only from a clean, committed tree so production
+  matches a commit.
+- **`.vercelignore` is load-bearing — never remove the `ISTQB 2026/` line.** The Vercel CLI does
+  **not** respect `.gitignore` when uploading. The very first production deploy (2026-07-20)
+  publicly exposed the copyrighted PDFs in the local-only `ISTQB 2026/` folder (verified: a direct
+  file URL returned 200). Fixed the same hour by adding `.vercelignore` (which also excludes
+  `docs/`, `scripts/`, `.githooks/`, `.claude/`, `CLAUDE.md` — nothing the browser needs),
+  redeploying, and **deleting the exposed deployment** (`vercel rm <deployment-url>`; verified 404
+  afterward on both the production alias and the removed deployment's own URL).
+- **`privacy.html` declares Vercel** as the hosting processor (ES/EN, section 4) — hosting is a
+  third-party service, so the same-commit policy rule (see Privacy Policy below) applies.
+- **Supabase URL configuration (dashboard task, not code):** `auth.js` builds `redirectTo` from
+  `window.location.origin`, so the code needs no per-domain change. Supabase → Authentication →
+  URL Configuration is set to the production domain: **Site URL** = `https://mycampusistqb.vercel.app`
+  and the same URL as the single **Redirect URLs** allowlist entry. Verified end-to-end on the
+  live URL (signup, Brevo confirmation email, login). Two known follow-ups, suggested but not
+  applied: `http://localhost:8000` is no longer allowlisted (add it back to Redirect URLs if login
+  needs testing in local dev — until then local OAuth bounces to production); the allowlist entry
+  could be widened to `https://mycampusistqb.vercel.app/**` for robustness (not critical — the
+  Site URL fallback lands on the same domain anyway).
+- The project is linked via the `.vercel/` folder (gitignored, per-clone). Re-link on a fresh
+  clone with `vercel link --yes --project mycampusistqb`. The CLI also drops a `.env.local` with a
+  `VERCEL_OIDC_TOKEN` (gitignored, harmless, not used by the app).
+
+### Corporate-network TLS interception (Inditex) — deploy workaround
+
+On the Inditex corporate network the CLI dies with `TypeError: fetch failed` /
+`SELF_SIGNED_CERT_IN_CHAIN` — a TLS-interception issue, not a Vercel/project problem. The network
+runs an SSL-inspecting proxy: `api.vercel.com` arrives signed by `CN=Inditex SSL Proxy RSA 2025`
+instead of its real CA. Browsers accept it (Windows trusts the corporate root via group policy)
+but **Node.js ships its own CA list and ignores the Windows certificate store**, so every Node
+tool (Vercel CLI, npm) fails. Symptom that identifies it: DNS resolves fine, but `curl` fails
+instantly with exit 35 (~0.15s, not a timeout). The VPN doesn't *block* the deploy — it just
+routes you through this same inspecting proxy, so the CA workaround is required whenever you're
+on the corporate path.
+
+**Fix — point Node at the Windows trust store, never disable TLS verification:**
+
+```powershell
+# One-off (current shell):
+$env:NODE_EXTRA_CA_CERTS="C:\Users\<user>\.certs\corporate-ca.pem"; vercel deploy --prod --yes
+# Persistent (new shells only):
+setx NODE_EXTRA_CA_CERTS "C:\Users\<user>\.certs\corporate-ca.pem"
+```
+
+Generate the bundle by exporting the Windows root store to PEM (≈105 certs on Jorge's machine,
+including `Inditex Corporate Root CA v3`):
+
+```powershell
+$certs = Get-ChildItem Cert:\LocalMachine\Root, Cert:\LocalMachine\CA, Cert:\CurrentUser\Root |
+         Sort-Object Thumbprint -Unique
+$sb = New-Object System.Text.StringBuilder
+foreach ($c in $certs) {
+  [void]$sb.AppendLine("-----BEGIN CERTIFICATE-----")
+  [void]$sb.AppendLine([Convert]::ToBase64String($c.RawData,'InsertLineBreaks'))
+  [void]$sb.AppendLine("-----END CERTIFICATE-----")
+}
+[IO.File]::WriteAllText("$env:USERPROFILE\.certs\corporate-ca.pem", $sb.ToString())
+```
+
+`NODE_EXTRA_CA_CERTS` **adds** to Node's trust list — it keeps full certificate validation. Do
+**not** reach for `NODE_TLS_REJECT_UNAUTHORIZED=0`: that turns verification off entirely and would
+ship deploy credentials over an unverified channel. Keep the `.pem` outside the repo (never
+commit/deploy it). The 2026-07-20 launch deploy worked because it ran from a different network;
+the 2026-07-22 deploy worked over the VPN with this CA bundle.
 
 ## Architecture
 
+### Script Load Order (Critical)
+
+The Sentry CDN bundle loads in `<head>`, before supabase-js, so `window.Sentry` is defined as
+early as possible. **Loading the bundle only defines the global — it does not yet capture
+anything.** Capture starts once `Monitoring.init()` runs, when `js/monitoring.js` executes in
+`<body>` after `config.js`. That leaves a real gap: a synchronous top-level error thrown by the
+`<head>` supabase-js `<script>` itself, before `Monitoring.init()` has run, is not captured.
+Known and accepted (closing it would mean moving `config.js`/`monitoring.js` into `<head>` ahead
+of supabase-js) — don't describe Sentry as covering the whole page lifecycle without this caveat.
+The rest load sequentially near the end of `<body>`:
+
+```
+sentry-cdn (in <head>) → config.js → monitoring.js → i18n.js → content.js → questions.js → gamification.js → app.js → onboarding.js → avatar.js → sync.js → auth.js
+```
+
+**Do not reorder these.** Earlier modules are dependencies of later ones. In practice reordering
+the current scripts wouldn't break anything today (all synchronous, no `defer`/`async`) — the real
+risk is one failing to load entirely (blocked, 404). `Auth._onAuthSuccess()` guards against that:
+it checks that `App`/`i18n`/`CHAPTERS`/`QUESTIONS`/`Gamification`/`AvatarSelector`/`Onboarding`/
+`Sync` are actually defined and shows a clear message instead of letting `App.init()` crash with
+an uncaught `ReferenceError` mid-render; a missing/failed `config.js` is covered separately by the
+top-level guard in `auth.js` (same `_showLoadFailure()` path as a failed CDN load). Don't treat
+those guards as permission to reorder — a future change could introduce a real top-level dependency.
+
 ### Module Pattern
 
-Each feature is a singleton object exposed as a global variable. All modules follow the same pattern: a plain object with an `init()` method and private helpers prefixed with `_`. Modules communicate through the global `App` object.
+Every module is a **global singleton object** — a plain object with an `init()` method and private
+helpers prefixed with `_`. Modules communicate through the global `App` object. Naming is
+inconsistent (note `i18n` is lowercase, not `I18n`).
+
+| Global | File | Responsibility |
+|--------|------|----------------|
+| `App` | `js/app.js` | Main controller: state, navigation, view rendering. Also holds `_expandedChapters` (Set), `_currentCard` (TTS), `currentLesson` |
+| `Auth` | `js/auth.js` | Supabase auth (email + Google OAuth), session handling. Entry point on `DOMContentLoaded` |
+| `Monitoring` | `js/monitoring.js` | Sentry error monitoring; no-op if the Sentry CDN/DSN is missing |
+| `Sync` | `js/sync.js` | Debounced cloud save/load to Supabase `user_progress` (4s debounce) |
+| `Gamification` | `js/gamification.js` | XP, levels (7 tiers), achievement badges |
+| `i18n` | `js/i18n.js` | Spanish/English translations; all UI strings go through this |
+| `AvatarSelector` | `js/avatar.js` | Tester-personality avatar picker |
+| `Onboarding` | `js/onboarding.js` | First-run guided tour |
+| *(data)* | `js/content.js` | Curriculum chapters, lessons, glossary |
+| *(data)* | `js/questions.js` | Exam question bank (120 questions) |
+
+### Entry Point
+
+`Auth.init()` is called on `DOMContentLoaded`. On successful auth it calls `App.init()`.
 
 ### State & Data Flow
 
@@ -50,60 +168,394 @@ User Action → App.* method → mutate App.state → App.saveState()
                                                    └─→ Sync.saveState() (4s debounce → Supabase)
 ```
 
-`App.state` is the single source of truth. All views read from it directly. On page load, state is restored from localStorage first, then reconciled with the cloud copy if the user is authenticated — the newer `_updatedAt` stamp wins, so a stale cloud copy never clobbers newer local progress (see the 2026-07-04 section). **Load-bearing subtlety (2026-07-22 fix):** the "newer local wins" rule must use the local timestamp captured *before* `App.init` runs — `init()` calls `updateStreakAndDate()`, which stamps `App.state._updatedAt` fresh even on an empty default state, so trusting a re-read of localStorage (or `App.state`) during background reconciliation makes a just-booted empty state look newer than the real cloud copy and overwrite it. See the "Persistence — cloud progress loss on re-login (2026-07-22)" section below.
+`App.state` is the single source of truth. All views read from it directly.
+
+**Conflict resolution (since the 2026-07-04 second pass):** every `Sync.saveState()` stamps
+`state._updatedAt`; `Sync.loadState()` compares that stamp between the localStorage copy and the
+cloud copy and **the newer one wins** (unstamped copies count as older than any stamped one; ties
+go to the cloud, preserving multi-device behavior). A `visibilitychange→hidden` listener in
+`sync.js` flushes a pending debounced save via a keepalive REST call so closing the tab inside the
+4s debounce doesn't leave the cloud stale.
+
+**Freshness-decision hazard (2026-07-22 fix) — read before touching sync/auth reconciliation.**
+The "newer local wins" rule is only safe if the local timestamp it trusts reflects *real user
+progress*. It does not, by default, at fresh login: `App.init()` calls `updateStreakAndDate()`
+(`app.js:1564`), which for a default/empty state (`lastStudyDate === null`) calls `saveState()`,
+stamping `App.state._updatedAt` fresh **and** writing that empty state to localStorage — all
+synchronously, before the background cloud reconciliation runs. See the next section.
+
+### Persistence — cloud progress loss on re-login (2026-07-22)
+
+Bug reported on real use: a user with progress does **Inspector → Application → Storage → Clear
+site data**, logs back in, and their progress **does not come back** — and the Supabase copy is
+**destroyed**. Spec: `docs/superpowers/specs/2026-07-22-cloud-progress-loss-on-reauth-fix-design.md`.
+Executed directly with TDD (no subagents); a manual export/import backup was deliberately deferred
+as a separate follow-up.
+
+**Root cause.** With `App._initialized === false` (`auth.js:_onAuthSuccess`):
+1. `App.loadState()` over an empty localStorage returns the default initial state **without
+   `_updatedAt`**.
+2. `App.init(emptyState)` runs synchronously; at `app.js:1564` `updateStreakAndDate()` enters its
+   branch (`lastStudyDate === null`) and calls `saveState()`.
+3. `Sync.saveState` stamps the empty state with `_updatedAt = Date.now()` (fresh) and writes it to
+   localStorage.
+4. The background `Sync.loadState()` **re-reads** that freshly-stamped empty state
+   (`localTs = now`), sees it as newer than the real cloud (`cloudTs` older) → `_push` uploads the
+   empty state over the cloud.
+
+It manifested through **three doors**: (a) `loadState`'s internal re-push; (b) the 4s-debounce push
+from init's `saveState` (wins the race on slow networks, before `loadState`'s `SELECT`); (c)
+`_onAuthSuccess`'s `.finally`, whose guard `cloudState._updatedAt >= App.state._updatedAt` was also
+fooled by the fresh stamp (cloud looked "older" than the empty state) → it didn't apply the cloud
+and re-dumped the empty `App.state`.
+
+**Fix in three layers (all load-bearing — do not collapse to one):**
+- **Layer 1 — `Sync.loadState(userId, localTsOverride)`:** the freshness decision uses the local
+  timestamp captured **before** `App.init` can write, not a re-read of the already-mutated
+  localStorage. `auth.js` captures `preInitLocalTs` before `App.init` (a *number*, not the object
+  reference — `init` mutates the object) and passes it (0 on a clean boot → the cloud wins). Without
+  the override the behavior is identical to before (no other caller breaks).
+- **Layer 2 — gate `Sync._reconciled`** (initial `false`): `saveState` always stamps and writes
+  localStorage, but only schedules the cloud push when `_reconciled === true`; `flushNow` and the
+  `visibilitychange` listener respect it too. `auth.js` sets `_reconciled = false` before
+  reconciling (both branches) and `= true` in the `.finally` (runs on error too → never leaves the
+  push blocked forever), then does `App.saveState()` to flush the reconciled state. **The internal
+  `_push` inside `loadState` is NOT gated** — it *is* the reconciliation; the gate lives only on
+  App-originated pushes (init streak, in-window changes).
+- **Layer 3 — `Auth._shouldApplyCloud(cloudState, hadLocalBase, appStateTs, postInitTs)`** (pure,
+  testable — the harness can't run `App.init`): replaces the `.then` guard. No `cloudState` → don't
+  apply (new user). `hadLocalBase === false` (clean boot, `preInitLocalTs === 0`) → **always** apply
+  the cloud (any in-window action was taken on an incomplete empty state). Real local base → apply
+  unless the user made a genuine in-window change (`appStateTs > postInitTs`, with `postInitTs`
+  captured just after `App.init`).
+
+**Why the app must be online for the problem scenario:** "Clear site data" also wipes the session;
+there is no offline login (Supabase is required to authenticate), so an empty boot after clear is
+always online with `preInitLocalTs === 0` → the cloud wins. No clear+offline combination can produce
+an authenticated empty session.
+
+**Editing constraints an agent must know:**
+- Do **not** re-read localStorage or `App.state` for the freshness decision during background
+  reconciliation — always use the pre-init stamp captured in `auth.js` before `App.init`. Any new
+  automatic `saveState()` inside `App.init` reintroduces the contamination — it must sit behind the
+  `_reconciled` gate.
+- The `_reconciled` gate lives in `saveState`/`flushNow`/`visibilitychange`, **never inside
+  `_push`** (that would break `loadState`'s legitimate re-push).
+- Regression gate: the **`N22`** family in `scripts/verify-runtime.js` (bug repro via
+  `Sync.loadState('u1', 0)` with a populated cloud → empty not uploaded, cloud wins; push gate:
+  `_reconciled=false` schedules no timer/keepalive, `=true` does; `_shouldApplyCloud` in its 4 cases
+  incl. the no-local-base boot the old guard failed; plus static wiring checks). The existing `N2`
+  check now sets `Sync._reconciled = true` because it tests the already-reconciled flush. `N1`
+  (multi-device) is intact.
+
+### i18n
+
+- `i18n.t(key)` in JS code
+- `data-i18n="key"` — text content in HTML
+- `data-i18n-placeholder="key"` — input placeholders
+- `data-i18n-title="key"` — `title` tooltips
+- `data-i18n-aria="key"` — `aria-label` (added 2026-07-14; a fourth block in `i18n.apply()` doing
+  `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like the others)
+- Default language is Spanish (`i18n.lang = 'es'`).
+- Translations live in `TRANSLATIONS` in `js/i18n.js` — **178 keys**, all ES/EN paired, enforced by
+  `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known hardcoded-language
+  residues). The count grew over time: 160 after the 2026-07-04 remediation → 165 (2026-07-08 global
+  search `gs_*`) → 170 (2026-07-14 a11y `data-i18n-aria` keys + `goto_question_aria`) → 174/175
+  (2026-07-15 round-2 mobile-search/combobox + `achievement_toast_prefix` + `bmc_label`) → 177/178
+  (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`).
+- `i18n.restore()` reads the saved language from localStorage and applies it; `i18n.setLang(lang)`
+  sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
+  (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore) — the
+  auth screen has its own `#authBtnES`/`#authBtnEN` switcher for exactly this reason.
+  `App.setLang()` delegates to `i18n.setLang()` rather than duplicating persist logic.
+- **Covers the whole app since 2026-07-04**, including `onboarding.js`, `avatar.js`, and the auth
+  screen — before that pass those three were 100% hardcoded Spanish. Any hardcoded Spanish/English
+  string in those files (or a new `i18n.lang === 'es' ? … : …` ternary anywhere) is new drift, not a
+  pre-existing gap.
 
 ### Key Modules
 
-| File | Module | Responsibility |
-|------|--------|----------------|
-| `js/app.js` | `App` | Main controller: state, navigation, view rendering |
-| `js/auth.js` | `Auth` | Supabase auth (email + Google OAuth), session handling |
-| `js/monitoring.js` | `Monitoring` | Sentry error monitoring; no-op if the CDN/DSN is missing |
-| `js/sync.js` | `Sync` | Debounced cloud save/load to Supabase `user_progress` table |
-| `js/content.js` | *(data)* | Curriculum chapters, lessons, glossary |
-| `js/questions.js` | *(data)* | Exam question bank (120 questions) |
-| `js/gamification.js` | `Gamification` | XP, levels (7 tiers), achievement badges |
-| `js/i18n.js` | `i18n` | Spanish/English translations; all UI strings go through this (verified end-to-end 2026-07-04 — onboarding, avatar picker, and the auth screen used to be Spanish-only) |
-| `js/avatar.js` | `AvatarSelector` | Tester personality avatar picker |
-| `js/onboarding.js` | `Onboarding` | First-run guided tour |
+See the Module Pattern table above. `js/content.js`/`js/questions.js` are pure data (schemas under
+"Data Schemas" below).
 
 ### Views
 
-All views are HTML sections in `index.html` toggled via the `.view.active` class (`css/styles.css` does `.view { display: none } / .view.active { display: block }` — nothing sets inline `display` on views). Navigation is handled by `App.navigate(viewName)` — valid names: `dashboard`, `curriculum`, `flashcards`, `simulator`, `glossary`, `progress`, `achievements`, `lesson`.
+All views are HTML sections in `index.html` toggled via the `.view.active` class (`css/styles.css`
+does `.view { display: none } / .view.active { display: block }` — nothing sets inline `display` on
+views). Navigation is `App.navigate(viewName)`. Valid names: `dashboard`, `curriculum`, `lesson`,
+`flashcards`, `simulator`, `glossary`, `progress`, `achievements`.
+
+### Flashcard TTS
+
+Each flashcard has a mute/unmute button on both question and answer sides, positioned bottom-right
+via CSS. Uses the native **Web Speech API** (SpeechSynthesis) — no external libraries.
+- `App._handleTTS(side, e)` — toggles speech; calls `e.stopPropagation()` to prevent card flip.
+- `App._setVoice(utterance, voices, langCode)` — female voice matching active language, with
+  fallbacks (female match → any language match → system default).
+- `App.renderFlashcard()` stores card text in `this._currentCard` and renders TTS buttons via
+  `innerHTML`; `App.flipFlashcard()` cancels speech and resets all TTS buttons.
+- CSS: `.fc-tts-btn` (absolute, bottom-right), `.fc-tts-playing` (green pulse via `@keyframes
+  fc-tts-pulse`).
+
+### Flashcard Carousel Animation (2026-07-07)
+
+Clicking prev/next (`#fcPrev`/`#fcNext`) slides the current card out and the next in from the
+opposite side, instead of an instant content swap. Design/plan under `docs/superpowers/` for
+`2026-07-07-flashcard-carousel-animation`.
+- **Direction:** next (→) slides current card out left, new card in from the right; prev (←) is the
+  mirror. 50px distance, 250ms per phase (out, then in) — `App._slideFlashcard(direction, advance)`,
+  driven entirely by inline styles (`transform`/`opacity`/`transition`) on `#flashcard`, not CSS
+  classes.
+- **Sequencing is `setTimeout`-based, not `transitionend`-based** — a deliberate deviation to match
+  every other timed-UI call in `js/app.js` and to stay testable against the mocked DOM in
+  `verify-runtime.js`. On-screen behavior is identical either way. (This `setTimeout`-only property
+  is also what makes the reduced-motion blunt block safe — see UI/UX below.)
+- **Independent of the 3D flip:** the slide transforms the outer `#flashcard`; the flip
+  (`.flashcard-inner.flipped`, `App.flipFlashcard()`) transforms the inner element. Two distinct
+  elements — don't conflate them (this matters again for the mobile grid-stack flip below).
+- **Reentrancy guard:** `App._fcAnimating` blocks overlapping animations from rapid clicks; reset to
+  `false` in `initFlashcards()` on every view entry.
+- `shuffleFlashcards()` and the deck `<select>` deliberately do **not** animate (session reset, not
+  sequential navigation). A retiming bug was fixed during planning: `rateFlashcard()`'s "deck
+  completed" boundary check moved into a `nextFlashcard(onAdvanced)` callback so it fires after the
+  index actually moves (it used to rely on synchronous increment).
+- Gate: the `N10` checks in `scripts/verify-runtime.js` (17 today — direction, guard reentrancy,
+  both deck boundaries, the `rateFlashcard` retiming).
+
+### Curriculum Expanded State
+
+Chapters stay expanded when navigating to a lesson and back via `App._expandedChapters` (a `Set` of
+chapter indices). `toggleChapter(i)` adds/removes; `navigateToLesson()` adds the chapter before
+rendering; `renderCurriculum()` restores the `open` class after HTML rebuild (and emits
+`aria-expanded` from the Set — `toggleChapter` syncs it manually since it only toggles the class,
+it does NOT re-render).
+
+### View Persistence
+
+Saves the current view to the localStorage key `mycampus_current_view`, restores on init.
+`_saveCurrentView(view)` serializes view name + lesson data + expanded chapters to JSON;
+`_restoreSavedView()` reads/parses (returns `null` on error/missing); `App.init()` restores the
+lesson with topic or falls back to `'dashboard'`. `navigateToLesson()` sets
+`this.currentView = 'lesson'` (critical for post-sync re-navigation). `auth.js`'s
+`_onAuthSuccess()` navigates to `App.currentView || 'dashboard'` (both branches) instead of a
+hardcoded `'dashboard'`.
 
 ### Privacy Policy
 
-`privacy.html` is a standalone bilingual (ES/EN) static page — deliberately self-contained (own inline CSS/JS, no `styles.css`, no app modules) so it renders even if the app itself breaks. It reuses the `mycampus_lang`/`mycampus_theme` localStorage keys for a coherent language/theme, and is linked from the auth screen and sidebar footer via the `privacy_link` i18n key. Its claims about data handling (providers, storage region, retention) must stay accurate to the code — update it in the same commit as any change to sync, auth providers, or third-party services. Full detail (controller identity, EU data residency): `AGENTS.md` → "Production Readiness".
+`privacy.html` is a standalone bilingual (ES/EN) static page — deliberately self-contained (own
+inline CSS/JS, no `styles.css`, no app modules) so it renders even if the app itself breaks. It
+reuses the `mycampus_lang`/`mycampus_theme` localStorage keys for a coherent language/theme, and is
+linked from the auth screen and sidebar footer via the `privacy_link` i18n key. **Its statements
+about data handling (providers, storage region, retention) must stay accurate to the code** — update
+it in the same commit as any change to sync, auth providers, storage, or third-party services (CDN,
+fonts, hosting), and bump its "last updated" date. Controller: Sid Maier
+(sidmaierlabs@gmail.com). Data residency: EU, West EU (Paris) Supabase region — no international-
+transfer clause needed.
 
 ### Backend (Supabase)
 
-- Config in `js/config.js` — contains the Supabase URL and anon key.
-- The single table used is `user_progress` with columns: `user_id` (UUID), `data` (JSONB), `updated_at` (timestamptz).
-- Row Level Security enabled and verified (2026-07-02): `SELECT`/`INSERT`/`UPDATE` policies all scope on `auth.uid() = user_id`, no `DELETE` policy (default-deny).
-- Client script pinned to an exact version + SRI hash in `index.html` (not a floating CDN tag) — see `AGENTS.md` for the exact update procedure when bumping it.
-- Google OAuth redirect URL is handled and cleaned by `auth.js` to prevent hash pollution in the URL after login.
-- Custom SMTP via Brevo (2026-07-07) — the built-in email service's 2/hour cap was blocking real signup confirmations. Full detail: `AGENTS.md` → "Supabase Backend".
+- Credentials in `js/config.js` (anon key + `SENTRY_DSN` — both public by design, safe to commit).
+- Single table `user_progress`: `user_id` (UUID), `data` (JSONB), `updated_at` (timestamptz).
+- **RLS enabled and verified (2026-07-02)** directly in the dashboard via the actual policy SQL (not
+  just the "RLS enabled" toggle): `SELECT`/`INSERT`/`UPDATE` policies all scope on
+  `auth.uid() = user_id`; **no `DELETE` policy** (default-deny — matches the app, which never
+  deletes rows).
+- **Supabase client pinned to an exact version + SRI hash** in `index.html` (not a floating `@2`
+  tag): `@supabase/supabase-js@2.110.0/dist/umd/supabase.js` with an `integrity="sha384-…"`
+  `crossorigin="anonymous"`. **To bump the version:** resolve the new version, fetch the exact
+  `/dist/umd/supabase.js` file (not the bare `@x.y.z` URL — jsdelivr's own header warns "do NOT use
+  SRI with dynamically generated files"), compute its sha384, cross-check the hash against a second
+  CDN (e.g. unpkg) before trusting it, then update version + `integrity` together.
+- Google OAuth redirect URL is handled and cleaned by `auth.js` to prevent hash pollution after
+  login.
+- **Custom SMTP (2026-07-07): Brevo, resolves a real production blocker.** Supabase's built-in email
+  service is rate-limited to **2 emails/hour** — with "Confirm email" enabled (it is), real signups
+  past the second in an hour would never receive their confirmation email. Configured under
+  Authentication → Emails → SMTP Settings: host `smtp-relay.brevo.com`, port `587`, sender
+  `sidmaierlabs@gmail.com` ("My Campus ISTQB"), username `b13600001@smtp-brevo.com` (Brevo's SMTP
+  login, **not** the Supabase project name — a real mistake made and caught while setting this up).
+  No custom domain was available, so Brevo was chosen over Resend because its free tier verifies a
+  single sender email instead of full domain DNS/DKIM. Verified end-to-end (a real signup's
+  confirmation arrived via Brevo's relay and the link worked).
 
 ### Error Monitoring (Sentry)
 
-`js/monitoring.js` (`Monitoring`) wraps a pinned Sentry Browser SDK CDN bundle (loaded in `<head>`, before supabase-js, so it captures errors from every later script). It is never a hard dependency — same no-op degradation pattern as the Supabase CDN guard — and it never reports email/name, only the Supabase UUID (`Monitoring.identify()`/`clearUser()`, called from `auth.js`). Full detail, including the SRI verification method (documented deviation from the Supabase cross-CDN procedure — Sentry's prebuilt bundles have no second mirror): `AGENTS.md` → "Error Monitoring (Sentry)".
+`js/monitoring.js` (`Monitoring`) wraps `@sentry/browser`, loaded as a pinned CDN bundle in
+`index.html`'s `<head>` before supabase-js. Capture starts only once `Monitoring.init()` runs in
+`<body>` (see Script Load Order for the known `<head>` gap).
+- **Never a hard dependency.** Same no-op degradation as the Supabase CDN guard: if `window.Sentry`
+  is missing (CDN blocked, offline, SRI mismatch) or `SENTRY_DSN` is undefined, `init()` no-ops and
+  every `Monitoring.*` call becomes a no-op. Verified by the `N9` checks.
+- `Sentry.init()` runs with `sendDefaultPii: false` and a `beforeSend` scrubber
+  (`Monitoring._scrub`) that strips `user.email`/`user.username`/`user.ip_address` and redacts any
+  email-shaped substring anywhere in the event. Users are identified **only** by their Supabase UUID
+  (`Monitoring.identify(user.id)` from `_onAuthSuccess`; cleared on `SIGNED_OUT` via `clearUser()`).
+  Never email or name.
+- **CDN pin (2026-07-07):** `https://browser.sentry-cdn.com/10.63.0/bundle.min.js`,
+  `sha384-DK4NLLOVDh6BGBXQ48eIAFQ6DET3Y3pPMh/1xZBluw9YlZC9d51bMNXIerBn9sQM`. The minimal error-only
+  bundle — no tracing, no session replay, consistent with `privacy.html`'s minimal-data stance.
+- **SRI verification — documented deviation from the Supabase procedure.** `@sentry/browser`'s
+  prebuilt CDN bundles are **not** published to the npm package (only ESM/CJS builds), and the only
+  official host is `browser.sentry-cdn.com` — so there is no second mirror to diff against. Verified
+  instead by (1) fetching the file twice and confirming byte-identical content, and (2) matching the
+  version+commit comment in the bundle header (`/*! @sentry/browser 10.63.0 (2362e9f) | … */`)
+  against the `10.63.0` tag's commit SHA in the public `getsentry/sentry-javascript` repo. Pinned to
+  `10.63.0` not `10.64.0` (the CDN returned `403` for `10.64.0` — propagation lag). Any future bump
+  must repeat this (double-fetch + GitHub tag match), not assume a second-CDN cross-check exists.
 
 ### Offline / Graceful Degradation
 
-The app is fully functional without cloud sync. If Supabase is unavailable or the user is logged out, all state persists in `localStorage`. `Sync` always falls back silently. If the Supabase CDN script itself fails to load, `Auth` shows a clear message instead of crashing (there's no offline login, though — Supabase is required to authenticate at all).
+Fully functional without cloud sync — falls back silently to localStorage. Since 2026-07-04 the
+*auth* gate also degrades instead of crashing: if the Supabase CDN script fails to load,
+`supabaseClient` stays `null` and `Auth._showLoadFailure()` shows a message instead of an uncaught
+`TypeError` killing the app. There's no working offline login, though — Supabase is required to
+authenticate at all; this only prevents a silent crash when it can't load.
+
+### Monetization — Buy Me a Coffee button (2026-07-15)
+
+A floating "Invítame un café" / "Buy me a coffee" pill (bottom-right) links to
+`https://buymeacoffee.com/jorgeborn3m` for non-intrusive soft-launch tips (no content gating, no
+payment infra of our own). **Chosen approach: self-hosted outbound link, NOT the official BMC widget
+script** — avoids a new third-party CDN dependency (which the repo's discipline would require pinning
++ SRI + no-op degradation for) and keeps full control over a11y/i18n/theming. It's a plain
+`<a target="_blank" rel="noopener noreferrer">`. Design/plan under `docs/superpowers/` for
+`2026-07-15-buymeacoffee-button`.
+
+Load-bearing details:
+- The pill lives **inside `#app-container`** (`index.html`, right after `</main>`), so it hides
+  automatically on the login screen (`#app-container` is `display:none` there) and shows once signed
+  in. During an exam it's hidden via `body.exam-active .bmc-fab { display:none }`.
+- **Exam visibility is driven by `App._setExamActive(active)`** (`js/app.js`) — the single source of
+  truth that both sets `this._examActive` and toggles the `exam-active` class on `<body>`. The four
+  former direct `this._examActive = …` assignments (navigate / renderSimulatorMenu / launchExam /
+  finishExam) route through it. Never reintroduce a direct assignment (the `N19` gate forbids it).
+- Background is `var(--primary-dark)` (`#5a52d5`), **not** `--primary` (`#6C63FF`): white text on
+  `--primary` is 4.32:1 (fails AA); on `--primary-dark` it's 5.83:1 (passes). `color:#fff` is
+  explicit because the icon `<svg>` uses `currentColor`. Not a `--*-text` token pair, so
+  `validate-contrast.js` doesn't cover it — the AA choice is locked by the `N19` CSS check.
+- The label's `data-i18n="bmc_label"` sits on the **inner `<span>`, never on the `<a>`**: the `<a>`
+  also contains the `#i-coffee` `<svg>`, and `i18n.apply()` does `el.textContent = t(key)`, which
+  would wipe the icon if the attribute were on the `<a>`. A real bug the final review caught; the
+  `N19` markup check now forbids `data-i18n` on the `<a>`. (In ≤768px the pill collapses to an
+  icon-only 48px circle — see Lesson Flow & Mobile FAB for the accessible-name handling there.)
+- `.toast-container` was raised to `bottom: 80px` (today `calc(80px + env(safe-area-inset-bottom,
+  0px))`) so transient `aria-live` toasts stack **above** the persistent pill.
+- Gate: the `N19` family in `scripts/verify-runtime.js`. `privacy.html` declares the outbound link
+  (ES/EN, section 4).
+
+### Global Search Dropdown (2026-07-08)
+
+The topbar's global search box (`#globalSearch`) no longer forces navigation to the
+glossary/curriculum while typing (the old listener did, and persisted the forced view via
+`_saveCurrentView`, which could break an in-progress exam screen). Design:
+`docs/superpowers/specs/2026-07-08-global-search-dropdown-design.md`.
+- With >2 chars a `#globalSearchResults` panel opens inside `.search-box` (on mobile that box opens
+  as a full-width bar under the topbar via `#mobileSearchBtn` — see UI/UX round 2 / I7) with up to 5
+  `GLOSSARY` terms (definition clamped to 2 lines) and up to 3 `CHAPTERS`/topic matches with a
+  lesson. Logic in the `GLOBAL SEARCH` section of `js/app.js`.
+- Clicking a term **expands it in place** (`_gsToggleTerm`); the "View in glossary" link
+  (`_gsGoGlossary`) is the *only* path that writes into `#glossarySearch`. Clicking a content result
+  → `_gsGoLesson` → `navigateToLesson()`.
+- **Exam guard:** `App._examActive` is set/cleared only through `App._setExamActive` (reset
+  unconditionally as the first statement of `navigate()`, covering every destination — a chapter
+  exam abandoned via any sidebar link used to leave the flag stuck `true` and block the dropdown
+  app-wide). With the flag active, `_gsBlockIfExam()` blocks the two navigating actions with a toast;
+  expanding definitions still works.
+- **XSS:** the user's query is never interpolated into the panel's `innerHTML` — only static
+  `GLOSSARY`/`CHAPTERS` data. No match highlighting, deliberately.
+- Gate: the `N11` checks in `scripts/verify-runtime.js`, plus manual Chromium (Playwright)
+  verification that caught a real defect the mocked DOM couldn't: the document-level "click outside
+  closes it" listener used `e.target.closest('.search-box')`, which broke because expanding a term
+  re-renders the panel's `innerHTML` mid-click and detaches the original target before the event
+  bubbles to `document`. Fixed with `e.composedPath()` (captured before dispatch, unaffected by DOM
+  mutations) plus a static `N11` regression check. Not reproducible in the mocked DOM (no real
+  parent/child linkage, no `composedPath()`), hence the static check.
+
+## Data Schemas
+
+**Ground rule for all ISTQB content** (still active for any future content work): every new/changed
+question, lesson fact, or glossary term must cite a `source` traceable to official material
+(syllabus PDF, official sample exams) — **never invent exam content.**
+
+### Lesson Content Schema (`js/content.js`)
+
+Every topic in `CHAPTERS[i].topics[]` (22 total across 6 chapters: 5/4/2/5/5/1) carries, alongside
+`id`/`title`/`xp`:
+- `lo`: array of official learning-objective codes, format `FL-x.y.z` (e.g. `["FL-4.2.1","FL-4.2.2"]`)
+- `source`: citation string, format `"Syllabus v4.0 §x.y"`
+
+Every `LESSONS[id].es/en.content` HTML string ends with a footer:
+`<p class="lesson-source">Fuente: …</p>` (es) / `Source: …` (en). **Any edit to `CHAPTERS`/`LESSONS`
+must be followed by `node scripts/validate-content.js`** — it enforces per-chapter topic counts,
+`lo`/`source` presence+format, and footer presence in both languages. Sibling of
+`validate-questions.js` (different data shape, kept separate on purpose — don't merge them).
+
+### Glossary Schema (`js/content.js`, `GLOSSARY` array)
+
+107 entries, covering all 97 official ISTQB v4.0 syllabus keywords (verified by
+`validate-content.js`). Each: `{ term: { es, en }, def: { es, en }, chapter: "1"–"6", source }`.
+- `term` is a **bilingual object, not a single `"ES / EN"` string** (changed 2026-07-02) —
+  `renderGlossary()`, the letter filters, and both search bars read `term[i18n.lang]` so only the
+  active language is displayed. Code/docs referring to `term` as a plain string are stale.
+- Letter-filter buttons rebuild on every render (including language switch) so the A–Z grouping and
+  selected letter stay correct per language — don't reintroduce a "build once" cache (it was a real
+  bug: letters computed from the wrong language after switching).
+
+### Question Bank Schema (`js/questions.js`)
+
+120 questions in `QUESTIONS`, distributed by official ISTQB exam weight per chapter (0-indexed):
+Cap0=24, Cap1=18, Cap2=12, Cap3=36, Cap4=24, Cap5=6. Every question with `id > 50` also carries
+`lo` (`FL-x.y.z`), `k` (cognitive level 1|2|3 = K1 recall / K2 understand / K3 apply), and `source`.
+**Any edit must be followed by `node scripts/validate-questions.js`** — per-chapter counts,
+bilingual/structural integrity, `lo`/`k`/`source` presence for `id > 50`. A failing run is a
+blocker, not a warning.
+
+## Conventions
+
+- Private methods/helpers prefixed with `_` (e.g. `_onAuthSuccess`).
+- Initial hidden elements use inline `style="display:none"` (not a CSS class) — except views, which
+  toggle via `.view.active`.
+- Single CSS file: `css/styles.css`.
+- All inline onclick handlers use global function calls (e.g. `onclick="App.navigate('curriculum')"`).
+- The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser-automation
+  assertions).
+- Dead-code note: an empty `<span class="nav-badge" id="curriculumBadge">` (scaffolding for a
+  never-implemented counter that no JS ever wrote to) and its CSS were deleted in the 2026-07-21
+  dead-code sweep. If a nav counter is ever wanted, recover the markup from history
+  (`git log -S nav-badge`) rather than re-inventing it.
 
 ## No Tests, No Linter
 
-There is no test suite and no linter configuration for the application itself. Manual browser testing remains the primary mechanism for UI changes.
+There is no test suite or linter for the application itself — manual browser testing is the primary
+mechanism for UI changes. Five exceptions, all Node-only dev scripts never served to the browser:
 
-Five exceptions, all Node-only dev scripts never served to the browser:
-- `scripts/validate-questions.js` gates `js/questions.js` — per-chapter question counts, structural integrity (bilingual fields, 4 options, valid `correct` index, unique ids), traceability (`lo`/`k`/`source` for every question added after id 50).
-- `scripts/validate-content.js` gates `CHAPTERS`/`LESSONS`/`GLOSSARY`/`FLASHCARDS` in `js/content.js` — topic counts, `lo`/`source` presence, glossary keyword-completeness against the syllabus.
-- `scripts/verify-runtime.js` — behavior harness: loads the real `js/` modules into a mocked minimal DOM (no browser, no npm install) and exercises sync freshness/flush, the script-load guards, the CDN-failure auth screen, `innerHTML` escaping of state-derived values, and i18n parity/residue checks. Run it after any change to `js/` or `index.html`; add a check when you fix a runtime behavior.
-- `scripts/validate-contrast.js` (added 2026-07-14) gates `css/styles.css` — parses the theme token blocks and asserts WCAG AA 4.5:1 for every status-text/background pair in both themes, including `rgba()`-tinted backgrounds alpha-blended over the surface. It cannot see JS-inline text colors (`style="color:..."` set from `js/app.js` templates) — those are covered separately by the `N12` static check in `scripts/verify-runtime.js` (asserts `js/app.js` never sets `color:` to a raw `--success`/`--warning`/`--danger`/`--secondary` token as text). Together the two gate the full surface; run both after any change to theme tokens or status-text colors.
-- `scripts/validate-responsive.js` (added 2026-07-21) — the only one needing a real browser: launches Playwright/Chromium at 320/375/414px with touch emulation and asserts zero horizontal overflow across all views, ≥44px touch targets, the exam dot strip's height, the full mobile drawer cycle, and the onboarding tour with its tooltip verified in-viewport at every step. Follows the repo's no-op dependency pattern — if Playwright isn't installed it prints `SKIP: Playwright no disponible` and exits 0. **Deliberately outside the pre-commit hook** (slow, adds a dependency) — run it manually before any release and after any layout change. What it can't see without a browser (the CSS/JS invariants behind the layout) is covered by the `N20`/`N20b`/`N20c` check families in `verify-runtime.js`.
-
-Run the relevant one after any change:
+- **`scripts/validate-questions.js`** gates `js/questions.js` — see Question Bank Schema.
+- **`scripts/validate-content.js`** gates `CHAPTERS`/`LESSONS`/`GLOSSARY`/`FLASHCARDS` in
+  `js/content.js` — see Lesson Content / Glossary schemas. Shares `scripts/lib/validate-utils.js`
+  with `validate-questions.js` (loading browser globals from Node, the `FL-x.y.z` regex, the
+  bilingual-field check); both accept an optional staged-file path argument.
+- **`scripts/verify-runtime.js`** — behavior harness: loads the real `js/` modules into a mocked
+  minimal DOM (no browser, no npm install) and exercises sync freshness/flush, the script-load
+  guards, the CDN-failure auth screen, `innerHTML` escaping of state-derived values, i18n
+  parity/residue, and the `N*` regression families below. Run it after any change to `js/` or
+  `index.html`; add a check when you fix a runtime behavior.
+- **`scripts/validate-contrast.js`** (2026-07-14) gates `css/styles.css` — parses the `:root` and
+  `[data-theme="light"]` custom-property blocks and asserts WCAG AA 4.5:1 for every
+  status-text/background pair in **both** themes, including `rgba()`-tinted backgrounds
+  alpha-blended over `--surface` (the same real-render math a CSS engine would use). It cannot see
+  JS-inline text colors (`style="color:…"` from `js/app.js` templates) — those are covered by the
+  `N12` static check in `verify-runtime.js`. Together the two gate the full surface.
+- **`scripts/validate-responsive.js`** (2026-07-21) — **the only gate needing a real browser.**
+  Launches Playwright/Chromium at 320/375/414px with touch emulation, serves the repo from its own
+  `node:http` server, bypasses the auth gate, and asserts: zero horizontal overflow across the 7
+  views + a tabled lesson + an active exam, ≥44px touch targets, the exam dot-strip height, the full
+  drawer open/scrim/close/inert cycle, the avatar modal at 1 column, the `.bmc-fab`
+  `getComputedStyle` (`padding:0`/`border-radius:50%`, proving the mobile circle wins the cascade at
+  runtime), and the whole onboarding tour (tooltip in-viewport and ≤25% over the spotlight at every
+  step). No-op dependency pattern: without Playwright it prints `SKIP: Playwright no disponible` and
+  exits 0. **Deliberately outside the pre-commit hook** (slow, adds a dependency) — run it manually
+  before any release and after any layout change. What it can't see without a browser is covered by
+  the `N20`/`N20b`/`N20c` families in `verify-runtime.js`.
 
 ```bash
 node scripts/validate-questions.js
@@ -113,328 +565,281 @@ node scripts/validate-contrast.js
 node scripts/validate-responsive.js   # manual pre-release step, not in pre-commit
 ```
 
-The pre-commit gate is version-controlled at `.githooks/pre-commit` — activate it once per clone with `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the **staged** copy of the three gated files (`js/questions.js`, `js/content.js`, `css/styles.css`) and runs the runtime harness when `js/`, `index.html` or the harness itself is staged; the commit is blocked on failure. `validate-responsive.js` is deliberately not in the hook.
+**Pre-commit gate** version-controlled at `.githooks/pre-commit` — activate once per clone with
+`git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the
+**staged** copy of the three gated files (`js/questions.js`, `js/content.js`, `css/styles.css`) and
+runs the runtime harness when `js/`, `index.html`, or the harness itself is staged; the commit is
+blocked on failure. `validate-responsive.js` is deliberately not in the hook.
 
-## ISTQB Content Fidelity Effort (complete, all 3 phases merged)
+## Reference Materials
 
-The question bank, lessons, and glossary were brought into closer alignment with the official **ISTQB CTFL v4.0 syllabus**, in three phases, all merged to `master`. Full design: `docs/superpowers/specs/2026-07-01-content-and-question-bank-expansion-design.md`. Full per-phase detail (known corrections, real errors found and fixed, remaining minor gaps) lives in `AGENTS.md` and `docs/content-audit-report.md` — this section is intentionally a summary only, to avoid the two files drifting out of sync with each other.
+The `ISTQB 2026/` folder contains official ISTQB PDFs (syllabus, sample exams). Not part of the
+application code — do not modify. **Not version-controlled** (gitignored — copyrighted third-party
+material, must never be committed/pushed to the public repo, and must stay in `.vercelignore`). It
+exists only on this local checkout; a fresh clone won't have it. A future content-audit session must
+source its own copies first.
 
-**Ground rule for this effort:** every new/changed piece of ISTQB content (question, lesson fact, glossary term) must cite a `source` traceable to official material (syllabus PDF, official sample exams) — never invent exam content. This rule is still active for any future content work.
+## ISTQB Content Fidelity Effort — complete (all 3 phases merged)
+
+The question bank, lessons, and glossary were brought into closer alignment with the official
+**ISTQB CTFL v4.0 syllabus**, in three phases, all merged to `master`. Full spec:
+`docs/superpowers/specs/2026-07-01-content-and-question-bank-expansion-design.md`. Per-phase plans
+under `docs/superpowers/plans/`; audit trail with per-lesson verdicts in
+`docs/content-audit-report.md`. Built via subagent-driven-development.
 
 | Phase | Status | Summary |
 |-------|--------|---------|
-| 1. Question bank (50 → 120) | ✅ Done | `js/questions.js`, 120 questions matching official exam-weight distribution (24/18/12/36/24/6). Every question added has `lo`/`k`/`source`. |
-| 2. Lesson content audit | ✅ Done | All 22 lessons in `js/content.js` audited against the syllabus; every topic has `lo`/`source`; every lesson has a `.lesson-source` footer. Real errors found and fixed (test-level count, review roles, a non-syllabus technique, a non-official tool taxonomy) — detail in `AGENTS.md`. Gate: `node scripts/validate-content.js`. |
-| 3. Glossary expansion | ✅ Done | `GLOSSARY` expanded to 107 terms, all 97/97 official v4.0 keywords covered. `FLASHCARDS` swept term-by-term for v4.0 fidelity. `GLOSSARY.term` is `{es, en}`, not a plain string. |
+| 1. Question bank (50 → 120) | ✅ Done | 120 questions matching official exam-weight distribution (24/18/12/36/24/6). Every added question has `lo`/`k`/`source`. |
+| 2. Lesson content audit | ✅ Done | All 22 lessons audited; every topic has `lo`/`source`; every lesson has a `.lesson-source` footer. Real errors found and fixed (below). |
+| 3. Glossary expansion (48 → 107) | ✅ Done | All 97/97 official v4.0 keywords covered. `FLASHCARDS` swept term-by-term for v4.0 fidelity. `GLOSSARY.term` is `{es, en}`. |
 
-The two known minor gaps from Phase 1 (light BVA question coverage in Ch.4, no dedicated question for FL-2.1.2) were closed on 2026-07-14 by replacing three redundant questions (ids 43/17/31 → 121/122/123, all with official `lo`/`k`/`source`) — detail in `AGENTS.md`.
+**Phase 1 minor gaps — CLOSED (2026-07-14).** Both gaps (light BVA coverage in Ch.4, no dedicated
+FL-2.1.2 question) were closed by **replacing three redundant/flawed questions** (bank stays at 120,
+distribution intact, new ids > 50 so the `lo`/`k`/`source` rule covers them): id 17 → 122 (3-value
+BVA applied, fresh 10–50 domain), id 31 → 123 (the syllabus's own "x ≤ 10 miscoded as x = 10"
+example), id 43 → 121 (FL-2.1.2/K1, the four good testing practices of §2.1.2). Design:
+`docs/superpowers/specs/2026-07-14-question-bank-gap-closure-design.md`. No content work currently
+pending.
+
+**Real errors found and fixed during Phase 2** (precedent for how thorough the audit needs to be):
+Ch.2 lesson's false "4 test levels" (syllabus defines 5); Ch.3's two review roles (Gestor, Moderador)
+silently merged into one, split back out; Ch.4's non-syllabus "Prueba de Caso de Uso" (removed in
+v4.0) and an OCR-corrupted self-contradictory BVA example; Ch.6's non-official tool taxonomy plus two
+non-v4.0 concepts ("false sense of security", "tool adoption considerations"). **Phase 3** fixed
+`FLASHCARDS` errors the same sweep found (ids 9, 14, 27, 28, 8, 17, 18 — e.g. "4 test levels", a
+mislabeled "formal reviews" list, non-syllabus automation benefits/risks, unqualified "2^n rules").
+Full detail: `docs/content-audit-report.md`.
 
 ## Reliability & Security Remediation Pass (2026-07-04)
 
-A follow-up audit (separate from the content-fidelity effort above) covered the app's runtime code — `auth.js`/`sync.js` reliability, XSS surface, script-load fragility, validator-script duplication, and i18n completeness. It was then **independently re-audited the same day** (second pass), which confirmed most closures but found two partial and several sibling risks — all fixed the same day. Full findings, verification, and the second-pass addendum: `docs/audit-2026-07-04-architecture-security.md`. Condensed summary: `AGENTS.md`'s "Repository" section. Highlights after both passes:
+A follow-up audit (separate from the content effort) covered the runtime code — `auth.js`/`sync.js`
+reliability, XSS surface, script-load fragility, validator duplication, and i18n completeness. It was
+**independently re-audited the same day** (second pass), which found two partial closures and several
+sibling risks — all fixed the same day. Full write-up (drift map, severity-ranked findings, how each
+was verified, plus a pre-soft-production spot-check addendum from 2026-07-10):
+`docs/audit-2026-07-04-architecture-security.md`. Highlights after both passes:
+- `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt
+  an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load
+  (second pass, via `_updatedAt` freshness stamps in `sync.js`). A pending debounced save is flushed
+  on tab hide/close. (See also the 2026-07-22 fix above, which closed a hole this freshness
+  mechanism still had at fresh login.)
+- No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (built through the
+  DOM, first pass) plus activity log and exam history from `App.state` (`escapeHtml()`, second pass).
+- A failed load of the Supabase CDN script, `config.js`, or any required script shows a clear message
+  instead of crashing — and the auth screen stays functional (language switcher, form handlers).
+- `i18n` covers the whole app (onboarding, avatar picker, auth screen were Spanish-only before;
+  ~35 ad-hoc ternaries consolidated into `TRANSLATIONS`).
+- Data hygiene: glossary chapter-tag map was missing chapter 6; the "Full Curriculum" achievement
+  still required the pre-Phase-2 lesson count (16, not 22); two `localStorage.setItem` calls lacked
+  `try/catch`; `examHistory` grew unbounded (now capped like `activityLog`); chapter 6's description
+  still mentioned a non-syllabus concept Phase 2 had purged from the lesson.
+- The pre-commit hook became version-controlled (`.githooks/`); the runtime harness
+  (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
 
-- `auth.js` no longer lets a stale cloud-state refetch overwrite recent local progress or interrupt an in-progress exam — on any path: the refocus re-emit (first pass) and the initial page load (second pass, via `_updatedAt` freshness stamps in `sync.js`, newest copy wins). A pending debounced save is flushed when the tab is hidden/closed.
-- No `innerHTML` sink is fed unescaped user-controllable data: the avatar `<img>` (first pass) plus activity log and exam history from `App.state` (second pass, `escapeHtml()`).
-- A failed load of the Supabase CDN script, `config.js`, or any other required script shows a clear message instead of crashing — and the auth screen stays functional (language switcher, form handlers) in that state.
-- `i18n` covers the whole app — onboarding, avatar picker, and auth screen were Spanish-only before the first pass; the second pass caught the surviving hardcoded residues (logout label, tooltips, streak toast, name fallback, glossary chapter tag). 160 keys at the time (178 today — see the 2026-07-14 section below), ES/EN paired, enforced by `scripts/verify-runtime.js`.
-- The pre-commit hook is version-controlled (`.githooks/`) and validates staged content; a new runtime harness (`scripts/verify-runtime.js`) makes the behavior fixes re-verifiable on any clone.
+## Production Readiness — closed 2026-07-07 (pre-launch, historical)
 
-## Production Readiness — closed 2026-07-07 (pre-launch)
+Was the gate for the 2026-07-20 launch, which has since happened (see Production Deployment above).
+Both items from the 2026-07-04 conversation resolved. Plan:
+`docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`.
+- **Error monitoring (Sentry free tier): DONE** — see Error Monitoring above; `privacy.html` (ES/EN)
+  updated in the same commit.
+- **Signup rate-limiting/captcha: DONE, resolved to soft launch.** The dashboard audit found native
+  rate limits adequate (sign-ups/sign-ins 30 per 5 min, token refresh 150 per 5 min, OTP 30 per
+  5 min) and caught the real blocker (the built-in email 2/hour cap, fixed via Brevo SMTP). **Captcha
+  (Cloudflare Turnstile) was deliberately NOT added** — the plan's own gate says a soft launch
+  (hand-shared link, no public announcement) doesn't need it. **Only reopen Part B2 (Turnstile) if
+  the launch becomes public/announced** — it needs a Cloudflare account and re-reading B2's
+  deployment-order warning in the plan doc first.
 
-Historical: this was the gate for the 2026-07-20 launch, which has since happened — see
-"Production Deployment (Vercel)" above for the live state. Both items from the 2026-07-04
-conversation are resolved as of 2026-07-07. **Error monitoring (Sentry free tier): DONE** — see "Error Monitoring (Sentry)" above. **Signup rate-limiting/captcha review: DONE, resolved to soft launch** — the dashboard audit found native rate limits adequate and caught a real blocker (built-in email service capped at 2/hour with "Confirm email" on, meaning real signups couldn't confirm), fixed via custom SMTP (Brevo) — see "Backend (Supabase)" above. Captcha (Cloudflare Turnstile) was deliberately **not** added — the plan's own gate says a soft launch doesn't need it. Full detail and the decision gate: `docs/superpowers/plans/2026-07-04-monitoring-and-signup-abuse.md`; current status summary: `AGENTS.md` → "Production Readiness — closed 2026-07-07 (pre-launch)".
+## UI/UX Remediation — ui-ux-pro-max Review (2026-07-14 + round 2 2026-07-15)
 
-## UI/UX Polish & Flashcard Carousel Animation (2026-07-07)
+A full UI/UX review (with the `ui-ux-pro-max` skill) produced a prioritized findings list;
+everything was remediated across two rounds via subagent-driven-development, each block with its own
+plan, per-task reviews, a final whole-branch review (each round found and fixed real cross-task
+issues), and real-browser Playwright verification. Specs/plans under `docs/superpowers/` for
+`2026-07-14-*` and `2026-07-15-uiux-remediation-round2`.
 
-A round of user-reported usability fixes, all in `css/styles.css` unless noted, full detail in
-`AGENTS.md`'s "Repository" and "Architecture" sections:
+**Round 1 (2026-07-14):**
 
-- **Sidebar clipped on short viewports:** on screens/windows short enough that the sidebar's
-  content (header + user card + nav + footer) exceeded the viewport height, the footer — streak
-  counter, **Salir**/logout button, privacy link — became unreachable, with no scrollbar to get
-  to it. Fixed by constraining `.sidebar` to a real `height: 100vh` (was `min-height`, which
-  doesn't force a fixed size) so the nav list correctly scrolls internally instead, plus a
-  scroll fallback on the sidebar itself for extreme cases. Applies to both desktop and the
-  `≤768px` mobile drawer.
-- **Progress view title spacing:** "Mi Progreso" had no margin below it, unlike every other
-  view's header — added.
-- **Flashcards carousel animation:** clicking the prev/next arrows now slides the current card
-  out and the next one in from the opposite side (50px + fade, 250ms/phase), instead of an
-  instant content swap — independent of the existing 3D flip. Design, plan, and full mechanism
-  detail: `docs/superpowers/specs/2026-07-07-flashcard-carousel-animation-design.md`,
-  `docs/superpowers/plans/2026-07-07-flashcard-carousel-animation.md`, `AGENTS.md` → "Flashcard
-  Carousel Animation". Built via subagent-driven-development; task review and final
-  whole-branch review both came back clean (no Critical/Important findings). Verified by the
-  `N10` checks in `scripts/verify-runtime.js`.
-
-## Global Search Dropdown (2026-07-08)
-
-The topbar's global search box no longer forces navigation to the glossary/curriculum while
-typing (it used to break the user's context and could knock down an in-progress exam screen):
-it now opens a results dropdown (glossary terms expandable in place, plus lesson matches), and
-only navigates on an explicit click — blocked with a toast if an exam is active
-(`App._examActive`). Design: `docs/superpowers/specs/2026-07-08-global-search-dropdown-design.md`;
-full detail: `AGENTS.md` → "Global Search Dropdown". Verified by the `N11` checks in
-`scripts/verify-runtime.js`, plus manual verification in a real Chromium browser (Playwright)
-on 2026-07-08 — which caught a real defect the mocked-DOM harness couldn't: the panel's "click
-outside closes it" listener used `e.target.closest()`, which broke because expanding a term
-replaces the panel's `innerHTML` mid-click and detaches the original target before the event
-reaches `document`; fixed with `e.composedPath()` (unaffected by that mutation) plus a static
-regression check in `scripts/verify-runtime.js` (full mechanism in `AGENTS.md`).
-
-## UI/UX Remediation — ui-ux-pro-max Review (2026-07-14)
-
-A full UI/UX review of the app (done with the `ui-ux-pro-max` skill) produced a prioritized
-findings list; four blocks were remediated the same day via subagent-driven-development, each
-with its own plan, per-task reviews, a final whole-branch review (all four found and fixed
-real issues), and real-browser Playwright verification. **This section is a summary only —
-mechanisms, exact hex values, verification evidence, and the complete follow-up lists live in
-`AGENTS.md`'s four matching entries and the four plan docs under `docs/superpowers/plans/`.**
-
-| Block | Findings closed | Summary | Gate |
-|-------|-----------------|---------|------|
-| Contrast | C2 + I1 | Semantic `--success-text`/`--warning-text`/`--danger-text`/`--primary-text` tokens per theme (light-theme status text was 1.27–2.37:1); `--text3` raised to AA in both themes; a fix wave swapped 7 JS-inline text colors the CSS validator couldn't see | `validate-contrast.js` (pre-commit, staged CSS) + `N12` (JS-inline status text) |
-| A11y quick wins | I6 + I5 + I4 | `aria-live="polite"` on `#toastContainer` (+ `aria-hidden` on the decorative `#xpPopup`); new `data-i18n-aria` mechanism naming five icon-only controls; four form inputs to 16px (kills iOS focus auto-zoom) | 12 `N13` checks |
-| Keyboard operability | C1 | `#themeToggle` → real `<button>`; `role="button" tabindex="0"` on template-rendered divs + ONE delegated document keydown handler; global `:focus-visible`; `selectAnswer` focus restore; flashcard flip made keyboard-operable in the fix wave | 11 `N14` checks |
+| Block | Findings | Summary | Gate |
+|-------|----------|---------|------|
+| Contrast | C2 + I1 | Semantic `--success-text`/`--warning-text`/`--danger-text`/`--primary-text` tokens per theme (light-theme status text was 1.27–2.37:1); `--text3` raised to AA (`#8C8CC8` dark / `#666688` light); a fix wave swapped 7 JS-inline text colors the CSS validator couldn't see | `validate-contrast.js` + `N12` |
+| A11y quick wins | I6 + I5 + I4 | `aria-live="polite"` on `#toastContainer` (+ `aria-hidden` on decorative `#xpPopup`); the `data-i18n-aria` mechanism naming five icon-only controls; four form inputs to 16px (kills iOS focus auto-zoom) | 12 `N13` checks |
+| Keyboard operability | C1 | `#themeToggle` → real `<button>`; `role="button" tabindex="0"` on template-rendered divs + ONE delegated `document` keydown handler; global `:focus-visible`; `selectAnswer` focus restore; keyboard-operable flashcard flip | 11 `N14` checks |
 | Reduced motion | I2 | Global `prefers-reduced-motion` blunt block (durations + delays → 0.01ms `!important`, beats inline styles) + `matchMedia` guard collapsing the carousel's `setTimeout` sequencing | 2 `N15` checks |
 
-**Round 2 (2026-07-15):** everything the review left open — **I3**, **I7**, **I8** and the
-per-block recorded follow-ups — was closed in a second round (commits `2df5af2..2ab887d`,
-same methodology). Summary: 44px touch targets via a `@media (pointer: coarse)` block
-(touch only — desktop visuals unchanged); mobile global search (`#mobileSearchBtn` + a
-full-width `.search-box.mobile-open` bar under the topbar, reusing the same
-`#globalSearch` and its JS) plus a complete ARIA combobox pattern for the dropdown
-(arrows/Enter/Escape, `aria-activedescendant`, no wrap, two-phase Enter on glossary
-terms); an inline SVG sprite of `#i-*` symbols + `App._icon(name)` replacing every
-structural emoji (26 at the time, 27 today with `#i-coffee`; decorative emojis that stay
-carry `aria-hidden`); and the minor
-follow-ups (avatar modal as a keyboard-operable `dialog`, `aria-expanded` on chapter
-headers and `#mobileMenuBtn`, roving tabindex + `aria-current` on exam dots, assertive
-`warning`/`error` toasts, new `--secondary-text` token as an extra
-`validate-contrast.js` pair). New gates: the `N16`/`N16b`, `N17` and `N18` check
-families in `scripts/verify-runtime.js`. Full mechanisms and evidence: `AGENTS.md` →
-"UI/UX remediation ronda 2 (2026-07-15)", plus the spec/plan pair
-`docs/superpowers/specs/2026-07-15-uiux-remediation-round2-design.md` /
-`docs/superpowers/plans/2026-07-15-uiux-remediation-round2.md`.
+**Round 2 (2026-07-15)** closed everything round 1 left open (I3, I7, I8 + per-block follow-ups),
+commits `2df5af2..4879e14`:
+- **I3 — touch targets:** a `@media (pointer: coarse)` block (touch only — desktop visuals
+  unchanged): `.lang-btn`/`.exam-dot` ≥44px, gaps to 8px, `.name-edit-btn` always visible on touch;
+  plus an all-devices rule making the edit button visible to keyboard focus.
+- **I7 — mobile search + combobox:** `#mobileSearchBtn` (≤768px, `data-i18n-aria` + synced
+  `aria-expanded`) opens `.search-box` as a full-width `.mobile-open` bar under the topbar, **reusing
+  the same `#globalSearch` input and all its JS**. `App._closeMobileSearch()` (Escape/`#searchCloseBtn`)
+  returns focus to the button. The dropdown got the full ARIA combobox pattern (desktop too):
+  `role="combobox"`/`aria-controls`/`aria-expanded`/`aria-activedescendant`, `role="listbox"` panel
+  with stable `gs-opt-N` `role="option"` ids, arrows without wrap, two-phase Enter on glossary terms,
+  Escape to close.
+- **I8 — structural emojis → inline SVG sprite:** a hidden sprite (`display:none`, `aria-hidden`) of
+  Lucide-style `#i-*` symbols (26 originally; `#i-coffee` added later by the BMC round — note the
+  `N17` check hardcodes the original 26-name list, so a symbol added later isn't gate-protected) as
+  the first element of `<body>`; `.icon` class (1em, `currentColor` — theme-proof); `App._icon(name)`
+  for `innerHTML` templates (unknown name → empty string; the name is always an internal literal,
+  never user data). All structural HTML + JS-template emojis migrated; decorative emojis that stay
+  carry `aria-hidden`. A real regression it caught: `.theme-btn`/`.name-edit-btn` declared no `color`,
+  so their `currentColor` SVGs inherited UA black (1.18:1 in dark) — fixed with explicit colors + the
+  14th `N17` check.
+- **Minor follow-ups:** avatar modal as a `role="dialog" aria-modal` with Escape + focus-return
+  (launcher/`.av-card` keyboard-operable via the delegated handler); `aria-expanded` on chapter
+  headers and `#mobileMenuBtn`; dashboard `continue-item`s keyboard-operable; roving tabindex +
+  `aria-current` on exam dots (ArrowLeft/Right in the delegated keydown); assertive `role="alert"` on
+  `warning`/`error` toasts; new `--secondary-text` token (extra `validate-contrast.js` pair).
+- New gates: the `N16`/`N16b`, `N17`, `N18` families.
 
 **Editing constraints an agent must know (load-bearing):**
 
-- The tail of `css/styles.css` is ordered on purpose — today: the `≤480px` tier, then
-  `@media (pointer: coarse)`, then **the `.bmc-fab` `≤768px` override block**, then the
-  reduced-motion block, then `:focus-visible` **literally last** (it must win the `outline`
-  property over earlier equal-specificity `outline: none` input rules). The `.bmc-fab`
-  override sits there — *after* the pill's base rule (~line 2238), not back up in the main
-  `≤768px` tier where it used to live — because media queries add no specificity: two rules
-  at the same specificity resolve by source order, so a same-specificity override placed
-  *before* the rule it's meant to override silently loses to it. That was a real bug (found
-  in the 2026-07-21 final review): the override lived in the main 768px tier, ~800 lines
-  before the base `.bmc-fab` rule, so `padding: 0`/`border-radius: 50%` were dead
-  declarations and the FAB only *looked* like a circle by coincidence (`border-radius: 999px`
-  on a 48px box also clamps to a circle). **Do not "tidy" this block back into the main
-  `≤768px` tier** — that would silently reintroduce the exact bug it fixes. Don't append CSS
-  after it without reading those blocks' comments. See the Mobile Adaptability section below
-  for the tier's own cascade caveat, and `css/styles.css:2264-2280` for the in-file account.
-- New interactive elements in `innerHTML` templates: give them `role="button" tabindex="0"`
-  — the delegated keydown listener in `App.init()` makes them keyboard-operable
-  automatically; never add per-element key listeners (the templates are regenerated
-  constantly).
-- New icon-only controls: name them with `data-i18n-aria="key"` (the fourth i18n attribute
-  mechanism — see `AGENTS.md` → "i18n").
-- Structural icons: use the `#i-*` inline sprite in `index.html` (static HTML:
-  `<svg class="icon" aria-hidden="true"><use href="#i-name"/></svg>`) or `App._icon(name)`
-  in JS templates — do not reintroduce emojis as UI icons (the `N17` gate blocks it).
-  Decorative emojis that stay must carry `aria-hidden`.
-- Status-feedback text colors: use the `--*-text` tokens (or the `.text-success`/`.text-warning`/
-  `.text-danger` utilities), never the raw `--success`/`--warning`/`--danger` tokens as text —
-  the two-part gate blocks the commit otherwise.
-- `TRANSLATIONS` currently has **178 keys** (ES/EN paired, harness-enforced). The most
-  recent additions were `achievement_toast_prefix` (round-2 final-review fix for the last
-  hardcoded "Logro:" toast residue in `js/app.js`), `bmc_label` (the Buy Me a Coffee
-  button — see the Monetization section below), `lesson_next`/`lesson_finish_chapter`
-  (the lesson bottom-bar buttons), and `lesson_next_locked_toast` (the same-day gating
-  revocation's warning toast — see the Lesson Flow & Mobile FAB section below).
-- The `data-theme` attribute lives on `<body>`, not `<html>` (matters for browser automation
-  assertions).
-- Under reduced motion, `#xpPopup` never becomes visible — intentional and adjudicated
-  (decorative, `aria-hidden`, XP info duplicated in the sidebar counter and toasts), not a bug.
-- Nothing in `js/` may rely on `transitionend`/`animationend` without re-verifying under
-  reduced motion (today everything is `setTimeout`-driven — that property is what makes the
-  blunt block safe).
+- **The tail of `css/styles.css` is ordered on purpose.** Today: the `≤480px` tier (~1453) →
+  `@media (pointer: coarse)` (~2199) → **the `.bmc-fab` `≤768px` override block** (~2281) →
+  reduced-motion (~2292) → `:focus-visible` **literally last** (~2309 — it must win the `outline`
+  property over earlier equal-specificity `outline: none` input rules). The `.bmc-fab` override sits
+  there — *after* the pill's base rule (~2238), not back in the main `≤768px` tier — because media
+  queries add no specificity: two rules at the same specificity resolve by source order, so a
+  same-specificity override placed *before* its target silently loses. That was a real bug (found in
+  the 2026-07-21 final review): the override lived ~800 lines before the base rule, so
+  `padding:0`/`border-radius:50%` were dead declarations and the FAB only *looked* circular by
+  coincidence. **Do not "tidy" this block back into the main `≤768px` tier** — it silently
+  reintroduces the bug. Don't append CSS after `:focus-visible`.
+- **New interactive elements in `innerHTML` templates:** give them `role="button" tabindex="0"` — the
+  delegated keydown listener in `App.init()` (Enter/Space over a `[role="button"]` → `preventDefault`
+  + `.click()`) makes them keyboard-operable automatically. Never add per-element key listeners (the
+  templates are regenerated constantly, so per-element listeners get wiped; one document-level
+  listener survives every regeneration).
+- **New icon-only controls:** name them with `data-i18n-aria="key"`.
+- **Structural icons:** use the `#i-*` inline sprite (static HTML:
+  `<svg class="icon" aria-hidden="true"><use href="#i-name"/></svg>`) or `App._icon(name)` in JS
+  templates — do not reintroduce emojis as UI icons (the `N17` gate blocks it). Decorative emojis
+  that stay must carry `aria-hidden`.
+- **Status-feedback text colors:** use the `--*-text` tokens (or `.text-success`/`.text-warning`/
+  `.text-danger`), never the raw `--success`/`--warning`/`--danger`/`--secondary` tokens as text —
+  the two-part gate (`validate-contrast.js` + `N12`) blocks the commit otherwise.
+- **Reduced motion:** `#xpPopup` never becomes visible (intentional and adjudicated — decorative,
+  `aria-hidden`, XP duplicated in the sidebar counter and toasts). Nothing in `js/` may rely on
+  `transitionend`/`animationend` without re-verifying under reduced motion — today everything is
+  `setTimeout`-driven, which is what makes the blunt block safe.
 
-**Still open from the review (after round 2, 2026-07-15):** only three deliberate
-leftovers — the avatar modal has no Tab focus-trap (Escape + focus-return do work; a
-documented deliberate limit of round 2), the nested-TTS AT nit in `#flashcard` (decision
-upheld: functionally safe, verified no double-fire), and the accent-as-text exceptions
-(`.chapter-number` — large/bold text, 3:1 large-text threshold —, `.lesson-chapter-tag`,
-and `.lesson-content code`, all pre-existing) — plus one minor follow-up: the structural
-✓/✗ text glyphs left out of I8's scope (exam review, avatar `av-check`). All enumerated
-with file pointers in `AGENTS.md` → "UI/UX remediation ronda 2 (2026-07-15)".
-
-## Monetization — Buy Me a Coffee button (2026-07-15)
-
-A floating "Invítame un café" / "Buy me a coffee" pill (bottom-right) links to the creator's
-Buy Me a Coffee donations page, for a non-intrusive soft-launch monetization (tips, no content
-gating, no payment infra of our own). Built via subagent-driven-development (spec + plan under
-`docs/superpowers/`, per-task reviews, final whole-branch review, real-browser Playwright
-verification). Design/plan: `docs/superpowers/specs/2026-07-15-buymeacoffee-button-design.md`,
-`docs/superpowers/plans/2026-07-15-buymeacoffee-button.md`.
-
-**Chosen approach: self-hosted outbound link, NOT the official BMC widget script** — avoids a
-new third-party CDN dependency (which the repo's discipline would require pinning + SRI +
-no-op degradation for) and keeps full control over a11y/i18n/theming. It's a plain
-`<a href="https://buymeacoffee.com/jorgeborn3m" target="_blank" rel="noopener noreferrer">`.
-
-Load-bearing details an agent must know:
-- The pill lives **inside `#app-container`** (in `index.html`), so it hides automatically on
-  the login screen (`#app-container` is `display:none` there — desired) and shows once signed
-  in. During an exam it is hidden via `body.exam-active .bmc-fab { display:none }`.
-- Exam visibility is driven by `App._setExamActive(active)` (`js/app.js`), the single point of
-  truth that both sets `this._examActive` and toggles the `exam-active` class on `<body>`. The
-  four former direct `this._examActive = …` assignments (navigate / renderSimulatorMenu /
-  launchExam / finishExam) now route through it. Never reintroduce a direct assignment.
-- Background is `var(--primary-dark)` (`#5a52d5`), **not** `--primary` (`#6C63FF`): white text
-  on `--primary` is only 4.32:1 (fails AA); on `--primary-dark` it's 5.83:1 (passes). `color:#fff`
-  is explicit because the icon `<svg>` uses `currentColor`. This pair is not a `--*-text` token
-  so `validate-contrast.js` doesn't cover it — the AA choice is locked by the `N19` CSS check.
-- The label's `data-i18n="bmc_label"` sits on the **inner `<span>`, never on the `<a>`**: the
-  `<a>` also contains the `#i-coffee` `<svg>`, and `i18n.apply()` does `el.textContent = t(key)`,
-  which would wipe the icon if the attribute were on the `<a>`. This was a real bug caught by the
-  final review and fixed; the `N19` markup check now forbids `data-i18n` on the `<a>`.
-- `.toast-container` was raised to a base of `bottom: 80px` (from 24px; today
-  `calc(80px + env(safe-area-inset-bottom, 0px))`) so transient `aria-live` toasts
-  stack **above** the persistent pill instead of overlapping it.
-- Gate: the `N19` check family in `scripts/verify-runtime.js` (i18n key, `#i-coffee` sprite +
-  markup, CSS tokens/offset/exam-hide, `_setExamActive` wiring, `privacy.html` mention).
-  `privacy.html` declares the outbound link in ES and EN.
+**Still open (deliberate leftovers after round 2 + the mobile round):** the avatar modal has no Tab
+focus-trap (Escape + focus-return work); the nested-TTS AT nit in `#flashcard` (decision upheld —
+functionally safe, verified no double-fire); three pre-existing accent/raw-color-as-text exceptions
+enumerated in the `N12` comment in `verify-runtime.js` (`.chapter-number` — large/bold, 3:1 threshold;
+`.lesson-chapter-tag` — a hex literal invisible to the token regex; `.lesson-content code` —
+`var(--secondary)` in CSS with no validator pair); and a handful of structural ✓/✗ and icon-only
+emoji glyphs left out of I8's scope (exam-review markers, avatar `.av-check`, TTS 🔇/🔊, the "Volver"
+← arrow, fc-stats 🔴🟡🟢) queued for a future minor pass. The answered daily-challenge options'
+focusable-but-inert parity is an upheld decision, not a bug.
 
 ## Mobile Adaptability (2026-07-21)
 
-The app had a tablet breakpoint (≤768px) but no phone one — real-browser measurement (Chromium,
-touch emulation, 320/375/414px) found the glossary, lesson tables, exam dot navigator, flashcard
-flip, sidebar drawer, and onboarding tour all overflowing or unusable below 768px. Fixed via
+The app had a tablet breakpoint (≤768px) but no phone one — a real-browser Chromium audit (touch
+emulation, 320/375/414px) found the glossary, lesson tables, exam dot navigator, flashcard flip,
+sidebar drawer, and onboarding tour all overflowing or unusable below 768px. Fixed via
 subagent-driven-development (11 tasks) plus a final whole-branch review that caught 1 Critical +
-2 Important cross-task bugs (mobile-scoped state leaking into desktop), all fixed same-day. Spec:
-`docs/superpowers/specs/2026-07-21-mobile-adaptability-design.md`; plan:
-`docs/superpowers/plans/2026-07-21-mobile-adaptability.md`; full mechanism detail and the review
-findings: `AGENTS.md` → "Mobile adaptability (2026-07-21)".
+2 Important cross-task bugs (mobile-scoped state leaking into desktop), all fixed same-day. Spec/plan
+under `docs/superpowers/` for `2026-07-21-mobile-adaptability`.
 
-Load-bearing details an agent must know:
-- **New `@media (max-width: 480px)` tier** in `css/styles.css`, right after the 768px block —
-  the old `@media (max-width: 500px)` (`.avatar-grid` only) is folded into it. File tail order
-  (verified 2026-07-21 final-review follow-up): 480 tier (~1453) → `(pointer: coarse)` (~2199)
-  → **`.bmc-fab` `≤768px` override block (~2281)** → reduced-motion (~2292) → `:focus-visible`
-  (~2309, still literally last). The `.bmc-fab` block is a later addition, not part of the
-  original three-block invariant — it must stay *after* the base `.bmc-fab` rule (~2238) for
-  its same-specificity override to win by source order; see the "Editing constraints" note
-  above for why moving it back into the main 768px tier reintroduces a dead-CSS bug.
-- **`App._setDrawerOpen(open)`** (parallel to `_setExamActive`) is the single point of truth for
-  the mobile sidebar drawer — scrim, Escape, body scroll-lock, `inert` while closed. Nothing else
-  may toggle `mobile-open` via `classList`. **The scrim's visibility/scroll-lock CSS
-  (`body.drawer-open …`) must stay inside the `≤768px` media block** — it lived outside one until
-  the final review caught a desktop bug (clicking the sidebar logo darkened the whole page).
-- **`App._wrapLessonTables()`**, called at the end of `renderLesson()`, wraps every lesson
-  `<table>` in a `.table-scroll` div by DOM manipulation — this is how mobile table scrolling
-  works without ever editing `js/content.js` (content-fidelity rule stays intact).
-  Do not add scroll wrappers by editing lesson HTML directly.
-- **Flashcard flip is grid-stack, not absolute-positioned faces**: `.flashcard-inner` (not
+- **New `@media (max-width: 480px)` tier** in `css/styles.css`, right after the 768px block (the old
+  `@media (max-width: 500px)` — `.avatar-grid` only — was folded in). Reduced paddings,
+  `.stats-grid`/`.results-stats` to 1 column, `flex-wrap` on rows that never wrapped. File-tail order
+  as in the UI/UX editing constraints above.
+- **Text safety net (all widths):** `overflow-wrap: break-word` on 9 content containers and
+  `min-width: 0` on 4 flex items that couldn't shrink before; `.page-title` truncates with an
+  ellipsis.
+- **`100vh` → `dvh` with a fallback pair** (`vh` kept, `dvh` added right after) at the 4 `100vh` sites
+  (`body`, `.sidebar`, `.main`, `#app-container`) + `.avatar-modal-card`'s `88vh` — `dvh` discounts
+  the mobile URL bar, so the sidebar footer no longer lands under the browser chrome. Related
+  load-bearing invariant from the 2026-07-07 short-viewport fix: `.sidebar` uses a real `height`
+  (not `min-height`, which doesn't force a fixed size and let the fixed box grow past the viewport,
+  making the footer unreachable) + `overflow-y: auto`, and **`.sidebar-nav` keeps `min-height: 0`**
+  (the flexbox gotcha that actually lets the nav shrink and scroll internally) — don't "tidy" that
+  `min-height: 0` away.
+- **Safe areas:** `viewport-fit=cover` on the viewport meta **in the same commit** as
+  `env(safe-area-inset-*)` insets on every edge-fixed element (`.bmc-fab`, `.toast-container`,
+  `.sidebar`/`.sidebar-footer`, `.topbar`) — activating `cover` without the insets would have exposed
+  what the pre-`cover` letterboxing hid by accident. **Any new fixed-position, edge-anchored element
+  must add `env(safe-area-inset-*)` insets** (see the `calc(base + env(inset, 0px))` pattern).
+- **`App._setDrawerOpen(open)`** (parallel to `_setExamActive`) is the single source of truth for the
+  mobile sidebar drawer — scrim (`#sidebarScrim`), Escape (a branch in the delegated keydown, last in
+  priority after search/avatar-modal), body scroll-lock, `inert` on the sidebar while closed on
+  mobile. Nothing else may toggle `mobile-open` via `classList`. `.topbar` was raised to
+  `z-index: 120` so `#mobileMenuBtn` stays reachable with the drawer open; `#sidebarToggle` (desktop
+  collapse-to-rail) hides on mobile. **The scrim's visibility/scroll-lock CSS (`body.drawer-open …`)
+  must stay inside the `≤768px` media block** — it lived outside one until the final review caught a
+  desktop bug (clicking the sidebar logo darkened the whole page); the logo-icon open branch is now
+  also `matchMedia('(max-width: 768px)')`-guarded.
+- **`App._wrapLessonTables()`**, called at the end of `renderLesson()`, wraps every lesson `<table>`
+  in a `.table-scroll` div (`overflow-x: auto`) by DOM manipulation — this is how mobile table
+  scrolling works **without ever editing `js/content.js`** (content-fidelity rule intact). Do not add
+  scroll wrappers by editing lesson HTML directly. (11 of 16 tabled lessons overflowed at 320px before
+  this.)
+- **Flashcard flip is grid-stack, not absolute-positioned faces:** `.flashcard-inner` (not
   `.flashcard`) is the rotator; `.flashcard` is the perspective container **and** the element the
-  2026-07-07 carousel translates via inline styles — two distinct elements, don't conflate them.
-  Faces use `grid-area: 1/1` so the card grows with long content instead of clipping it.
-- **`App._centerExamDot()`** (called from `renderExamDots()`, the single point all dot-moving
-  flows funnel through) centers the mobile dot strip via `strip.scrollTo()` scoped to the dot
-  container — **never `scrollIntoView`**, which was tried first and reverted because it drags the
-  whole page's scroll position on desktop whenever the strip sits below the fold.
-- Any new fixed-position, edge-anchored element must add `env(safe-area-inset-*)` insets (see
-  `.bmc-fab`/`.toast-container`/`.sidebar` for the `calc(base + env(inset, 0px))` pattern) — the
-  viewport meta now has `viewport-fit=cover`, so unprotected edges really do sit under a notch.
-- Gate: `scripts/validate-responsive.js` (real-browser, manual pre-release step — see "No Tests,
-  No Linter" above) + the `N20`/`N20b`/`N20c` check families in `verify-runtime.js`.
+  2026-07-07 carousel translates via inline styles — two distinct elements, don't conflate them. Faces
+  use `grid-area: 1/1` so the card grows with long content instead of clipping it. `.fc-arrow` gained
+  `flex-shrink: 0` at all widths; at ≤480px the arrows drop below the full-width card via `flex-wrap`
+  + CSS `order` (tab order stays prev→card→next — a documented WCAG 2.4.3 nit at that one breakpoint).
+- **`App._centerExamDot()`** (called from `renderExamDots()`, the single point all dot-moving flows
+  funnel through) centers the mobile dot strip via `strip.scrollTo()` scoped to the dot container —
+  **never `scrollIntoView`**, which was tried first and reverted because it drags the whole page's
+  scroll on desktop whenever the strip sits below the fold.
+- **Onboarding tour works on mobile:** `_updateStep()` opens the drawer (via `_setDrawerOpen`, gated)
+  before positioning a sidebar-target step and closes it for the welcome step and on finish/skip;
+  tooltip widths clamped to `innerWidth - 32`, vertical clamp measures real `offsetHeight`, a third
+  "below the target" placement when neither side fits; `resize`/`orientationchange` listeners live
+  only for the tour's duration.
+- Gate: `scripts/validate-responsive.js` (real-browser, manual pre-release) + the `N20`/`N20b`/`N20c`
+  families in `verify-runtime.js`.
 
 ## Lesson Flow & Mobile FAB (2026-07-21)
 
-Dos defectos de usabilidad reportados sobre dispositivo real, tras la ronda de adaptabilidad
-móvil. Spec: `docs/superpowers/specs/2026-07-21-lesson-next-button-and-mobile-fab-design.md`;
-plan: `docs/superpowers/plans/2026-07-21-lesson-next-button-and-mobile-fab.md`.
+Two usability defects reported on a real device after the mobile round. Spec/plan under
+`docs/superpowers/` for `2026-07-21-lesson-next-button-and-mobile-fab` and
+`2026-07-21-lesson-advance-gating-design.md`.
 
-- **Barra inferior de la lección**: pasa de `[← Volver] [Completada]` a
-  `[Marcar como completada] [Siguiente lección →]`. El "Volver al curriculum" de abajo era
-  un duplicado del de `.lesson-nav` (`index.html:342`) y se eliminó — el de arriba sigue.
-- **`App.advanceLesson(topicId, chapterId, nextTopicId)`** (antes `completeAndAdvance`):
-  **solo navega, y solo si la lección está en `completedLessons`** — sin marcar, toast
-  `warning` (`lesson_next_locked_toast`) y no navega; el primario se emite atenuado
-  (`locked` + `aria-disabled="true"`, nunca `disabled` real) y `completeLesson()` lo
-  desbloquea in place (`#nextLessonBtn`). **Revocación consciente (misma tarde, tras
-  probar en dispositivo real)** de la semántica completar-y-avanzar desplegada por la
-  mañana: regalaba el XP como efecto colateral y vaciaba de sentido "Marcar como
-  completada". El XP vive exclusivamente en `completeLesson`. No restaurar el
-  encadenamiento. Spec: `2026-07-21-lesson-advance-gating-design.md`. Sigue vigente: el
-  flujo **para** al cerrar capítulo, y el siguiente tema se deriva de `ch.topics`
-  (`js/content.js` no se toca).
-- **`.lesson-next-btn` usa `--primary-dark`, no `--primary`**: blanco sobre `#6C63FF` es
-  4.32:1 (falla AA), sobre `#5a52d5` es 5.83:1 (pasa). Por eso **no** reutiliza `.btn-primary`,
-  que arrastra ese fallo preexistente. Mismo criterio que `.bmc-fab`.
-- **FAB del café solo-icono en ≤768px** (círculo de 48px): con el texto solapaba los botones
-  de la lección. El nombre accesible pasa a `data-i18n-aria="bmc_label"` en el `<a>` —
-  compatible con el gate `N19`, cuyo regex exige `data-i18n=` con el `=` inmediato. El span
-  se oculta con el selector `.bmc-fab span` y **no** con una clase propia, porque `N19` exige
-  literalmente `<span data-i18n="bmc_label">`.
-- **`.lesson-actions` gana `padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px))`**
-  en ≤768px. Deliberadamente solo en la lección.
-- **Guard de presencia en los checks de orden CSS (`N19`/`N21`, commit `9161acb`):** el check
-  "las reglas nuevas van antes del bloque reduced-motion" usaba
-  `cssSrc.indexOf(selector) < cssSrc.indexOf('@media (prefers-reduced-motion')`. Si `selector`
-  no existe en el CSS, `indexOf` devuelve `-1`, y `-1 < <cualquier índice>` es `true` — el check
-  pasaba en vacío aunque la regla entera se hubiera borrado. Se detectó durante la revisión de
-  la Task 3 y el dueño del repo aprobó explícitamente arreglar también el `N19` preexistente
-  (ampliando la restricción original del plan de "`N19` intocable"). Ambos checks llevan ahora
-  una guarda `cssSrc.includes(selector) &&` antes de comparar índices, verificada renombrando
-  temporalmente el selector para confirmar que el check sí falla. No "simplificar" esta guarda
-  de vuelta a la comparación de índices desnuda.
-- Gate: la familia `N21` en `scripts/verify-runtime.js` (17 checks, incluyendo 2
-  comportamentales que llaman a `App.advanceLesson` real con navegación/toast
-  monkeypatchados, no solo grep).
-
-## Persistence — cloud progress loss on re-login (2026-07-22)
-
-Bug reportado sobre uso real: un usuario con progreso hace **Inspector → Application → Storage →
-Clear site data**, vuelve a iniciar sesión y **su progreso no vuelve** — ni local ni en la nube.
-La copia de Supabase, que debería restaurarlo, quedaba **destruida**. Spec:
-`docs/superpowers/specs/2026-07-22-cloud-progress-loss-on-reauth-fix-design.md`. Ejecución:
-directa con TDD (sin subagentes). Detalle completo: `AGENTS.md` → "Persistencia: pérdida de
-progreso en la nube al re-loguearse (2026-07-22)".
-
-Causa raíz: al re-loguearse con `App._initialized === false`, `App.init()` llama a
-`updateStreakAndDate()` (`app.js:1564`), que **sella un estado vacío con `_updatedAt` fresco y
-lo escribe en localStorage antes** de que la reconciliación con la nube ocurra. Luego el
-mecanismo de frescura (`_updatedAt`, newest wins) veía ese vacío recién sellado como "más
-nuevo" que la nube real y lo subía encima, borrando el progreso. Se manifestaba por **tres
-puertas**: la re-subida interna de `Sync.loadState`, el push del debounce de 4 s (race de red
-lenta), y el `.finally` de `_onAuthSuccess` re-volcando `App.state`.
-
-Fix en tres capas (todas load-bearing, no simplificar a una):
-- **Capa 1 — `Sync.loadState(userId, localTsOverride)`**: la decisión de frescura usa el sello
-  local capturado **antes** de que `App.init` escriba (en arranque limpio = 0), no una relectura
-  del localStorage ya mutado. Sin el override, comportamiento idéntico al previo.
-- **Capa 2 — gate `Sync._reconciled`**: mientras es `false`, `saveState`/`flushNow`/el listener
-  de `visibilitychange` escriben en localStorage pero **no empujan a la nube**. `auth.js` lo pone
-  a `false` antes de reconciliar y a `true` en el `.finally` (también en error → nunca deja el
-  push bloqueado para siempre), y entonces vuelca el estado reconciliado. El `_push` **interno**
-  de `loadState` NO pasa por el gate: es la propia reconciliación.
-- **Capa 3 — `Auth._shouldApplyCloud(cloudState, hadLocalBase, appStateTs, postInitTs)`** (puro,
-  testeable): reemplaza el guard `cloudState._updatedAt >= App.state._updatedAt` del `.then`, que
-  el sello fresco de init también engañaba. En arranque **sin base local** (`preInitLocalTs === 0`,
-  escenario clear) aplica **siempre** la nube; con base local real, la aplica salvo que el usuario
-  haya hecho un cambio genuino en la ventana de reconciliación (`appStateTs > postInitTs`).
-
-Editing constraints an agent must know:
-- **No re-leer localStorage ni `App.state` para la decisión de frescura durante la reconciliación
-  de fondo** — usar siempre el sello pre-init capturado en `auth.js` antes de `App.init`. Añadir
-  cualquier `saveState()` automático nuevo dentro de `App.init` reintroduce la contaminación del
-  sello; si hace falta, debe quedar detrás del gate `_reconciled`.
-- El gate `_reconciled` vive en `saveState`/`flushNow`/`visibilitychange`, **nunca dentro de
-  `_push`** (rompería la re-subida legítima de `loadState`).
-- Gate de regresión: la familia **`N22`** en `scripts/verify-runtime.js` (repro del bug vía
-  `Sync.loadState` con override, gate de push, `_shouldApplyCloud` en sus 4 casos incluido el
-  arranque sin base local, y estáticos del cableado). El check N2 existente ahora fija
-  `Sync._reconciled = true` porque testea el flush del flujo ya reconciliado.
+- **Lesson bottom bar** went from `[← Volver] [Completada]` to `[Marcar como completada] [Siguiente
+  lección: <tema> →]` (primary on the right). The bottom "Volver al curriculum" was an exact duplicate
+  of the one in `.lesson-nav` (`index.html:342`) and was removed — the top one stays.
+- **`App.advanceLesson(topicId, chapterId, nextTopicId)`** (formerly `completeAndAdvance`) **only
+  navigates, and only if the lesson is already in `completedLessons`.** If not, guard clause → toast
+  `warning` (`lesson_next_locked_toast`) and `return` without touching `completeLesson` or state. If
+  completed, it branches: `navigateToLesson(chapterId, nextTopicId)` if there's a next topic, or
+  `navigate('curriculum')` if it's the chapter's last lesson (**product decision, still current:** the
+  flow **stops** at chapter close, it doesn't chain into the next chapter). The next topic is derived
+  from `ch.topics` inside `renderLesson()` — **`js/content.js` is not touched.** The primary is
+  emitted dimmed (`locked` + `aria-disabled="true"`, never a real `disabled` — so the click still
+  reaches the guard and fires the toast) when the lesson isn't completed, and `completeLesson()`
+  unlocks it **in place** on the same `#nextLessonBtn` without re-rendering. **Deliberate revocation
+  (same afternoon, after testing on a real device)** of the morning's complete-and-advance chaining:
+  it gave XP as a side effect and made "Marcar como completada" meaningless. **XP lives exclusively in
+  `completeLesson`.** Do not restore the chaining.
+- **`.lesson-next-btn` uses `--primary-dark`, not `--primary`** (white on `#6C63FF` is 4.32:1, fails
+  AA; on `#5a52d5` it's 5.83:1). So it does **not** reuse `.btn-primary`, which carries that
+  pre-existing failure. Same criterion as `.bmc-fab`. In the 480 tier `.next-topic-title` is hidden
+  (button becomes "Siguiente lección →").
+- **Icon-only coffee FAB in ≤768px** (48px circle — with its text it overlapped the lesson buttons).
+  Its accessible name moves to `data-i18n-aria="bmc_label"` **on the `<a>`** — compatible with the
+  `N19` check that forbids `data-i18n` there (its regex requires `data-i18n=` with the immediate `=`,
+  which `data-i18n-aria="` doesn't satisfy). The span is hidden with the descendant selector
+  `.bmc-fab span`, **not** a dedicated class, because `N19` literally requires `<span
+  data-i18n="bmc_label">`.
+- **`.lesson-actions` gains `padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px))`** in
+  ≤768px (48px circle + 24px offset). Deliberately only on the lesson view.
+- **Presence guard in the CSS-order checks (`N19`/`N21`).** The "new rules come before the
+  reduced-motion block" check used `cssSrc.indexOf(selector) < cssSrc.indexOf('@media
+  (prefers-reduced-motion')`; if `selector` is absent, `indexOf` returns `-1` and `-1 < anything` is
+  `true` — the check passed vacuously even if the whole rule was deleted. Both checks now anchor to
+  `/\.selector \{/` (a real rule, not any mention — a comment mentioning the selector used to satisfy
+  a naive `includes(selector)`). **Lesson: always anchor to `/\.selector \{/`, never
+  `includes(selector)`.**
+- Gate: the `N21` family (17 checks — 2 behavioral: they load a real `App` via `loadApp()`,
+  monkeypatch `navigateToLesson`/`showToast`, and call `App.advanceLesson()` for real, first with
+  `completedLessons = []` asserting no-nav + toast, then with the lesson added asserting nav), plus
+  the re-anchored `N19` and the new cascade assert in `validate-responsive.js`.
