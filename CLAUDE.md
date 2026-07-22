@@ -551,7 +551,8 @@ mechanism for UI changes. Five exceptions, all Node-only dev scripts never serve
   views + a tabled lesson + an active exam, ≥44px touch targets, the exam dot-strip height, the full
   drawer open/scrim/close/inert cycle, the avatar modal at 1 column, the `.bmc-fab`
   `getComputedStyle` (`padding:0`/`border-radius:50%`, proving the mobile circle wins the cascade at
-  runtime), and the whole onboarding tour (tooltip in-viewport and ≤25% over the spotlight at every
+  runtime — this FAB check runs at four widths 320/375/414/600, all ≤768), and the whole onboarding
+  tour (tooltip in-viewport and ≤25% over the spotlight at every
   step). No-op dependency pattern: without Playwright it prints `SKIP: Playwright no disponible` and
   exits 0. **Deliberately outside the pre-commit hook** (slow, adds a dependency) — run it manually
   before any release and after any layout change. What it can't see without a browser is covered by
@@ -593,11 +594,20 @@ under `docs/superpowers/plans/`; audit trail with per-lesson verdicts in
 | 2. Lesson content audit | ✅ Done | All 22 lessons audited; every topic has `lo`/`source`; every lesson has a `.lesson-source` footer. Real errors found and fixed (below). |
 | 3. Glossary expansion (48 → 107) | ✅ Done | All 97/97 official v4.0 keywords covered. `FLASHCARDS` swept term-by-term for v4.0 fidelity. `GLOSSARY.term` is `{es, en}`. |
 
-**Phase 1 minor gaps — CLOSED (2026-07-14).** Both gaps (light BVA coverage in Ch.4, no dedicated
+**Phase 1 minor gaps — CLOSED (2026-07-14).** Both gaps (light BVA coverage in Ch.4 — the
+pre-existing BVA questions ids 15/80/38 were all 2-value on the same 1–100 domain; no dedicated
 FL-2.1.2 question) were closed by **replacing three redundant/flawed questions** (bank stays at 120,
-distribution intact, new ids > 50 so the `lo`/`k`/`source` rule covers them): id 17 → 122 (3-value
-BVA applied, fresh 10–50 domain), id 31 → 123 (the syllabus's own "x ≤ 10 miscoded as x = 10"
-example), id 43 → 121 (FL-2.1.2/K1, the four good testing practices of §2.1.2). Design:
+distribution intact, new ids > 50 so the `lo`/`k`/`source` rule covers them):
+- **id 17 → id 122** — decision tables were over-represented (6 questions) and id 17 carried the same
+  unqualified "2^n rules" imprecision Phase 3 fixed; id 122 is 3-value BVA applied on a fresh 10–50
+  domain. **FL-4.2.2/K3, source "Syllabus v4.0 §4.2.2".**
+- **id 31 → id 123** — id 31 was a near-duplicate of id 20; id 123 is the syllabus's own "x ≤ 10
+  miscoded as x = 10" defect-detection example. **FL-4.2.2/K3, source "Syllabus v4.0 §4.2.2".**
+- **id 43 → id 121** — id 43 was a literal duplicate of id 11 (same stem/answer); id 121 covers the
+  four good testing practices of §2.1.2 (its three distractors are direct negations of the other
+  three official practices). **FL-2.1.2/K1, source "Syllabus v4.0 §2.1.2".**
+
+Result: BVA now has 5 questions; state transition keeps 4. Design:
 `docs/superpowers/specs/2026-07-14-question-bank-gap-closure-design.md`. No content work currently
 pending.
 
@@ -645,8 +655,9 @@ Both items from the 2026-07-04 conversation resolved. Plan:
   updated in the same commit.
 - **Signup rate-limiting/captcha: DONE, resolved to soft launch.** The dashboard audit found native
   rate limits adequate (sign-ups/sign-ins 30 per 5 min, token refresh 150 per 5 min, OTP 30 per
-  5 min) and caught the real blocker (the built-in email 2/hour cap, fixed via Brevo SMTP). **Captcha
-  (Cloudflare Turnstile) was deliberately NOT added** — the plan's own gate says a soft launch
+  5 min) and caught the real blocker (the built-in email 2/hour cap, fixed via Brevo SMTP). Supabase's
+  native captcha **and leaked-password protection are both currently off** (security-posture note).
+  **Captcha (Cloudflare Turnstile) was deliberately NOT added** — the plan's own gate says a soft launch
   (hand-shared link, no public announcement) doesn't need it. **Only reopen Part B2 (Turnstile) if
   the launch becomes public/announced** — it needs a Cloudflare account and re-reading B2's
   deployment-order warning in the plan doc first.
@@ -668,11 +679,23 @@ issues), and real-browser Playwright verification. Specs/plans under `docs/super
 | Keyboard operability | C1 | `#themeToggle` → real `<button>`; `role="button" tabindex="0"` on template-rendered divs + ONE delegated `document` keydown handler; global `:focus-visible`; `selectAnswer` focus restore; keyboard-operable flashcard flip | 11 `N14` checks |
 | Reduced motion | I2 | Global `prefers-reduced-motion` blunt block (durations + delays → 0.01ms `!important`, beats inline styles) + `matchMedia` guard collapsing the carousel's `setTimeout` sequencing | 2 `N15` checks |
 
+Exact token values (recoverable from `css/styles.css`, recorded here for completeness): light theme
+`--success-text:#1B5E20` / `--warning-text:#7A5600` / `--danger-text:#B71C1C` / `--primary-text:#4F46C4`;
+dark theme kept `#81C784`/`#FFD54F`/`#EF9A9A` and added `--primary-text:#A29DFF`. The round-2
+`--secondary-text` pair is `#00D2FF` dark / `#007A99` light. Reduced-motion notes: the exam-timer
+danger state stays distinguishable without its pulse (danger text color + tinted background — motion
+was never the only signal); and the `_slideFlashcard` `typeof matchMedia` guard deliberately keeps the
+mocked harness (no `matchMedia`) on the 250ms path so the `N10` timing checks run unchanged.
+
 **Round 2 (2026-07-15)** closed everything round 1 left open (I3, I7, I8 + per-block follow-ups),
 commits `2df5af2..4879e14`:
 - **I3 — touch targets:** a `@media (pointer: coarse)` block (touch only — desktop visuals
   unchanged): `.lang-btn`/`.exam-dot` ≥44px, gaps to 8px, `.name-edit-btn` always visible on touch;
-  plus an all-devices rule making the edit button visible to keyboard focus.
+  plus an all-devices rule making the edit button visible to keyboard focus. **Editing hazard:** the
+  coarse block's hit-area expansion on `.name-edit-btn` uses a `margin: -17px` shorthand that silently
+  kills the base `margin-left`, so an explicit `margin-left: -9px` follows it (17 − 9 = 8px visual gap,
+  matching desktop; hit area stays 44×44) — don't tidy the shorthand or the pencil glues to the
+  username on touch.
 - **I7 — mobile search + combobox:** `#mobileSearchBtn` (≤768px, `data-i18n-aria` + synced
   `aria-expanded`) opens `.search-box` as a full-width `.mobile-open` bar under the topbar, **reusing
   the same `#globalSearch` input and all its JS**. `App._closeMobileSearch()` (Escape/`#searchCloseBtn`)
@@ -750,6 +773,14 @@ under `docs/superpowers/` for `2026-07-21-mobile-adaptability`.
   `@media (max-width: 500px)` — `.avatar-grid` only — was folded in). Reduced paddings,
   `.stats-grid`/`.results-stats` to 1 column, `flex-wrap` on rows that never wrapped. File-tail order
   as in the UI/UX editing constraints above.
+- **Avatar-grid cascade — the same source-order trap as `.bmc-fab`.** Folding the old
+  `@media (max-width: 500px)` into the 480 tier moved it *before* the avatar-modal CSS section, so at
+  equal specificity the base `.avatar-grid { 1fr 1fr }` (~line 1812) silently won by source order and
+  rendered 2 squeezed columns on a phone. Fixed by giving the tier rule **id specificity —
+  `#avatar-modal .avatar-grid`** (order-independent); the `N20` tier check now requires the
+  `#avatar-modal` prefix. **Do not "simplify" `#avatar-modal .avatar-grid` back to `.avatar-grid`** —
+  it reintroduces the 2-column regression. General lesson: **merging a media block changes its cascade
+  position — check what its rules used to beat.**
 - **Text safety net (all widths):** `overflow-wrap: break-word` on 9 content containers and
   `min-width: 0` on 4 flex items that couldn't shrink before; `.page-title` truncates with an
   ellipsis.
@@ -771,15 +802,24 @@ under `docs/superpowers/` for `2026-07-21-mobile-adaptability`.
   priority after search/avatar-modal), body scroll-lock, `inert` on the sidebar while closed on
   mobile. Nothing else may toggle `mobile-open` via `classList`. `.topbar` was raised to
   `z-index: 120` so `#mobileMenuBtn` stays reachable with the drawer open; `#sidebarToggle` (desktop
-  collapse-to-rail) hides on mobile. **The scrim's visibility/scroll-lock CSS (`body.drawer-open …`)
-  must stay inside the `≤768px` media block** — it lived outside one until the final review caught a
-  desktop bug (clicking the sidebar logo darkened the whole page); the logo-icon open branch is now
-  also `matchMedia('(max-width: 768px)')`-guarded.
+  collapse-to-rail) hides on mobile. `#sidebarScrim` reuses the previously-dead `.sidebar-overlay`
+  CSS; `inert` covers 11 focusables that were tabbable off-screen before. **The scrim's
+  visibility/scroll-lock CSS (`body.drawer-open …`) must stay inside the `≤768px` media block** — it
+  lived outside one until the final review caught a desktop bug (clicking the sidebar logo darkened the
+  whole page); the logo-icon open branch is now also `matchMedia('(max-width: 768px)')`-guarded.
+  **Crossing back above 768px (e.g. rotating a tablet) with the drawer open must close it:** the
+  breakpoint-change listener's desktop branch calls `App._setDrawerOpen(false)` — it used to only
+  remove `inert`, leaving `mobile-open`/`drawer-open` stuck.
 - **`App._wrapLessonTables()`**, called at the end of `renderLesson()`, wraps every lesson `<table>`
   in a `.table-scroll` div (`overflow-x: auto`) by DOM manipulation — this is how mobile table
   scrolling works **without ever editing `js/content.js`** (content-fidelity rule intact). Do not add
   scroll wrappers by editing lesson HTML directly. (11 of 16 tabled lessons overflowed at 320px before
   this.)
+- **Glossary stacks at ≤480px** instead of overflowing (`.glossary-item` was 3 columns with a
+  `min-width:200px` term + `min-width:60px; white-space:nowrap` chapter chip that never fit a phone).
+  The chapter chip is visually reordered next to the term via CSS `order`, but **the DOM order
+  (term → definition → chip) is untouched** — the round-2 `N11` checks guard that DOM order, so don't
+  reorder the markup itself.
 - **Flashcard flip is grid-stack, not absolute-positioned faces:** `.flashcard-inner` (not
   `.flashcard`) is the rotator; `.flashcard` is the perspective container **and** the element the
   2026-07-07 carousel translates via inline styles — two distinct elements, don't conflate them. Faces
@@ -794,7 +834,9 @@ under `docs/superpowers/` for `2026-07-21-mobile-adaptability`.
   before positioning a sidebar-target step and closes it for the welcome step and on finish/skip;
   tooltip widths clamped to `innerWidth - 32`, vertical clamp measures real `offsetHeight`, a third
   "below the target" placement when neither side fits; `resize`/`orientationchange` listeners live
-  only for the tour's duration.
+  only for the tour's duration. A drawer-just-opened step needs an extra `setTimeout` (50ms
+  reduced-motion / 250ms normal, **never `transitionend`**) before measuring — the drawer's transform
+  transition hasn't settled when position is computed synchronously.
 - Gate: `scripts/validate-responsive.js` (real-browser, manual pre-release) + the `N20`/`N20b`/`N20c`
   families in `verify-runtime.js`.
 
@@ -816,7 +858,9 @@ Two usability defects reported on a real device after the mobile round. Spec/pla
   from `ch.topics` inside `renderLesson()` — **`js/content.js` is not touched.** The primary is
   emitted dimmed (`locked` + `aria-disabled="true"`, never a real `disabled` — so the click still
   reaches the guard and fires the toast) when the lesson isn't completed, and `completeLesson()`
-  unlocks it **in place** on the same `#nextLessonBtn` without re-rendering. **Deliberate revocation
+  unlocks it **in place** on the same `#nextLessonBtn` without re-rendering. On a successful advance it
+  does `window.scrollTo(0, 0)` (guarded by a `typeof` check for the mocked-DOM harness) so you don't
+  land mid-lesson. **Deliberate revocation
   (same afternoon, after testing on a real device)** of the morning's complete-and-advance chaining:
   it gave XP as a side effect and made "Marcar como completada" meaningless. **XP lives exclusively in
   `completeLesson`.** Do not restore the chaining.
