@@ -256,7 +256,9 @@ an authenticated empty session.
 - `data-i18n-title="key"` — `title` tooltips
 - `data-i18n-aria="key"` — `aria-label` (added 2026-07-14; a fourth block in `i18n.apply()` doing
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like the others)
-- Default language is Spanish (`i18n.lang = 'es'`).
+- Default language is Spanish (`i18n.lang = 'es'`) — but since the 2026-07-25 landing,
+  **first visit with no saved preference follows `navigator.language`** (non-`es*` browser →
+  EN); a saved preference always wins. `privacy.html` replicates the same fallback inline.
 - Translations live in `TRANSLATIONS` in `js/i18n.js` — **231 keys**, all ES/EN paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known hardcoded-language
   residues). The count grew over time: 160 after the 2026-07-04 remediation → 165 (2026-07-08 global
@@ -265,7 +267,8 @@ an authenticated empty session.
   (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`) → 196 (2026-07-25
   celebración de módulo/diploma) → 231 (2026-07-25 landing pública, claves `lp_*` + the public-landing
   section further below).
-- `i18n.restore()` reads the saved language from localStorage and applies it; `i18n.setLang(lang)`
+- `i18n.restore()` reads the saved language from localStorage (falling back to
+  `navigator.language` on first visit, see above) and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
   (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore) — the
   auth screen has its own `#authBtnES`/`#authBtnEN` switcher for exactly this reason.
@@ -561,7 +564,11 @@ mechanism for UI changes. Five exceptions, all Node-only dev scripts never serve
   `getComputedStyle` (`padding:0`/`border-radius:50%`, proving the mobile circle wins the cascade at
   runtime — this FAB check runs at four widths 320/375/414/600, all ≤768), and the whole onboarding
   tour (tooltip in-viewport and ≤25% over the spotlight at every
-  step). No-op dependency pattern: without Playwright it prints `SKIP: Playwright no disponible` and
+  step). Since 2026-07-26 it also measures the **public landing BEFORE the auth bypass** (no
+  horizontal overflow at 320/375/414/600 + a 1195 desktop pass, ≥44px targets on
+  signin/lang/tab/submit/CTA, 6 timeline steps) and pins `locale: 'es-ES'` on every context —
+  `i18n.restore()` now follows `navigator.language`, and without the pin the headless (en-US)
+  would never measure the longer Spanish strings. No-op dependency pattern: without Playwright it prints `SKIP: Playwright no disponible` and
   exits 0. **Deliberately outside the pre-commit hook** (slow, adds a dependency) — run it manually
   before any release and after any layout change. What it can't see without a browser is covered by
   the `N20`/`N20b`/`N20c` families in `verify-runtime.js`.
