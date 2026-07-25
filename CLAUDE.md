@@ -907,6 +907,17 @@ Modal centrado al completar módulos. Spec:
 - **CTA de la card** → primera lección pendiente del siguiente capítulo (escaneo solo
   hacia delante; sin pendientes posteriores → curriculum). **CTA del diploma** →
   `navigate('simulator')`.
+- **Fecha del diploma vía `i18n.t('date_locale')`** (`es-ES`/`en-US`), no un ternario de
+  idioma — el plan original proponía `lang === 'es' ? 'es-ES' : 'en-GB'`, revisado y
+  corregido durante la implementación porque reinventaba un mecanismo ya existente
+  (usado también en `activityLog`) e introducía el patrón `i18n.lang === 'es' ? … : …`
+  que este documento marca como drift.
+- **Sin celebración retroactiva (decisión deliberada):** el disparo vive dentro de
+  `completeLesson()`, que no se re-ejecuta sobre lecciones ya marcadas. Un usuario con
+  un capítulo ya completo antes de este despliegue no verá su card al recargar; si
+  tenía **los 6** completos, nunca disparará el diploma automáticamente (nadie vuelve a
+  marcar la última lección). Ningún catch-up retroactivo implementado — quedaría como
+  trabajo nuevo si se necesita.
 - **Confetti solo en el diploma**, generado por JS con guard
   `matchMedia('(prefers-reduced-motion: reduce)')` (patrón `_slideFlashcard` — con
   reduce NO se genera ninguna pieza); autolimpieza a los 6s y al cerrar.
