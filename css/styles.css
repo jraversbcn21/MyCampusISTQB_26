@@ -1561,8 +1561,9 @@ body {
    Fluida sin media queries (clamp/flex-wrap/auto-fit) de 320 a 1920px.
    =================================================== */
 
-/* Scroll suave de los CTAs a #acceso. Guard explícito: el blunt block de
-   reduced-motion anula transiciones pero NO scroll-behavior. */
+/* Scroll suave de los CTAs a #acceso. El blunt block de reduced-motion (más
+   abajo) ya fuerza scroll-behavior: auto !important, así que ese caso queda
+   cubierto ahí; este guard es la vía CSS-first para el resto (no-preference). */
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
@@ -1597,8 +1598,8 @@ body {
   --lp-text: #E9E9F2;
   --lp-text-2: #C7C7DB;
   --lp-text-muted: #9A9AB4;
-  --lp-text-dim: #7B7B96;
-  --lp-text-faint: #6E6E88;
+  --lp-text-dim: #8E8EA8;
+  --lp-text-faint: #8B8BA6;
   --lp-link: #9F8BFF;
   --lp-link-hover: #BFB0FF;
   --lp-pad-x: clamp(16px, 4vw, 56px);

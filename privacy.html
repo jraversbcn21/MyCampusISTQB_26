@@ -271,7 +271,16 @@
     (function () {
       var lang = 'es', theme = 'dark';
       try {
-        lang = localStorage.getItem('mycampus_lang') || 'es';
+        // F6 (review final 2026-07-25): i18n.restore() ahora respeta
+        // navigator.language en primera visita (sin preferencia guardada) —
+        // replicado aquí para que un visitante EN no vea landing EN y
+        // privacidad ES por defecto.
+        var savedLang = localStorage.getItem('mycampus_lang');
+        if (savedLang) {
+          lang = savedLang;
+        } else if (typeof navigator !== 'undefined' && navigator.language) {
+          lang = navigator.language.toLowerCase().indexOf('es') === 0 ? 'es' : 'en';
+        }
         theme = localStorage.getItem('mycampus_theme') || 'dark';
       } catch (e) {}
       document.body.setAttribute('data-theme', theme);

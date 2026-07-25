@@ -111,6 +111,10 @@ const Auth = {
   _showAuthScreen() {
     document.getElementById('auth-screen').style.display = 'block';
     document.getElementById('app-container').style.display = 'none';
+    // F1 (review final 2026-07-25): tras logout/expiración el scroll queda a
+    // media página (heredado de la vista anterior) y la tarjeta de acceso
+    // fuera de vista. Mismo patrón de guard que advanceLesson en js/app.js.
+    if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
   },
 
   _hideAuthScreen() {
@@ -312,6 +316,9 @@ const Auth = {
     document.getElementById('authSubmit').textContent = mode === 'login' ? i18n.t('auth_login_tab') : i18n.t('auth_submit_register');
     document.getElementById('authForgot').style.display = mode === 'login' ? 'block' : 'none';
     document.getElementById('fieldName').style.display = mode === 'register' ? 'flex' : 'none';
+    // F4 (review final 2026-07-25): el input ya no es siempre "current-password"
+    // ahora que el modo por defecto es Registrarse.
+    document.getElementById('authPassword').setAttribute('autocomplete', mode === 'login' ? 'current-password' : 'new-password');
   },
 
   // CTAs de la landing: llevan a la tarjeta en el modo pedido y enfocan el

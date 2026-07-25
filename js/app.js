@@ -516,7 +516,10 @@ const App = {
     }
     // El scroll al top evita aterrizar a media lección nueva (rama avanzar)
     // o a media pantalla en el listado de capítulos (rama cerrar capítulo).
-    if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
+    // F5 (review final 2026-07-25): behavior: 'auto' explícito — el nuevo
+    // `html { scroll-behavior: smooth }` global de la landing (guardado tras
+    // reduced-motion) convertiría este salto en una animación no deseada.
+    if (typeof window.scrollTo === 'function') window.scrollTo({ top: 0, behavior: 'auto' });
   },
 
   /* ===== CELEBRATION (2026-07-25) =====

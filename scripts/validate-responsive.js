@@ -122,7 +122,7 @@ const measureDoc = () => {
     for (const width of WIDTHS) {
       console.log(`\nViewport ${width}×720 (hasTouch, isMobile):`);
       const context = await browser.newContext({
-        viewport: { width, height: 720 }, hasTouch: true, isMobile: true,
+        viewport: { width, height: 720 }, hasTouch: true, isMobile: true, locale: 'es-ES',
       });
       // Sin red externa (CDNs de Sentry/Supabase abortadas): determinista y
       // rápido; los guards de carga de la app degradan limpio sin ellas.
@@ -441,7 +441,7 @@ const measureDoc = () => {
 
     /* ---- Landing a ancho desktop (1195 = captura del handoff): sin overflow. ---- */
     {
-      const ctxDesk = await browser.newContext({ viewport: { width: 1195, height: 800 } });
+      const ctxDesk = await browser.newContext({ viewport: { width: 1195, height: 800 }, locale: 'es-ES' });
       // Mismo abort de red externa que los demás contextos (~129-133): sin él
       // esta pasada depende de que Sentry/Supabase respondan por CDN real y
       // puede colgarse/fallar por timeout en redes sin salida.
