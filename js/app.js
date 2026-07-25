@@ -57,6 +57,8 @@ const App = {
       activityLog: [],
       dailyChallengeDate: null,
       dailyChallengeCompleted: false,
+      celebratedChapters: [],
+      diplomaShown: false,
     };
   },
 
@@ -492,6 +494,7 @@ const App = {
         nextBtn.classList.remove('locked');
         nextBtn.removeAttribute('aria-disabled');
       }
+      this._maybeCelebrate(chapterId);
     }
   },
 
@@ -520,6 +523,28 @@ const App = {
      Card de módulo completado + diploma de campus. El disparo vive en
      completeLesson (_maybeCelebrate); aquí solo la presentación. Spec:
      docs/superpowers/specs/2026-07-25-chapter-completion-celebration-design.md */
+
+  // Disparo (spec 2026-07-25): al llegar un capítulo al 100%, celebrar UNA vez.
+  // Si con él los 6 quedan al 100% → diploma (sustituye a la card del capítulo,
+  // nunca dos popups). loadState() no fusiona defaults sobre estados guardados,
+  // así que los estados anteriores a la feature llegan sin los campos nuevos —
+  // guard de migración aquí, no en loadState (cubre también la copia de la nube).
+  _maybeCelebrate(chapterId) {
+    if (!Array.isArray(this.state.celebratedChapters)) this.state.celebratedChapters = [];
+    if (typeof this.state.diplomaShown !== 'boolean') this.state.diplomaShown = false;
+    if (!this._chapterComplete(chapterId)) return;
+    if (this.state.celebratedChapters.includes(chapterId)) return;
+    this.state.celebratedChapters.push(chapterId);
+    const campusDone = CHAPTERS.every((ch, i) => this._chapterComplete(i));
+    if (campusDone && !this.state.diplomaShown) {
+      this.state.diplomaShown = true;
+      this.saveState();
+      this._showCelebration('diploma', chapterId);
+    } else {
+      this.saveState();
+      this._showCelebration('chapter', chapterId);
+    }
+  },
 
   _chapterComplete(chapterId) {
     const ch = CHAPTERS[chapterId];

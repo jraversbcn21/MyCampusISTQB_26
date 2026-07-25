@@ -1488,6 +1488,66 @@ const SAMPLE_Q = {
       /const displayName = this\._getDisplayName\(\)/.test(appSrc));
   }
 
+  /* --- Task 4: disparo en completeLesson --- */
+  const quiet = (c) => {
+    c.App.updateSidebar = () => {};
+    c.App.showXPPopup = () => {};
+    c.App.showToast = () => {};
+    c.App.checkAchievements = () => {};
+  };
+  {
+    const ctx2 = loadApp();
+    quiet(ctx2);
+    ctx2.App.state = ctx2.App.loadState();
+    const ch0 = ctx2.CHAPTERS[0].topics.map(t => t.id);
+    ctx2.App.state.completedLessons = ch0.slice(0, -1);
+    const shown = [];
+    ctx2.App._showCelebration = (kind, chId) => shown.push([kind, chId]);
+    ctx2.App.completeLesson(ch0[ch0.length - 1], 0, 10);
+    check('N23 trigger: cerrar un capítulo dispara la card una vez',
+      shown.length === 1 && shown[0][0] === 'chapter' && shown[0][1] === 0);
+    check('N23 trigger: el capítulo queda marcado en celebratedChapters',
+      Array.isArray(ctx2.App.state.celebratedChapters) && ctx2.App.state.celebratedChapters.includes(0));
+    ctx2.App.completeLesson(ch0[ch0.length - 1], 0, 10);
+    check('N23 trigger: repetir la lección ya completada no re-dispara', shown.length === 1);
+    const ch1 = ctx2.CHAPTERS[1].topics.map(t => t.id);
+    ctx2.App.completeLesson(ch1[0], 1, 10);
+    check('N23 trigger: completar sin cerrar capítulo no celebra', shown.length === 1);
+  }
+  {
+    // Diploma: todo el campus completo salvo la última lección del cap. 5.
+    const ctx2 = loadApp();
+    quiet(ctx2);
+    ctx2.App.state = ctx2.App.loadState();
+    const all = ctx2.CHAPTERS.flatMap(ch => ch.topics.map(t => t.id));
+    const last = all[all.length - 1];
+    ctx2.App.state.completedLessons = all.filter(id => id !== last);
+    const shown = [];
+    ctx2.App._showCelebration = (kind) => shown.push(kind);
+    ctx2.App.completeLesson(last, 5, 10);
+    check('N23 diploma: cerrar el campus muestra SOLO el diploma (sustituye a la card)',
+      shown.length === 1 && shown[0] === 'diploma');
+    check('N23 diploma: diplomaShown queda persistido', ctx2.App.state.diplomaShown === true);
+    check('N23 diploma: el capítulo que cierra también queda en celebratedChapters (no habrá card después)',
+      ctx2.App.state.celebratedChapters.includes(5));
+  }
+  {
+    // Migración: estado guardado antes de esta feature (sin los campos nuevos).
+    const ctx2 = loadApp();
+    quiet(ctx2);
+    ctx2.App.state = ctx2.App.loadState();
+    delete ctx2.App.state.celebratedChapters;
+    delete ctx2.App.state.diplomaShown;
+    const ch0 = ctx2.CHAPTERS[0].topics.map(t => t.id);
+    ctx2.App.state.completedLessons = ch0.slice(0, -1);
+    const shown = [];
+    ctx2.App._showCelebration = (kind) => shown.push(kind);
+    let threw = false;
+    try { ctx2.App.completeLesson(ch0[ch0.length - 1], 0, 10); } catch (e) { threw = true; }
+    check('N23 migración: un estado legado sin los campos nuevos no revienta y celebra',
+      !threw && shown.length === 1);
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
