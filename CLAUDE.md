@@ -257,12 +257,14 @@ an authenticated empty session.
 - `data-i18n-aria="key"` — `aria-label` (added 2026-07-14; a fourth block in `i18n.apply()` doing
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like the others)
 - Default language is Spanish (`i18n.lang = 'es'`).
-- Translations live in `TRANSLATIONS` in `js/i18n.js` — **196 keys**, all ES/EN paired, enforced by
+- Translations live in `TRANSLATIONS` in `js/i18n.js` — **231 keys**, all ES/EN paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known hardcoded-language
   residues). The count grew over time: 160 after the 2026-07-04 remediation → 165 (2026-07-08 global
   search `gs_*`) → 170 (2026-07-14 a11y `data-i18n-aria` keys + `goto_question_aria`) → 174/175
   (2026-07-15 round-2 mobile-search/combobox + `achievement_toast_prefix` + `bmc_label`) → 177/178
-  (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`) → 196 (2026-07-25 celebración de módulo/diploma).
+  (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`) → 196 (2026-07-25
+  celebración de módulo/diploma) → 231 (2026-07-25 landing pública, claves `lp_*` + the public-landing
+  section further below).
 - `i18n.restore()` reads the saved language from localStorage and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
   (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore) — the
@@ -933,3 +935,91 @@ Modal centrado al completar módulos. Spec:
   `/\.celebration-card \{/`, XSS del nombre, guard reduced-motion, Escape/drawer, y
   comportamentales: card una vez, no-recelebración, diploma sustituye a la card,
   migración de estado legado).
+
+## Landing pública (2026-07-25)
+
+Rediseño de la pantalla de acceso sin sesión — de un formulario centrado a una landing
+completa (header, hero con la tarjeta de acceso, banda "por qué certificarse", roadmap del
+syllabus y CTA final). Handoff de diseño (high-fidelity, no code) en
+`design_handoff_landing_istqb/design-reference/` (`landing-desktop.png` 1195px,
+`landing-mobile.png` 390px) — local al puesto de Jorge, no versionado en el repo. Spec/plan:
+`docs/superpowers/specs/2026-07-25-landing-redesign-design.md` y
+`docs/superpowers/plans/2026-07-25-landing-redesign.md`. Implementado en 5 tasks
+(subagent-driven-development) + este Task 6 de verificación/documentación.
+
+- **Enfoque A: `#auth-screen` transformado, no una página nueva.** El div `#auth-screen`
+  existente pasa de ser un formulario centrado a la landing entera
+  (`header.lp-header` → `section.lp-hero` con `.auth-card#acceso` dentro → `section.lp-why` →
+  `section.lp-roadmap` → `section.lp-cta` → `footer.lp-footer`). La tarjeta de acceso
+  **conserva todos sus ids** (`authForm`, `authEmail`, `authPassword`, `authSubmit`,
+  `authGoogle`, `authForgot`, `authMessage`, `tabLogin`/`tabRegister`, `fieldName`) — `auth.js`
+  no tuvo que aprender ids nuevos, solo comportamiento nuevo (ver más abajo). Los tabs se
+  invirtieron en el DOM (Registrarse primero) para que el orden visual siga el handoff;
+  `auth.js` depende solo de los ids, no del orden del DOM. El logo y el switcher ES/EN que
+  antes vivían dentro de la tarjeta se movieron al header (`#authBtnES`/`#authBtnEN`, mismos
+  ids) — no se duplican.
+- **Tokens `--lp-*` scoped a `#auth-screen`, dark-only.** No van a `:root` — son fijos
+  (`--lp-bg:#0B0B12`, `--lp-surface:#15151F`, `--lp-accent:#6C4EF6`, etc.), independientes de
+  `data-theme`, para igualar el handoff sin que el tema claro los toque.
+  `scripts/validate-contrast.js` solo parsea `:root`/`[data-theme="light"]`, así que no
+  interfiere con este bloque (documentado como decisión, no como agujero de cobertura).
+- **Fluida sin media queries** (`clamp()`, `flex-wrap`, `auto-fit/minmax`) de 320 a 1920px —
+  decisión de arquitectura explícita del Task 3, no un descuido: por eso `.lp-signin-link`
+  del header sigue visible a 390px aunque el mockup móvil del handoff no lo muestre (ver
+  desviaciones más abajo). El bloque de auth se reescribió en el sitio donde ya vivía
+  (~1564–1760 de `css/styles.css`); los overrides móviles de auth de los tiers ≤768/≤480 se
+  eliminaron enteros — nada de este rediseño se añadió al tail del archivo, así que la cadena
+  `≤480 → pointer:coarse → .bmc-fab → reduced-motion → :focus-visible` sigue intacta.
+- **Fuentes Space Grotesk/Manrope, solo-landing.** El `<link>` de Google Fonts ya existente se
+  amplió con `Space+Grotesk:wght@500;700` y `Manrope:wght@400;500;600;700` (comparte
+  `display=swap` con la carga existente — no es una segunda petición). `#auth-screen` declara
+  `font-family: 'Manrope', …` como base; títulos, wordmark y números de paso (`.lp-h1`,
+  `.lp-why h3`, `.lp-roadmap-intro h2`, `.lp-step-num`, `.lp-timeline h3`) usan Space Grotesk.
+  El resto de la app (dashboard, lecciones, etc.) sigue en Inter — estas dos fuentes no se
+  aplican fuera de `#auth-screen`.
+- **Tab por defecto: Registrarse, no Iniciar sesión.** `Auth._mode` arranca en `'register'`
+  (antes `'login'`) — la landing recibe visitantes nuevos, no gente que vuelve. `authForgot`
+  mantiene su comportamiento previo (oculto en modo registro; la fila inferior de la tarjeta
+  muestra solo el link de privacidad en ese tab) — **no es un bug nuevo del rediseño**, ya
+  documentado como decisión en el spec.
+- **`navigator.language` en la primera visita.** `i18n.restore()` ahora consulta
+  `navigator.language` cuando no hay preferencia guardada en localStorage (antes caía siempre
+  a `'es'`); una preferencia guardada sigue mandando sobre el idioma del navegador, y la
+  ausencia de `navigator` (o de `navigator.language`) cae a `'es'` por defecto. Cambio de
+  comportamiento global deliberado — hoy cualquier visitante nuevo con navegador en inglés
+  arranca en EN en vez de en ES.
+- **CTAs con scroll + foco, no solo cambio de tab.** `#lpSigninLink` (header) y `#lpCtaBtn`
+  (banda final) llaman a `Auth._goToAuthCard(mode)`: cambia de tab (`_switchMode`), hace
+  `card.scrollIntoView({ block: 'center' })` sobre `#acceso` y pone el foco en `#authEmail`
+  (`{ preventScroll: true }`, para no pelear con el scroll recién hecho). Verificado con
+  Playwright real: click en `#lpSigninLink` → tab login activo + email enfocado + tarjeta en
+  viewport; click en `#lpCtaBtn` → tab registro activo + email enfocado + campo Nombre visible.
+- **Gap de `authSubmit` en `init()` arreglado.** `authSubmit` no lleva `data-i18n` (su texto
+  depende del modo login/registro, no solo del idioma), así que restaurar un idioma no-ES en
+  `Auth.init()` dejaba el botón en español hasta el primer cambio de tab. `init()` ahora
+  fija `authSubmit.textContent` explícitamente según `this._mode` justo después de
+  `i18n.restore()`.
+- **`.auth-privacy-link` reubicada, no duplicada.** La regla vieja (vivía suelta cerca del
+  tail del archivo, ~2377–2386 antes del rediseño) se borró entera; la única regla para esa
+  clase ahora vive dentro de la sección CSS de la landing (hoy ~línea 1868), junto al resto de
+  `.lp-auth-foot`/`.auth-forgot`.
+- **Desviación deliberada — inputs a 16px.** El handoff pide 14px; los `<input>` de la
+  tarjeta van a `font-size: 1rem` (16px) porque el gate `N13` y el auto-zoom de iOS lo exigen
+  (mismo criterio que el resto de la app, ver UI/UX Remediation). Apenas perceptible al ojo.
+- **Desviación deliberada — campo Nombre visible en Registrarse.** El handoff no lo muestra
+  en su mockup de alta fidelidad, pero el campo ya existía en la tarjeta original y sigue
+  siendo necesario para el registro real (`auth.js` lo usa) — se mantiene visible solo en modo
+  registro (`display:none` en login), como ya funcionaba antes del rediseño.
+- **Verificación visual (Task 6):** capturas Playwright reales a 1195px y 390px comparadas
+  sección por sección contra el handoff (header, hero, tarjeta, banda "por qué", roadmap/
+  timeline, CTA, footer) — tipografías, colores, radios y espaciados coinciden al pixel salvo
+  las dos desviaciones deliberadas de arriba. No se necesitó ningún ajuste de CSS. Un tercer
+  punto se observó y se documenta pero **no se trata como bug**: `.lp-signin-link` es visible
+  en el header a 390px (el mockup móvil del handoff no lo muestra), consecuencia directa de la
+  decisión "fluida sin media queries" del Task 3 — ocultarlo requeriría introducir un media
+  query que esa decisión de arquitectura excluye explícitamente.
+- Gate: familia **N24** en `verify-runtime.js` (claves i18n `lp_*` definidas, markup de la
+  tarjeta con `id="acceso"`, `restore()` respetando `navigator.language` en sus tres casos) +
+  checks de landing en `scripts/validate-responsive.js` (sin scroll horizontal a
+  320/375/414/600/1195px, targets ≥44px en signin/lang/tab/submit/cta, timeline con los 6
+  pasos renderizados).
