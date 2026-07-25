@@ -1747,11 +1747,19 @@ const SAMPLE_Q = {
     const ifSessionBranch = authSrc.slice(getSessionIdx, elseIdx);
     check('N25 auth: la rama "if (session)" de init() no limpia la vista guardada',
       getSessionIdx !== -1 && elseIdx !== -1 && !/_clearSavedView/.test(ifSessionBranch));
-    const onAuthSuccessBody = authSrc.slice(
-      authSrc.indexOf('async _onAuthSuccess(user) {'),
-      authSrc.indexOf('_shouldApplyCloud(cloudState'));
+    // Ancla al final al literal de la DEFINICIÓN de _shouldApplyCloud (con su
+    // segundo parámetro, "hadLocalBase"), no al call site dentro de
+    // _onAuthSuccess ("this._shouldApplyCloud(cloudState, preInitLocalTs > 0,"
+    // ~línea 203) — ese call site aparece ANTES y corta el slice ~34 líneas
+    // pronto, perdiendo el resto del .then/.catch/.finally de la rama
+    // `if (!App._initialized)` y TODA la rama `else` (código real hallado en
+    // code review: con el ancla vieja, reintroducir `_clearSavedView()` en esa
+    // reconciliación no lo detectaba el gate).
+    const onAuthSuccessDefIdx = authSrc.indexOf('async _onAuthSuccess(user) {');
+    const shouldApplyCloudDefIdx = authSrc.indexOf('_shouldApplyCloud(cloudState, hadLocalBase');
+    const onAuthSuccessBody = authSrc.slice(onAuthSuccessDefIdx, shouldApplyCloudDefIdx);
     check('N25 auth: _onAuthSuccess no limpia la vista guardada',
-      authSrc.indexOf('async _onAuthSuccess(user) {') !== -1 && !/_clearSavedView/.test(onAuthSuccessBody));
+      onAuthSuccessDefIdx !== -1 && shouldApplyCloudDefIdx !== -1 && !/_clearSavedView/.test(onAuthSuccessBody));
 
     // Behaviorales — reutilizan el mecanismo de N7/N9: Auth.init() con supabase
     // y localStorage mockeados; sb._calls.authStateCb dispara los eventos de auth.
