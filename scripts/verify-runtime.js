@@ -1510,6 +1510,8 @@ const SAMPLE_Q = {
       Array.isArray(ctx2.App.state.celebratedChapters) && ctx2.App.state.celebratedChapters.includes(0));
     ctx2.App.completeLesson(ch0[ch0.length - 1], 0, 10);
     check('N23 trigger: repetir la lección ya completada no re-dispara', shown.length === 1);
+    ctx2.App._maybeCelebrate(0); // llamada directa: capítulo completo Y ya celebrado
+    check('N23 trigger: _maybeCelebrate con capítulo ya celebrado no re-dispara (dedup propio)', shown.length === 1);
     const ch1 = ctx2.CHAPTERS[1].topics.map(t => t.id);
     ctx2.App.completeLesson(ch1[0], 1, 10);
     check('N23 trigger: completar sin cerrar capítulo no celebra', shown.length === 1);
