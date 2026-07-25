@@ -1310,8 +1310,12 @@ const SAMPLE_Q = {
     check('N21 css: el título del siguiente tema se oculta en el tier 480',
       /@media \(max-width: 480px\)[\s\S]*?\.next-topic-title\s*\{[^}]*display:\s*none/.test(cssSrc));
     check('N21 css: las reglas nuevas van antes del bloque reduced-motion',
+      // '...motion: reduce)' específico, no el genérico "...motion" a secas: la
+      // landing (Task 3, 2026-07-25) añadió antes en el fichero un segundo media
+      // query de motion — '@media (prefers-reduced-motion: no-preference)' —
+      // que un indexOf genérico encontraría primero (mismo ajuste que N19/N21-fab).
       cssSrc.includes('.lesson-next-btn')
-      && cssSrc.indexOf('.lesson-next-btn') < cssSrc.indexOf('@media (prefers-reduced-motion'));
+      && cssSrc.indexOf('.lesson-next-btn') < cssSrc.indexOf('@media (prefers-reduced-motion: reduce)'));
 
     /* --- Task 4: FAB del café solo-icono en móvil + colchón --- */
     // El tier 768 se aísla por su cierre a columna 0: las reglas anidadas
@@ -1471,7 +1475,10 @@ const SAMPLE_Q = {
     // Ancla a la regla real (/\.selector \{/), nunca includes() — lección N19/N21.
     const idxCelebrCard = cssSrc.search(/\.celebration-card \{/);
     check('N23 css: .celebration-card existe y va antes del bloque reduced-motion',
-      idxCelebrCard >= 0 && idxCelebrCard < cssSrc.indexOf('@media (prefers-reduced-motion'));
+      // '...motion: reduce)' específico — ver nota N19/N21 (la landing, Task 3
+      // 2026-07-25, añadió antes un segundo media query de motion "no-preference"
+      // que un indexOf genérico encontraría primero).
+      idxCelebrCard >= 0 && idxCelebrCard < cssSrc.indexOf('@media (prefers-reduced-motion: reduce)'));
     check('N23 css: el CTA usa --primary-dark con texto blanco (AA 5.83:1; --primary fallaría)',
       /\.celebr-cta\s*\{[^}]*background:\s*var\(--primary-dark\)/.test(cssSrc)
       && /\.celebr-cta\s*\{[^}]*color:\s*#fff/.test(cssSrc));
