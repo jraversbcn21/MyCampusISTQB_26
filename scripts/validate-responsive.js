@@ -442,12 +442,17 @@ const measureDoc = () => {
     /* ---- Landing a ancho desktop (1195 = captura del handoff): sin overflow. ---- */
     {
       const ctxDesk = await browser.newContext({ viewport: { width: 1195, height: 800 } });
+      // Mismo abort de red externa que los demás contextos (~129-133): sin él
+      // esta pasada depende de que Sentry/Supabase respondan por CDN real y
+      // puede colgarse/fallar por timeout en redes sin salida.
+      await ctxDesk.route('**/*', route => {
+        let host = '';
+        try { host = new URL(route.request().url()).hostname; } catch (e) {}
+        return host === '127.0.0.1' ? route.continue() : route.abort();
+      });
       const pDesk = await ctxDesk.newPage();
       await pDesk.goto(base, { waitUntil: 'domcontentloaded' });
-      const m = await pDesk.evaluate(() => ({
-        sw: document.documentElement.scrollWidth,
-        cw: document.documentElement.clientWidth,
-      }));
+      const m = await pDesk.evaluate(measureDoc);
       assert(1195, 'landing desktop sin scroll horizontal', m.sw <= m.cw, `sw=${m.sw} cw=${m.cw}`);
       await ctxDesk.close();
     }
