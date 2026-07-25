@@ -16,7 +16,7 @@ if (window.supabase && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_AN
 
 const Auth = {
   user: null,
-  _mode: 'login', // 'login' | 'register'
+  _mode: 'register', // 'login' | 'register' — la landing abre en registro (visitante nuevo)
   _authInProgress: false,
 
   /* ===== INIT ===== */
@@ -29,6 +29,12 @@ const Auth = {
       i18n.restore();
       document.getElementById('authBtnES').classList.toggle('active', i18n.lang === 'es');
       document.getElementById('authBtnEN').classList.toggle('active', i18n.lang === 'en');
+      // authSubmit no lleva data-i18n (su texto depende del modo) — sin esto,
+      // un idioma restaurado distinto de ES lo dejaba en español al arrancar.
+      document.getElementById('authSubmit').textContent =
+        i18n.t(this._mode === 'login' ? 'auth_login_tab' : 'auth_submit_register');
+      document.getElementById('authBtnES').setAttribute('aria-pressed', String(i18n.lang === 'es'));
+      document.getElementById('authBtnEN').setAttribute('aria-pressed', String(i18n.lang === 'en'));
     }
 
     // Listeners ANTES del early-return de fallo de carga: los handlers ya
@@ -103,7 +109,7 @@ const Auth = {
 
   /* ===== UI ===== */
   _showAuthScreen() {
-    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('auth-screen').style.display = 'block';
     document.getElementById('app-container').style.display = 'none';
   },
 
@@ -291,6 +297,8 @@ const Auth = {
     i18n.setLang(lang);
     document.getElementById('authBtnES').classList.toggle('active', lang === 'es');
     document.getElementById('authBtnEN').classList.toggle('active', lang === 'en');
+    document.getElementById('authBtnES').setAttribute('aria-pressed', String(lang === 'es'));
+    document.getElementById('authBtnEN').setAttribute('aria-pressed', String(lang === 'en'));
     // authSubmit depende del modo (login/registro), no solo del idioma —
     // data-i18n lo pisaría con el texto de login siempre. Se refresca aquí.
     document.getElementById('authSubmit').textContent = this._mode === 'login' ? i18n.t('auth_login_tab') : i18n.t('auth_submit_register');
@@ -306,10 +314,32 @@ const Auth = {
     document.getElementById('fieldName').style.display = mode === 'register' ? 'flex' : 'none';
   },
 
+  // CTAs de la landing: llevan a la tarjeta en el modo pedido y enfocan el
+  // email. El scroll suave lo da el CSS (scroll-behavior con guard de
+  // reduced-motion); typeof-guards para el DOM mockeado del harness.
+  _goToAuthCard(mode) {
+    this._switchMode(mode);
+    const card = document.getElementById('acceso');
+    if (card && typeof card.scrollIntoView === 'function') {
+      card.scrollIntoView({ block: 'center' });
+    }
+    const email = document.getElementById('authEmail');
+    if (email && typeof email.focus === 'function') {
+      email.focus({ preventScroll: true });
+    }
+  },
+
   /* ===== EVENT BINDING ===== */
   _bindEvents() {
     document.getElementById('tabLogin').addEventListener('click', () => this._switchMode('login'));
     document.getElementById('tabRegister').addEventListener('click', () => this._switchMode('register'));
+
+    // Landing: header "Iniciar sesión" y CTA final "Crear cuenta gratis".
+    // preventDefault: el href="#acceso" queda como fallback sin JS.
+    const signinLink = document.getElementById('lpSigninLink');
+    if (signinLink) signinLink.addEventListener('click', (e) => { e.preventDefault(); this._goToAuthCard('login'); });
+    const ctaBtn = document.getElementById('lpCtaBtn');
+    if (ctaBtn) ctaBtn.addEventListener('click', (e) => { e.preventDefault(); this._goToAuthCard('register'); });
 
     document.getElementById('authBtnES').addEventListener('click', () => this._setAuthLang('es'));
     document.getElementById('authBtnEN').addEventListener('click', () => this._setAuthLang('en'));

@@ -1646,6 +1646,84 @@ const SAMPLE_Q = {
       cssSrc.indexOf('.lp-hero {') !== -1
       && cssSrc.indexOf('.lp-hero {') < cssSrc.indexOf('@media (prefers-reduced-motion: reduce)'));
     check('N24 css: paso activo del timeline', /\.lp-step:first-child \.lp-step-num \{/.test(cssSrc));
+
+    /* ---- N24-auth: landing pública — auth.js (registro por defecto, CTAs, aria-pressed) ---- */
+    const authSrc = fs.readFileSync(path.join(ROOT, 'js', 'auth.js'), 'utf8');
+    check('N24 auth: _showAuthScreen muestra con display block (landing scrolleable)',
+      /_showAuthScreen\(\) \{[^}]*'block'/.test(authSrc)
+      && !/_showAuthScreen\(\) \{[^}]*'flex'/.test(authSrc));
+    check('N24 auth: modo por defecto register', /_mode: 'register'/.test(authSrc));
+    check('N24 auth: CTAs de la landing cableados (_goToAuthCard + lpSigninLink + lpCtaBtn)',
+      /_goToAuthCard/.test(authSrc) && /lpSigninLink/.test(authSrc) && /lpCtaBtn/.test(authSrc));
+    check('N24 auth: scrollIntoView y focus con typeof-guard (DOM mockeado)',
+      /typeof card\.scrollIntoView === 'function'/.test(authSrc)
+      && /typeof email\.focus === 'function'/.test(authSrc));
+    check('N24 auth: aria-pressed sincronizado en el switcher',
+      /aria-pressed/.test(authSrc));
+    check('N24 auth: authSubmit se retraduce en init (gap preexistente)',
+      /init\(\)[\s\S]{0,900}authSubmit/.test(authSrc));
+
+    // Behavioral: mismo patrón de carga que N7 (loadApp con supabase mock por defecto).
+    {
+      const ctx = loadApp();
+      ctx.Auth._switchMode('login');
+      check('N24 auth behavioral: _switchMode(login) activa tabLogin y oculta fieldName',
+        ctx.document.getElementById('tabLogin').classList.contains('active')
+        && ctx.document.getElementById('fieldName').style.display === 'none');
+      ctx.Auth._switchMode('register');
+      check('N24 auth behavioral: _switchMode(register) activa tabRegister y muestra fieldName',
+        ctx.document.getElementById('tabRegister').classList.contains('active')
+        && ctx.document.getElementById('fieldName').style.display === 'flex');
+    }
+    // Behavioral: init() retraduce authSubmit y sincroniza aria-pressed según i18n.lang.
+    // supabase: null (mismo patrón que N7) para tomar la rama _showLoadFailure y no
+    // depender de un session.user simulado que este arnés no modela.
+    {
+      const ls = makeLocalStorage();
+      ls.setItem('mycampus_lang', 'en');
+      const ctx = loadApp({ localStorage: ls, supabase: null });
+      await ctx.Auth.init();
+      check('N24 auth behavioral: init() retraduce authSubmit al idioma restaurado',
+        ctx.document.getElementById('authSubmit').textContent === ctx.i18n.t('auth_submit_register'));
+      check('N24 auth behavioral: init() sincroniza aria-pressed en authBtnES/EN',
+        ctx.document.getElementById('authBtnES').getAttribute('aria-pressed') === 'false'
+        && ctx.document.getElementById('authBtnEN').getAttribute('aria-pressed') === 'true');
+    }
+    // Behavioral: los CTAs de la landing cambian de modo, hacen scroll y enfocan el email.
+    // El mock de document NO implementa scrollIntoView (motivo real del typeof-guard en
+    // auth.js) — el primer click confirma que _goToAuthCard no revienta sin él; luego se
+    // añade uno ad-hoc para confirmar que SÍ se invoca cuando el DOM real lo soporta.
+    {
+      const ctx = loadApp();
+      ctx.Auth._bindEvents();
+      const signin = ctx.document.getElementById('lpSigninLink');
+      let threw = false;
+      try { fireEl(signin, 'click', { preventDefault() {} }); } catch (e) { threw = true; }
+      check('N24 auth behavioral: lpSigninLink no revienta sin scrollIntoView en el mock (guard) y cambia a login',
+        !threw && ctx.document.getElementById('tabLogin').classList.contains('active'));
+
+      let scrolled = false, focused = false;
+      const card = ctx.document.getElementById('acceso');
+      card.scrollIntoView = () => { scrolled = true; };
+      const email = ctx.document.getElementById('authEmail');
+      email.focus = () => { focused = true; };
+      const cta = ctx.document.getElementById('lpCtaBtn');
+      fireEl(cta, 'click', { preventDefault() {} });
+      check('N24 auth behavioral: lpCtaBtn cambia a register, hace scroll y enfoca email cuando el mock los soporta',
+        ctx.document.getElementById('tabRegister').classList.contains('active') && scrolled && focused);
+    }
+    // Behavioral: _setAuthLang sincroniza aria-pressed al cambiar idioma en runtime.
+    {
+      const ctx = loadApp();
+      ctx.Auth._setAuthLang('en');
+      check('N24 auth behavioral: _setAuthLang(en) pone aria-pressed=true en authBtnEN y false en authBtnES',
+        ctx.document.getElementById('authBtnEN').getAttribute('aria-pressed') === 'true'
+        && ctx.document.getElementById('authBtnES').getAttribute('aria-pressed') === 'false');
+      ctx.Auth._setAuthLang('es');
+      check('N24 auth behavioral: _setAuthLang(es) pone aria-pressed=true en authBtnES y false en authBtnEN',
+        ctx.document.getElementById('authBtnES').getAttribute('aria-pressed') === 'true'
+        && ctx.document.getElementById('authBtnEN').getAttribute('aria-pressed') === 'false');
+    }
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
