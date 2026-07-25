@@ -206,6 +206,43 @@ const TRANSLATIONS = {
     auth_load_failure_msg: "No se pudo cargar el servicio de autenticación. Comprueba tu conexión a internet y recarga la página.",
     auth_missing_modules_msg: "Error al cargar la aplicación. Recarga la página; si el problema persiste, contacta soporte.",
 
+    // LANDING PÚBLICA (2026-07-25)
+    lp_signin_link: "Iniciar sesión",
+    lp_badge: "ISTQB FOUNDATION LEVEL · SYLLABUS V4.0",
+    lp_h1: "Todo lo que necesitas para aprobar, en un solo lugar.",
+    lp_lede: "Teoría, práctica y exámenes simulados con tiempo siguiendo el syllabus oficial, en español e inglés.",
+    lp_why_heading: "Por qué certificarse",
+    lp_why1_title: "Un estándar internacional",
+    lp_why1_body: "ISTQB es la certificación de testing más pedida en las búsquedas de QA, y Foundation Level es su puerta de entrada.",
+    lp_why2_title: "Sin experiencia previa",
+    lp_why2_body: "El syllabus empieza de cero: sirve tanto si cambias de carrera como si ya trabajas en testing.",
+    lp_why3_title: "Un vocabulario común",
+    lp_why3_body: "Terminas sabiendo nombrar técnicas, niveles y tipos de prueba como lo hace todo equipo de QA.",
+    lp_roadmap_title: "Tu recorrido por el syllabus",
+    lp_roadmap_intro: "Seis capítulos, en el mismo orden que el examen oficial. Siempre sabes dónde estás y qué te falta.",
+    lp_included_label: "INCLUIDO EN CADA CAPÍTULO",
+    lp_included_1: "Teoría escrita para el examen",
+    lp_included_2: "Preguntas de práctica con explicación",
+    lp_included_3: "Examen simulado con tiempo al final",
+    lp_included_4: "Progreso guardado a medida que avanzas",
+    lp_ch1_title: "Fundamentos del testing",
+    lp_ch1_body: "Para qué sirve probar, los siete principios, el proceso de prueba y las habilidades que exige.",
+    lp_ch2_title: "Testing en el ciclo de vida",
+    lp_ch2_body: "Niveles y tipos de prueba, pruebas de mantenimiento y testing en equipos ágiles.",
+    lp_ch3_title: "Pruebas estáticas",
+    lp_ch3_body: "Revisiones y el proceso de revisión: detectar defectos antes de ejecutar una sola línea.",
+    lp_ch4_title: "Análisis y diseño de pruebas",
+    lp_ch4_body: "Particiones de equivalencia, valores límite, tablas de decisión, cobertura y testing exploratorio.",
+    lp_ch5_title: "Gestión de las actividades de prueba",
+    lp_ch5_body: "Planificación, estimación, análisis de riesgos, monitoreo, control y gestión de defectos.",
+    lp_ch6_title: "Herramientas de prueba",
+    lp_ch6_body: "Qué cubre realmente el soporte de herramientas y qué esperar al adoptarlas.",
+    lp_cta_title: "Cuando quieras, empezamos",
+    lp_cta_body: "Crea tu cuenta y abre el capítulo 1 ahora mismo.",
+    lp_cta_btn: "Crear cuenta gratis",
+    lp_footer: "MyCampus · ISTQB Foundation Level v4.0",
+    auth_password_placeholder: "Contraseña",
+
     // CELEBRACIÓN (módulo completado + diploma, 2026-07-25)
     celebr_badge: "Módulo {n} · Superado",
     celebr_title: "¡Enhorabuena!",
@@ -430,6 +467,43 @@ const TRANSLATIONS = {
     auth_load_failure_msg: "The authentication service failed to load. Check your internet connection and reload the page.",
     auth_missing_modules_msg: "Error loading the app. Reload the page; if the problem persists, contact support.",
 
+    // PUBLIC LANDING (2026-07-25)
+    lp_signin_link: "Sign in",
+    lp_badge: "ISTQB FOUNDATION LEVEL · SYLLABUS V4.0",
+    lp_h1: "Everything you need to pass, in one place.",
+    lp_lede: "Theory, practice and timed mock exams following the official syllabus, in Spanish and English.",
+    lp_why_heading: "Why get certified",
+    lp_why1_title: "An international standard",
+    lp_why1_body: "ISTQB is the most requested testing certification in QA job listings, and Foundation Level is its entry point.",
+    lp_why2_title: "No experience required",
+    lp_why2_body: "The syllabus starts from zero, so it works for career changers as much as for working testers.",
+    lp_why3_title: "A shared vocabulary",
+    lp_why3_body: "You leave able to name techniques, levels and test types the way every QA team does.",
+    lp_roadmap_title: "Your route through the syllabus",
+    lp_roadmap_intro: "Six chapters, in the same order as the official exam. You always know where you are and what is left.",
+    lp_included_label: "INCLUDED IN EVERY CHAPTER",
+    lp_included_1: "Theory written for the exam",
+    lp_included_2: "Practice questions with explanations",
+    lp_included_3: "Timed mock exam at the end",
+    lp_included_4: "Progress saved as you go",
+    lp_ch1_title: "Fundamentals of testing",
+    lp_ch1_body: "What testing is for, the seven principles, the test process and the skills it takes.",
+    lp_ch2_title: "Testing throughout the lifecycle",
+    lp_ch2_body: "Test levels, test types, maintenance testing and testing in agile teams.",
+    lp_ch3_title: "Static testing",
+    lp_ch3_body: "Reviews and the review process: catching defects before a single line runs.",
+    lp_ch4_title: "Test analysis and design",
+    lp_ch4_body: "Equivalence partitioning, boundary values, decision tables, coverage and exploratory testing.",
+    lp_ch5_title: "Managing the test activities",
+    lp_ch5_body: "Planning, estimation, risk analysis, monitoring, control and defect management.",
+    lp_ch6_title: "Test tools",
+    lp_ch6_body: "What tool support really covers, and what to expect when adopting it.",
+    lp_cta_title: "Ready when you are",
+    lp_cta_body: "Create your account and open chapter 1 right away.",
+    lp_cta_btn: "Create free account",
+    lp_footer: "MyCampus · ISTQB Foundation Level v4.0",
+    auth_password_placeholder: "Password",
+
     // CELEBRATION (module completed + diploma, 2026-07-25)
     celebr_badge: "Module {n} · Passed",
     celebr_title: "Congratulations!",
@@ -481,8 +555,17 @@ const i18n = {
   // Restaura el idioma guardado y lo aplica. Se llama al arrancar, antes de
   // que exista sesión — la pantalla de auth debe verse en el idioma correcto
   // sin depender de que el usuario ya haya iniciado sesión.
+  // Primera visita (sin preferencia guardada): respeta el idioma del
+  // navegador — navegador no-español arranca en EN. La preferencia guardada
+  // sigue mandando. typeof-guard: el harness corre en Node sin navigator.
   restore() {
-    this.lang = localStorage.getItem('mycampus_lang') || 'es';
+    const saved = localStorage.getItem('mycampus_lang');
+    if (saved) {
+      this.lang = saved;
+    } else {
+      const nav = (typeof navigator !== 'undefined' && navigator.language) || 'es';
+      this.lang = nav.toLowerCase().startsWith('es') ? 'es' : 'en';
+    }
     this.apply();
   },
   setLang(lang) {

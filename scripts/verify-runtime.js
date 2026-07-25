@@ -126,6 +126,7 @@ function loadApp(opts = {}) {
     innerWidth: 1280, innerHeight: 800,
     addEventListener() {},
   };
+  const nav = opts.navigator || {};
   const fetchMock = (url, init) => { calls.fetches.push({ url, init }); return Promise.resolve({ ok: true }); };
   const ret = `return {
     App: typeof App !== 'undefined' ? App : undefined,
@@ -139,7 +140,7 @@ function loadApp(opts = {}) {
   };`;
   const fn = new Function('window', 'document', 'localStorage', 'history', 'fetch', 'confirm', 'navigator',
     `${src}\n;${ret}`);
-  const globals = fn(win, doc, ls, { replaceState() {} }, fetchMock, () => true, {});
+  const globals = fn(win, doc, ls, { replaceState() {} }, fetchMock, () => true, nav);
   return { ...globals, document: doc, localStorage: ls, window: win, supabase: sb, calls };
 }
 
@@ -1548,6 +1549,52 @@ const SAMPLE_Q = {
     try { ctx2.App.completeLesson(ch0[ch0.length - 1], 0, 10); } catch (e) { threw = true; }
     check('N23 migración: un estado legado sin los campos nuevos no revienta y celebra',
       !threw && shown.length === 1);
+  }
+
+  /* ---- N24: landing pública (2026-07-25) ---- */
+  {
+    const i18nSrc = fs.readFileSync(path.join(ROOT, 'js', 'i18n.js'), 'utf8');
+    // restore(): rama de primera visita con navigator.language, antes de setLang
+    // (setLang no existe en restore() hoy, pero el ancla mantiene el chequeo
+    // robusto si restore() creciera más adelante).
+    const restoreBody = i18nSrc.slice(i18nSrc.indexOf('restore()'));
+    const beforeApply = restoreBody.slice(0, restoreBody.indexOf('apply()'));
+    check('N24 i18n: restore() respeta navigator.language en primera visita',
+      i18nSrc.indexOf('restore()') !== -1 && /navigator/.test(beforeApply));
+    // Claves lp_* + auth_password_placeholder definidas en TRANSLATIONS
+    // (la paridad ES/EN la cubre el check global "i18n: paridad ES/EN" más abajo).
+    for (const k of ['lp_signin_link', 'lp_badge', 'lp_h1', 'lp_lede', 'lp_why_heading',
+      'lp_why1_title', 'lp_why1_body', 'lp_why2_title', 'lp_why2_body', 'lp_why3_title', 'lp_why3_body',
+      'lp_roadmap_title', 'lp_roadmap_intro', 'lp_included_label',
+      'lp_included_1', 'lp_included_2', 'lp_included_3', 'lp_included_4',
+      'lp_ch1_title', 'lp_ch1_body', 'lp_ch2_title', 'lp_ch2_body', 'lp_ch3_title', 'lp_ch3_body',
+      'lp_ch4_title', 'lp_ch4_body', 'lp_ch5_title', 'lp_ch5_body', 'lp_ch6_title', 'lp_ch6_body',
+      'lp_cta_title', 'lp_cta_body', 'lp_cta_btn', 'lp_footer', 'auth_password_placeholder']) {
+      check(`N24 i18n: clave ${k} definida`, new RegExp(`\\b${k}:`).test(i18nSrc));
+    }
+
+    // Behavioral: loadApp() acepta un navigator mockeado (ver cambio en loadApp
+    // arriba) — mismo sandbox que usan los checks N1/N22, sin reinventar carga.
+    {
+      const ctx = loadApp({ navigator: { language: 'en-US' } });
+      ctx.i18n.restore();
+      check('N24 i18n: restore() con navigator.language="en-US" y sin preferencia guardada arranca en EN',
+        ctx.i18n.lang === 'en');
+    }
+    {
+      const ls = makeLocalStorage();
+      ls.setItem('mycampus_lang', 'es');
+      const ctx = loadApp({ navigator: { language: 'en-US' }, localStorage: ls });
+      ctx.i18n.restore();
+      check('N24 i18n: la preferencia guardada (es) manda sobre navigator.language',
+        ctx.i18n.lang === 'es');
+    }
+    {
+      const ctx = loadApp({ navigator: {} });
+      ctx.i18n.restore();
+      check('N24 i18n: sin navigator.language (o navigator ausente) cae a "es" por defecto',
+        ctx.i18n.lang === 'es');
+    }
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
