@@ -1338,7 +1338,10 @@ body {
 /* Base 80px (no 24px): deja hueco al pill .bmc-fab, de base 24px con ~44px de
    alto. Ambos suman el mismo env(safe-area-inset-bottom), así que el hueco de
    56px se conserva. Los toasts (transitorios, aria-live) ganan el rincón. */
-.toast-container { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: calc(24px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+/* z-index 6000 (2026-07-25): por encima de los modales (5000) — los toasts de
+   logro/level-up saltan en el mismo completeLesson que abre la celebración y
+   deben verse sobre su scrim. Siguen bajo el tour de onboarding (9999+). */
+.toast-container { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: calc(24px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 8px; z-index: 6000; }
 .toast {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1521,6 +1524,12 @@ body {
      ganaba la cascada — el viejo bloque de 500px funcionaba solo porque
      estaba tras esa sección. El id decide por especificidad, no por orden. */
   #avatar-modal .avatar-grid { grid-template-columns: 1fr; }
+  /* Celebración (2026-07-25): prefijo #celebration-modal por especificidad —
+     este tier va ANTES de la sección base en el archivo (misma lección que
+     #avatar-modal .avatar-grid). */
+  #celebration-modal .celebration-card { padding: 24px 16px; }
+  #celebration-modal .celebr-step { width: 32px; height: 32px; font-size: 0.8rem; }
+  #celebration-modal .celebr-link { flex-basis: 6px; }
 }
 
 /* ===== UTILITY ===== */
@@ -1946,6 +1955,197 @@ body {
   transition: background var(--transition);
 }
 .avatar-btn-save:hover { background: var(--primary-dark); }
+
+/* ===== CELEBRATION MODAL (2026-07-25) =====
+   Card «Camino de módulos» + diploma de campus. Patrón #avatar-modal (scrim
+   fixed, z-index 5000). CTA con --primary-dark (blanco sobre --primary falla
+   AA — regla .bmc-fab/.lesson-next-btn). El dorado del diploma es SOLO
+   decorativo (bordes, sello, halo) — nunca color de texto (regla N12); los
+   textos de estado usan tokens --*-text. */
+#celebration-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+  padding: 16px;
+  overflow: hidden;
+}
+.celebration-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 88vh;  /* fallback */
+  max-height: 88dvh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  text-align: center;
+  position: relative;
+}
+.celebration-card h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 4px 0;
+}
+.celebration-card.diploma {
+  max-width: 520px;
+  border: 2px solid rgba(255,193,7,0.55);
+  outline: 1px solid rgba(255,193,7,0.25);
+  outline-offset: 5px;
+}
+
+/* --- card de módulo --- */
+.celebr-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--secondary-text);
+  border: 1px solid rgba(0,210,255,0.4);
+  border-radius: 999px;
+  padding: 4px 12px;
+  margin-bottom: 10px;
+}
+.celebr-sub { color: var(--text2); font-size: 0.9rem; }
+.celebr-path {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 18px 0 8px;
+}
+.celebr-step {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  flex-shrink: 0;
+}
+.celebr-step.done {
+  background: var(--primary-dark);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 14px rgba(108,99,255,0.6);
+}
+.celebr-step.next { border: 2px dashed var(--secondary); color: var(--secondary-text); }
+.celebr-link { flex: 0 0 10px; height: 2px; background: var(--surface2); }
+.celebr-quote {
+  color: var(--primary-text);
+  font-size: 0.95rem;
+  font-style: italic;
+  margin: 14px 0 18px;
+  line-height: 1.5;
+}
+.celebr-cta {
+  background: var(--primary-dark);
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.celebr-cta:hover { filter: brightness(1.1); }
+.celebr-ghost {
+  display: block;
+  margin: 12px auto 0;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.celebr-ghost:hover { text-decoration: underline; color: var(--text2); }
+
+/* --- diploma --- */
+.celebr-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--warning-text);
+  margin-bottom: 8px;
+}
+.celebr-medal {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.1rem;
+  background: radial-gradient(circle at 35% 30%, rgba(255,213,79,0.35), rgba(255,193,7,0.12));
+  box-shadow: 0 0 26px rgba(255,193,7,0.45);
+}
+.celebr-name { font-size: 1.25rem; color: var(--primary-text); font-weight: 600; margin: 12px 0 2px; }
+.celebr-name-rule { width: 180px; height: 1px; background: var(--border); margin: 6px auto 12px; }
+.celebr-body { color: var(--text2); font-size: 0.9rem; line-height: 1.55; margin-bottom: 14px; }
+.celebr-chips {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.celebr-chip {
+  font-size: 0.72rem;
+  color: var(--success-text);
+  background: rgba(76,175,80,0.12);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+.celebr-date { font-size: 0.78rem; color: var(--text3); margin-bottom: 16px; }
+.celebr-seal {
+  position: absolute;
+  bottom: 16px;
+  right: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFD54F, #B8860B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1A1A2E;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* --- confetti (solo lo genera JS en el diploma; bajo reduced-motion no se
+       genera NINGUNA pieza — guard matchMedia en _spawnConfetti — y además el
+       blunt block global anularía la animación) --- */
+.celebr-confetti-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.celebr-confetti {
+  position: absolute;
+  top: -20px;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  animation: celebrFall 3s linear forwards;
+}
+@keyframes celebrFall {
+  to { transform: translateY(110vh) rotate(540deg); }
+}
 
 /* ===== NAME EDIT ===== */
 .name-edit-btn {

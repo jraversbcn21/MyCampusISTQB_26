@@ -1449,6 +1449,31 @@ const SAMPLE_Q = {
         && typeof ctx.TRANSLATIONS.en[k] === 'string' && ctx.TRANSLATIONS.en[k].length > 0));
   }
 
+  /* --- Task 2: markup + CSS --- */
+  {
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    check('N23 markup: #celebration-modal es role=dialog aria-modal etiquetado por celebrationTitle',
+      /<div id="celebration-modal"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*aria-labelledby="celebrationTitle"/.test(htmlSrc));
+    check('N23 markup: la capa de confetti es decorativa (aria-hidden)',
+      /<div id="celebrConfetti"[^>]*aria-hidden="true"/.test(htmlSrc));
+
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    // Ancla a la regla real (/\.selector \{/), nunca includes() — lección N19/N21.
+    const idxCelebrCard = cssSrc.search(/\.celebration-card \{/);
+    check('N23 css: .celebration-card existe y va antes del bloque reduced-motion',
+      idxCelebrCard >= 0 && idxCelebrCard < cssSrc.indexOf('@media (prefers-reduced-motion'));
+    check('N23 css: el CTA usa --primary-dark con texto blanco (AA 5.83:1; --primary fallaría)',
+      /\.celebr-cta\s*\{[^}]*background:\s*var\(--primary-dark\)/.test(cssSrc)
+      && /\.celebr-cta\s*\{[^}]*color:\s*#fff/.test(cssSrc));
+    check('N23 css: los toasts quedan por encima del modal (z-index 6000 > 5000)',
+      /\.toast-container\s*\{[^}]*z-index:\s*6000/.test(cssSrc));
+    check('N23 css: el override móvil lleva prefijo #celebration-modal (id gana la cascada; el tier va antes que la base)',
+      /@media \(max-width: 480px\)[\s\S]*?#celebration-modal \.celebration-card\s*\{/.test(cssSrc));
+    check('N23 css: los chips usan el par success validado (fondo tintado + --success-text)',
+      /\.celebr-chip\s*\{[^}]*background:\s*rgba\(76,\s*175,\s*80,\s*0?\.12\)/.test(cssSrc)
+      && /\.celebr-chip\s*\{[^}]*color:\s*var\(--success-text\)/.test(cssSrc));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

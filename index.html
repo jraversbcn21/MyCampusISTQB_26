@@ -535,6 +535,14 @@
     </div>
   </div>
 
+  <!-- CELEBRATION MODAL (2026-07-25): card de módulo completado + diploma de
+       campus. Mismo patrón que #avatar-modal (scrim, Escape, foco). El interior
+       lo construye App._showCelebration() — es dinámico (capítulo, nombre, fecha). -->
+  <div id="celebration-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="celebrationTitle">
+    <div id="celebrConfetti" class="celebr-confetti-layer" aria-hidden="true"></div>
+    <div class="celebration-card" id="celebrationCard"></div>
+  </div>
+
   </div><!-- end #app-container -->
 
   <!-- SCRIPTS — ORDEN CRÍTICO, NO REORDENAR (ver AGENTS.md "Script Load Order").
