@@ -134,6 +134,29 @@ const measureDoc = () => {
 
       const page = await context.newPage();
       await page.goto(base, { waitUntil: 'domcontentloaded' });
+
+      /* ---- LANDING PÚBLICA (2026-07-25): se mide ANTES del bypass de auth —
+         es la única vista que un usuario sin sesión ve. ---- */
+      const lp = await page.evaluate(() => {
+        const r = (el) => { if (!el) return null; const b = el.getBoundingClientRect(); return { w: b.width, h: b.height }; };
+        return {
+          sw: document.documentElement.scrollWidth,
+          cw: document.documentElement.clientWidth,
+          signin: r(document.getElementById('lpSigninLink')),
+          langES: r(document.getElementById('authBtnES')),
+          tabReg: r(document.getElementById('tabRegister')),
+          submit: r(document.getElementById('authSubmit')),
+          cta: r(document.getElementById('lpCtaBtn')),
+          steps: document.querySelectorAll('.lp-step').length,
+        };
+      });
+      assert(width, 'landing sin scroll horizontal', lp.sw <= lp.cw, `sw=${lp.sw} cw=${lp.cw}`);
+      const lpGe44 = (b) => b && b.h >= 44;
+      assert(width, 'landing: targets ≥44px de alto (signin/lang/tab/submit/cta)',
+        [lp.signin, lp.langES, lp.tabReg, lp.submit, lp.cta].every(lpGe44),
+        JSON.stringify({ signin: lp.signin, langES: lp.langES, tabReg: lp.tabReg, submit: lp.submit, cta: lp.cta }));
+      assert(width, 'landing: timeline con 6 pasos renderizados', lp.steps === 6);
+
       await bypassAuth(page);
 
       /* ---- (a) Sin scroll horizontal en las 7 vistas + (b) targets + (e) glosario ---- */
@@ -414,6 +437,19 @@ const measureDoc = () => {
       }
 
       await context.close();
+    }
+
+    /* ---- Landing a ancho desktop (1195 = captura del handoff): sin overflow. ---- */
+    {
+      const ctxDesk = await browser.newContext({ viewport: { width: 1195, height: 800 } });
+      const pDesk = await ctxDesk.newPage();
+      await pDesk.goto(base, { waitUntil: 'domcontentloaded' });
+      const m = await pDesk.evaluate(() => ({
+        sw: document.documentElement.scrollWidth,
+        cw: document.documentElement.clientWidth,
+      }));
+      assert(1195, 'landing desktop sin scroll horizontal', m.sw <= m.cw, `sw=${m.sw} cw=${m.cw}`);
+      await ctxDesk.close();
     }
   } finally {
     await browser.close();
