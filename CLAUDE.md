@@ -257,12 +257,12 @@ an authenticated empty session.
 - `data-i18n-aria="key"` — `aria-label` (added 2026-07-14; a fourth block in `i18n.apply()` doing
   `el.setAttribute('aria-label', this.t(key))`, so it re-applies on language switch like the others)
 - Default language is Spanish (`i18n.lang = 'es'`).
-- Translations live in `TRANSLATIONS` in `js/i18n.js` — **178 keys**, all ES/EN paired, enforced by
+- Translations live in `TRANSLATIONS` in `js/i18n.js` — **196 keys**, all ES/EN paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known hardcoded-language
   residues). The count grew over time: 160 after the 2026-07-04 remediation → 165 (2026-07-08 global
   search `gs_*`) → 170 (2026-07-14 a11y `data-i18n-aria` keys + `goto_question_aria`) → 174/175
   (2026-07-15 round-2 mobile-search/combobox + `achievement_toast_prefix` + `bmc_label`) → 177/178
-  (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`).
+  (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`) → 196 (2026-07-25 celebración de módulo/diploma).
 - `i18n.restore()` reads the saved language from localStorage and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
   (the auth screen renders outside `App`, so it can't wait for `App.init()`'s own restore) — the
@@ -887,3 +887,38 @@ Two usability defects reported on a real device after the mobile round. Spec/pla
   monkeypatch `navigateToLesson`/`showToast`, and call `App.advanceLesson()` for real, first with
   `completedLessons = []` asserting no-nav + toast, then with the lesson added asserting nav), plus
   the re-anchored `N19` and the new cascade assert in `validate-responsive.js`.
+
+## Celebración de módulo + diploma de campus (2026-07-25)
+
+Modal centrado al completar módulos. Spec:
+`docs/superpowers/specs/2026-07-25-chapter-completion-celebration-design.md`.
+
+- **Disparo en `completeLesson` → `App._maybeCelebrate(chapterId)`**: al llegar un
+  capítulo al 100% (aunque se complete en desorden), una sola vez por usuario —
+  `state.celebratedChapters` (array) y `state.diplomaShown` (bool), persistidos en el
+  JSONB existente (sync intacto). Si con él los 6 quedan al 100% → **diploma**, que
+  sustituye a la card (nunca dos popups). Guard de migración dentro de
+  `_maybeCelebrate` (estados legados y copias de nube sin los campos nuevos) — no en
+  `loadState`, que no fusiona defaults sobre estados guardados.
+- **`#celebration-modal`** estático en `index.html` (patrón avatar-modal: Escape con
+  listener propio + exclusión en la rama drawer del keydown delegado, clic en scrim,
+  foco al CTA al abrir y de vuelta al cerrar). Interior por JS: card «Camino de
+  módulos» (`_chapterCardHtml`) o diploma (`_diplomaHtml`, clase `diploma`).
+- **CTA de la card** → primera lección pendiente del siguiente capítulo (escaneo solo
+  hacia delante; sin pendientes posteriores → curriculum). **CTA del diploma** →
+  `navigate('simulator')`.
+- **Confetti solo en el diploma**, generado por JS con guard
+  `matchMedia('(prefers-reduced-motion: reduce)')` (patrón `_slideFlashcard` — con
+  reduce NO se genera ninguna pieza); autolimpieza a los 6s y al cerrar.
+- **`_getDisplayName()`** — resolución del nombre extraída de `updateSidebar` (IIFE)
+  y reutilizada por el diploma **con `escapeHtml`** (dato controlable por el usuario).
+- **`.toast-container` subió a `z-index: 6000`** (antes 1000): los toasts de
+  logro/level-up saltan en el mismo `completeLesson` que abre el modal (5000) y deben
+  verse sobre su scrim. Siguen bajo el onboarding (9999+).
+- CSS en sección propia tras el avatar-modal; overrides móviles dentro del tier 480
+  **con prefijo `#celebration-modal`** (especificidad de id — misma lección que
+  `#avatar-modal .avatar-grid`; el tier va antes que la base en el archivo).
+- Gate: familia **N23** en `verify-runtime.js` (i18n, markup/CSS anclado a
+  `/\.celebration-card \{/`, XSS del nombre, guard reduced-motion, Escape/drawer, y
+  comportamentales: card una vez, no-recelebración, diploma sustituye a la card,
+  migración de estado legado).
