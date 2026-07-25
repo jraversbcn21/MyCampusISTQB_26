@@ -66,6 +66,7 @@ const Auth = {
         this.user = null;
         this._authInProgress = false;
         if (typeof Monitoring !== 'undefined') Monitoring.clearUser();
+        this._clearSavedView();
         this._showAuthScreen();
       }
     });
@@ -75,6 +76,7 @@ const Auth = {
       this.user = session.user;
       await this._onAuthSuccess(session.user);
     } else {
+      this._clearSavedView();
       this._showAuthScreen();
     }
   },
@@ -108,6 +110,18 @@ const Auth = {
   },
 
   /* ===== UI ===== */
+  // Al quedarse sin sesión (logout, expiración, boot sin token) la vista
+  // guardada se descarta: el siguiente login debe aterrizar SIEMPRE en el
+  // dashboard (decisión 2026-07-26). La recarga CON sesión no pasa por aquí,
+  // así que View Persistence sigue funcionando para F5 a mitad de estudio.
+  // NO llamar desde _showAuthScreen: la ruta de fallo de CDN la muestra sin
+  // saber si hay sesión y no debe borrar la vista de un usuario logueado.
+  _clearSavedView() {
+    try {
+      localStorage.removeItem('mycampus_current_view');
+    } catch (e) {}
+  },
+
   _showAuthScreen() {
     document.getElementById('auth-screen').style.display = 'block';
     document.getElementById('app-container').style.display = 'none';

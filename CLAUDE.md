@@ -342,6 +342,12 @@ lesson with topic or falls back to `'dashboard'`. `navigateToLesson()` sets
 `_onAuthSuccess()` navigates to `App.currentView || 'dashboard'` (both branches) instead of a
 hardcoded `'dashboard'`.
 
+Desde 2026-07-26 la vista guardada se **descarta al quedarse sin sesión**
+(`Auth._clearSavedView()` en la rama `SIGNED_OUT` y en el boot sin sesión — nunca en
+`_showAuthScreen`, que también se muestra en la ruta de fallo de CDN sin saber si hay
+sesión): todo login/registro aterriza siempre en el dashboard. La restauración de vista
+queda solo para recargas CON sesión activa (F5 a mitad de lección). Gate: familia `N25`.
+
 ### Privacy Policy
 
 `privacy.html` is a standalone bilingual (ES/EN) static page — deliberately self-contained (own

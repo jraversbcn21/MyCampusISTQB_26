@@ -1726,6 +1726,77 @@ const SAMPLE_Q = {
     }
   }
 
+  /* ---- N25: login siempre al dashboard (2026-07-26) ---- */
+  {
+    const authSrc = fs.readFileSync(path.join(ROOT, 'js', 'auth.js'), 'utf8');
+    check('N25 auth: helper _clearSavedView definido con try/catch',
+      /_clearSavedView\(\) \{/.test(authSrc)
+      && /_clearSavedView\(\) \{[^}]*try[^}]*mycampus_current_view/.test(authSrc));
+    const signedOutBranch = authSrc.slice(authSrc.indexOf("'SIGNED_OUT'"), authSrc.indexOf('getSession'));
+    check('N25 auth: SIGNED_OUT limpia la vista guardada',
+      authSrc.indexOf("'SIGNED_OUT'") !== -1 && /_clearSavedView\(\)/.test(signedOutBranch));
+    const showAuthBody = authSrc.slice(authSrc.indexOf('_showAuthScreen() {'), authSrc.indexOf('_hideAuthScreen'));
+    check('N25 auth: _showAuthScreen NO limpia (ruta de fallo de CDN)',
+      authSrc.indexOf('_showAuthScreen() {') !== -1 && !/_clearSavedView/.test(showAuthBody));
+
+    // La rama "if (session)" de init() y todo _onAuthSuccess (recarga CON sesión
+    // activa) no deben limpiar la vista guardada — View Persistence sigue vivo
+    // para F5 a mitad de lección. Estático: complementa los behaviorales de abajo.
+    const getSessionIdx = authSrc.indexOf('getSession()');
+    const elseIdx = authSrc.indexOf('} else {', getSessionIdx);
+    const ifSessionBranch = authSrc.slice(getSessionIdx, elseIdx);
+    check('N25 auth: la rama "if (session)" de init() no limpia la vista guardada',
+      getSessionIdx !== -1 && elseIdx !== -1 && !/_clearSavedView/.test(ifSessionBranch));
+    const onAuthSuccessBody = authSrc.slice(
+      authSrc.indexOf('async _onAuthSuccess(user) {'),
+      authSrc.indexOf('_shouldApplyCloud(cloudState'));
+    check('N25 auth: _onAuthSuccess no limpia la vista guardada',
+      authSrc.indexOf('async _onAuthSuccess(user) {') !== -1 && !/_clearSavedView/.test(onAuthSuccessBody));
+
+    // Behaviorales — reutilizan el mecanismo de N7/N9: Auth.init() con supabase
+    // y localStorage mockeados; sb._calls.authStateCb dispara los eventos de auth.
+    {
+      // (2) Boot sin sesión elimina la clave.
+      const ls = makeLocalStorage();
+      ls.setItem('mycampus_current_view', JSON.stringify({ view: 'simulator' }));
+      const sb = makeSupabaseMock({ session: null });
+      const ctx = loadApp({ supabase: sb, localStorage: ls });
+      await ctx.Auth.init();
+      check('N25 behavioral: boot sin sesión elimina mycampus_current_view',
+        ctx.localStorage.getItem('mycampus_current_view') === null);
+    }
+    {
+      // (1) SIGNED_OUT elimina la clave. Se re-siembra DESPUÉS del init() (que ya
+      // la limpia por sí solo, cf. check anterior) para aislar el mecanismo bajo
+      // prueba: el propio handler de SIGNED_OUT, no el boot sin sesión.
+      const ls = makeLocalStorage();
+      const sb = makeSupabaseMock({ session: null });
+      const ctx = loadApp({ supabase: sb, localStorage: ls });
+      await ctx.Auth.init();
+      ls.setItem('mycampus_current_view', JSON.stringify({ view: 'simulator' }));
+      check('N25 behavioral (sanity): la clave está sembrada antes de SIGNED_OUT',
+        ctx.localStorage.getItem('mycampus_current_view') !== null);
+      sb._calls.authStateCb('SIGNED_OUT', null);
+      check('N25 behavioral: SIGNED_OUT elimina mycampus_current_view',
+        ctx.localStorage.getItem('mycampus_current_view') === null);
+    }
+    {
+      // (3) Boot CON sesión no la elimina. App "ya inicializada" (mismo patrón
+      // que N9) toma la rama corta de _onAuthSuccess a la que init() delega tras
+      // `if (session)` — cubre la invariante real sin recorrer todo App.init(),
+      // fuera de alcance del DOM mínimo mockeado de este arnés.
+      const ls = makeLocalStorage();
+      ls.setItem('mycampus_current_view', JSON.stringify({ view: 'simulator' }));
+      const sb = makeSupabaseMock();
+      const ctx = loadApp({ supabase: sb, localStorage: ls });
+      ctx.App._initialized = true;
+      const user = { id: 'u1', email: 'a@b.c', user_metadata: {} };
+      await ctx.Auth._onAuthSuccess(user);
+      check('N25 behavioral: boot CON sesión no borra mycampus_current_view',
+        ctx.localStorage.getItem('mycampus_current_view') !== null);
+    }
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
