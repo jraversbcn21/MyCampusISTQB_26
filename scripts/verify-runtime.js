@@ -1472,6 +1472,20 @@ const SAMPLE_Q = {
     check('N23 css: los chips usan el par success validado (fondo tintado + --success-text)',
       /\.celebr-chip\s*\{[^}]*background:\s*rgba\(76,\s*175,\s*80,\s*0?\.12\)/.test(cssSrc)
       && /\.celebr-chip\s*\{[^}]*color:\s*var\(--success-text\)/.test(cssSrc));
+
+    /* --- Task 3: JS del modal --- */
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    check('N23 xss: el nombre del diploma pasa por escapeHtml (dato controlable por el usuario)',
+      /escapeHtml\(this\._getDisplayName\(\)\)/.test(appSrc));
+    check('N23 motion: el confetti no se genera bajo prefers-reduced-motion (guard matchMedia, patrón _slideFlashcard)',
+      /_spawnConfetti\(\)\s*\{[\s\S]{0,400}?matchMedia\('\(prefers-reduced-motion: reduce\)'\)/.test(appSrc));
+    check('N23 a11y: Escape y clic en el scrim cierran el modal de celebración',
+      /getElementById\('celebration-modal'\)[\s\S]{0,400}?Escape[\s\S]{0,200}?_closeCelebration/.test(appSrc)
+      && /e\.target === celebrModal[\s\S]{0,100}?_closeCelebration/.test(appSrc));
+    check('N23 a11y: el drawer ignora Escape nacido dentro del modal de celebración',
+      /t\.closest\('#celebration-modal'\)/.test(appSrc));
+    check('N23 sidebar: updateSidebar usa el helper _getDisplayName (sin IIFE duplicada)',
+      /const displayName = this\._getDisplayName\(\)/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

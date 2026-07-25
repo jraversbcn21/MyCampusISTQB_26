@@ -171,21 +171,25 @@ const App = {
     this._saveCurrentView('lesson');
   },
 
+  // Nombre visible del alumno: localStorage > metadata de Auth > prefijo del
+  // email > fallback i18n. Extraído de updateSidebar (2026-07-25) para
+  // reutilizarlo en el diploma sin duplicar la resolución.
+  _getDisplayName() {
+    if (typeof Auth !== 'undefined' && Auth.user) {
+      const uid = Auth.user.id;
+      const saved = localStorage.getItem(`mycampus_displayname_${uid}`);
+      if (saved) return saved;
+      const meta = Auth.user.user_metadata || {};
+      return meta.full_name || meta.name || Auth.user.email?.split('@')[0] || i18n.t('student_fallback');
+    }
+    return i18n.t('student_fallback');
+  },
+
   /* ===== SIDEBAR ===== */
   updateSidebar() {
     const lvl = Gamification.getLevel(this.state.xp);
     const progress = Gamification.getLevelProgress(this.state.xp);
-    // Nombre: localStorage > metadata de Auth > email prefix
-    const displayName = (() => {
-      if (typeof Auth !== 'undefined' && Auth.user) {
-        const uid = Auth.user.id;
-        const saved = localStorage.getItem(`mycampus_displayname_${uid}`);
-        if (saved) return saved;
-        const meta = Auth.user.user_metadata || {};
-        return meta.full_name || meta.name || Auth.user.email?.split('@')[0] || i18n.t('student_fallback');
-      }
-      return i18n.t('student_fallback');
-    })();
+    const displayName = this._getDisplayName();
     document.getElementById('userName').textContent = displayName;
     document.getElementById('userLevel').textContent = `${i18n.t('level_label')} ${lvl.level} · ${lvl.name[i18n.lang]}`;
     document.getElementById('xpFillSmall').style.width = progress + '%';
@@ -510,6 +514,120 @@ const App = {
     // El scroll al top evita aterrizar a media lección nueva (rama avanzar)
     // o a media pantalla en el listado de capítulos (rama cerrar capítulo).
     if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
+  },
+
+  /* ===== CELEBRATION (2026-07-25) =====
+     Card de módulo completado + diploma de campus. El disparo vive en
+     completeLesson (_maybeCelebrate); aquí solo la presentación. Spec:
+     docs/superpowers/specs/2026-07-25-chapter-completion-celebration-design.md */
+
+  _chapterComplete(chapterId) {
+    const ch = CHAPTERS[chapterId];
+    return !!ch && ch.topics.every(t => this.state.completedLessons.includes(t.id));
+  },
+
+  // Primer capítulo POSTERIOR con alguna lección pendiente (y con contenido),
+  // y su primera lección pendiente. Solo escaneo hacia delante — si todo lo
+  // posterior está completo, el CTA cae al curriculum (decisión del spec).
+  _nextChapterTarget(chapterId) {
+    for (let c = chapterId + 1; c < CHAPTERS.length; c++) {
+      const t = CHAPTERS[c].topics.find(
+        tp => !this.state.completedLessons.includes(tp.id) && LESSONS[tp.id]);
+      if (t) return { chapterId: c, topicId: t.id };
+    }
+    return null;
+  },
+
+  _showCelebration(kind, chapterId) {
+    const modal = document.getElementById('celebration-modal');
+    const card = document.getElementById('celebrationCard');
+    if (!modal || !card) return;
+    this._celebrReturnFocusEl = (typeof document.activeElement === 'object') ? document.activeElement : null;
+    if (card.classList) card.classList.toggle('diploma', kind === 'diploma');
+    card.innerHTML = kind === 'diploma' ? this._diplomaHtml() : this._chapterCardHtml(chapterId);
+    modal.style.display = 'flex';
+    if (kind === 'diploma') this._spawnConfetti();
+    const cta = document.getElementById('celebrCta');
+    if (cta && typeof cta.focus === 'function') cta.focus();
+  },
+
+  _chapterCardHtml(chapterId) {
+    const lang = i18n.lang;
+    const target = this._nextChapterTarget(chapterId);
+    const steps = CHAPTERS.map((ch, i) => {
+      const done = this._chapterComplete(i);
+      const cls = done ? ' done' : (target && i === target.chapterId ? ' next' : '');
+      return `<div class="celebr-step${cls}" aria-hidden="true">${done ? this._icon('check') : (i + 1)}</div>`;
+    }).join('<div class="celebr-link" aria-hidden="true"></div>');
+    const ctaLabel = target
+      ? i18n.t('celebr_cta_next').replace('{n}', target.chapterId + 1)
+      : i18n.t('celebr_cta_curriculum');
+    const ctaAction = target
+      ? `App._closeCelebration();App.navigateToLesson(${target.chapterId}, '${target.topicId}')`
+      : `App._closeCelebration();App.navigate('curriculum')`;
+    return `
+      <div class="celebr-badge">${i18n.t('celebr_badge').replace('{n}', chapterId + 1)}</div>
+      <h2 id="celebrationTitle">${i18n.t('celebr_title')} <span aria-hidden="true">🎉</span></h2>
+      <p class="celebr-sub">${i18n.t('celebr_subtitle').replace('{ch}', CHAPTERS[chapterId].title[lang])}</p>
+      <div class="celebr-path">${steps}</div>
+      <p class="celebr-quote">${i18n.t('celebr_quote_' + chapterId)}</p>
+      <button class="celebr-cta" id="celebrCta" onclick="${ctaAction}">${ctaLabel}</button>
+      <button class="celebr-ghost" id="celebrStay" onclick="App._closeCelebration()">${i18n.t('celebr_cta_stay')}</button>`;
+  },
+
+  _diplomaHtml() {
+    const lang = i18n.lang;
+    // Único dato controlable por el usuario del template → escapeHtml (regla XSS).
+    const name = escapeHtml(this._getDisplayName());
+    const date = new Date().toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB',
+      { day: 'numeric', month: 'long', year: 'numeric' });
+    const chips = CHAPTERS.map(ch =>
+      `<span class="celebr-chip"><span aria-hidden="true">✓ </span>${ch.title[lang]}</span>`).join('');
+    return `
+      <div class="celebr-eyebrow">${i18n.t('diploma_eyebrow')}</div>
+      <div class="celebr-medal" aria-hidden="true">🎓</div>
+      <h2 id="celebrationTitle">${i18n.t('diploma_title')}</h2>
+      <p class="celebr-body">${i18n.t('diploma_awarded_to')}</p>
+      <div class="celebr-name">${name}</div>
+      <div class="celebr-name-rule" aria-hidden="true"></div>
+      <p class="celebr-body">${i18n.t('diploma_body')}</p>
+      <div class="celebr-chips">${chips}</div>
+      <div class="celebr-date">${date}</div>
+      <button class="celebr-cta" id="celebrCta" onclick="App._closeCelebration();App.navigate('simulator')">${i18n.t('diploma_cta')}</button>
+      <button class="celebr-ghost" id="celebrStay" onclick="App._closeCelebration()">${i18n.t('diploma_close')}</button>
+      <div class="celebr-seal" aria-hidden="true">${this._icon('check')}</div>`;
+  },
+
+  _closeCelebration() {
+    const modal = document.getElementById('celebration-modal');
+    if (modal) modal.style.display = 'none';
+    const conf = document.getElementById('celebrConfetti');
+    if (conf) conf.innerHTML = '';
+    if (this._celebrReturnFocusEl && typeof this._celebrReturnFocusEl.focus === 'function') {
+      this._celebrReturnFocusEl.focus();
+    }
+    this._celebrReturnFocusEl = null;
+  },
+
+  _spawnConfetti() {
+    // Guard reduced-motion (patrón _slideFlashcard): typeof mantiene al harness
+    // mockeado (sin matchMedia) en el camino normal; con reduce activo no se
+    // genera NINGUNA pieza — el respeto al usuario no depende solo del blunt
+    // block CSS.
+    if (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const holder = document.getElementById('celebrConfetti');
+    if (!holder) return;
+    const colors = ['#6C63FF', '#00D2FF', '#FFC107', '#FF6B6B', '#4CAF50', '#A29DFF'];
+    let html = '';
+    for (let i = 0; i < 50; i++) {
+      const left = (Math.random() * 100).toFixed(1);
+      const delay = (Math.random() * 1.5).toFixed(2);
+      const dur = (2.5 + Math.random() * 2).toFixed(2);
+      const rot = Math.floor(Math.random() * 360);
+      html += `<div class="celebr-confetti" style="left:${left}%;background:${colors[i % colors.length]};animation-delay:${delay}s;animation-duration:${dur}s;transform:rotate(${rot}deg)"></div>`;
+    }
+    holder.innerHTML = html;
+    setTimeout(() => { if (holder) holder.innerHTML = ''; }, 6000);
   },
 
   /* ===== FLASHCARDS ===== */
@@ -1454,6 +1572,18 @@ const App = {
     // Scrim del drawer (2026-07-21): clic fuera cierra. El scrim es decorativo
     // (aria-hidden); el cierre accesible es Escape en el keydown delegado.
     document.getElementById('sidebarScrim').addEventListener('click', () => this._setDrawerOpen(false));
+    // Celebración (2026-07-25): Escape y clic en el scrim cierran. Mismo
+    // patrón que el modal de avatar (listener propio en el elemento; el foco
+    // de vuelta lo gestiona _closeCelebration).
+    const celebrModal = document.getElementById('celebration-modal');
+    if (celebrModal) {
+      celebrModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') this._closeCelebration();
+      });
+      celebrModal.addEventListener('click', (e) => {
+        if (e.target === celebrModal) this._closeCelebration();
+      });
+    }
     document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
 
     // Teclado (C1): los controles renderizados por plantilla son divs con
@@ -1482,7 +1612,8 @@ const App = {
         const sidebar = document.getElementById('sidebar');
         if (sidebar && sidebar.classList.contains('mobile-open')
             && t.id !== 'globalSearch'
-            && !(typeof t.closest === 'function' && t.closest('#avatar-modal'))) {
+            && !(typeof t.closest === 'function' && t.closest('#avatar-modal'))
+            && !(typeof t.closest === 'function' && t.closest('#celebration-modal'))) {
           this._setDrawerOpen(false);
         }
       }
