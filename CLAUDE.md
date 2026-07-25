@@ -1018,6 +1018,36 @@ syllabus y CTA final). Handoff de diseño (high-fidelity, no code) en
   en el header a 390px (el mockup móvil del handoff no lo muestra), consecuencia directa de la
   decisión "fluida sin media queries" del Task 3 — ocultarlo requeriría introducir un media
   query que esa decisión de arquitectura excluye explícitamente.
+- **Oleada de fixes del review final de la rama (commit `4be8fba`)** — hallazgos que solo se
+  veían mirando el conjunto, todos aplicados y re-revisados:
+  - **Contraste AA de los tokens `--lp-*` (desviación adicional del handoff):**
+    `--lp-text-faint` subió de `#6E6E88` a **`#8B8BA6`** y `--lp-text-dim` de `#7B7B96` a
+    **`#8E8EA8`**. Motivo: al pasar los labels a `.sr-only`, el placeholder quedó como única
+    etiqueta visible de los inputs y estaba a 3.40:1; el footer a 3.97:1. Ratios nuevos
+    verificados a mano (cálculo WCAG): 5.08–6.07, todo AA. **`validate-contrast.js` NO ve los
+    tokens `--lp-*`** (solo parsea `:root`/`[data-theme="light"]`) — cualquier color nuevo en
+    la landing debe verificarse a mano; este es el agujero que dejó pasar los tres pares.
+  - **`_showAuthScreen()` hace `window.scrollTo(0, 0)`** (con typeof-guard): sin él, un
+    logout/expiración con la app scrolleada dejaba la landing a mitad de página con la
+    tarjeta fuera del viewport.
+  - **`autocomplete` del password por modo:** el markup declara `new-password` (default =
+    registro) y `_switchMode` lo alterna a `current-password` en login — antes declaraba
+    siempre `current-password` con el default nuevo en registro (gestores de contraseñas no
+    ofrecían generar una).
+  - **`html { scroll-behavior: smooth }` es global** (necesario para los CTAs de la landing):
+    para que no convirtiera en animado el salto al inicio de `advanceLesson()` en la app,
+    ese `scrollTo` usa ahora `{ top: 0, behavior: 'auto' }` explícito. Cualquier `scrollTo`
+    futuro de la app que quiera ser instantáneo debe fijar `behavior: 'auto'`.
+  - **`privacy.html` replica el fallback a `navigator.language`** en su init de idioma
+    (self-contained, sin importar i18n.js) — sin esto un visitante EN veía landing EN y
+    privacidad ES.
+  - **Semántica:** `role="list"` en `ol.lp-timeline` (el `list-style:none` pierde la
+    semántica en Safari/VoiceOver) y un `<main>` envolviendo hero/why/roadmap/cta. Hay dos
+    `<main>` en el documento (landing y app) — mutuamente excluyentes vía `display:none`, el
+    oculto queda fuera del árbol de accesibilidad; no es un bug.
+  - **`validate-responsive.js` fija `locale: 'es-ES'`** en sus contextos: `restore()` sigue
+    ahora `navigator.language` y el headless es en-US, así que sin el locale el gate nunca
+    medía el idioma con las cadenas más largas (ES).
 - Gate: familia **N24** en `verify-runtime.js` (claves i18n `lp_*` definidas, markup de la
   tarjeta con `id="acceso"`, `restore()` respetando `navigator.language` en sus tres casos) +
   checks de landing en `scripts/validate-responsive.js` (sin scroll horizontal a
