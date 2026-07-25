@@ -960,8 +960,12 @@ const SAMPLE_Q = {
       // que un includes()/indexOf() sobre el texto plano pasaba siempre —
       // incluso si se borrasen todas las reglas .bmc-fab reales. Mismo
       // patrón de ancla que usa el check de cascada N21.
+      // '@media (prefers-reduced-motion: reduce)' (no el genérico "...motion"
+      // a secas) porque la landing (Task 3, 2026-07-25) añadió un segundo
+      // media query de motion — '@media (prefers-reduced-motion: no-preference)'
+      // — antes en el fichero, que un indexOf genérico encontraría primero.
       /\.bmc-fab \{/.test(cssSrc)
-      && cssSrc.indexOf('.bmc-fab {') < cssSrc.indexOf('@media (prefers-reduced-motion'));
+      && cssSrc.indexOf('.bmc-fab {') < cssSrc.indexOf('@media (prefers-reduced-motion: reduce)'));
     const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
     check('N19 examen: _setExamActive setea el flag y togglea la clase del body',
       /_setExamActive\(active\)\s*\{[\s\S]{0,160}this\._examActive = active[\s\S]{0,160}document\.body\.classList\.toggle\('exam-active', active\)/.test(appSrc));
@@ -1000,11 +1004,12 @@ const SAMPLE_Q = {
     check('N20 tier: filas flex envuelven (rating/results-actions/lesson-actions/exam-topbar/flashcard-stats)',
       ['.rating-btns', '.results-actions', '.lesson-actions', '.exam-topbar', '.flashcard-stats-row']
         .every(s => new RegExp(s.replace('.', '\\.') + '[^{]*\\{[^}]*flex-wrap:\\s*wrap').test(t480)));
-    check('N20 tier: paddings reducidos (.view/.topbar/.exam-body/.auth-card)',
+    check('N20 tier: paddings reducidos (.view/.topbar/.exam-body)',
       // .topbar usa longhand padding-left/right con base 12px (safe areas,
       // Task 3): padding(?:-left)? acepta shorthand o longhand, 12px la base.
+      // .auth-card ya no tiene override en el tier (landing, Task 3 2026-07-25).
       /\.view\s*\{[^}]*padding:\s*12px/.test(t480) && /\.topbar\s*\{[^}]*padding(?:-left)?:[^};]*12px/.test(t480)
-      && /\.exam-body\s*\{[^}]*padding:/.test(t480) && /\.auth-card\s*\{[^}]*padding:/.test(t480));
+      && /\.exam-body\s*\{[^}]*padding:/.test(t480));
     check('N20 tier: prohibido overflow-x:hidden como mitigación en body/main/views-container',
       !/(?:^|[\s,])(?:body|html|\.main|\.views-container)[^{]*\{[^}]*overflow-x:\s*hidden/m.test(cssSrc));
     /* --- Task 2: red de seguridad de texto + dvh + topbar (reglas base, fuera de media queries) --- */
@@ -1336,7 +1341,11 @@ const SAMPLE_Q = {
     const idxBaseFabMatch = /\.bmc-fab \{\r?\n\s*position: fixed;/.exec(cssSrc);
     const idxBaseFab = idxBaseFabMatch ? idxBaseFabMatch.index : -1;
     const idxOverrideFab = cssSrc.indexOf('.bmc-fab { padding: 0; width: 48px;');
-    const idxReducedMotion = cssSrc.indexOf('@media (prefers-reduced-motion');
+    // '...motion: reduce)' específico, no el genérico "...motion" a secas: la
+    // landing (Task 3, 2026-07-25) añadió antes en el fichero un segundo media
+    // query de motion — '@media (prefers-reduced-motion: no-preference)' —
+    // que un indexOf genérico encontraría primero (mismo ajuste que N19).
+    const idxReducedMotion = cssSrc.indexOf('@media (prefers-reduced-motion: reduce)');
     check('N21 css: el override móvil de .bmc-fab va DESPUÉS de la base y ANTES de reduced-motion (gana la cascada)',
       idxBaseFab >= 0 && idxOverrideFab > idxBaseFab && idxOverrideFab < idxReducedMotion);
 
@@ -1615,6 +1624,21 @@ const SAMPLE_Q = {
     check('N24 markup: un solo <h1> en la landing', (lpBlock.match(/<h1/g) || []).length === 1);
     check('N24 markup: authForgot arranca oculto (modo registro por defecto)',
       /id="authForgot"[^>]*style="display:none"/.test(htmlSrc) || /style="display:none"[^>]*id="authForgot"/.test(htmlSrc));
+
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    check('N24 css: tokens --lp-* scoped a #auth-screen (dark-only)',
+      /#auth-screen \{[^}]*--lp-bg: ?#0B0B12/i.test(cssSrc) && /--lp-accent: ?#6C4EF6/i.test(cssSrc));
+    check('N24 css: #auth-screen ya no es position:fixed (landing scrolleable)',
+      !/#auth-screen \{[^}]*position: ?fixed/.test(cssSrc));
+    for (const sel of ['.lp-header \\{', '.lp-hero \\{', '.lp-why \\{', '.lp-timeline \\{', '.lp-cta-btn \\{', '.lp-footer \\{', '.sr-only \\{']) {
+      check(`N24 css: regla real ${sel.replace(' \\{', '')}`, new RegExp(sel).test(cssSrc));
+    }
+    check('N24 css: scroll suave con guard de reduced-motion',
+      /@media \(prefers-reduced-motion: no-preference\) \{\s*html \{ scroll-behavior: smooth; \}/.test(cssSrc));
+    check('N24 css: la landing va antes del tail (reduced-motion sigue detrás)',
+      cssSrc.indexOf('.lp-hero {') !== -1
+      && cssSrc.indexOf('.lp-hero {') < cssSrc.indexOf('@media (prefers-reduced-motion: reduce)'));
+    check('N24 css: paso activo del timeline', /\.lp-step:first-child \.lp-step-num \{/.test(cssSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
