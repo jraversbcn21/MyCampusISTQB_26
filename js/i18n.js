@@ -205,6 +205,26 @@ const TRANSLATIONS = {
     auth_err_rate_limit: "Demasiados intentos. Espera unos minutos.",
     auth_load_failure_msg: "No se pudo cargar el servicio de autenticación. Comprueba tu conexión a internet y recarga la página.",
     auth_missing_modules_msg: "Error al cargar la aplicación. Recarga la página; si el problema persiste, contacta soporte.",
+
+    // CELEBRACIÓN (módulo completado + diploma, 2026-07-25)
+    celebr_badge: "Módulo {n} · Superado",
+    celebr_title: "¡Enhorabuena!",
+    celebr_subtitle: "Has dominado {ch}",
+    celebr_quote_0: "Cada test que entiendes hoy es un bug que evitas mañana. ¡Sigue así!",
+    celebr_quote_1: "El testing acompaña al software durante toda su vida — tú ya sabes cuándo y cómo.",
+    celebr_quote_2: "Un buen tester encuentra defectos sin ejecutar una sola línea de código. Vas camino de serlo.",
+    celebr_quote_3: "Dominar las técnicas es pasar de probar por intuición a probar con precisión.",
+    celebr_quote_4: "Gestionar el testing es gestionar el riesgo — y tú ya tienes el mapa.",
+    celebr_quote_5: "Las herramientas multiplican al tester que sabe lo que hace. Como tú.",
+    celebr_cta_next: "Empezar Módulo {n} →",
+    celebr_cta_curriculum: "Ir al curriculum →",
+    celebr_cta_stay: "Quedarme aquí",
+    diploma_eyebrow: "MyCampus ISTQB · CTFL v4.0",
+    diploma_title: "Diploma de Finalización",
+    diploma_awarded_to: "Se otorga el presente diploma a",
+    diploma_body: "por completar con éxito los 6 módulos del campus de preparación para la certificación ISTQB Foundation Level.",
+    diploma_cta: "Ponte a prueba: Simulacro de examen →",
+    diploma_close: "Cerrar",
   },
 
   en: {
@@ -409,6 +429,26 @@ const TRANSLATIONS = {
     auth_err_rate_limit: "Too many attempts. Wait a few minutes.",
     auth_load_failure_msg: "The authentication service failed to load. Check your internet connection and reload the page.",
     auth_missing_modules_msg: "Error loading the app. Reload the page; if the problem persists, contact support.",
+
+    // CELEBRATION (module completed + diploma, 2026-07-25)
+    celebr_badge: "Module {n} · Passed",
+    celebr_title: "Congratulations!",
+    celebr_subtitle: "You've mastered {ch}",
+    celebr_quote_0: "Every test you understand today is a bug you prevent tomorrow. Keep it up!",
+    celebr_quote_1: "Testing walks with software through its whole life — now you know when and how.",
+    celebr_quote_2: "A great tester finds defects without running a single line of code. You're on your way.",
+    celebr_quote_3: "Mastering techniques means moving from testing by intuition to testing with precision.",
+    celebr_quote_4: "Managing testing is managing risk — and you now hold the map.",
+    celebr_quote_5: "Tools multiply the tester who knows what they're doing. Like you.",
+    celebr_cta_next: "Start Module {n} →",
+    celebr_cta_curriculum: "Go to curriculum →",
+    celebr_cta_stay: "Stay here",
+    diploma_eyebrow: "MyCampus ISTQB · CTFL v4.0",
+    diploma_title: "Diploma of Completion",
+    diploma_awarded_to: "This diploma is awarded to",
+    diploma_body: "for successfully completing all 6 modules of the ISTQB Foundation Level preparation campus.",
+    diploma_cta: "Put yourself to the test: Exam simulator →",
+    diploma_close: "Close",
   }
 };
 

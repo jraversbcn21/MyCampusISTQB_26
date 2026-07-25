@@ -1435,6 +1435,20 @@ const SAMPLE_Q = {
       && /Sync\._reconciled\s*=\s*true/.test(authSrc));
   }
 
+  /* ---- N23: celebración de módulo completado + diploma de campus (2026-07-25) ---- */
+  {
+    const ctx = loadApp();
+    const keys = ['celebr_badge', 'celebr_title', 'celebr_subtitle',
+      'celebr_quote_0', 'celebr_quote_1', 'celebr_quote_2',
+      'celebr_quote_3', 'celebr_quote_4', 'celebr_quote_5',
+      'celebr_cta_next', 'celebr_cta_curriculum', 'celebr_cta_stay',
+      'diploma_eyebrow', 'diploma_title', 'diploma_awarded_to',
+      'diploma_body', 'diploma_cta', 'diploma_close'];
+    check('N23 i18n: las 18 claves de celebración definidas y no vacías en ES y EN',
+      keys.every(k => typeof ctx.TRANSLATIONS.es[k] === 'string' && ctx.TRANSLATIONS.es[k].length > 0
+        && typeof ctx.TRANSLATIONS.en[k] === 'string' && ctx.TRANSLATIONS.en[k].length > 0));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
