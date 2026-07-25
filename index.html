@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MyCampus ISTQB — Foundation Level v4.0</title>
   <meta name="description" content="Plataforma de estudio gratuita para preparar la certificación ISTQB Certified Tester Foundation Level (CTFL) v4.0: lecciones, glosario, flashcards y simulacros de examen con progreso sincronizado en la nube." />
-  <meta name="theme-color" content="#0B0B14" />
+  <meta name="theme-color" content="#0B0B12" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="MyCampus ISTQB — Foundation Level v4.0" />
   <meta property="og:description" content="Prepara la certificación ISTQB CTFL v4.0 con lecciones, glosario, flashcards y simulacros de examen." />
@@ -19,7 +19,7 @@
        fonts.googleapis.com en paralelo en vez de esperar a que ambos
        scripts bloqueantes terminen. -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <!-- Sentry va primero de los dos scripts síncronos: en cuanto carga, deja
        window.Sentry listo para que monitoring.js pueda inicializarlo. Ese
        init real ocurre más abajo en <body> (ver AGENTS.md "Script Load
@@ -67,61 +67,157 @@
     <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></symbol>
   </svg>
 
-  <!-- ============ AUTH SCREEN ============ -->
+  <!-- ============ LANDING PÚBLICA + AUTH (rediseño 2026-07-25, opción 1B) ============
+       La tarjeta de acceso conserva TODOS los ids que auth.js usa. El default
+       estático es modo registro (tab activo, submit "Crear cuenta", fieldName
+       visible, authForgot oculto) — auth.js Task 4 pone _mode:'register' a juego. -->
   <div id="auth-screen">
-    <div class="auth-card">
-      <div class="auth-lang-switcher">
-        <button class="lang-btn active" id="authBtnES">ES</button>
-        <button class="lang-btn" id="authBtnEN">EN</button>
+    <header class="lp-header">
+      <div class="lp-brand">
+        <span class="lp-brand-icon"><svg class="icon" aria-hidden="true"><use href="#i-graduation-cap"/></svg></span>
+        <span class="lp-wordmark">MyCampus</span>
       </div>
-
-      <div class="auth-logo">
-        <span class="auth-logo-icon"><svg class="icon" aria-hidden="true"><use href="#i-graduation-cap"/></svg></span>
-        <div>
-          <span class="auth-logo-title">MyCampus</span>
-          <span class="auth-logo-sub">ISTQB Foundation Level v4.0</span>
+      <div class="lp-header-right">
+        <a href="#acceso" class="lp-signin-link" id="lpSigninLink" data-i18n="lp_signin_link">Iniciar sesión</a>
+        <div class="lp-lang">
+          <button class="lang-btn active" id="authBtnES" aria-pressed="true">ES</button>
+          <button class="lang-btn" id="authBtnEN" aria-pressed="false">EN</button>
         </div>
       </div>
+    </header>
 
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tabLogin" data-i18n="auth_login_tab">Iniciar sesión</button>
-        <button class="auth-tab" id="tabRegister" data-i18n="auth_register_tab">Registrarse</button>
+    <section class="lp-hero">
+      <span class="lp-badge" data-i18n="lp_badge">ISTQB FOUNDATION LEVEL · SYLLABUS V4.0</span>
+      <h1 class="lp-h1" data-i18n="lp_h1">Todo lo que necesitas para aprobar, en un solo lugar.</h1>
+      <p class="lp-lede" data-i18n="lp_lede">Teoría, práctica y exámenes simulados con tiempo siguiendo el syllabus oficial, en español e inglés.</p>
+
+      <div class="auth-card" id="acceso">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabRegister" data-i18n="auth_register_tab">Registrarse</button>
+          <button class="auth-tab" id="tabLogin" data-i18n="auth_login_tab">Iniciar sesión</button>
+        </div>
+
+        <div id="authMessage" class="auth-message" style="display:none"></div>
+
+        <form class="auth-form" id="authForm" autocomplete="on">
+          <div class="auth-field" id="fieldName">
+            <label for="authName" class="sr-only" data-i18n="auth_name_label">Nombre</label>
+            <input type="text" id="authName" name="name" placeholder="¿Cómo te llamamos?" data-i18n-placeholder="auth_name_placeholder" autocomplete="name" />
+          </div>
+          <div class="auth-field">
+            <label for="authEmail" class="sr-only" data-i18n="auth_email_label">Email</label>
+            <input type="email" id="authEmail" name="email" placeholder="tu@email.com" data-i18n-placeholder="auth_email_placeholder" autocomplete="email" required />
+          </div>
+          <div class="auth-field">
+            <label for="authPassword" class="sr-only" data-i18n="auth_password_label">Contraseña</label>
+            <input type="password" id="authPassword" name="password" placeholder="Contraseña" data-i18n-placeholder="auth_password_placeholder" autocomplete="current-password" required />
+          </div>
+          <button type="submit" class="auth-btn-primary" id="authSubmit">Crear cuenta</button>
+        </form>
+
+        <div class="auth-divider"><span data-i18n="auth_divider">o continuar con</span></div>
+
+        <button class="auth-btn-google" id="authGoogle">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.20443C17.64 8.56625 17.5827 7.95262 17.4764 7.36353H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8196H14.9564C16.6582 14.2527 17.64 11.9455 17.64 9.20443Z" fill="#4285F4"/>
+            <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5614C11.2418 14.1014 10.2109 14.4204 9 14.4204C6.65591 14.4204 4.67182 12.8372 3.96409 10.71H0.957275V13.0418C2.43818 15.9832 5.48182 18 9 18Z" fill="#34A853"/>
+            <path d="M3.96409 10.71C3.78409 10.17 3.68182 9.59319 3.68182 9C3.68182 8.40682 3.78409 7.83 3.96409 7.29V4.95818H0.957275C0.347727 6.17318 0 7.54773 0 9C0 10.4523 0.347727 11.8268 0.957275 13.0418L3.96409 10.71Z" fill="#FBBC05"/>
+            <path d="M9 3.57955C10.3214 3.57955 11.5077 4.03364 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01682 0.957275 4.95818L3.96409 7.29C4.67182 5.16273 6.65591 3.57955 9 3.57955Z" fill="#EA4335"/>
+          </svg>
+          <span data-i18n="auth_google_btn">Continuar con Google</span>
+        </button>
+
+        <div class="lp-auth-foot">
+          <a href="#" class="auth-forgot" id="authForgot" style="display:none" data-i18n="auth_forgot_password">¿Olvidaste tu contraseña?</a>
+          <a href="privacy.html" class="auth-privacy-link" data-i18n="privacy_link">Política de privacidad</a>
+        </div>
       </div>
+    </section>
 
-      <div id="authMessage" class="auth-message" style="display:none"></div>
+    <section class="lp-why">
+      <h2 class="sr-only" data-i18n="lp_why_heading">Por qué certificarse</h2>
+      <div>
+        <h3 data-i18n="lp_why1_title">Un estándar internacional</h3>
+        <p data-i18n="lp_why1_body">ISTQB es la certificación de testing más pedida en las búsquedas de QA, y Foundation Level es su puerta de entrada.</p>
+      </div>
+      <div>
+        <h3 data-i18n="lp_why2_title">Sin experiencia previa</h3>
+        <p data-i18n="lp_why2_body">El syllabus empieza de cero: sirve tanto si cambias de carrera como si ya trabajas en testing.</p>
+      </div>
+      <div>
+        <h3 data-i18n="lp_why3_title">Un vocabulario común</h3>
+        <p data-i18n="lp_why3_body">Terminas sabiendo nombrar técnicas, niveles y tipos de prueba como lo hace todo equipo de QA.</p>
+      </div>
+    </section>
 
-      <form class="auth-form" id="authForm" autocomplete="on">
-        <div class="auth-field" id="fieldName" style="display:none">
-          <label for="authName" data-i18n="auth_name_label">Nombre</label>
-          <input type="text" id="authName" name="name" placeholder="¿Cómo te llamamos?" data-i18n-placeholder="auth_name_placeholder" autocomplete="name" />
+    <section class="lp-roadmap">
+      <div class="lp-roadmap-intro">
+        <h2 class="lp-h2" data-i18n="lp_roadmap_title">Tu recorrido por el syllabus</h2>
+        <p data-i18n="lp_roadmap_intro">Seis capítulos, en el mismo orden que el examen oficial. Siempre sabes dónde estás y qué te falta.</p>
+        <div class="lp-included">
+          <span class="lp-included-label" data-i18n="lp_included_label">INCLUIDO EN CADA CAPÍTULO</span>
+          <span data-i18n="lp_included_1">Teoría escrita para el examen</span>
+          <span data-i18n="lp_included_2">Preguntas de práctica con explicación</span>
+          <span data-i18n="lp_included_3">Examen simulado con tiempo al final</span>
+          <span data-i18n="lp_included_4">Progreso guardado a medida que avanzas</span>
         </div>
-        <div class="auth-field">
-          <label for="authEmail" data-i18n="auth_email_label">Email</label>
-          <input type="email" id="authEmail" name="email" placeholder="tu@email.com" data-i18n-placeholder="auth_email_placeholder" autocomplete="email" required />
-        </div>
-        <div class="auth-field">
-          <label for="authPassword" data-i18n="auth_password_label">Contraseña</label>
-          <input type="password" id="authPassword" name="password" placeholder="••••••••" autocomplete="current-password" required />
-        </div>
-        <button type="submit" class="auth-btn-primary" id="authSubmit">Iniciar sesión</button>
-      </form>
+      </div>
+      <ol class="lp-timeline">
+        <li class="lp-step">
+          <div class="lp-step-rail" aria-hidden="true"><span class="lp-step-num">1</span><span class="lp-step-line"></span></div>
+          <div class="lp-step-body">
+            <h3 data-i18n="lp_ch1_title">Fundamentos del testing</h3>
+            <p data-i18n="lp_ch1_body">Para qué sirve probar, los siete principios, el proceso de prueba y las habilidades que exige.</p>
+          </div>
+        </li>
+        <li class="lp-step">
+          <div class="lp-step-rail" aria-hidden="true"><span class="lp-step-num">2</span><span class="lp-step-line"></span></div>
+          <div class="lp-step-body">
+            <h3 data-i18n="lp_ch2_title">Testing en el ciclo de vida</h3>
+            <p data-i18n="lp_ch2_body">Niveles y tipos de prueba, pruebas de mantenimiento y testing en equipos ágiles.</p>
+          </div>
+        </li>
+        <li class="lp-step">
+          <div class="lp-step-rail" aria-hidden="true"><span class="lp-step-num">3</span><span class="lp-step-line"></span></div>
+          <div class="lp-step-body">
+            <h3 data-i18n="lp_ch3_title">Pruebas estáticas</h3>
+            <p data-i18n="lp_ch3_body">Revisiones y el proceso de revisión: detectar defectos antes de ejecutar una sola línea.</p>
+          </div>
+        </li>
+        <li class="lp-step">
+          <div class="lp-step-rail" aria-hidden="true"><span class="lp-step-num">4</span><span class="lp-step-line"></span></div>
+          <div class="lp-step-body">
+            <h3 data-i18n="lp_ch4_title">Análisis y diseño de pruebas</h3>
+            <p data-i18n="lp_ch4_body">Particiones de equivalencia, valores límite, tablas de decisión, cobertura y testing exploratorio.</p>
+          </div>
+        </li>
+        <li class="lp-step">
+          <div class="lp-step-rail" aria-hidden="true"><span class="lp-step-num">5</span><span class="lp-step-line"></span></div>
+          <div class="lp-step-body">
+            <h3 data-i18n="lp_ch5_title">Gestión de las actividades de prueba</h3>
+            <p data-i18n="lp_ch5_body">Planificación, estimación, análisis de riesgos, monitoreo, control y gestión de defectos.</p>
+          </div>
+        </li>
+        <li class="lp-step">
+          <div class="lp-step-rail" aria-hidden="true"><span class="lp-step-num">6</span></div>
+          <div class="lp-step-body">
+            <h3 data-i18n="lp_ch6_title">Herramientas de prueba</h3>
+            <p data-i18n="lp_ch6_body">Qué cubre realmente el soporte de herramientas y qué esperar al adoptarlas.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
 
-      <a href="#" class="auth-forgot" id="authForgot" data-i18n="auth_forgot_password">¿Olvidaste tu contraseña?</a>
+    <section class="lp-cta">
+      <h2 class="lp-h2" data-i18n="lp_cta_title">Cuando quieras, empezamos</h2>
+      <p data-i18n="lp_cta_body">Crea tu cuenta y abre el capítulo 1 ahora mismo.</p>
+      <a class="lp-cta-btn" id="lpCtaBtn" href="#acceso" data-i18n="lp_cta_btn">Crear cuenta gratis</a>
+    </section>
 
-      <div class="auth-divider"><span data-i18n="auth_divider">o continuar con</span></div>
-
-      <button class="auth-btn-google" id="authGoogle">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17.64 9.20443C17.64 8.56625 17.5827 7.95262 17.4764 7.36353H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8196H14.9564C16.6582 14.2527 17.64 11.9455 17.64 9.20443Z" fill="#4285F4"/>
-          <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5614C11.2418 14.1014 10.2109 14.4204 9 14.4204C6.65591 14.4204 4.67182 12.8372 3.96409 10.71H0.957275V13.0418C2.43818 15.9832 5.48182 18 9 18Z" fill="#34A853"/>
-          <path d="M3.96409 10.71C3.78409 10.17 3.68182 9.59319 3.68182 9C3.68182 8.40682 3.78409 7.83 3.96409 7.29V4.95818H0.957275C0.347727 6.17318 0 7.54773 0 9C0 10.4523 0.347727 11.8268 0.957275 13.0418L3.96409 10.71Z" fill="#FBBC05"/>
-          <path d="M9 3.57955C10.3214 3.57955 11.5077 4.03364 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01682 0.957275 4.95818L3.96409 7.29C4.67182 5.16273 6.65591 3.57955 9 3.57955Z" fill="#EA4335"/>
-        </svg>
-        <span data-i18n="auth_google_btn">Continuar con Google</span>
-      </button>
-
-      <a href="privacy.html" class="auth-privacy-link" data-i18n="privacy_link">Política de privacidad</a>
-    </div>
+    <footer class="lp-footer">
+      <span data-i18n="lp_footer">MyCampus · ISTQB Foundation Level v4.0</span>
+      <a href="privacy.html" data-i18n="privacy_link">Política de privacidad</a>
+    </footer>
   </div>
 
   <!-- ============ APP (visible tras login) ============ -->

@@ -851,7 +851,7 @@ const SAMPLE_Q = {
     check('N17 iconos: los 4 stat-icons usan el sprite',
       (htmlSrc.match(/class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-/g) || []).length === 4);
     check('N17 iconos: logo, toggles, logout, búsqueda y flechas usan el sprite',
-      ['auth-logo-icon', 'logo-icon'].every(c => new RegExp(`class="${c}"><svg class="icon"`).test(htmlSrc))
+      ['lp-brand-icon', 'logo-icon'].every(c => new RegExp(`class="${c}"><svg class="icon"`).test(htmlSrc))
       && !/id="sidebarToggle"[^>]*>&#9776;|id="mobileMenuBtn"[^>]*>&#9776;/.test(htmlSrc)
       && /id="mobileSearchBtn"[^>]*><svg class="icon"/.test(htmlSrc)
       && /class="logout-icon"><svg class="icon"/.test(htmlSrc)
@@ -1595,6 +1595,26 @@ const SAMPLE_Q = {
       check('N24 i18n: sin navigator.language (o navigator ausente) cae a "es" por defecto',
         ctx.i18n.lang === 'es');
     }
+
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const iReg = htmlSrc.indexOf('id="tabRegister"');
+    const iLog = htmlSrc.indexOf('id="tabLogin"');
+    check('N24 markup: tarjeta de acceso con id="acceso"', htmlSrc.includes('id="acceso"'));
+    check('N24 markup: tabs en orden Registrarse -> Iniciar sesión', iReg !== -1 && iLog !== -1 && iReg < iLog);
+    check('N24 markup: labels del form ocultos con sr-only',
+      /class="sr-only" data-i18n="auth_email_label"/.test(htmlSrc)
+      && /class="sr-only" data-i18n="auth_password_label"/.test(htmlSrc)
+      && /class="sr-only" data-i18n="auth_name_label"/.test(htmlSrc));
+    check('N24 markup: link de login del header presente', htmlSrc.includes('id="lpSigninLink"'));
+    check('N24 markup: CTA final presente', htmlSrc.includes('id="lpCtaBtn"'));
+    check('N24 markup: placeholder de contraseña via i18n',
+      htmlSrc.includes('data-i18n-placeholder="auth_password_placeholder"'));
+    check('N24 markup: fuentes Space Grotesk y Manrope en <head>',
+      /Space\+Grotesk/.test(htmlSrc) && /Manrope/.test(htmlSrc));
+    const lpBlock = htmlSrc.slice(htmlSrc.indexOf('id="auth-screen"'), htmlSrc.indexOf('id="app-container"'));
+    check('N24 markup: un solo <h1> en la landing', (lpBlock.match(/<h1/g) || []).length === 1);
+    check('N24 markup: authForgot arranca oculto (modo registro por defecto)',
+      /id="authForgot"[^>]*style="display:none"/.test(htmlSrc) || /style="display:none"[^>]*id="authForgot"/.test(htmlSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
