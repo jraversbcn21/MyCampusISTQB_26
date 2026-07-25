@@ -579,7 +579,7 @@ const App = {
     const lang = i18n.lang;
     // Único dato controlable por el usuario del template → escapeHtml (regla XSS).
     const name = escapeHtml(this._getDisplayName());
-    const date = new Date().toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB',
+    const date = new Date().toLocaleDateString(i18n.t('date_locale'),
       { day: 'numeric', month: 'long', year: 'numeric' });
     const chips = CHAPTERS.map(ch =>
       `<span class="celebr-chip"><span aria-hidden="true">✓ </span>${ch.title[lang]}</span>`).join('');
