@@ -18,6 +18,9 @@ Live in production at **https://mycampusistqb.vercel.app** (soft launch 2026-07-
 
 - **GitHub:** https://github.com/jraversbcn21/MyCampusISTQB_26 — **public**, default branch
   `master`.
+- **`LICENSE`: MIT, copyright Sid Maier (2026-08-05)** — added after the repo link was shared on
+  Reddit and a commenter asked about reuse terms; before this the repo was public but had no
+  explicit license (default all-rights-reserved).
 - **No CI/CD, no PR review workflow** — work happens as direct commits to `master` (the repo's
   actual practice; tracked here so an agent doesn't assume a branch/PR process that isn't there).
 - **Git history was rewritten on 2026-07-02** (`git filter-repo` + force-push) to purge the
