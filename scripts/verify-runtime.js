@@ -1877,6 +1877,17 @@ const SAMPLE_Q = {
     }
   }
 
+  /* ---- N27: ranking global por XP (2026-08-06) ---- */
+  {
+    const ctx = loadApp();
+    const rkKeys = ['nav_ranking', 'rk_intro', 'rk_publish_note', 'rk_name_label',
+      'rk_name_placeholder', 'rk_join', 'rk_leave', 'rk_rename', 'rk_error', 'rk_offline',
+      'rk_empty', 'rk_loading', 'rk_pos_header', 'rk_name_header', 'rk_xp_header',
+      'rk_your_position', 'rk_you', 'rk_name_invalid', 'rk_left_toast'];
+    check('N27 i18n: claves rk_* definidas en ES y EN',
+      rkKeys.every(k => ctx.TRANSLATIONS.es[k] && ctx.TRANSLATIONS.en[k]));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

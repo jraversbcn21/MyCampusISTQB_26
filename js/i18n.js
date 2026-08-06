@@ -262,6 +262,27 @@ const TRANSLATIONS = {
     diploma_body: "por completar con éxito los 6 módulos del campus de preparación para la certificación ISTQB Foundation Level.",
     diploma_cta: "Ponte a prueba: Simulacro de examen →",
     diploma_close: "Cerrar",
+
+    // Ranking (2026-08-06)
+    nav_ranking: "Ranking",
+    rk_intro: "Compárate con el resto de estudiantes del campus por XP acumulado.",
+    rk_publish_note: "Participar publica únicamente el nombre que elijas y tu XP, visibles solo para usuarios registrados del campus. Puedes cambiar el nombre o salir cuando quieras; al salir, tu entrada se borra al momento.",
+    rk_name_label: "Nombre a mostrar",
+    rk_name_placeholder: "Tu nombre en el ranking",
+    rk_join: "Participar en el ranking",
+    rk_leave: "Salir del ranking",
+    rk_rename: "Guardar nombre",
+    rk_error: "El ranking no está disponible ahora mismo. Inténtalo más tarde.",
+    rk_offline: "El ranking necesita conexión. Vuelve a intentarlo cuando estés en línea.",
+    rk_empty: "Aún no hay participantes. ¡Sé el primero!",
+    rk_loading: "Cargando ranking…",
+    rk_pos_header: "Puesto",
+    rk_name_header: "Nombre",
+    rk_xp_header: "XP",
+    rk_your_position: "Tu posición",
+    rk_you: "Tú",
+    rk_name_invalid: "El nombre debe tener entre 1 y 30 caracteres.",
+    rk_left_toast: "Has salido del ranking. Tu entrada se ha borrado.",
   },
 
   en: {
@@ -523,6 +544,27 @@ const TRANSLATIONS = {
     diploma_body: "for successfully completing all 6 modules of the ISTQB Foundation Level preparation campus.",
     diploma_cta: "Put yourself to the test: Exam simulator →",
     diploma_close: "Close",
+
+    // Ranking (2026-08-06)
+    nav_ranking: "Ranking",
+    rk_intro: "Compare yourself with the rest of the campus students by accumulated XP.",
+    rk_publish_note: "Joining publishes only the name you choose and your XP, visible only to registered campus users. You can change your name or leave at any time; leaving deletes your entry immediately.",
+    rk_name_label: "Display name",
+    rk_name_placeholder: "Your name on the leaderboard",
+    rk_join: "Join the ranking",
+    rk_leave: "Leave the ranking",
+    rk_rename: "Save name",
+    rk_error: "The ranking is not available right now. Please try again later.",
+    rk_offline: "The ranking needs a connection. Try again when you are online.",
+    rk_empty: "No participants yet. Be the first!",
+    rk_loading: "Loading ranking…",
+    rk_pos_header: "Rank",
+    rk_name_header: "Name",
+    rk_xp_header: "XP",
+    rk_your_position: "Your position",
+    rk_you: "You",
+    rk_name_invalid: "The name must be between 1 and 30 characters.",
+    rk_left_toast: "You have left the ranking. Your entry has been deleted.",
   }
 };
 
