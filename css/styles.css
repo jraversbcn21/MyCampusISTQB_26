@@ -2470,8 +2470,9 @@ body {
 
 /* ===================================================
    RANKING (2026-08-06)
-   Tabla del top + panel de opt-in. Nombres ajenos truncan con ellipsis; la
-   tabla vive en .table-scroll (patrón lecciones móvil). Botones a 44px min.
+   Tabla del top + panel de opt-in. Nombres ajenos parten con break-word (sin
+   truncado silencioso); la tabla vive en .table-scroll (patrón lecciones
+   móvil). Botones a 44px min.
    =================================================== */
 .ranking-intro { color: var(--text2); margin-bottom: 16px; }
 .ranking-msg { color: var(--text2); padding: 24px 0; }

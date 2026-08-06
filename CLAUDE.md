@@ -1238,6 +1238,15 @@ protegido con un check comportamental que renderiza un `display_name` malicioso
   Lección general (repetida ya tres veces): fusionar o mover un bloque de media query
   cambia su posición en la cascada — comprobar qué reglas posteriores estaba ganando antes
   de tocarlo.
+- **Resurrección del opt-out en multi-dispositivo (aceptada, inherente al "más reciente
+  gana").** Un usuario sale del ranking en el dispositivo A (`rankingLeave()` borra su fila
+  y pone `rankingOptIn = false`); si el dispositivo B tenía `rankingOptIn: true` desatualizado
+  en su copia local y luego genera progreso propio, su push (más fresco) vuelve a hacer
+  `upsert` de la fila vía `_pushRanking` — la salida queda revertida sin que nadie la pidiera
+  de nuevo. Autoconsistente (el estado sincronizado dice `rankingOptIn: true`, coherente con
+  la fila reaparecida) y aceptado para el modelo de conflictos existente (mismo criterio que
+  "más reciente gana" en `Sync.loadState`) — no es un bug a corregir, se documenta para que
+  un futuro agente no lo redescubra como tal.
 
 **Privacidad (mismo commit — regla del repo):** sección "Ranking voluntario"/"Voluntary
 ranking" en `privacy.html` ES/EN — qué se publica (nombre elegido + XP), a quién (solo

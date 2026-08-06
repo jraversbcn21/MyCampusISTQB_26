@@ -1387,6 +1387,7 @@ const App = {
     let res;
     try { res = await this._rankingFetch(); }
     catch (e) {
+      console.warn('[Ranking] fetch falló:', e.message);
       cont.innerHTML = `<p class="ranking-msg">${i18n.t('rk_error')}</p>`;
       return;
     }

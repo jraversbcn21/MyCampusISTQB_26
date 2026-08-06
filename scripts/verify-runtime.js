@@ -2046,7 +2046,7 @@ const SAMPLE_Q = {
       /\.ranking-table \{/.test(cssSrc)
       && cssSrc.search(/\.ranking-table \{/) < cssSrc.search(/@media \(prefers-reduced-motion: reduce\)/));
     check('N27 css: fila propia resaltada y botones táctiles de ≥44px',
-      /\.rk-me \{/.test(cssSrc) && /\.rk-join-btn/.test(cssSrc));
+      /\.rk-me \{/.test(cssSrc) && /\.rk-join-btn, \.rk-rename-btn, \.rk-leave-btn \{/.test(cssSrc));
     check('N27 responsive: la vista ranking entra en el barrido del gate',
       /'achievements', 'ranking'/.test(fs.readFileSync(path.join(ROOT, 'scripts', 'validate-responsive.js'), 'utf8')));
     check('N27 css: overrides del tier 480 con prefijo #view-ranking (especificidad de id — ganan a la base posterior)',
