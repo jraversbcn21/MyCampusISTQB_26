@@ -1997,6 +1997,40 @@ const SAMPLE_Q = {
       && html.includes('id="rkNameInput"'));
   }
 
+  {
+    // Sync: upsert del ranking tras el push del progreso, gated por el flag,
+    // y nunca bloqueante.
+    const ctx = loadApp();
+    ctx.Sync._reconciled = true;
+    const st = { xp: 500, rankingOptIn: true, rankingName: 'Yo', _updatedAt: 1 };
+    await ctx.Sync._push('u-rk', st);
+    const tables = ctx.supabase._calls.upserts.map(u => u.table);
+    check('N27 sync: con optIn el push sube progreso Y ranking (en ese orden)',
+      tables.indexOf('user_progress') !== -1
+      && tables.indexOf('leaderboard') > tables.indexOf('user_progress'));
+
+    const before = ctx.supabase._calls.upserts.filter(u => u.table === 'leaderboard').length;
+    await ctx.Sync._push('u-rk', { xp: 500, rankingOptIn: false, _updatedAt: 2 });
+    check('N27 sync: sin optIn el push no toca leaderboard',
+      ctx.supabase._calls.upserts.filter(u => u.table === 'leaderboard').length === before);
+  }
+  {
+    // Un fallo del upsert del ranking no rompe el push del progreso.
+    const sb = makeSupabaseMock();
+    const origFrom = sb.from.bind(sb);
+    sb.from = (table) => {
+      if (table === 'leaderboard') return { upsert: async () => { throw new Error('boom'); } };
+      return origFrom(table);
+    };
+    const ctx = loadApp({ supabase: sb });
+    ctx.Sync._reconciled = true;
+    let threw = false;
+    try { await ctx.Sync._push('u-rk', { xp: 1, rankingOptIn: true, rankingName: 'Yo', _updatedAt: 3 }); }
+    catch (e) { threw = true; }
+    check('N27 sync: el upsert del ranking reventando no propaga ni impide el push',
+      !threw && sb._calls.upserts.some(u => u.table === 'user_progress'));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

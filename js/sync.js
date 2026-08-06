@@ -126,8 +126,30 @@ const Sync = {
         );
       if (error) throw error;
       this._dirty = false;
+
+      // Ranking (2026-08-06): proyección {nombre, xp} si el usuario participa.
+      // Posterior e independiente: su fallo jamás bloquea el progreso.
+      if (state && state.rankingOptIn) await this._pushRanking(userId, state);
     } catch (e) {
       console.warn('[Sync] push a Supabase falló:', e.message);
+    }
+  },
+
+  // Upsert de la fila propia en leaderboard. Nunca lanza. El flush keepalive de
+  // visibilitychange NO lo replica (deliberado, spec): el siguiente sync con
+  // sesión abierta pone la tabla al día.
+  async _pushRanking(userId, state) {
+    try {
+      const { error } = await supabaseClient
+        .from('leaderboard')
+        .upsert(
+          { user_id: userId, display_name: state.rankingName, xp: state.xp,
+            updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' }
+        );
+      if (error) throw error;
+    } catch (e) {
+      console.warn('[Sync] push del ranking falló (no bloquea el progreso):', e.message);
     }
   },
 
