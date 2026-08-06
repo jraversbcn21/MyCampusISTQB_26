@@ -1173,8 +1173,9 @@ y conflict-resolution gratis (nada nuevo que sincronizar).
   estaba dentro, ni un rename exitoso reactivar a quien ya salió).
 - **Opt-out** (`App.rankingLeave()`): `DELETE` de la fila propia, `rankingOptIn = false`,
   **`rankingName` se conserva** en el estado por si vuelve a entrar (no se limpia).
-- **Render** (`App.renderRanking()`): `SELECT display_name, xp ORDER BY xp DESC LIMIT 50`
-  con `count: 'exact'` (total M en la misma petición); si el usuario participa y no
+- **Render** (`App.renderRanking()`): `SELECT user_id, display_name, xp ORDER BY xp DESC
+  LIMIT 50` (`user_id` va en el `SELECT` para poder identificar cuál fila, si alguna, es la
+  propia) con `count: 'exact'` (total M en la misma petición); si el usuario participa y no
   aparece en el top, una segunda consulta `head: true` cuenta filas con `xp > <mi xp>` →
   «Tu posición: #N / M» (N = superiores + 1). Fila propia resaltada (`.rk-me` + tag
   `rk_you`) cuando sí aparece. Degradación sin excepción: sin `supabaseClient` → mensaje
@@ -1243,15 +1244,16 @@ ranking" en `privacy.html` ES/EN — qué se publica (nombre elegido + XP), a qu
 usuarios autenticados), que el nombre es editable y que salir borra el dato de inmediato;
 fecha "última actualización" al 2026-08-06.
 
-**Gate: familia N27 en `scripts/verify-runtime.js`** (~20 checks) — i18n (`rk_*` +
+**Gate: familia N27 en `scripts/verify-runtime.js`** (23 checks) — i18n (`rk_*` +
 `nav_ranking` definidas y pareadas ES/EN); estáticos (símbolo `#i-podium` en el sprite,
 nav-item e `id="view-ranking"` con `#rankingContent`, `navigate()` despachando
-`renderRanking()` + `titleMap`, guard de migración anclado a regla real — nunca
-`includes()`, lección N19/N21); comportamentales de estado (join valida y persiste, nombre
-vacío/de 31 chars rechazado sin tocar Supabase, leave hace `DELETE` y conserva el nombre,
-fetch calcula posición como superiores + 1); XSS (`display_name` malicioso escapado); sync
-(con `optIn` el push sube progreso y LUEGO ranking, sin `optIn` no toca `leaderboard`, un
-upsert de ranking que revienta no propaga ni bloquea el push de progreso, y `_pushRanking`
-en aislamiento nunca lanza); css/responsive (`.ranking-table` anclada antes del bloque
-reduced-motion, targets ≥44px, fila propia resaltada, la vista `ranking` entra en el barrido
-de `validate-responsive.js`, overrides del tier 480 con el prefijo `#view-ranking`).
+`renderRanking()` + `titleMap`); comportamentales de estado (guard de migración
+`_rankingEnsureState` sobre estado legado, join valida y persiste, nombre vacío/de 31 chars
+rechazado sin tocar Supabase, leave hace `DELETE` y conserva el nombre, fetch calcula
+posición como superiores + 1); XSS (`display_name` malicioso escapado); sync (con `optIn`
+el push sube progreso y LUEGO ranking, sin `optIn` no toca `leaderboard`, un upsert de
+ranking que revienta no propaga ni bloquea el push de progreso, y `_pushRanking` en
+aislamiento nunca lanza); css/responsive (`.ranking-table` **anclada a regla real, nunca
+`includes()`** — lección N19/N21 — antes del bloque reduced-motion, targets ≥44px, fila
+propia resaltada, la vista `ranking` entra en el barrido de `validate-responsive.js`,
+overrides del tier 480 con el prefijo `#view-ranking`).
