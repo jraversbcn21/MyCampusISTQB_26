@@ -1753,7 +1753,31 @@ const App = {
           }
         });
       }
+
+      // Rotación en móvil físico (2026-08-06): iOS Safari no re-clampa
+      // window.scrollY contra la nueva altura del documento al rotar — con el
+      // scroll casi al final de una lección, retrato→apaisado→retrato deja el
+      // viewport más allá del contenido (pantalla en blanco, solo el FAB fixed)
+      // hasta que un tap fuerza el re-clamp de WebKit. Reproducimos el tap:
+      // sobre la mq de orientación (no la de 768px — el apaisado de un móvil
+      // pequeño no cruza ese breakpoint) y tras el settle de 250ms estándar del
+      // repo (el layout aún no está asentado cuando la mq dispara).
+      const mqOrient = matchMedia('(orientation: portrait)');
+      if (typeof mqOrient.addEventListener === 'function') {
+        mqOrient.addEventListener('change', () => {
+          setTimeout(() => this._clampScrollAfterRotate(), 250);
+        });
+      }
     }
+  },
+
+  // Solo actúa si scrollY quedó fuera de rango (el estado inválido que deja
+  // WebKit) — no-op en cualquier rotación normal. behavior:'auto' explícito:
+  // html { scroll-behavior: smooth } es global y lo convertiría en animado.
+  _clampScrollAfterRotate() {
+    if (typeof window === 'undefined' || typeof window.scrollTo !== 'function') return;
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    if (window.scrollY > max) window.scrollTo({ top: max, behavior: 'auto' });
   },
 
   /* ===== TTS (Text-to-Speech) ===== */

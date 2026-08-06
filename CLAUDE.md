@@ -1069,3 +1069,28 @@ syllabus y CTA final). Handoff de diseño (high-fidelity, no code) en
   checks de landing en `scripts/validate-responsive.js` (sin scroll horizontal a
   320/375/414/600/1195px, targets ≥44px en signin/lang/tab/submit/cta, timeline con los 6
   pasos renderizados).
+
+## Clamp de scroll tras rotación en móvil físico (2026-08-06)
+
+Bug reportado en dispositivo real (iOS Safari): con el scroll casi al final de una lección,
+rotar retrato→apaisado→retrato dejaba la pantalla en blanco (solo el FAB del café visible)
+hasta un tap. Diagnóstico: WebKit no re-clampa `window.scrollY` contra la nueva altura del
+documento al rotar — el viewport queda más allá del final del contenido (el topbar sticky
+desaparece porque el viewport está fuera de su contenedor; el FAB fixed sigue visible). El
+primer toque fuerza el re-clamp interno de WebKit — el fix lo reproduce programáticamente.
+
+- **`App._clampScrollAfterRotate()`** — si `scrollY > scrollHeight - innerHeight`, clampa al
+  máximo (`Math.max(0, …)`); si el scroll es válido, no-op absoluto (cero impacto en
+  rotaciones normales). `behavior: 'auto'` explícito (el `html { scroll-behavior: smooth }`
+  global lo haría animado — restricción ya documentada en la landing). Guard `typeof
+  window.scrollTo` para el arnés.
+- **Listener sobre `matchMedia('(orientation: portrait)')`** en `App.init()`, junto al de
+  768px y con sus mismos guards — la mq de orientación, no la de 768px, porque el apaisado
+  de un móvil pequeño (p. ej. iPhone SE, 667px) no cruza ese breakpoint. Difiere el clamp
+  con el `setTimeout` de 250ms estándar del repo (la mq dispara antes de que el layout
+  asiente; nunca `transitionend`).
+- No reproducible en Chromium/Playwright ni en el arnés (quirk de WebKit) — la verificación
+  del síntoma real es manual en dispositivo físico.
+- Gate: familia **N26** en `verify-runtime.js` (estáticos: listener registrado, settle de
+  250ms, `behavior:'auto'`; comportamentales: clampa sobre-scrolleado, no-op en rango,
+  clamp a 0 con documento corto, no-op sin `scrollTo`).

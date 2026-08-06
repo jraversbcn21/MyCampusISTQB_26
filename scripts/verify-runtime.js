@@ -1805,6 +1805,54 @@ const SAMPLE_Q = {
     }
   }
 
+  /* ---- N26: clamp del scroll tras rotar (2026-08-06) ---- */
+  // Bug en iOS Safari (móvil físico): al rotar retrato→apaisado→retrato con el
+  // scroll casi al final de una lección, WebKit no re-clampa window.scrollY
+  // contra la nueva altura del documento — pantalla en blanco (solo el FAB
+  // fixed) hasta que un tap fuerza el re-clamp. El fix reproduce el tap:
+  // listener sobre matchMedia('(orientation: portrait)') que, tras el settle
+  // de 250ms estándar del repo, clampa scrollY solo si quedó fuera de rango.
+  {
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    check('N26 estático: init() registra el listener de orientación con los guards del arnés',
+      /matchMedia\('\(orientation: portrait\)'\)/.test(appSrc));
+    check('N26 estático: el listener difiere el clamp 250ms (settle de layout, patrón del repo)',
+      /setTimeout\(\(\) => this\._clampScrollAfterRotate\(\), 250\)/.test(appSrc));
+    check("N26 estático: el clamp usa behavior:'auto' (scroll-behavior:smooth global lo haría animado)",
+      /_clampScrollAfterRotate\(\) \{[\s\S]*?behavior: 'auto'/.test(appSrc));
+
+    // Comportamental: el método clampa solo cuando scrollY quedó más allá del
+    // final real del documento (el estado inválido que deja WebKit).
+    {
+      const ctx = loadApp();
+      const scrolls = [];
+      ctx.window.scrollTo = (arg) => { scrolls.push(arg); };
+      ctx.window.innerHeight = 800;
+      ctx.document.documentElement.scrollHeight = 2000; // max válido = 1200
+
+      ctx.window.scrollY = 5000; // más allá del final → clamp al máximo
+      ctx.App._clampScrollAfterRotate();
+      check('N26 comportamiento: sobre-scrolleado → clampa a scrollHeight - innerHeight con behavior auto',
+        scrolls.length === 1 && scrolls[0].top === 1200 && scrolls[0].behavior === 'auto');
+
+      ctx.window.scrollY = 500; // dentro de rango → no toca nada
+      ctx.App._clampScrollAfterRotate();
+      check('N26 comportamiento: scroll válido → no-op (cero impacto en rotaciones normales)',
+        scrolls.length === 1);
+
+      ctx.window.scrollY = 100; // documento más corto que el viewport → max 0
+      ctx.document.documentElement.scrollHeight = 600;
+      ctx.App._clampScrollAfterRotate();
+      check('N26 comportamiento: documento más corto que el viewport → clampa a 0, nunca negativo',
+        scrolls.length === 2 && scrolls[1].top === 0);
+
+      delete ctx.window.scrollTo; // arnés/navegador sin scrollTo → no revienta
+      let threw = false;
+      try { ctx.App._clampScrollAfterRotate(); } catch (e) { threw = true; }
+      check('N26 comportamiento: sin window.scrollTo el método es no-op (guard typeof)', !threw);
+    }
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
