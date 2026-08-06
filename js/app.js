@@ -1765,9 +1765,19 @@ const App = {
       const mqOrient = matchMedia('(orientation: portrait)');
       if (typeof mqOrient.addEventListener === 'function') {
         mqOrient.addEventListener('change', () => {
+          this._rotateDebugPush('mq orientación disparó');
           setTimeout(() => this._clampScrollAfterRotate(), 250);
         });
       }
+    }
+
+    // DIAGNÓSTICO TEMPORAL (2026-08-06, retirar tras cerrar el bug de rotación):
+    // overlay fixed activable con ?debugrotate en la URL — visible incluso en el
+    // estado "pantalla en blanco" (los fixed se pintan). pointer-events:none para
+    // no robar el tap que recupera el scroll.
+    if (typeof location !== 'undefined' && String(location.search).indexOf('debugrotate') !== -1) {
+      this._rotateDebugOn = true;
+      try { this._initRotateDebug(); } catch (e) { /* diagnóstico, nunca rompe la app */ }
     }
   },
 
@@ -1777,7 +1787,40 @@ const App = {
   _clampScrollAfterRotate() {
     if (typeof window === 'undefined' || typeof window.scrollTo !== 'function') return;
     const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    if (window.scrollY > max) window.scrollTo({ top: max, behavior: 'auto' });
+    const over = window.scrollY > max;
+    this._rotateDebugPush('clamp: y=' + Math.round(window.scrollY) + ' max=' + max + (over ? ' → CLAMP' : ' → noop'));
+    if (over) window.scrollTo({ top: max, behavior: 'auto' });
+  },
+
+  /* ===== DIAGNÓSTICO DE ROTACIÓN (temporal, 2026-08-06) ===== */
+  _rotateDebugOn: false,
+  _rotateDebugLog: [],
+  _rotateDebugPush(msg) {
+    if (!this._rotateDebugOn) return;
+    const t = new Date();
+    this._rotateDebugLog.push(
+      ('0' + t.getMinutes()).slice(-2) + ':' + ('0' + t.getSeconds()).slice(-2) + ' ' + msg);
+    if (this._rotateDebugLog.length > 6) this._rotateDebugLog.shift();
+  },
+  _initRotateDebug() {
+    const el = document.createElement('div');
+    el.id = 'rotateDebug';
+    el.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;' +
+      'z-index:99999;background:rgba(0,0,0,.85);color:#0f0;font:11px/1.5 monospace;' +
+      'padding:6px 8px;pointer-events:none;white-space:pre;';
+    document.body.appendChild(el);
+    const render = () => {
+      const vv = window.visualViewport;
+      const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      el.textContent = [
+        'scrollY=' + Math.round(window.scrollY) + '  max=' + max +
+          '  scrollH=' + document.documentElement.scrollHeight + '  innerH=' + window.innerHeight,
+        vv ? 'vvPageTop=' + Math.round(vv.pageTop) + '  vvOffTop=' + Math.round(vv.offsetTop) +
+          '  vvH=' + Math.round(vv.height) : '(sin visualViewport)',
+      ].concat(this._rotateDebugLog).join('\n');
+    };
+    render();
+    setInterval(render, 300);
   },
 
   /* ===== TTS (Text-to-Speech) ===== */
