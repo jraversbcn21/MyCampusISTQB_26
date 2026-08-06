@@ -1816,13 +1816,20 @@ const SAMPLE_Q = {
     const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
     check('N26 estático: init() registra el listener de orientación con los guards del arnés',
       /matchMedia\('\(orientation: portrait\)'\)/.test(appSrc));
-    check('N26 estático: el listener difiere el clamp 250ms (settle de layout, patrón del repo)',
-      /setTimeout\(\(\) => this\._clampScrollAfterRotate\(\), 250\)/.test(appSrc));
+    // Evidencia de dispositivo (overlay 2026-08-06): a los 250ms WebKit aún
+    // reportaba scrollY=max (sano) y la corrupción llegó después — un chequeo
+    // único la esquiva. Ráfaga de chequeos cubriendo la ventana de la
+    // restauración tardía de iOS.
+    check('N26 estático: el listener programa la ráfaga de chequeos 250/700/1300/2000ms (la corrupción llega tarde)',
+      /\[250, 700, 1300, 2000\]\.forEach\(\(ms\) => setTimeout\(\(\) => this\._clampScrollAfterRotate\(\), ms\)\)/.test(appSrc));
     check("N26 estático: el clamp usa behavior:'auto' (scroll-behavior:smooth global lo haría animado)",
       /_clampScrollAfterRotate\(\) \{[\s\S]*?behavior: 'auto'/.test(appSrc));
 
-    // Comportamental: el método clampa solo cuando scrollY quedó más allá del
-    // final real del documento (el estado inválido que deja WebKit).
+    // Comportamental: re-sincroniza cuando scrollY quedó fuera de rango O cuando
+    // el visual viewport se desancló del layout viewport (vvOffTop > 1 sin
+    // pinch-zoom — la firma exacta que capturó el overlay en el dispositivo).
+    // El nudge son DOS scrollTo distintos: uno solo al valor actual se optimiza
+    // a no-op y no re-engancha el visual viewport (por eso el tap sí funciona).
     {
       const ctx = loadApp();
       const scrolls = [];
@@ -1830,21 +1837,38 @@ const SAMPLE_Q = {
       ctx.window.innerHeight = 800;
       ctx.document.documentElement.scrollHeight = 2000; // max válido = 1200
 
-      ctx.window.scrollY = 5000; // más allá del final → clamp al máximo
+      ctx.window.scrollY = 5000; // más allá del final → re-sync al máximo
       ctx.App._clampScrollAfterRotate();
-      check('N26 comportamiento: sobre-scrolleado → clampa a scrollHeight - innerHeight con behavior auto',
-        scrolls.length === 1 && scrolls[0].top === 1200 && scrolls[0].behavior === 'auto');
+      check('N26 comportamiento: sobre-scrolleado → nudge de 2 scrolls acabando en max con behavior auto',
+        scrolls.length === 2 && scrolls[0].top === 1199 && scrolls[1].top === 1200
+        && scrolls.every(s => s.behavior === 'auto'));
 
-      ctx.window.scrollY = 500; // dentro de rango → no toca nada
+      scrolls.length = 0;
+      ctx.window.scrollY = 500; // dentro de rango, sin drift → no toca nada
       ctx.App._clampScrollAfterRotate();
       check('N26 comportamiento: scroll válido → no-op (cero impacto en rotaciones normales)',
-        scrolls.length === 1);
+        scrolls.length === 0);
 
+      // La firma del dispositivo: scrollY parece válido pero el visual viewport
+      // quedó desanclado (pageTop - offsetTop = scroll real del layout).
+      ctx.window.scrollY = 1200;
+      ctx.window.visualViewport = { scale: 1, offsetTop: 500, pageTop: 1700, height: 300 };
+      ctx.App._clampScrollAfterRotate();
+      check('N26 comportamiento: drift del visual viewport sin pinch-zoom → re-sync al scroll real del layout',
+        scrolls.length === 2 && scrolls[1].top === 1200);
+
+      scrolls.length = 0;
+      ctx.window.visualViewport = { scale: 2, offsetTop: 500, pageTop: 1700, height: 300 };
+      ctx.App._clampScrollAfterRotate();
+      check('N26 comportamiento: con pinch-zoom real (scale>1) nunca toca el scroll del usuario',
+        scrolls.length === 0);
+
+      delete ctx.window.visualViewport;
       ctx.window.scrollY = 100; // documento más corto que el viewport → max 0
       ctx.document.documentElement.scrollHeight = 600;
       ctx.App._clampScrollAfterRotate();
-      check('N26 comportamiento: documento más corto que el viewport → clampa a 0, nunca negativo',
-        scrolls.length === 2 && scrolls[1].top === 0);
+      check('N26 comportamiento: documento más corto que el viewport → acaba en 0, nunca negativo',
+        scrolls.length === 2 && scrolls[1].top === 0 && scrolls.every(s => s.top >= 0));
 
       delete ctx.window.scrollTo; // arnés/navegador sin scrollTo → no revienta
       let threw = false;

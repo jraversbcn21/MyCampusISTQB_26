@@ -1766,7 +1766,10 @@ const App = {
       if (typeof mqOrient.addEventListener === 'function') {
         mqOrient.addEventListener('change', () => {
           this._rotateDebugPush('mq orientación disparó');
-          setTimeout(() => this._clampScrollAfterRotate(), 250);
+          // Ráfaga, no chequeo único: el overlay de diagnóstico demostró (en
+          // dispositivo, 2026-08-06) que a los 250ms WebKit aún reporta un
+          // estado sano y la corrupción del viewport llega después.
+          [250, 700, 1300, 2000].forEach((ms) => setTimeout(() => this._clampScrollAfterRotate(), ms));
         });
       }
     }
@@ -1781,15 +1784,31 @@ const App = {
     }
   },
 
-  // Solo actúa si scrollY quedó fuera de rango (el estado inválido que deja
-  // WebKit) — no-op en cualquier rotación normal. behavior:'auto' explícito:
-  // html { scroll-behavior: smooth } es global y lo convertiría en animado.
+  // Re-sincroniza el scroll tras rotar si iOS lo dejó en estado inválido:
+  // scrollY fuera de rango, O visual viewport desanclado del layout viewport
+  // (offsetTop > 1 sin pinch-zoom — la firma que capturó el overlay:
+  // scrollY=4719 = layout 1806 + drift 2913). Con pinch-zoom real (scale > 1)
+  // no toca nada: un offsetTop grande ahí es legítimo. No-op absoluto en
+  // rotaciones normales. El nudge son DOS scrollTo con valores distintos —
+  // uno solo al valor vigente se optimiza a no-op y no re-engancha el visual
+  // viewport (por eso el tap del usuario sí lo arreglaba). behavior:'auto'
+  // explícito: html { scroll-behavior: smooth } es global y lo haría animado.
   _clampScrollAfterRotate() {
     if (typeof window === 'undefined' || typeof window.scrollTo !== 'function') return;
+    const vv = window.visualViewport;
+    if (vv && vv.scale > 1.001) return; // zoom del usuario: jamás pelear con él
     const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const over = window.scrollY > max;
-    this._rotateDebugPush('clamp: y=' + Math.round(window.scrollY) + ' max=' + max + (over ? ' → CLAMP' : ' → noop'));
-    if (over) window.scrollTo({ top: max, behavior: 'auto' });
+    const drift = vv ? vv.offsetTop : 0;
+    const broken = window.scrollY > max || drift > 1;
+    this._rotateDebugPush('clamp: y=' + Math.round(window.scrollY) + ' max=' + max +
+      ' drift=' + Math.round(drift) + (broken ? ' → RESYNC' : ' → noop'));
+    if (!broken) return;
+    // Posición real del layout viewport (pageTop - offsetTop); sin
+    // visualViewport, el propio scrollY. Clampada al documento actual.
+    const layoutY = vv ? (vv.pageTop - vv.offsetTop) : window.scrollY;
+    const target = Math.min(Math.max(0, Math.round(layoutY)), max);
+    window.scrollTo({ top: target > 0 ? target - 1 : target + 1, behavior: 'auto' });
+    window.scrollTo({ top: target, behavior: 'auto' });
   },
 
   /* ===== DIAGNÓSTICO DE ROTACIÓN (temporal, 2026-08-06) ===== */
