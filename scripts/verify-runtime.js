@@ -1967,6 +1967,36 @@ const SAMPLE_Q = {
       res.rows.length === 1 && res.total === 60 && res.myPos === 8);
   }
 
+  // renderRanking: XSS: nombres ajenos escapados; render de tabla y panel opt-in.
+  {
+    const sb = makeSupabaseMock({ selectQueue: [
+      { data: [
+        { user_id: 'evil', display_name: '<img src=x onerror=alert(1)>', xp: 999 },
+        { user_id: 'u-rk', display_name: 'Yo', xp: 777 },
+      ], count: 2, error: null },
+    ] });
+    const ctx = loadApp({ supabase: sb });
+    ctx.App.state = ctx.App.loadState();
+    ctx.App.state.xp = 777; ctx.App.state.rankingOptIn = true; ctx.App.state.rankingName = 'Yo';
+    ctx.Auth.user = { id: 'u-rk', email: 'a@b.c', user_metadata: {} };
+    await ctx.App.renderRanking();
+    const html = ctx.document.getElementById('rankingContent').innerHTML;
+    check('N27 xss: display_name ajeno escapado en el innerHTML',
+      !html.includes('<img src=x') && html.includes('&lt;img'));
+    check('N27 render: fila propia resaltada (clase rk-me) y botón de salir presente',
+      html.includes('rk-me') && html.includes('App.rankingLeave()'));
+  }
+  {
+    const ctx = loadApp();
+    ctx.App.state = ctx.App.loadState();
+    ctx.Auth.user = { id: 'u-rk', email: 'a@b.c', user_metadata: {} };
+    await ctx.App.renderRanking();
+    const html = ctx.document.getElementById('rankingContent').innerHTML;
+    check('N27 render: sin participar → panel de opt-in con nota de privacidad y botón Participar',
+      html.includes('App.rankingJoin') && html.includes('rk-publish-note')
+      && html.includes('id="rkNameInput"'));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

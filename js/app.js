@@ -1287,8 +1287,6 @@ const App = {
     }).join('');
   },
 
-  renderRanking() {},
-
   /* ===== RANKING (2026-08-06) ===== */
   // Guard de migración en el punto de uso (lección celebratedChapters): estados
   // legados y copias de nube sin los campos nuevos.
@@ -1373,6 +1371,78 @@ const App = {
       if (!e2 && typeof above === 'number') myPos = above + 1;
     }
     return { rows, total: count || 0, myPos };
+  },
+
+  // Pinta #rankingContent: panel opt-in/controles + tabla, con degradación
+  // offline/carga/error. Nombres ajenos siempre por escapeHtml; xp por Number.
+  async renderRanking() {
+    this._rankingEnsureState();
+    const cont = document.getElementById('rankingContent');
+    if (!cont) return;
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+      cont.innerHTML = `<p class="ranking-msg">${i18n.t('rk_offline')}</p>`;
+      return;
+    }
+    cont.innerHTML = `<p class="ranking-msg">${i18n.t('rk_loading')}</p>`;
+    let res;
+    try { res = await this._rankingFetch(); }
+    catch (e) {
+      cont.innerHTML = `<p class="ranking-msg">${i18n.t('rk_error')}</p>`;
+      return;
+    }
+    const uid = (typeof Auth !== 'undefined' && Auth.user) ? Auth.user.id : null;
+    let html = '';
+
+    if (!this.state.rankingOptIn) {
+      const suggested = escapeHtml(this.state.rankingName || this._getDisplayName());
+      html += `
+        <div class="ranking-optin">
+          <p class="rk-publish-note">${i18n.t('rk_publish_note')}</p>
+          <label class="rk-name-label" for="rkNameInput">${i18n.t('rk_name_label')}</label>
+          <input type="text" id="rkNameInput" maxlength="30" value="${suggested}"
+                 placeholder="${i18n.t('rk_name_placeholder')}">
+          <button class="btn-primary rk-join-btn"
+                  onclick="App.rankingJoin(document.getElementById('rkNameInput').value)">
+            ${i18n.t('rk_join')}</button>
+        </div>`;
+    } else {
+      const own = escapeHtml(this.state.rankingName);
+      html += `
+        <div class="ranking-controls">
+          <input type="text" id="rkNameInput" maxlength="30" value="${own}"
+                 aria-label="${i18n.t('rk_name_label')}">
+          <button class="rk-rename-btn"
+                  onclick="App.rankingRename(document.getElementById('rkNameInput').value)">
+            ${i18n.t('rk_rename')}</button>
+          <button class="rk-leave-btn" onclick="App.rankingLeave()">${i18n.t('rk_leave')}</button>
+        </div>`;
+    }
+
+    if (!res.rows.length) {
+      html += `<p class="ranking-msg">${i18n.t('rk_empty')}</p>`;
+    } else {
+      const body = res.rows.map((r, i) => {
+        const me = uid && r.user_id === uid;
+        return `<tr${me ? ' class="rk-me"' : ''}>
+          <td class="rk-pos">${i + 1}</td>
+          <td class="rk-name">${escapeHtml(r.display_name)}${me ? ` <span class="rk-you-tag">${i18n.t('rk_you')}</span>` : ''}</td>
+          <td class="rk-xp">${Number(r.xp) || 0}</td>
+        </tr>`;
+      }).join('');
+      html += `
+        <div class="table-scroll"><table class="ranking-table">
+          <thead><tr>
+            <th scope="col">${i18n.t('rk_pos_header')}</th>
+            <th scope="col">${i18n.t('rk_name_header')}</th>
+            <th scope="col">${i18n.t('rk_xp_header')}</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table></div>`;
+      if (res.myPos !== null) {
+        html += `<p class="ranking-mypos">${i18n.t('rk_your_position')}: #${res.myPos} / ${res.total}</p>`;
+      }
+    }
+    cont.innerHTML = html;
   },
 
   // Único punto de verdad para el estado de examen: setea el flag y refleja
