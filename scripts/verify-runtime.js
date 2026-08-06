@@ -2029,6 +2029,16 @@ const SAMPLE_Q = {
     catch (e) { threw = true; }
     check('N27 sync: el upsert del ranking reventando no propaga ni impide el push',
       !threw && sb._calls.upserts.some(u => u.table === 'user_progress'));
+
+    // Cobertura directa: sin esto, un futuro borrado del try/catch interno de
+    // _pushRanking pasaría el check de arriba igualmente (el catch externo de
+    // _push se lo tragaría con el mismo resultado observable). Llamando a
+    // _pushRanking en aislamiento se prueba SU propio try/catch, no el ajeno.
+    let threwDirect = false;
+    try { await ctx.Sync._pushRanking('u-rk', { xp: 1, rankingOptIn: true, rankingName: 'Yo' }); }
+    catch (e) { threwDirect = true; }
+    check('N27 sync: _pushRanking en aislamiento nunca lanza (catch propio, no el de _push)',
+      !threwDirect);
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
