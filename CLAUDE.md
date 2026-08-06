@@ -262,14 +262,15 @@ an authenticated empty session.
 - Default language is Spanish (`i18n.lang = 'es'`) — but since the 2026-07-25 landing,
   **first visit with no saved preference follows `navigator.language`** (non-`es*` browser →
   EN); a saved preference always wins. `privacy.html` replicates the same fallback inline.
-- Translations live in `TRANSLATIONS` in `js/i18n.js` — **231 keys**, all ES/EN paired, enforced by
+- Translations live in `TRANSLATIONS` in `js/i18n.js` — **250 keys**, all ES/EN paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known hardcoded-language
   residues). The count grew over time: 160 after the 2026-07-04 remediation → 165 (2026-07-08 global
   search `gs_*`) → 170 (2026-07-14 a11y `data-i18n-aria` keys + `goto_question_aria`) → 174/175
   (2026-07-15 round-2 mobile-search/combobox + `achievement_toast_prefix` + `bmc_label`) → 177/178
   (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`) → 196 (2026-07-25
   celebración de módulo/diploma) → 231 (2026-07-25 landing pública, claves `lp_*` + the public-landing
-  section further below).
+  section further below) → 250 (2026-08-06 ranking global por XP, `nav_ranking` + claves `rk_*` — see
+  the Ranking section further below).
 - `i18n.restore()` reads the saved language from localStorage (falling back to
   `navigator.language` on first visit, see above) and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints
@@ -1106,3 +1107,151 @@ porque re-engancha el visual viewport; el fix lo reproduce programáticamente.
   250/700/1300/2000, `behavior:'auto'`; comportamentales: nudge de 2 scrolls acabando en
   max sobre-scrolleado, no-op en rango, re-sync con drift del visual viewport, respeto del
   pinch-zoom, clamp a 0 con documento corto, no-op sin `scrollTo`).
+
+## Ranking global por XP (2026-08-06)
+
+Nueva categoría **«Ranking»** en el nav: clasificación global por XP acumulado, opt-in
+explícito. Spec completa (decisiones, SQL, flujos, fuera-de-alcance):
+`docs/superpowers/specs/2026-08-06-ranking-design.md`.
+
+**Enfoque: tabla dedicada, `user_progress` intacto.** Se descartaron una función
+`security definer` sobre `user_progress` (riesgo innecesario sobre los datos de progreso
+reales) y un backend agregador (sobredimensionado). `leaderboard` es una **proyección**
+`{display_name, xp}` refrescada por el ciclo de sync existente — `App.state.xp` sigue
+siendo la única fuente de verdad del XP.
+
+**Modelo de datos (SQL de dashboard, tarea manual — mismo procedimiento que la
+verificación RLS de `user_progress` del 2026-07-02, aplicado y verificado por Jorge:
+listado real de `pg_policies` comprobado, no solo el toggle "RLS enabled"):**
+
+```sql
+create table public.leaderboard (
+  user_id      uuid primary key references auth.users(id) on delete cascade,
+  display_name text not null check (char_length(display_name) between 1 and 30),
+  xp           integer not null default 0 check (xp >= 0 and xp <= 500000),
+  updated_at   timestamptz not null default now()
+);
+
+alter table public.leaderboard enable row level security;
+
+create policy "leaderboard_insert_own" on public.leaderboard
+  for insert to authenticated with check (auth.uid() = user_id);
+create policy "leaderboard_update_own" on public.leaderboard
+  for update to authenticated using (auth.uid() = user_id);
+create policy "leaderboard_delete_own" on public.leaderboard
+  for delete to authenticated using (auth.uid() = user_id);
+create policy "leaderboard_select_all" on public.leaderboard
+  for select to authenticated using (true);
+
+create index leaderboard_xp_desc on public.leaderboard (xp desc);
+```
+
+- **`xp <= 500000` es una cota de cordura anti-flexing, no un máximo teórico:** el XP es
+  acumulable sin techo (reto diario, flashcards, exámenes repetibles); 500 000 solo mata
+  valores absurdos inyectados por consola (el top real hoy ronda ~3 000). El fraude fino
+  (inflarse dentro de la cota) no se puede impedir sin backend propio — el cliente escribe
+  su propio XP; riesgo asumido para un soft launch, igual que hoy puede falsearse el
+  progreso propio. **Sin anti-fraude retroactivo más allá de este `CHECK`** — decisión
+  deliberada de alcance (ver la spec, "Fuera de alcance").
+  `on delete cascade` limpia la fila sola al borrar el usuario en Supabase.
+- **Solo usuarios autenticados** (`to authenticated` en las cuatro políticas) — nunca
+  público anónimo, ni siquiera de solo lectura.
+- **Sin periodos** (no hay ranking semanal/mensual): no existe historial de XP con fechas
+  y no se introduce uno para esto — clasificación única por XP total acumulado.
+
+**Estado nuevo en `App.state`:** `rankingOptIn` (bool, default `false`) y `rankingName`
+(string, default `''`); viajan en el JSONB existente de `user_progress` → multi-dispositivo
+y conflict-resolution gratis (nada nuevo que sincronizar).
+
+**Flujos** (`js/app.js`, sección `/* ===== RANKING (2026-08-06) ===== */`):
+- **Opt-in** (`App.rankingJoin(name)`): valida 1–30 chars (toast `rk_name_invalid` si no),
+  upsert a `leaderboard` con `{user_id, display_name, xp, updated_at}`, `rankingOptIn = true`,
+  `saveState()`.
+- **Cambio de nombre** (`App.rankingRename(name)`): mismo upsert; **no toca el flag** —
+  reutiliza `_rankingUpsertSelf` sin poner `rankingOptIn = true` de nuevo (un fallo de
+  validación en un rename no debe activar accidentalmente el opt-in de alguien que ya
+  estaba dentro, ni un rename exitoso reactivar a quien ya salió).
+- **Opt-out** (`App.rankingLeave()`): `DELETE` de la fila propia, `rankingOptIn = false`,
+  **`rankingName` se conserva** en el estado por si vuelve a entrar (no se limpia).
+- **Render** (`App.renderRanking()`): `SELECT display_name, xp ORDER BY xp DESC LIMIT 50`
+  con `count: 'exact'` (total M en la misma petición); si el usuario participa y no
+  aparece en el top, una segunda consulta `head: true` cuenta filas con `xp > <mi xp>` →
+  «Tu posición: #N / M» (N = superiores + 1). Fila propia resaltada (`.rk-me` + tag
+  `rk_you`) cuando sí aparece. Degradación sin excepción: sin `supabaseClient` → mensaje
+  `rk_offline`; `SELECT` en error → `rk_error`; tabla vacía → `rk_empty`; mientras carga →
+  `rk_loading`.
+
+**Actualización del XP — enganchada al sync existente (`js/sync.js`).**
+`Sync._pushRanking(userId, state)` se llama desde `_push` **justo después de
+`this._dirty = false`** (progreso de `user_progress` ya confirmado), gated por
+`state && state.rankingOptIn`. Tiene su **propio `try/catch`** — un upsert de ranking que
+revienta nunca lanza hacia `_push` ni contamina/bloquea el push de progreso real (verificado
+en aislamiento, no solo dentro de `_push`, porque un `catch` exterior podía enmascarar uno
+interior roto — la razón de que exista el check "en aislamiento" de N27 más abajo).
+**El flush keepalive de `visibilitychange` NO replica el upsert del ranking** (decisión
+deliberada de la spec, "mantenerlo simple"): al cerrar la pestaña dentro del debounce de 4s
+solo el progreso se garantiza vía keepalive; la tabla del ranking se pone al día en el
+siguiente sync con sesión abierta — el desfase es aceptable en un ranking, no en el progreso.
+
+**XSS — el punto crítico de esta feature.** Los `display_name` que se renderizan son datos
+elegidos por *otros* usuarios y llegan a `innerHTML`. **Todo `display_name` ajeno pasa por
+`escapeHtml()` sin excepción** (incluido dentro de atributos `value="…"`, no solo texto de
+nodo) — misma disciplina que el resto del repo (avatar/activityLog/examHistory,
+2026-07-04). El XP ajeno pasa por `Number(r.xp) || 0`, nunca interpolado crudo. Gate-
+protegido con un check comportamental que renderiza un `display_name` malicioso
+(`<img onerror=…>`) y confirma que el HTML resultante lo contiene escapado.
+
+**Editing hazards que un agente debe conocer:**
+- **Guard de migración en el punto de uso, nunca en `loadState`.** `_rankingEnsureState()`
+  rellena `rankingOptIn`/`rankingName` con defaults justo antes de usarlos — la misma
+  lección que `celebratedChapters` (2026-07-25): `loadState` no fusiona defaults sobre
+  estados guardados, así que un guard ahí no cubre estados legados ni copias de nube.
+  Cualquier método de ranking nuevo debe empezar llamando a `_rankingEnsureState()`, no
+  asumir que el campo existe.
+- **`_pushRanking` vive *después* de `this._dirty = false` dentro de `_push`, nunca antes
+  y nunca en `flushNow`/el listener `visibilitychange`.** El gate `_reconciled` (2026-07-22,
+  ver Persistencia arriba) sigue viviendo solo en `saveState`/`flushNow`/`visibilitychange`
+  — `_pushRanking` no necesita su propio gate porque solo se alcanza desde dentro de `_push`,
+  que ya pasó por él.
+- **El mock de Supabase del arnés (`makeSupabaseMock` en `scripts/verify-runtime.js`) es
+  thenable, no solo query-builder.** `from(table)` registra `calls.upserts` como
+  `{table, ...row}` (aplanado, no anidado) y `calls.deletes` como `[{table}]`; la cadena
+  soporta `.order()/.limit()/.gt()/.eq()` y resuelve vía `.then(resolve)` consumiendo
+  `opts.selectQueue` en orden — retrocompatible (N1/N2/N22 intactos). Un test de ranking
+  nuevo que necesite una respuesta concreta de `SELECT` debe empujarla a `selectQueue`, no
+  asumir un resultado por defecto.
+- **`#i-podium` no está protegido por N17.** El check N17 hardcodea la lista original de 26
+  símbolos del sprite I8; un símbolo añadido después (como `#i-coffee`/N19 y ahora
+  `#i-podium`) se protege desde su propia familia — aquí, **N27**. No añadir `#i-podium` a
+  la lista de N17 pensando que así queda cubierto; ya lo está, solo que desde otro sitio.
+  Y no es `#i-trophy` — ese símbolo ya existe y lo usa el nav de Logros.
+- **El tercer caso del cascade trap de especificidad de id.** Igual que
+  `#avatar-modal .avatar-grid` (2026-07-21) y `#celebration-modal .celebration-card`
+  (2026-07-25): el tier `≤480px` vive ANTES de la sección base `RANKING` en
+  `css/styles.css` (el tier ~1536, la sección base ~2472), así que a igual especificidad
+  la regla base posterior ganaría por orden de fuente. Los overrides del tier llevan
+  **prefijo `#view-ranking`** (`#view-ranking .ranking-optin`, `#view-ranking
+  .ranking-table th/td`) precisamente para ganar por especificidad de id en vez de
+  depender del orden — una ronda de revisión encontró las reglas sin prefijo como CSS
+  muerto antes de este fix. **No "simplificar" quitando el prefijo** — reintroduce el bug.
+  Lección general (repetida ya tres veces): fusionar o mover un bloque de media query
+  cambia su posición en la cascada — comprobar qué reglas posteriores estaba ganando antes
+  de tocarlo.
+
+**Privacidad (mismo commit — regla del repo):** sección "Ranking voluntario"/"Voluntary
+ranking" en `privacy.html` ES/EN — qué se publica (nombre elegido + XP), a quién (solo
+usuarios autenticados), que el nombre es editable y que salir borra el dato de inmediato;
+fecha "última actualización" al 2026-08-06.
+
+**Gate: familia N27 en `scripts/verify-runtime.js`** (~20 checks) — i18n (`rk_*` +
+`nav_ranking` definidas y pareadas ES/EN); estáticos (símbolo `#i-podium` en el sprite,
+nav-item e `id="view-ranking"` con `#rankingContent`, `navigate()` despachando
+`renderRanking()` + `titleMap`, guard de migración anclado a regla real — nunca
+`includes()`, lección N19/N21); comportamentales de estado (join valida y persiste, nombre
+vacío/de 31 chars rechazado sin tocar Supabase, leave hace `DELETE` y conserva el nombre,
+fetch calcula posición como superiores + 1); XSS (`display_name` malicioso escapado); sync
+(con `optIn` el push sube progreso y LUEGO ranking, sin `optIn` no toca `leaderboard`, un
+upsert de ranking que revienta no propaga ni bloquea el push de progreso, y `_pushRanking`
+en aislamiento nunca lanza); css/responsive (`.ranking-table` anclada antes del bloque
+reduced-motion, targets ≥44px, fila propia resaltada, la vista `ranking` entra en el barrido
+de `validate-responsive.js`, overrides del tier 480 con el prefijo `#view-ranking`).
