@@ -72,7 +72,7 @@ function makeLocalStorage() {
 }
 
 function makeSupabaseMock(opts = {}) {
-  const calls = { upserts: [] };
+  const calls = { upserts: [], deletes: [] };
   const client = {
     _calls: calls,
     auth: {
@@ -80,12 +80,23 @@ function makeSupabaseMock(opts = {}) {
       getSession: async () => ({ data: { session: 'session' in opts ? opts.session : { access_token: 'tok-mock' } } }),
       signOut: async () => ({ error: null }),
     },
-    from() {
+    from(table) {
       const chain = {
         select() { return chain; },
+        order() { return chain; },
+        limit() { return chain; },
+        gt() { return chain; },
         eq() { return chain; },
         single: async () => opts.singleResult || { data: null, error: { code: 'PGRST116' } },
-        upsert: async (row) => { calls.upserts.push(row); return { error: null }; },
+        upsert: async (row) => { calls.upserts.push({ table, ...row }); return { error: null }; },
+        delete() { calls.deletes.push({ table }); return { eq: async () => ({ error: null }) }; },
+        // Los selects de lista/count se esperan directamente (thenable): consumen
+        // opts.selectQueue en orden, o un resultado vacío por defecto.
+        then(resolve) {
+          resolve((opts.selectQueue && opts.selectQueue.length)
+            ? opts.selectQueue.shift()
+            : { data: [], count: 0, error: null });
+        },
       };
       return chain;
     },
@@ -1900,6 +1911,60 @@ const SAMPLE_Q = {
     check('N27 nav: navigate() despacha renderRanking y titleMap tiene ranking',
       /if \(view === 'ranking'\) this\.renderRanking\(\);/.test(appSrc)
       && /ranking: 'nav_ranking'/.test(appSrc));
+  }
+
+  // Comportamental: opt-in / opt-out / fetch contra el mock.
+  {
+    const ctx = loadApp();
+    ctx.App.state = ctx.App.loadState();
+    ctx.App.state.xp = 777;
+    ctx.window.CAMPUS_USER_ID = 'u-rk';
+    // Auth.user es lo que leen las acciones:
+    ctx.Auth.user = { id: 'u-rk', email: 'a@b.c', user_metadata: {} };
+    let saved = 0; ctx.App.saveState = () => { saved++; };
+    ctx.App.renderRanking = () => {}; // Task 5; aquí solo datos
+    ctx.App.showToast = () => {};
+
+    check('N27 estado: _rankingEnsureState migra estados legados (defaults false/\'\')',
+      (ctx.App._rankingEnsureState(), ctx.App.state.rankingOptIn === false
+        && ctx.App.state.rankingName === ''));
+
+    // Los awaits van directos: el cuerpo principal del arnés es async
+    // (mismo patrón que los checks N25 con _onAuthSuccess).
+    await ctx.App.rankingJoin('  Jorge C  ');
+    const up = ctx.supabase._calls.upserts.find(u => u.table === 'leaderboard');
+    check('N27 join: upsert a leaderboard con nombre limpio y xp del estado',
+      up && up.display_name === 'Jorge C' && up.xp === 777 && up.user_id === 'u-rk');
+    check('N27 join: activa rankingOptIn, guarda rankingName y persiste',
+      ctx.App.state.rankingOptIn === true && ctx.App.state.rankingName === 'Jorge C'
+      && saved > 0);
+
+    const before = ctx.supabase._calls.upserts.length;
+    await ctx.App.rankingJoin('');
+    check('N27 join: nombre vacío → rechazado sin tocar Supabase',
+      ctx.supabase._calls.upserts.length === before);
+    await ctx.App.rankingJoin('x'.repeat(31));
+    check('N27 join: nombre de 31 chars → rechazado',
+      ctx.supabase._calls.upserts.length === before);
+
+    await ctx.App.rankingLeave();
+    check('N27 leave: DELETE en leaderboard y flag a false (el nombre se conserva)',
+      ctx.supabase._calls.deletes.some(d => d.table === 'leaderboard')
+      && ctx.App.state.rankingOptIn === false && ctx.App.state.rankingName === 'Jorge C');
+  }
+
+  {
+    const sb = makeSupabaseMock({ selectQueue: [
+      { data: [{ user_id: 'a', display_name: 'Ana', xp: 900 }], count: 60, error: null },
+      { count: 7, error: null },
+    ] });
+    const ctx = loadApp({ supabase: sb });
+    ctx.App.state = ctx.App.loadState();
+    ctx.App.state.xp = 100; ctx.App.state.rankingOptIn = true; ctx.App.state.rankingName = 'Yo';
+    ctx.Auth.user = { id: 'u-rk', email: 'a@b.c', user_metadata: {} };
+    const res = await ctx.App._rankingFetch();
+    check('N27 fetch: top + total + posición propia (superiores + 1) cuando estoy fuera del top',
+      res.rows.length === 1 && res.total === 60 && res.myPos === 8);
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

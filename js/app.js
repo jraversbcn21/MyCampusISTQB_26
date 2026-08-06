@@ -1289,6 +1289,92 @@ const App = {
 
   renderRanking() {},
 
+  /* ===== RANKING (2026-08-06) ===== */
+  // Guard de migración en el punto de uso (lección celebratedChapters): estados
+  // legados y copias de nube sin los campos nuevos.
+  _rankingEnsureState() {
+    if (typeof this.state.rankingOptIn !== 'boolean') this.state.rankingOptIn = false;
+    if (typeof this.state.rankingName !== 'string') this.state.rankingName = '';
+  },
+
+  async _rankingUpsertSelf(name) {
+    const clean = String(name || '').trim();
+    if (clean.length < 1 || clean.length > 30) {
+      this.showToast(i18n.t('rk_name_invalid'), 'warning');
+      return false;
+    }
+    if (typeof supabaseClient === 'undefined' || !supabaseClient
+        || typeof Auth === 'undefined' || !Auth.user) {
+      this.showToast(i18n.t('rk_offline'), 'warning');
+      return false;
+    }
+    const { error } = await supabaseClient.from('leaderboard').upsert(
+      { user_id: Auth.user.id, display_name: clean, xp: this.state.xp,
+        updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
+    if (error) { this.showToast(i18n.t('rk_error'), 'error'); return false; }
+    this.state.rankingName = clean;
+    return true;
+  },
+
+  async rankingJoin(name) {
+    this._rankingEnsureState();
+    const ok = await this._rankingUpsertSelf(name);
+    if (!ok) return false;
+    this.state.rankingOptIn = true;
+    this.saveState();
+    this.renderRanking();
+    return true;
+  },
+
+  async rankingRename(name) {
+    this._rankingEnsureState();
+    const ok = await this._rankingUpsertSelf(name);
+    if (!ok) return false;
+    this.saveState();
+    this.renderRanking();
+    return true;
+  },
+
+  async rankingLeave() {
+    this._rankingEnsureState();
+    if (typeof supabaseClient === 'undefined' || !supabaseClient
+        || typeof Auth === 'undefined' || !Auth.user) {
+      this.showToast(i18n.t('rk_offline'), 'warning');
+      return false;
+    }
+    const { error } = await supabaseClient.from('leaderboard')
+      .delete().eq('user_id', Auth.user.id);
+    if (error) { this.showToast(i18n.t('rk_error'), 'error'); return false; }
+    this.state.rankingOptIn = false; // rankingName se conserva por si vuelve
+    this.saveState();
+    this.showToast(i18n.t('rk_left_toast'), 'success');
+    this.renderRanking();
+    return true;
+  },
+
+  // Top 50 + total + posición propia. Lanza en error de red: el caller decide.
+  async _rankingFetch() {
+    const { data, count, error } = await supabaseClient
+      .from('leaderboard')
+      .select('user_id, display_name, xp', { count: 'exact' })
+      .order('xp', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    const rows = data || [];
+    let myPos = null;
+    const uid = (typeof Auth !== 'undefined' && Auth.user) ? Auth.user.id : null;
+    if (this.state.rankingOptIn && uid && !rows.some(r => r.user_id === uid)) {
+      const { count: above, error: e2 } = await supabaseClient
+        .from('leaderboard')
+        .select('user_id', { count: 'exact', head: true })
+        .gt('xp', this.state.xp);
+      if (!e2 && typeof above === 'number') myPos = above + 1;
+    }
+    return { rows, total: count || 0, myPos };
+  },
+
   // Único punto de verdad para el estado de examen: setea el flag y refleja
   // en <body> la clase exam-active (CSS oculta el pill de apoyo durante el
   // examen). Sustituye las asignaciones directas a _examActive.
