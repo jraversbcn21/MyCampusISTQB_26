@@ -2486,6 +2486,11 @@ body {
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  /* Tope de ancho (2026-08-06): sin él, en desktop el panel (campo + botón)
+     se estiraba de extremo a extremo del contenido (~1400px). Mismo criterio
+     de tarjeta compacta que la .auth-card de la landing; en móvil no cambia
+     nada (el contenedor ya es más estrecho que el tope). */
+  max-width: 560px;
 }
 .ranking-optin { flex-direction: column; align-items: stretch; }
 .rk-publish-note { color: var(--text2); font-size: 0.85rem; }
