@@ -43,7 +43,7 @@ if (!playwright) {
 
 const ROOT = path.join(__dirname, '..');
 const WIDTHS = [320, 375, 414, 600]; // × 720, hasTouch + isMobile — 600 cubre la banda 481-768 (hallazgo revisión final, sin gate previo)
-const VIEWS = ['dashboard', 'curriculum', 'flashcards', 'simulator', 'glossary', 'progress', 'achievements'];
+const VIEWS = ['dashboard', 'curriculum', 'flashcards', 'simulator', 'glossary', 'progress', 'achievements', 'ranking'];
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',

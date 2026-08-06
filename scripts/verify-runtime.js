@@ -2039,6 +2039,16 @@ const SAMPLE_Q = {
     catch (e) { threwDirect = true; }
     check('N27 sync: _pushRanking en aislamiento nunca lanza (catch propio, no el de _push)',
       !threwDirect);
+
+    /* ---- N27 css/responsive (Task 7) ---- */
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    check('N27 css: .ranking-table definida antes del bloque reduced-motion (orden del tail)',
+      /\.ranking-table \{/.test(cssSrc)
+      && cssSrc.search(/\.ranking-table \{/) < cssSrc.search(/@media \(prefers-reduced-motion: reduce\)/));
+    check('N27 css: fila propia resaltada y botones táctiles de ≥44px',
+      /\.rk-me \{/.test(cssSrc) && /\.rk-join-btn/.test(cssSrc));
+    check('N27 responsive: la vista ranking entra en el barrido del gate',
+      /'achievements', 'ranking'/.test(fs.readFileSync(path.join(ROOT, 'scripts', 'validate-responsive.js'), 'utf8')));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

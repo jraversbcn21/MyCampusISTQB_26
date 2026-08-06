@@ -1528,6 +1528,9 @@ body {
   #celebration-modal .celebration-card { padding: 24px 16px; }
   #celebration-modal .celebr-step { width: 32px; height: 32px; font-size: 0.8rem; }
   #celebration-modal .celebr-link { flex-basis: 6px; }
+  /* Ranking (2026-08-06): mismos paddings reducidos que el resto del tier. */
+  .ranking-optin, .ranking-controls { padding: 12px; }
+  .ranking-table th, .ranking-table td { padding: 8px; }
 }
 
 /* ===== UTILITY ===== */
@@ -2460,6 +2463,68 @@ body {
   width: 130px;
   outline: none;
 }
+
+/* ===================================================
+   RANKING (2026-08-06)
+   Tabla del top + panel de opt-in. Nombres ajenos truncan con ellipsis; la
+   tabla vive en .table-scroll (patrón lecciones móvil). Botones a 44px min.
+   =================================================== */
+.ranking-intro { color: var(--text2); margin-bottom: 16px; }
+.ranking-msg { color: var(--text2); padding: 24px 0; }
+.ranking-optin, .ranking-controls {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.ranking-optin { flex-direction: column; align-items: stretch; }
+.rk-publish-note { color: var(--text2); font-size: 0.85rem; }
+.rk-name-label { font-size: 0.8rem; color: var(--text2); }
+#rkNameInput {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 1rem; /* 16px: mata el auto-zoom de iOS (gate N13) */
+  min-width: 0;
+  flex: 1;
+}
+.rk-join-btn, .rk-rename-btn, .rk-leave-btn {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.rk-join-btn {
+  background: var(--primary-dark); /* blanco sobre --primary falla AA (regla .bmc-fab) */
+  color: #fff;
+  border: none;
+}
+.rk-leave-btn { color: var(--danger-text); }
+.ranking-table { width: 100%; border-collapse: collapse; }
+.ranking-table th, .ranking-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.ranking-table th { color: var(--text3); font-size: 0.75rem; text-transform: uppercase; }
+.rk-pos { width: 56px; color: var(--text2); }
+.rk-xp { text-align: right; font-weight: 600; }
+.rk-name { overflow-wrap: break-word; }
+.rk-me { background: rgba(108,99,255,0.1); }
+.rk-me .rk-name { color: var(--primary-text); font-weight: 600; }
+.rk-you-tag { font-size: 0.7rem; color: var(--primary-text); font-weight: 700; }
+.ranking-mypos { margin-top: 12px; color: var(--text); font-weight: 600; }
 
 /* ===================================================
    ONBOARDING TOUR
