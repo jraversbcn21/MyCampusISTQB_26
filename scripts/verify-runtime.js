@@ -2049,6 +2049,8 @@ const SAMPLE_Q = {
       /\.rk-me \{/.test(cssSrc) && /\.rk-join-btn/.test(cssSrc));
     check('N27 responsive: la vista ranking entra en el barrido del gate',
       /'achievements', 'ranking'/.test(fs.readFileSync(path.join(ROOT, 'scripts', 'validate-responsive.js'), 'utf8')));
+    check('N27 css: overrides del tier 480 con prefijo #view-ranking (especificidad de id — ganan a la base posterior)',
+      /#view-ranking \.ranking-optin, #view-ranking \.ranking-controls \{/.test(cssSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

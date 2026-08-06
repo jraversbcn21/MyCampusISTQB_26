@@ -1528,9 +1528,13 @@ body {
   #celebration-modal .celebration-card { padding: 24px 16px; }
   #celebration-modal .celebr-step { width: 32px; height: 32px; font-size: 0.8rem; }
   #celebration-modal .celebr-link { flex-basis: 6px; }
-  /* Ranking (2026-08-06): mismos paddings reducidos que el resto del tier. */
-  .ranking-optin, .ranking-controls { padding: 12px; }
-  .ranking-table th, .ranking-table td { padding: 8px; }
+  /* Ranking (2026-08-06): mismos paddings reducidos que el resto del tier.
+     Prefijo #view-ranking por especificidad — misma lección que
+     #avatar-modal .avatar-grid / #celebration-modal .celebration-card: este
+     tier va ANTES que la sección base en el archivo, así que sin el id la
+     regla base posterior (misma especificidad) gana por orden de fuente. */
+  #view-ranking .ranking-optin, #view-ranking .ranking-controls { padding: 12px; }
+  #view-ranking .ranking-table th, #view-ranking .ranking-table td { padding: 8px; }
 }
 
 /* ===== UTILITY ===== */
