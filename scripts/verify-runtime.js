@@ -846,8 +846,8 @@ const SAMPLE_Q = {
       /_icon\(name\)/.test(appSrc) && /class="icon" aria-hidden="true"><use href="#i-\$\{name\}"/.test(appSrc));
     check('N17 iconos: clase .icon definida (currentColor, 1em)',
       /\.icon\s*\{[^}]*stroke:\s*currentColor/.test(cssSrc) && /\.icon\s*\{[^}]*width:\s*1em/.test(cssSrc));
-    check('N17 iconos: la nav del sidebar usa el sprite (7 nav-icons)',
-      (htmlSrc.match(/class="nav-icon"><svg class="icon" aria-hidden="true"><use href="#i-/g) || []).length === 7);
+    check('N17 iconos: la nav del sidebar usa el sprite (8 nav-icons)',
+      (htmlSrc.match(/class="nav-icon"><svg class="icon" aria-hidden="true"><use href="#i-/g) || []).length === 8);
     check('N17 iconos: los 4 stat-icons usan el sprite',
       (htmlSrc.match(/class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-/g) || []).length === 4);
     check('N17 iconos: logo, toggles, logout, búsqueda y flechas usan el sprite',
@@ -1886,6 +1886,20 @@ const SAMPLE_Q = {
       'rk_your_position', 'rk_you', 'rk_name_invalid', 'rk_left_toast'];
     check('N27 i18n: claves rk_* definidas en ES y EN',
       rkKeys.every(k => ctx.TRANSLATIONS.es[k] && ctx.TRANSLATIONS.en[k]));
+  }
+
+  {
+    const htmlSrc = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+    check('N27 markup: símbolo #i-podium en el sprite',
+      /<symbol id="i-podium" viewBox="0 0 24 24">/.test(htmlSrc));
+    check('N27 markup: nav-item data-view="ranking" con icono sprite y data-i18n',
+      /data-view="ranking"[\s\S]{0,200}#i-podium[\s\S]{0,200}data-i18n="nav_ranking"/.test(htmlSrc));
+    check('N27 markup: vista view-ranking con #rankingContent dentro',
+      /<div class="view" id="view-ranking">[\s\S]{0,400}id="rankingContent"/.test(htmlSrc));
+    check('N27 nav: navigate() despacha renderRanking y titleMap tiene ranking',
+      /if \(view === 'ranking'\) this\.renderRanking\(\);/.test(appSrc)
+      && /ranking: 'nav_ranking'/.test(appSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

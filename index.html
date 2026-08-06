@@ -65,6 +65,7 @@
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
     <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></symbol>
+    <symbol id="i-podium" viewBox="0 0 24 24"><path d="M9 21V9h6v12"/><path d="M3 21v-6h6"/><path d="M15 12h6v9"/><path d="M3 21h18"/></symbol>
   </svg>
 
   <!-- ============ LANDING PÚBLICA + AUTH (rediseño 2026-07-25, opción 1B) ============
@@ -286,6 +287,10 @@
       <a href="#" class="nav-item" data-view="achievements">
         <span class="nav-icon"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></span>
         <span class="nav-label" data-i18n="nav_achievements">Logros</span>
+      </a>
+      <a href="#" class="nav-item" data-view="ranking">
+        <span class="nav-icon"><svg class="icon" aria-hidden="true"><use href="#i-podium"/></svg></span>
+        <span class="nav-label" data-i18n="nav_ranking">Ranking</span>
       </a>
     </nav>
 
@@ -599,6 +604,12 @@
         </div>
         <div class="achievements-summary" id="achievementsSummary"></div>
         <div class="achievements-grid" id="achievementsGrid"></div>
+      </div>
+
+      <!-- ============ RANKING VIEW ============ -->
+      <div class="view" id="view-ranking">
+        <p class="ranking-intro" data-i18n="rk_intro">Compárate con el resto de estudiantes del campus por XP acumulado.</p>
+        <div id="rankingContent"></div>
       </div>
 
     </div><!-- end views-container -->

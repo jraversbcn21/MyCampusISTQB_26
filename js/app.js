@@ -140,7 +140,7 @@ const App = {
       dashboard: 'nav_dashboard', curriculum: 'nav_curriculum',
       flashcards: 'nav_flashcards', simulator: 'nav_simulator',
       glossary: 'nav_glossary', progress: 'nav_progress',
-      achievements: 'nav_achievements', lesson: 'nav_curriculum'
+      achievements: 'nav_achievements', ranking: 'nav_ranking', lesson: 'nav_curriculum'
     };
     document.getElementById('pageTitle').textContent = i18n.t(titleMap[view] || view);
 
@@ -154,6 +154,7 @@ const App = {
     if (view === 'glossary') this.renderGlossary();
     if (view === 'progress') this.renderProgress();
     if (view === 'achievements') this.renderAchievements();
+    if (view === 'ranking') this.renderRanking();
     if (view === 'lesson' && this.currentLesson) {
       this.renderLesson(this.currentLesson.chapterId, this.currentLesson.topicId);
     }
@@ -1285,6 +1286,8 @@ const App = {
         </div>`;
     }).join('');
   },
+
+  renderRanking() {},
 
   // Único punto de verdad para el estado de examen: setea el flag y refleja
   // en <body> la clase exam-active (CSS oculta el pill de apoyo durante el
