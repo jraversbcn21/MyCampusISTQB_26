@@ -105,9 +105,10 @@ al día en el siguiente sync con sesión abierta y el desfase es aceptable en un
 - Item «Ranking» en el nav del sidebar (tras Achievements) + vista `ranking` en
   `index.html` — patrón `.view`/`App.navigate` (9.º nombre válido). `_saveCurrentView`
   la persiste como cualquier otra.
-- Icono `#i-trophy` nuevo en el sprite Lucide (patrón I8; jamás emoji como icono — gate N17.
-  Ojo: el check N17 hardcodea la lista original de 26 símbolos, así que el símbolo nuevo se
-  protege desde la familia N27, como se hizo con `#i-coffee`/N19).
+- Icono `#i-podium` nuevo en el sprite (patrón I8; **no** `#i-trophy`, que ya existe y lo
+  usa el nav de Logros; jamás emoji como icono — gate N17. Ojo: el check N17 hardcodea la
+  lista original de 26 símbolos, así que el símbolo nuevo se protege desde la familia N27,
+  como se hizo con `#i-coffee`/N19).
 - Top 50 en tabla semántica (`<table>` con `<th scope>`) — posición, nombre, XP. Sin
   medallas-emoji; posiciones como texto.
 - **XSS (punto crítico):** los `display_name` ajenos son datos controlados por otros usuarios
