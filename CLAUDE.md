@@ -1251,7 +1251,16 @@ protegido con un check comportamental que renderiza un `display_name` malicioso
 **Privacidad (mismo commit — regla del repo):** sección "Ranking voluntario"/"Voluntary
 ranking" en `privacy.html` ES/EN — qué se publica (nombre elegido + XP), a quién (solo
 usuarios autenticados), que el nombre es editable y que salir borra el dato de inmediato;
-fecha "última actualización" al 2026-08-06.
+fecha "última actualización" al 2026-08-06. La página estila ahora también `h3` (solo
+estilaba `h2` y los encabezados nuevos salían más grandes que su sección — jerarquía
+invertida, cazada por el review final).
+
+**Pulido post-lanzamiento (mismo día, reporte de Jorge en desktop real):**
+`.ranking-optin`/`.ranking-controls` llevan `max-width: 560px` — sin él, el panel del
+opt-in (campo + botón) se estiraba de extremo a extremo del contenido (~1400px) en
+desktop. Mismo criterio de tarjeta compacta que la `.auth-card` de la landing; en móvil
+no cambia nada (el contenedor ya es más estrecho que el tope). La tabla del top-50 queda
+deliberadamente a ancho completo. Verificado en producción con los tres gates de CSS.
 
 **Gate: familia N27 en `scripts/verify-runtime.js`** (23 checks) — i18n (`rk_*` +
 `nav_ranking` definidas y pareadas ES/EN); estáticos (símbolo `#i-podium` en el sprite,
