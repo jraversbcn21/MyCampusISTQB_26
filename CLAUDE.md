@@ -1075,9 +1075,10 @@ syllabus y CTA final). Handoff de diseño (high-fidelity, no code) en
 Bug reportado en dispositivo real (iOS Safari): con el scroll casi al final de una lección,
 rotar retrato→apaisado→retrato dejaba la pantalla en blanco (solo el FAB del café visible —
 fixed se pinta; el topbar sticky no, porque el viewport queda fuera de su contenedor) hasta
-que un tap lo recuperaba. **El primer intento (clamp único de `scrollY` a los 250ms) NO lo
-arregló** — un overlay de diagnóstico en el dispositivo (`?debugrotate` en la URL, código
-temporal aún presente en `app.js`) capturó el mecanismo real: a los 250ms WebKit todavía
+que un tap lo recuperaba. **Verificado como cerrado en el dispositivo real el mismo día.**
+**El primer intento (clamp único de `scrollY` a los 250ms) NO lo arregló** — un overlay de
+diagnóstico temporal en el dispositivo (`?debugrotate` en la URL; ya retirado, recuperable
+de la historia con `git log -S debugrotate`) capturó el mecanismo real: a los 250ms WebKit todavía
 reporta un estado sano (`scrollY = max`), la corrupción llega DESPUÉS, y su firma es el
 **visual viewport desanclado del layout viewport** — `visualViewport.offsetTop = 2913` (debe
 ser ~0 sin pinch-zoom) con `scrollY = 4719 = layout 1806 + drift 2913`. El tap funciona
@@ -1097,9 +1098,10 @@ porque re-engancha el visual viewport; el fix lo reproduce programáticamente.
   **ráfaga de chequeos a 250/700/1300/2000ms** (no uno solo — la lección del primer intento:
   la corrupción llega tarde y un chequeo único la esquiva; nunca `transitionend`).
 - No reproducible en Chromium/Playwright ni en el arnés (quirk de WebKit) — la verificación
-  del síntoma real es manual en dispositivo físico, con el overlay `?debugrotate` como
-  herramienta de evidencia. **El overlay es temporal: retirarlo (código marcado
-  "DIAGNÓSTICO TEMPORAL" en `app.js`) cuando el bug quede confirmado como cerrado.**
+  fue manual en el dispositivo físico: primero con el overlay `?debugrotate` como
+  herramienta de evidencia (capturó la firma del drift), después confirmando que la
+  pantalla se recupera sola sin tap con el fix v2. El overlay se retiró tras el cierre;
+  si un bug similar reaparece, recuperarlo de la historia en vez de reescribirlo.
 - Gate: familia **N26** en `verify-runtime.js` (estáticos: listener registrado, ráfaga
   250/700/1300/2000, `behavior:'auto'`; comportamentales: nudge de 2 scrolls acabando en
   max sobre-scrolleado, no-op en rango, re-sync con drift del visual viewport, respeto del

@@ -1765,22 +1765,12 @@ const App = {
       const mqOrient = matchMedia('(orientation: portrait)');
       if (typeof mqOrient.addEventListener === 'function') {
         mqOrient.addEventListener('change', () => {
-          this._rotateDebugPush('mq orientación disparó');
           // Ráfaga, no chequeo único: el overlay de diagnóstico demostró (en
           // dispositivo, 2026-08-06) que a los 250ms WebKit aún reporta un
           // estado sano y la corrupción del viewport llega después.
           [250, 700, 1300, 2000].forEach((ms) => setTimeout(() => this._clampScrollAfterRotate(), ms));
         });
       }
-    }
-
-    // DIAGNÓSTICO TEMPORAL (2026-08-06, retirar tras cerrar el bug de rotación):
-    // overlay fixed activable con ?debugrotate en la URL — visible incluso en el
-    // estado "pantalla en blanco" (los fixed se pintan). pointer-events:none para
-    // no robar el tap que recupera el scroll.
-    if (typeof location !== 'undefined' && String(location.search).indexOf('debugrotate') !== -1) {
-      this._rotateDebugOn = true;
-      try { this._initRotateDebug(); } catch (e) { /* diagnóstico, nunca rompe la app */ }
     }
   },
 
@@ -1800,8 +1790,6 @@ const App = {
     const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     const drift = vv ? vv.offsetTop : 0;
     const broken = window.scrollY > max || drift > 1;
-    this._rotateDebugPush('clamp: y=' + Math.round(window.scrollY) + ' max=' + max +
-      ' drift=' + Math.round(drift) + (broken ? ' → RESYNC' : ' → noop'));
     if (!broken) return;
     // Posición real del layout viewport (pageTop - offsetTop); sin
     // visualViewport, el propio scrollY. Clampada al documento actual.
@@ -1809,37 +1797,6 @@ const App = {
     const target = Math.min(Math.max(0, Math.round(layoutY)), max);
     window.scrollTo({ top: target > 0 ? target - 1 : target + 1, behavior: 'auto' });
     window.scrollTo({ top: target, behavior: 'auto' });
-  },
-
-  /* ===== DIAGNÓSTICO DE ROTACIÓN (temporal, 2026-08-06) ===== */
-  _rotateDebugOn: false,
-  _rotateDebugLog: [],
-  _rotateDebugPush(msg) {
-    if (!this._rotateDebugOn) return;
-    const t = new Date();
-    this._rotateDebugLog.push(
-      ('0' + t.getMinutes()).slice(-2) + ':' + ('0' + t.getSeconds()).slice(-2) + ' ' + msg);
-    if (this._rotateDebugLog.length > 6) this._rotateDebugLog.shift();
-  },
-  _initRotateDebug() {
-    const el = document.createElement('div');
-    el.id = 'rotateDebug';
-    el.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;' +
-      'z-index:99999;background:rgba(0,0,0,.85);color:#0f0;font:11px/1.5 monospace;' +
-      'padding:6px 8px;pointer-events:none;white-space:pre;';
-    document.body.appendChild(el);
-    const render = () => {
-      const vv = window.visualViewport;
-      const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      el.textContent = [
-        'scrollY=' + Math.round(window.scrollY) + '  max=' + max +
-          '  scrollH=' + document.documentElement.scrollHeight + '  innerH=' + window.innerHeight,
-        vv ? 'vvPageTop=' + Math.round(vv.pageTop) + '  vvOffTop=' + Math.round(vv.offsetTop) +
-          '  vvH=' + Math.round(vv.height) : '(sin visualViewport)',
-      ].concat(this._rotateDebugLog).join('\n');
-    };
-    render();
-    setInterval(render, 300);
   },
 
   /* ===== TTS (Text-to-Speech) ===== */
