@@ -1269,7 +1269,7 @@ fila a partes iguales). Se descartó mostrar iniciales: el campo es el input edi
 rename, no un display. Check propio en N27. Verificado en producción con los tres gates
 de CSS.
 
-**Gate: familia N27 en `scripts/verify-runtime.js`** (23 checks) — i18n (`rk_*` +
+**Gate: familia N27 en `scripts/verify-runtime.js`** (24 checks) — i18n (`rk_*` +
 `nav_ranking` definidas y pareadas ES/EN); estáticos (símbolo `#i-podium` en el sprite,
 nav-item e `id="view-ranking"` con `#rankingContent`, `navigate()` despachando
 `renderRanking()` + `titleMap`); comportamentales de estado (guard de migración

@@ -2049,13 +2049,21 @@ const SAMPLE_Q = {
       /\.rk-me \{/.test(cssSrc) && /\.rk-join-btn, \.rk-rename-btn, \.rk-leave-btn \{/.test(cssSrc));
     check('N27 responsive: la vista ranking entra en el barrido del gate',
       /'achievements', 'ranking'/.test(fs.readFileSync(path.join(ROOT, 'scripts', 'validate-responsive.js'), 'utf8')));
-    check('N27 css: overrides del tier 480 con prefijo #view-ranking (especificidad de id — ganan a la base posterior)',
-      /#view-ranking \.ranking-optin, #view-ranking \.ranking-controls \{/.test(cssSrc));
-    check('N27 css: input del nombre a fila completa en el tier 480 (móvil: los botones caen debajo)',
+    // Anclado al bloque del tier 480, no a cssSrc entero: sin esto, mover las
+    // reglas fuera del tier (a la sección base o al tier 768) deja pasar el
+    // check igual porque solo mira si el texto aparece en algún sitio del
+    // fichero — no si está DENTRO del media query que le da la especificidad
+    // de id que necesita para ganar la cascada. Ver la nota de especificidad
+    // de id en el propio tier (~1531).
+    const t480start = cssSrc.indexOf('@media (max-width: 480px)');
+    const t480 = cssSrc.slice(t480start, cssSrc.indexOf('/* ===== UTILITY', t480start));
+    check('N27 css: overrides del tier 480 con prefijo #view-ranking (especificidad de id — ganan a la base posterior) (dentro del tier)',
+      /#view-ranking \.ranking-optin, #view-ranking \.ranking-controls \{/.test(t480));
+    check('N27 css: input del nombre a fila completa en el tier 480 (móvil: los botones caen debajo) (dentro del tier)',
       (() => {
-        const m = cssSrc.match(/#view-ranking \.ranking-controls #rkNameInput \{([^}]*)\}/);
+        const m = t480.match(/#view-ranking \.ranking-controls #rkNameInput \{([^}]*)\}/);
         return !!m && /flex-basis:\s*100%/.test(m[1])
-          && /#view-ranking \.ranking-controls \.rk-rename-btn,\s*\n?\s*#view-ranking \.ranking-controls \.rk-leave-btn \{[^}]*flex:\s*1/.test(cssSrc);
+          && /#view-ranking \.ranking-controls \.rk-rename-btn,\s*\n?\s*#view-ranking \.ranking-controls \.rk-leave-btn \{[^}]*flex:\s*1/.test(t480);
       })());
   }
 
