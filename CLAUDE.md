@@ -114,6 +114,19 @@ ship deploy credentials over an unverified channel. Keep the `.pem` outside the 
 commit/deploy it). The 2026-07-20 launch deploy worked because it ran from a different network;
 the 2026-07-22 deploy worked over the VPN with this CA bundle.
 
+**`curl` against production from this network (2026-08-07):** the same proxy makes plain `curl`
+die with exit 35, and `--cacert <bundle>` alone still fails — Windows curl uses schannel, which
+then errors with "the revocation status is unknown" (exit 60) because the revocation check can't
+traverse the proxy. Working combination, still fully verifying the certificate:
+
+```bash
+curl --ssl-revoke-best-effort --cacert "$USERPROFILE/.certs/corporate-ca.pem" <url>
+```
+
+(`--ssl-revoke-best-effort` only tolerates an unreachable revocation server; it does not disable
+verification.) Used to verify deployed CSS and the `ISTQB 2026/`/`.superpowers/` 404s directly
+from the corporate network.
+
 ## Architecture
 
 ### Script Load Order (Critical)
