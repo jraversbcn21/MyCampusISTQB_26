@@ -1260,7 +1260,14 @@ invertida, cazada por el review final).
 opt-in (campo + botón) se estiraba de extremo a extremo del contenido (~1400px) en
 desktop. Mismo criterio de tarjeta compacta que la `.auth-card` de la landing; en móvil
 no cambia nada (el contenedor ya es más estrecho que el tope). La tabla del top-50 queda
-deliberadamente a ancho completo. Verificado en producción con los tres gates de CSS.
+deliberadamente a ancho completo. En móvil (reporte de Jorge en dispositivo real,
+2026-08-07): en `.ranking-controls` el input del nombre compartía fila con los dos
+botones y con `min-width: 0` se encogía a ~60px en vez de saltar de línea (de "Jorge
+Indi" solo se veía "Joi") — en el tier 480, `#view-ranking .ranking-controls
+#rkNameInput` pasa a `flex-basis: 100%` (fila propia) y los botones a `flex: 1` (segunda
+fila a partes iguales). Se descartó mostrar iniciales: el campo es el input editable del
+rename, no un display. Check propio en N27. Verificado en producción con los tres gates
+de CSS.
 
 **Gate: familia N27 en `scripts/verify-runtime.js`** (23 checks) — i18n (`rk_*` +
 `nav_ranking` definidas y pareadas ES/EN); estáticos (símbolo `#i-podium` en el sprite,
