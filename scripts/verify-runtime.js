@@ -2051,6 +2051,12 @@ const SAMPLE_Q = {
       /'achievements', 'ranking'/.test(fs.readFileSync(path.join(ROOT, 'scripts', 'validate-responsive.js'), 'utf8')));
     check('N27 css: overrides del tier 480 con prefijo #view-ranking (especificidad de id — ganan a la base posterior)',
       /#view-ranking \.ranking-optin, #view-ranking \.ranking-controls \{/.test(cssSrc));
+    check('N27 css: input del nombre a fila completa en el tier 480 (móvil: los botones caen debajo)',
+      (() => {
+        const m = cssSrc.match(/#view-ranking \.ranking-controls #rkNameInput \{([^}]*)\}/);
+        return !!m && /flex-basis:\s*100%/.test(m[1])
+          && /#view-ranking \.ranking-controls \.rk-rename-btn,\s*\n?\s*#view-ranking \.ranking-controls \.rk-leave-btn \{[^}]*flex:\s*1/.test(cssSrc);
+      })());
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

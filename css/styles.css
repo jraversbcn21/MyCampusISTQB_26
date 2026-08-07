@@ -1535,6 +1535,14 @@ body {
      regla base posterior (misma especificidad) gana por orden de fuente. */
   #view-ranking .ranking-optin, #view-ranking .ranking-controls { padding: 12px; }
   #view-ranking .ranking-table th, #view-ranking .ranking-table td { padding: 8px; }
+  /* Fix 2026-08-07: en el panel de controles (estado opt-in) el input comparte
+     fila flex con dos botones anchos y, con min-width:0, se encogía a ~60px en
+     vez de saltar de línea (solo se veía "Joi" de "Jorge Indi"). A fila
+     completa el nombre se ve entero; los botones caen debajo a partes iguales
+     (el flex-wrap de la base los apila si aun así no cupieran). */
+  #view-ranking .ranking-controls #rkNameInput { flex-basis: 100%; }
+  #view-ranking .ranking-controls .rk-rename-btn,
+  #view-ranking .ranking-controls .rk-leave-btn { flex: 1; }
 }
 
 /* ===== UTILITY ===== */
