@@ -643,6 +643,22 @@ Result: BVA now has 5 questions; state transition keeps 4. Design:
 `docs/superpowers/specs/2026-07-14-question-bank-gap-closure-design.md`. No content work currently
 pending.
 
+**User-reported gap — CLOSED (2026-08-10).** A Reddit commenter reported that lesson 2.3's
+non-functional testing section was missing portability and safety — verified true against the
+official syllabus v4.0.1 §2.2.2 (p. 29), which lists **eight** ISO/IEC 25010 non-functional quality
+characteristics; the lesson's table had only 6. Fixed: both rows added (ES/EN, reordered to the
+syllabus order) plus the v4.0.1 aliases (usability = "interaction capability", portability =
+"flexibility" — the v4.0.1 release notes, p. 72, document the ISO 25010:2023 rename and the new
+"safety" characteristic); the glossary "Prueba no funcional" definition and the functional-vs-non-
+functional flashcard now enumerate all 8 instead of a partial 4. **Safety translates to "seguridad
+funcional" in official ES material** (Sample Exam A ES, question A23) — don't retranslate it as
+plain "seguridad" (that's *security*). Same commit also fixed the citation drift the check
+uncovered: topic/lesson 2.3 cited "§2.3" and 2.4 cited "§2.4" following the app's own topic
+numbering, but in the real syllabus test types are **§2.2.2–2.2.3** and maintenance testing is
+**§2.3** (§2.4 doesn't exist) — `questions.js` and the glossary already used the real numbering;
+only `CHAPTERS` sources and the four lesson footers were wrong. `validate-content.js` only checks
+that `source` is non-empty, so citation *accuracy* is on the editor, not the gate.
+
 **Real errors found and fixed during Phase 2** (precedent for how thorough the audit needs to be):
 Ch.2 lesson's false "4 test levels" (syllabus defines 5); Ch.3's two review roles (Gestor, Moderador)
 silently merged into one, split back out; Ch.4's non-syllabus "Prueba de Caso de Uso" (removed in

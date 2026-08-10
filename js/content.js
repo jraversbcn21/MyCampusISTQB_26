@@ -35,8 +35,8 @@ const CHAPTERS = [
     topics: [
       { id: "2.1", title: { es: "Testing en el contexto del SDLC", en: "Testing in the context of SDLC" }, xp: 40, lo: ["FL-2.1.1","FL-2.1.2","FL-2.1.3","FL-2.1.4","FL-2.1.5","FL-2.1.6"], source: "Syllabus v4.0 §2.1" },
       { id: "2.2", title: { es: "Niveles de prueba", en: "Test levels" }, xp: 50, lo: ["FL-2.2.1"], source: "Syllabus v4.0 §2.2" },
-      { id: "2.3", title: { es: "Tipos de prueba", en: "Test types" }, xp: 40, lo: ["FL-2.2.2","FL-2.2.3"], source: "Syllabus v4.0 §2.3" },
-      { id: "2.4", title: { es: "Pruebas de mantenimiento", en: "Maintenance testing" }, xp: 30, lo: ["FL-2.3.1"], source: "Syllabus v4.0 §2.4" },
+      { id: "2.3", title: { es: "Tipos de prueba", en: "Test types" }, xp: 40, lo: ["FL-2.2.2","FL-2.2.3"], source: "Syllabus v4.0 §2.2.2-2.2.3" },
+      { id: "2.4", title: { es: "Pruebas de mantenimiento", en: "Maintenance testing" }, xp: 30, lo: ["FL-2.3.1"], source: "Syllabus v4.0 §2.3" },
     ]
   },
   {
@@ -805,15 +805,17 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Prueba de humo (smoke/sanity)</li>
 </ul>
 <h3>Pruebas No Funcionales</h3>
-<p>Verifican <strong>CÓMO se comporta</strong> el sistema. Cubren características de calidad que no son funciones específicas (ISO/IEC 25010).</p>
+<p>Verifican <strong>CÓMO se comporta</strong> el sistema. Cubren características de calidad que no son funciones específicas. La norma ISO/IEC 25010 clasifica ocho características de calidad no funcionales:</p>
 <table>
-  <tr><th>Tipo</th><th>Qué evalúa</th></tr>
-  <tr><td>Rendimiento/Carga</td><td>Velocidad, escalabilidad bajo carga</td></tr>
-  <tr><td>Seguridad</td><td>Vulnerabilidades, acceso no autorizado</td></tr>
-  <tr><td>Usabilidad</td><td>Facilidad de uso, experiencia de usuario</td></tr>
-  <tr><td>Fiabilidad</td><td>Disponibilidad, tolerancia a fallos</td></tr>
+  <tr><th>Característica</th><th>Qué evalúa</th></tr>
+  <tr><td>Rendimiento/Carga (eficiencia de desempeño)</td><td>Velocidad, escalabilidad bajo carga</td></tr>
   <tr><td>Compatibilidad</td><td>Interoperabilidad con otros sistemas</td></tr>
+  <tr><td>Usabilidad (también: capacidad de interacción)</td><td>Facilidad de uso, experiencia de usuario</td></tr>
+  <tr><td>Fiabilidad</td><td>Disponibilidad, tolerancia a fallos</td></tr>
+  <tr><td>Seguridad</td><td>Vulnerabilidades, acceso no autorizado</td></tr>
   <tr><td>Mantenibilidad</td><td>Facilidad de modificación</td></tr>
+  <tr><td>Portabilidad (también: flexibilidad)</td><td>Facilidad de transferir el sistema a otros entornos</td></tr>
+  <tr><td>Seguridad funcional (safety)</td><td>Evitar estados que pongan en peligro la vida, la salud, la propiedad o el medio ambiente</td></tr>
 </table>
 <h3>Pruebas de Caja Negra</h3>
 <p>Se basan en la <strong>especificación</strong>. Las pruebas se obtienen a partir de documentación externa al objeto de prueba (requisitos, especificaciones), sin necesitar conocimiento del código interno.</p>
@@ -834,7 +836,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 <div class="warning-box">
 ⚠️ <strong>Para el examen:</strong> Distingue entre pruebas funcionales (QUÉ hace el sistema) y no funcionales (CÓMO lo hace), y entre caja negra (especificación) y caja blanca (estructura interna).
 </div>
-<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.3</p>`
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.2.2-2.2.3</p>`
     },
     en: {
       title: "Test types",
@@ -849,15 +851,17 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Smoke/sanity testing</li>
 </ul>
 <h3>Non-Functional Testing</h3>
-<p>Verifies <strong>HOW WELL</strong> the system behaves. Covers quality characteristics that are not specific functions (ISO/IEC 25010).</p>
+<p>Verifies <strong>HOW WELL</strong> the system behaves. Covers quality characteristics that are not specific functions. The ISO/IEC 25010 standard classifies eight non-functional quality characteristics:</p>
 <table>
-  <tr><th>Type</th><th>What it evaluates</th></tr>
-  <tr><td>Performance/Load</td><td>Speed, scalability under load</td></tr>
-  <tr><td>Security</td><td>Vulnerabilities, unauthorized access</td></tr>
-  <tr><td>Usability</td><td>Ease of use, user experience</td></tr>
-  <tr><td>Reliability</td><td>Availability, fault tolerance</td></tr>
+  <tr><th>Characteristic</th><th>What it evaluates</th></tr>
+  <tr><td>Performance efficiency</td><td>Speed, scalability under load</td></tr>
   <tr><td>Compatibility</td><td>Interoperability with other systems</td></tr>
+  <tr><td>Usability (also known as: interaction capability)</td><td>Ease of use, user experience</td></tr>
+  <tr><td>Reliability</td><td>Availability, fault tolerance</td></tr>
+  <tr><td>Security</td><td>Vulnerabilities, unauthorized access</td></tr>
   <tr><td>Maintainability</td><td>Ease of modification</td></tr>
+  <tr><td>Portability (also known as: flexibility)</td><td>Ease of transferring the system to other environments</td></tr>
+  <tr><td>Safety</td><td>Avoiding states that endanger human life, health, property or the environment</td></tr>
 </table>
 <h3>Black-Box Testing</h3>
 <p>Based on the <strong>specification</strong>. Tests are derived from documentation external to the test object (requirements, specifications), without needing knowledge of the internal code.</p>
@@ -872,7 +876,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 </ul>
 <div class="example-box">📌 <strong>For the exam:</strong> Confirmation testing checks that ONE specific defect is fixed; regression testing checks that NOTHING ELSE broke. Both may be needed at any test level, and regression testing is a strong candidate for automation.</div>
 <div class="warning-box">⚠️ <strong>For the exam:</strong> Distinguish functional (WHAT the system does) from non-functional (HOW it does it), and black-box (specification) from white-box (internal structure).</div>
-<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.3</p>`
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.2.2-2.2.3</p>`
     }
   },
   "3.1": {
@@ -1923,7 +1927,7 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 <div class="highlight-box">
 💡 <strong>Para el examen:</strong> Recuerda los tres desencadenantes principales: <strong>modificación</strong>, <strong>migración</strong> y <strong>retirada</strong>. Y que el análisis de impacto precede siempre a las pruebas de mantenimiento.
 </div>
-<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.4</p>
+<p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §2.3</p>
       `
     },
     en: {
@@ -1969,7 +1973,7 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 <div class="highlight-box">
 💡 <strong>For the exam:</strong> Remember the three main triggers: <strong>modification</strong>, <strong>migration</strong> and <strong>retirement</strong>. And that impact analysis always precedes maintenance testing.
 </div>
-<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.4</p>
+<p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §2.3</p>
       `
     }
   },
@@ -2286,7 +2290,7 @@ const FLASHCARDS = [
   },
   { id: 10, chapter: 1, chapterTag: { es: "Cap. 2 · SDLC", en: "Ch. 2 · SDLC" },
     q: { es: "¿Qué es el testing funcional vs. no funcional?", en: "What is functional vs. non-functional testing?" },
-    a: { es: "Funcional: verifica QUÉ hace el sistema (comportamiento). No funcional: verifica CÓMO se comporta el sistema (rendimiento, usabilidad, seguridad, fiabilidad).", en: "Functional: verifies WHAT the system does (behavior). Non-functional: verifies HOW the system behaves (performance, usability, security, reliability)." }
+    a: { es: "Funcional: verifica QUÉ hace el sistema (comportamiento). No funcional: verifica CÓMO se comporta el sistema — las 8 características de ISO 25010: rendimiento, compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad, portabilidad y seguridad funcional (safety).", en: "Functional: verifies WHAT the system does (behavior). Non-functional: verifies HOW WELL the system behaves — the 8 ISO 25010 characteristics: performance efficiency, compatibility, usability, reliability, security, maintainability, portability and safety." }
   },
   { id: 11, chapter: 1, chapterTag: { es: "Cap. 2 · SDLC", en: "Ch. 2 · SDLC" },
     q: { es: "¿Qué es el testing de regresión y por qué es importante?", en: "What is regression testing and why is it important?" },
@@ -2405,7 +2409,7 @@ const GLOSSARY = [
   { term: { es: "Prueba de sistema", en: "System testing" }, def: { es: "Nivel de prueba que verifica el comportamiento del sistema completo de extremo a extremo.", en: "Test level that verifies the behavior of the complete system end-to-end." }, chapter: "2", source: "Syllabus v4.0 keywords §2 · §2.2.1" },
   { term: { es: "Prueba de aceptación", en: "Acceptance testing" }, def: { es: "Nivel de prueba realizado para determinar si el sistema cumple con los criterios de aceptación del negocio.", en: "Test level performed to determine if the system meets business acceptance criteria." }, chapter: "2", source: "Syllabus v4.0 keywords §2 · §2.2.1" },
   { term: { es: "Prueba funcional", en: "Functional testing" }, def: { es: "Pruebas que verifican lo que el sistema HACE, basadas en las funciones requeridas.", en: "Tests that verify what the system DOES, based on required functions." }, chapter: "2", source: "Syllabus v4.0 keywords §2 · §2.2.2" },
-  { term: { es: "Prueba no funcional", en: "Non-functional testing" }, def: { es: "Pruebas que verifican cómo se comporta el sistema (rendimiento, usabilidad, seguridad, fiabilidad).", en: "Tests that verify how the system behaves (performance, usability, security, reliability)." }, chapter: "2", source: "Syllabus v4.0 keywords §2 · §2.2.2" },
+  { term: { es: "Prueba no funcional", en: "Non-functional testing" }, def: { es: "Pruebas que evalúan atributos distintos de las características funcionales — cómo se comporta el sistema. ISO/IEC 25010 clasifica ocho características: rendimiento (eficiencia de desempeño), compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad, portabilidad y seguridad funcional (safety).", en: "Tests that evaluate attributes other than functional characteristics — how well the system behaves. ISO/IEC 25010 classifies eight characteristics: performance efficiency, compatibility, usability, reliability, security, maintainability, portability and safety." }, chapter: "2", source: "Syllabus v4.0 keywords §2 · §2.2.2" },
   { term: { es: "Prueba de regresión", en: "Regression testing" }, def: { es: "Pruebas que verifican que los cambios no han introducido nuevos defectos en áreas que funcionaban correctamente.", en: "Tests that verify changes haven't introduced new defects in areas that previously worked correctly." }, chapter: "2", source: "Syllabus v4.0 keywords §2 · §2.2.3" },
   { term: { es: "Testing de humo", en: "Smoke test" }, def: { es: "Conjunto básico de pruebas que verifican las funcionalidades más críticas para confirmar que el sistema puede ser probado más a fondo.", en: "Basic set of tests verifying the most critical functionalities to confirm the system can be further tested." }, chapter: "2", source: "Syllabus v4.0 §5.1.3 (ejemplo de criterio de entrada: 'initial quality level of a test object, e.g., all smoke tests have passed')" },
   { term: { es: "Prueba alfa", en: "Alpha testing" }, def: { es: "Prueba de aceptación realizada por usuarios en el sitio del desarrollador.", en: "Acceptance testing performed by users at the developer's site." }, chapter: "2", source: "Syllabus v4.0 §2.2.1" },
