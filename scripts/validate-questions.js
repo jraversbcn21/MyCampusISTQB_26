@@ -1,6 +1,6 @@
 /* Validador de banco de preguntas — arnés de desarrollo (no se sirve al navegador). */
 const path = require('path');
-const { FL_RE, loadGlobals, checkBilingualText, report } = require('./lib/validate-utils');
+const { FL_RE, SYLLABUS_SECTIONS, checkSyllabusRefs, loadGlobals, checkBilingualText, report } = require('./lib/validate-utils');
 
 // Ruta opcional por argumento: el hook de pre-commit valida una copia
 // temporal del contenido STAGED (git show :js/questions.js), no el working
@@ -45,8 +45,10 @@ for (const q of QUESTIONS) {
   if (q.id <= 50) continue;
   const tag = `id ${q.id}`;
   if (!FL_RE.test(q.lo || '')) errors.push(`${tag}: lo inválido o ausente (${q.lo})`);
+  else if (!SYLLABUS_SECTIONS.has(q.lo.slice(3))) errors.push(`${tag}: el objetivo ${q.lo} no existe en el syllabus v4.0.1`);
   if (![1, 2, 3].includes(q.k)) errors.push(`${tag}: k debe ser 1, 2 o 3 (${q.k})`);
   if (!q.source || !q.source.trim()) errors.push(`${tag}: source vacío`);
+  checkSyllabusRefs(q.source, tag, errors);
 }
 
 report(errors);

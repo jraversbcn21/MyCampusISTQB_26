@@ -656,8 +656,18 @@ plain "seguridad" (that's *security*). Same commit also fixed the citation drift
 uncovered: topic/lesson 2.3 cited "§2.3" and 2.4 cited "§2.4" following the app's own topic
 numbering, but in the real syllabus test types are **§2.2.2-2.2.3** and maintenance testing is
 **§2.3** (§2.4 doesn't exist). `questions.js` and the glossary already used the real numbering;
-only `CHAPTERS` sources and the four lesson footers were wrong. `validate-content.js` only checks
-that `source` is non-empty, so citation *accuracy* is on the editor, not the gate. Follow-up in the
+only `CHAPTERS` sources and the four lesson footers were wrong. A full-repo sweep on 2026-08-10
+checked every `§` citation (22 topic sources, 22×2 lesson footers, 107 glossary sources, 74
+question sources) against the 92 real sections of the v4.0.1 PDF: chapter 2 was the only drift
+(the app's topic numbering coincides 1:1 with the syllabus everywhere else). The sweep is now a
+**permanent gate**: `scripts/lib/validate-utils.js` hardcodes `SYLLABUS_SECTIONS` (chapters,
+sections, and per-section LO counts from the official PDF) and `checkSyllabusRefs()`, wired into
+both validators — every `§x.y.z` in a `source`/lesson footer must exist in the syllabus, and every
+`lo`/`FL-x.y.z` code must be a real learning objective. Sources without `§` (the two glossary
+entries citing the reference book) are deliberately skipped, and cross-chapter citations are
+allowed (legitimate case: the glossary cites smoke tests at §5.1.3, the syllabus's only mention).
+Negative-tested: re-introducing the old `§2.4` citation or a bogus `FL-2.9.9` fails the validators.
+Follow-up in the
 question bank (same day, same replace-don't-add discipline as 2026-07-14): **id 11 replaced by
 id 124**. Legacy id 11 ("which of these is a non-functional test type?", no `lo`/`k`/`source`)
 covered the same ground superficially; id 124 tests the ISO 25010 classification itself, with

@@ -1,6 +1,6 @@
 /* Validador de auditoría de contenido — arnés de desarrollo (no se sirve al navegador). */
 const path = require('path');
-const { FL_RE, loadGlobals, checkBilingualText, report } = require('./lib/validate-utils');
+const { FL_RE, SYLLABUS_SECTIONS, checkSyllabusRefs, loadGlobals, checkBilingualText, report } = require('./lib/validate-utils');
 
 // Ruta opcional por argumento — mismo motivo que en validate-questions.js:
 // el hook de pre-commit valida la copia staged, no el working tree.
@@ -28,9 +28,11 @@ CHAPTERS.forEach((ch, chIdx) => {
     } else {
       topic.lo.forEach(code => {
         if (!FL_RE.test(code)) errors.push(`${tag}: código lo inválido "${code}"`);
+        else if (!SYLLABUS_SECTIONS.has(code.slice(3))) errors.push(`${tag}: el objetivo ${code} no existe en el syllabus v4.0.1`);
       });
     }
     if (!topic.source || !topic.source.trim()) errors.push(`${tag}: source vacío`);
+    checkSyllabusRefs(topic.source, tag, errors);
 
     const lesson = LESSONS[topic.id];
     if (!lesson) {
@@ -42,8 +44,11 @@ CHAPTERS.forEach((ch, chIdx) => {
         errors.push(`${tag}: falta LESSONS.${topic.id}.${lang}.content`);
         continue;
       }
-      if (!lesson[lang].content.includes('class="lesson-source"')) {
+      const footer = lesson[lang].content.match(/class="lesson-source">([^<]+)</);
+      if (!footer) {
         errors.push(`${tag}: falta pie de fuente (.lesson-source) en LESSONS.${topic.id}.${lang}.content`);
+      } else {
+        checkSyllabusRefs(footer[1], `${tag} (pie ${lang})`, errors);
       }
     }
   });
@@ -89,6 +94,7 @@ GLOSSARY.forEach((g, i) => {
   checkBilingualText(g, 'def', tag, errors);
   if (!['1','2','3','4','5','6'].includes(g.chapter)) errors.push(`${tag}: chapter inválido "${g.chapter}"`);
   if (!g.source || !g.source.trim()) errors.push(`${tag}: source vacío`);
+  checkSyllabusRefs(g.source, tag, errors);
   const key = g.term ? `${(g.term.es || '').toLowerCase().trim()}|${(g.term.en || '').toLowerCase().trim()}` : '';
   if (seenTerms.has(key)) errors.push(`${tag}: término duplicado`);
   seenTerms.add(key);
