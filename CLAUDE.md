@@ -657,7 +657,14 @@ uncovered: topic/lesson 2.3 cited "§2.3" and 2.4 cited "§2.4" following the ap
 numbering, but in the real syllabus test types are **§2.2.2-2.2.3** and maintenance testing is
 **§2.3** (§2.4 doesn't exist). `questions.js` and the glossary already used the real numbering;
 only `CHAPTERS` sources and the four lesson footers were wrong. `validate-content.js` only checks
-that `source` is non-empty, so citation *accuracy* is on the editor, not the gate.
+that `source` is non-empty, so citation *accuracy* is on the editor, not the gate. Follow-up in the
+question bank (same day, same replace-don't-add discipline as 2026-07-14): **id 11 replaced by
+id 124**. Legacy id 11 ("which of these is a non-functional test type?", no `lo`/`k`/`source`)
+covered the same ground superficially; id 124 tests the ISO 25010 classification itself, with
+portability and safety among the options and the three FUNCTIONAL characteristics of §2.2.2 as the
+basis for the correct answer ("functional correctness" is NOT non-functional). **FL-2.2.2/K1,
+source "Syllabus v4.0 §2.2.2".** Bank stays at 120, distribution intact; the other FL-2.2.2
+question (id 72, white-box) is untouched.
 
 **Real errors found and fixed during Phase 2** (precedent for how thorough the audit needs to be):
 Ch.2 lesson's false "4 test levels" (syllabus defines 5); Ch.3's two review roles (Gestor, Moderador)

@@ -187,19 +187,20 @@ const QUESTIONS = [
     }
   },
   {
-    id: 11, chapter: 1,
+    id: 124, chapter: 1, lo: "FL-2.2.2", k: 1,
+    source: "Syllabus v4.0 §2.2.2",
     q: {
-      es: "¿Cuál de los siguientes es un tipo de prueba NO FUNCIONAL?",
-      en: "Which of the following is a NON-FUNCTIONAL test type?"
+      es: "Según la clasificación de la norma ISO/IEC 25010 recogida en el syllabus, ¿cuál de las siguientes NO es una característica de calidad no funcional?",
+      en: "According to the ISO/IEC 25010 classification referenced in the syllabus, which of the following is NOT a non-functional quality characteristic?"
     },
     options: {
-      es: ["Prueba de regresión", "Prueba de aceptación de usuario", "Prueba de carga (performance)", "Prueba de humo (smoke test)"],
-      en: ["Regression testing", "User acceptance testing", "Load testing (performance)", "Smoke testing"]
+      es: ["Portabilidad", "Seguridad funcional (safety)", "Corrección funcional", "Compatibilidad"],
+      en: ["Portability", "Safety", "Functional correctness", "Compatibility"]
     },
     correct: 2,
     explanation: {
-      es: "La prueba de carga (load testing) es una prueba no funcional que evalúa el rendimiento del sistema bajo condiciones de carga. Las pruebas no funcionales evalúan CÓMO se comporta el sistema, no QUÉ hace.",
-      en: "Load testing is a non-functional test evaluating system performance under load conditions. Non-functional tests evaluate HOW the system behaves, not WHAT it does."
+      es: "La corrección funcional es una de las tres características FUNCIONALES que evalúa la prueba funcional (completitud, corrección y pertinencia funcional). La norma ISO/IEC 25010 clasifica ocho características de calidad NO funcionales: rendimiento (eficiencia de desempeño), compatibilidad, usabilidad (capacidad de interacción), fiabilidad, seguridad, mantenibilidad, portabilidad (flexibilidad) y seguridad funcional (safety).",
+      en: "Functional correctness is one of the three FUNCTIONAL characteristics that functional testing evaluates (functional completeness, correctness and appropriateness). The ISO/IEC 25010 standard classifies eight NON-functional quality characteristics: performance efficiency, compatibility, usability (interaction capability), reliability, security, maintainability, portability (flexibility) and safety."
     }
   },
   // ===== CHAPTER 3: STATIC TESTING =====
