@@ -1328,3 +1328,32 @@ aislamiento nunca lanza); css/responsive (`.ranking-table` **anclada a regla rea
 `includes()`** — lección N19/N21 — antes del bloque reduced-motion, targets ≥44px, fila
 propia resaltada, la vista `ranking` entra en el barrido de `validate-responsive.js`,
 overrides del tier 480 con el prefijo `#view-ranking`).
+
+## Doble icono TTS en iOS Safari al girar la flashcard (2026-08-11)
+
+Bug reportado en iPhone físico (visto en iOS 26 y 18; Android/Blink y Chrome responsive
+correctos): al girar la flashcard, el botón TTS de la cara oculta se veía **en espejo** en la
+esquina opuesta (bottom-left, reflejo del bottom-right real) — dos iconos de sonido en la cara
+trasera. **Verificado como cerrado en ambos dispositivos iOS el mismo día.**
+
+- **Causa raíz:** WebKit no aplica el culling de `backface-visibility: hidden` de la cara a
+  hijos posicionados que promociona a capa de composición propia (`.fc-tts-btn` es
+  `absolute` + `z-index: 2`). El texto de la cara se oculta bien (no tiene capa propia); solo
+  el botón "atraviesa" la carta girada. Mismo patrón que el clamp de rotación (N26): quirk de
+  WebKit invisible para Chromium/Playwright/arnés — la verificación es manual en dispositivo.
+- **El primer intento NO funcionó — no volver a él:** declarar `backface-visibility: hidden`
+  en el propio `.fc-tts-btn` (el fix "estándar" documentado para este bug) se desplegó y
+  falló en dispositivo real en iOS 18 y 26 — WebKit tampoco lo respeta en el hijo con capa
+  propia. La declaración se conserva en la regla como cinturón, comentada como tal.
+- **Fix real — determinista, sin depender del culling 3D:** dos reglas en la sección
+  FLASHCARD TTS BUTTON de `css/styles.css` ocultan con `visibility: hidden` el botón de la
+  cara no visible según el estado: `.flashcard-inner.flipped .flashcard-front .fc-tts-btn` y
+  `.flashcard-inner:not(.flipped) .flashcard-back .fc-tts-btn`. La clase `.flipped` que ya
+  gobierna el giro es la única fuente de verdad. Bonus a11y: el botón de la cara oculta deja
+  de ser tabulable (antes ambos estaban en el orden de tabulación). El `transition: all` del
+  botón suaviza el cambio a mitad de giro; con reduced-motion el bloque global lo hace
+  instantáneo. La sección TTS (~2700) sigue antes de la cadena final del tail
+  (`pointer: coarse` → `.bmc-fab` → reduced-motion → `:focus-visible`) — orden intacto.
+- Gate: familia **N28** en `verify-runtime.js` (3 checks estáticos anclados a regla real: las
+  reglas de visibility por estado — el fix real —, el backface del botón como cinturón, y el
+  backface de las caras como mecanismo base del flip).
