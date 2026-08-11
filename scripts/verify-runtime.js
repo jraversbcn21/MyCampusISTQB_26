@@ -2067,6 +2067,26 @@ const SAMPLE_Q = {
       })());
   }
 
+  /* ---- N28: backface del botón TTS en iOS Safari (2026-08-11) ---- */
+  // WebKit no hereda el backface-visibility de la cara a hijos posicionados con
+  // capa de composición propia (absolute + z-index): en iPhone físico el botón
+  // TTS de la cara oculta se veía en espejo a través de la tarjeta girada.
+  // No reproducible en Chromium/arnés (quirk de WebKit) — checks estáticos +
+  // verificación manual en dispositivo, mismo criterio que N26.
+  {
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+    check('N28 css: .fc-tts-btn declara su propio backface-visibility: hidden (WebKit no lo hereda de la cara)',
+      (() => {
+        const m = cssSrc.match(/\.fc-tts-btn \{([^}]*)\}/);
+        return !!m && /backface-visibility:\s*hidden/.test(m[1]);
+      })());
+    check('N28 css: las caras conservan backface-visibility: hidden (el mecanismo base del flip)',
+      (() => {
+        const m = cssSrc.match(/\.flashcard-front, \.flashcard-back \{([^}]*)\}/);
+        return !!m && /backface-visibility:\s*hidden/.test(m[1]);
+      })());
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();

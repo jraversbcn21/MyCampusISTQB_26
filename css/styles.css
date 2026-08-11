@@ -2718,6 +2718,11 @@ body {
   padding: 0;
   line-height: 1;
   z-index: 2;
+  /* WebKit no hereda el backface-visibility de la cara a este hijo posicionado
+     (capa de composición propia por absolute+z-index): en iOS Safari el botón
+     de la cara oculta se veía en espejo a través de la tarjeta girada. Debe
+     declararse en el propio botón, no basta con el de .flashcard-front/back. */
+  backface-visibility: hidden;
 }
 .fc-tts-btn:hover {
   background: var(--primary-dark);
