@@ -2720,9 +2720,21 @@ body {
   z-index: 2;
   /* WebKit no hereda el backface-visibility de la cara a este hijo posicionado
      (capa de composición propia por absolute+z-index): en iOS Safari el botón
-     de la cara oculta se veía en espejo a través de la tarjeta girada. Debe
-     declararse en el propio botón, no basta con el de .flashcard-front/back. */
+     de la cara oculta se veía en espejo a través de la tarjeta girada.
+     Declararlo aquí NO bastó en dispositivo real (verificado en iOS 18 y 26) —
+     el fix efectivo son las reglas de visibility de abajo, que no dependen del
+     culling 3D. Se conserva como cinturón, no como fix. */
   backface-visibility: hidden;
+}
+/* Fix real del doble icono en iOS Safari: ocultar determinísticamente el botón
+   de la cara no visible según el estado .flipped, sin depender del culling 3D
+   que WebKit no aplica a hijos con capa propia. El `transition: all` del botón
+   retrasa el visibility→hidden ~al punto medio del giro de 0.5s; con
+   reduced-motion el bloque global anula duraciones y el cambio es instantáneo.
+   visibility:hidden además saca de la tabulación el botón de la cara oculta. */
+.flashcard-inner.flipped .flashcard-front .fc-tts-btn,
+.flashcard-inner:not(.flipped) .flashcard-back .fc-tts-btn {
+  visibility: hidden;
 }
 .fc-tts-btn:hover {
   background: var(--primary-dark);

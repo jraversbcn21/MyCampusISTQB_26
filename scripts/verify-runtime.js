@@ -2067,15 +2067,19 @@ const SAMPLE_Q = {
       })());
   }
 
-  /* ---- N28: backface del botón TTS en iOS Safari (2026-08-11) ---- */
-  // WebKit no hereda el backface-visibility de la cara a hijos posicionados con
-  // capa de composición propia (absolute + z-index): en iPhone físico el botón
-  // TTS de la cara oculta se veía en espejo a través de la tarjeta girada.
-  // No reproducible en Chromium/arnés (quirk de WebKit) — checks estáticos +
-  // verificación manual en dispositivo, mismo criterio que N26.
+  /* ---- N28: doble icono TTS en iOS Safari al girar la flashcard (2026-08-11) ---- */
+  // WebKit no aplica el culling de backface a hijos posicionados con capa de
+  // composición propia (absolute + z-index): en iPhone físico el botón TTS de
+  // la cara oculta se veía en espejo a través de la tarjeta girada. Declarar
+  // backface-visibility en el propio botón NO bastó (verificado en iOS 18 y
+  // 26) — el fix real son las reglas de visibility por estado .flipped, que no
+  // dependen del culling 3D. No reproducible en Chromium/arnés (quirk de
+  // WebKit) — checks estáticos + verificación manual en dispositivo (N26).
   {
     const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
-    check('N28 css: .fc-tts-btn declara su propio backface-visibility: hidden (WebKit no lo hereda de la cara)',
+    check('N28 css: el botón de la cara no visible se oculta por estado .flipped (fix real — sin depender del culling 3D)',
+      /\.flashcard-inner\.flipped \.flashcard-front \.fc-tts-btn,\s*\n?\s*\.flashcard-inner:not\(\.flipped\) \.flashcard-back \.fc-tts-btn \{[^}]*visibility:\s*hidden/.test(cssSrc));
+    check('N28 css: .fc-tts-btn conserva backface-visibility: hidden (cinturón, no fix)',
       (() => {
         const m = cssSrc.match(/\.fc-tts-btn \{([^}]*)\}/);
         return !!m && /backface-visibility:\s*hidden/.test(m[1]);
