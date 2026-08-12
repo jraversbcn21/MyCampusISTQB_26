@@ -995,11 +995,11 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 <p>La retroalimentación temprana y frecuente de los implicados permite comunicar cuanto antes posibles problemas de calidad. Si hay poca implicación de los implicados durante el ciclo de vida, el producto puede no cumplir su visión original o actual, lo que puede provocar repetición de trabajo, incumplimiento de plazos o incluso el fracaso del proyecto. La retroalimentación frecuente ayuda al equipo de desarrollo a comprender mejor lo que construye y a centrarse en las funcionalidades que más valor aportan.</p>
 <h3>Tipos de Revisión</h3>
 <table>
-  <tr><th>Tipo</th><th>Formalidad</th><th>Guiado por</th><th>Objetivo</th></tr>
-  <tr><td>Informal</td><td>Muy baja</td><td>Cualquiera</td><td>Encontrar defectos rápidamente</td></tr>
-  <tr><td>Walkthrough</td><td>Baja-Media</td><td>Autor</td><td>Aprendizaje del equipo</td></tr>
-  <tr><td>Revisión técnica</td><td>Media</td><td>Moderador</td><td>Consenso técnico</td></tr>
-  <tr><td>Inspección</td><td>Alta</td><td>Moderador certificado</td><td>Máxima detección de defectos</td></tr>
+  <tr><th>Tipo</th><th>Formalidad</th><th>Objetivo principal</th><th>Características clave</th></tr>
+  <tr><td>Informal</td><td>Muy baja</td><td>Detectar anomalías</td><td>Sin proceso definido; no requiere salida formal documentada</td></tr>
+  <tr><td>Walkthrough</td><td>Baja-Media</td><td>Evaluar calidad, educar a los revisores, obtener consenso, generar ideas, detectar anomalías</td><td>Guiada por el <strong>autor</strong>; la revisión individual previa NO es obligatoria</td></tr>
+  <tr><td>Revisión técnica</td><td>Media</td><td>Obtener consenso y tomar decisiones sobre un problema técnico; detectar anomalías</td><td>Revisores <strong>técnicamente cualificados</strong>, dirigida por un moderador</td></tr>
+  <tr><td>Inspección</td><td>Alta (la más formal)</td><td>Encontrar el máximo número de anomalías</td><td>Sigue el proceso genérico completo; se recopilan <strong>métricas</strong> para mejorar el SDLC; el autor NO puede ser líder de la revisión ni escriba</td></tr>
 </table>
 <h3>Roles y Responsabilidades en una Revisión Formal</h3>
 <ul>
@@ -1045,11 +1045,11 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 <p>Early and frequent feedback from stakeholders allows quality issues to be communicated as soon as possible. Low stakeholder involvement during the SDLC can result in a product that fails to meet the stakeholder's original or current vision, which can lead to costly rework, missed deadlines, or even project failure. Frequent feedback helps the development team better understand what they are building and focus on the features that bring the most value.</p>
 <h3>Review Types</h3>
 <table>
-  <tr><th>Type</th><th>Formality</th><th>Led by</th><th>Objective</th></tr>
-  <tr><td>Informal</td><td>Very low</td><td>Anyone</td><td>Find defects quickly</td></tr>
-  <tr><td>Walkthrough</td><td>Low-Medium</td><td>Author</td><td>Team learning</td></tr>
-  <tr><td>Technical review</td><td>Medium</td><td>Moderator</td><td>Technical consensus</td></tr>
-  <tr><td>Inspection</td><td>High</td><td>Certified moderator</td><td>Maximum defect detection</td></tr>
+  <tr><th>Type</th><th>Formality</th><th>Main objective</th><th>Key characteristics</th></tr>
+  <tr><td>Informal</td><td>Very low</td><td>Detecting anomalies</td><td>No defined process; no formal documented output required</td></tr>
+  <tr><td>Walkthrough</td><td>Low-Medium</td><td>Evaluate quality, educate reviewers, gain consensus, generate ideas, detect anomalies</td><td>Led by the <strong>author</strong>; individual review beforehand is NOT required</td></tr>
+  <tr><td>Technical review</td><td>Medium</td><td>Gain consensus and make decisions on a technical problem; detect anomalies</td><td><strong>Technically qualified</strong> reviewers, led by a moderator</td></tr>
+  <tr><td>Inspection</td><td>High (most formal)</td><td>Find the maximum number of anomalies</td><td>Follows the complete generic process; <strong>metrics</strong> are collected to improve the SDLC; the author canNOT act as review leader or scribe</td></tr>
 </table>
 <h3>Roles and Responsibilities in a Formal Review</h3>
 <ul>
