@@ -684,7 +684,7 @@ questions, glossary and flashcards were verified correct and untouched): (a) the
 now lists the official **5 activities** of §3.2.2 (it taught 6, with "Seguimiento/Follow-up" as
 its own step; follow-up belongs INSIDE "Communication and analysis") — this also removed a
 contradiction with question id 78, whose explanation already enumerated the 5 correctly; (b) the
-review-types table gained a key-characteristics column and lost two errors of its own: "Certified
+review-types table gained a key-characteristics column (the "Led by" column was folded into it, so the table stays at 4 columns) and lost two errors of its own: "Certified
 moderator" (does not exist in v4.0) and the informal review's objective now reads "detecting
 anomalies" (not "find defects quickly"); (c) 9th review success factor added ("Facilitar las
 reuniones"/"Facilitating meetings", §3.2.5); (d) inspection now states the author cannot act as

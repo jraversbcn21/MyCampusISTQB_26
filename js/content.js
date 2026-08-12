@@ -1008,7 +1008,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li><strong>Moderador (facilitador):</strong> Asegura el funcionamiento eficaz de las reuniones de revisión: media, gestiona el tiempo y mantiene un entorno seguro en el que todos puedan hablar libremente</li>
   <li><strong>Escriba (o grabador):</strong> Recopila las anomalías de los revisores y registra la información de la revisión (decisiones, nuevas anomalías)</li>
   <li><strong>Revisor:</strong> Lleva a cabo la revisión individual del producto de trabajo</li>
-  <li><strong>Líder de revisión:</strong> Asume la responsabilidad general de la revisión: decide quién participa y organiza cuándo y dónde se realiza</li>
+  <li><strong>Líder de la revisión:</strong> Asume la responsabilidad general de la revisión: decide quién participa y organiza cuándo y dónde se realiza</li>
 </ul>
 <h3>Proceso de Revisión</h3>
 <ol>
