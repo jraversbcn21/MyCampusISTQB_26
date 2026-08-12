@@ -1031,9 +1031,10 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Apoyo de la dirección al proceso de revisión</li>
   <li>Integrar las revisiones en la cultura de la organización</li>
   <li>Formación adecuada para todos los participantes</li>
+  <li>Facilitar las reuniones</li>
 </ul>
 <div class="highlight-box">
-💡 <strong>Para el examen:</strong> La INSPECCIÓN es la revisión más formal. El WALKTHROUGH es guiado por el autor. La revisión INFORMAL no tiene proceso definido. El GESTOR y el MODERADOR son roles distintos: el Gestor decide qué se revisa y aporta recursos; el Moderador facilita la reunión.
+💡 <strong>Para el examen:</strong> Memoriza el orden de formalidad (Informal &lt; Walkthrough &lt; Revisión técnica &lt; Inspección): las preguntas suelen plantear un escenario y pedir el tipo de revisión adecuado. La INSPECCIÓN es la más formal y en ella el autor NO puede actuar como líder de la revisión ni como escriba. El WALKTHROUGH es guiado por el autor. La revisión INFORMAL no tiene proceso definido. El GESTOR y el MODERADOR son roles distintos: el Gestor decide qué se revisa y aporta recursos; el Moderador facilita la reunión.
 </div>
 <p class="lesson-source">Fuente: ISTQB CTFL Syllabus v4.0 §3.2</p>`
     },
@@ -1081,9 +1082,10 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Management support for the review process</li>
   <li>Making reviews part of the organizational culture</li>
   <li>Adequate training for all participants</li>
+  <li>Facilitating meetings</li>
 </ul>
 <div class="highlight-box">
-💡 <strong>For the exam:</strong> INSPECTION is the most formal review. WALKTHROUGH is led by the author. INFORMAL review has no defined process. MANAGER and MODERATOR are distinct roles: the Manager decides what is reviewed and provides resources; the Moderator facilitates the meeting.
+💡 <strong>For the exam:</strong> Memorize the formality order (Informal &lt; Walkthrough &lt; Technical review &lt; Inspection): questions often present a scenario and ask which review type fits. INSPECTION is the most formal and in it the author canNOT act as review leader or scribe. WALKTHROUGH is led by the author. INFORMAL review has no defined process. MANAGER and MODERATOR are distinct roles: the Manager decides what is reviewed and provides resources; the Moderator facilitates the meeting.
 </div>
 <p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §3.2</p>`
     }
