@@ -1012,13 +1012,15 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 </ul>
 <h3>Proceso de Revisión</h3>
 <ol>
-  <li><strong>Planificación:</strong> Definir alcance, criterios de entrada/salida, asignar roles</li>
-  <li><strong>Inicio:</strong> Distribuir materiales, verificar criterios de entrada</li>
-  <li><strong>Revisión individual:</strong> Cada revisor examina el producto de trabajo</li>
-  <li><strong>Comunicación y análisis:</strong> Reunión para discutir los hallazgos</li>
-  <li><strong>Corrección y reporte:</strong> El autor corrige; se genera el informe</li>
-  <li><strong>Seguimiento:</strong> Verificar que los defectos fueron corregidos</li>
+  <li><strong>Planificación:</strong> Definir el alcance de la revisión: propósito, producto de trabajo, características de calidad a evaluar, áreas de foco, criterios de salida, esfuerzo y plazos</li>
+  <li><strong>Inicio de la revisión:</strong> Asegurar que cada participante tiene acceso al producto de trabajo, entiende su rol y recibe todo lo necesario</li>
+  <li><strong>Revisión individual:</strong> Cada revisor evalúa el producto de trabajo aplicando técnicas de revisión y registra anomalías, recomendaciones y preguntas</li>
+  <li><strong>Comunicación y análisis:</strong> Las anomalías identificadas no son necesariamente defectos: se analizan y discuten, decidiendo su estado, propiedad y acciones (normalmente en una reunión de revisión). Puede ser necesaria una <strong>revisión de seguimiento</strong> para completar las acciones</li>
+  <li><strong>Corrección y suministro de información:</strong> Se crea un informe de defecto por cada defecto para seguir las acciones correctivas; alcanzados los criterios de salida, el producto se acepta y se informa de los resultados</li>
 </ol>
+<div class="example-box">
+📌 <strong>Ojo:</strong> el proceso de revisión tiene exactamente <strong>5 actividades</strong>. El seguimiento (follow-up) NO es una actividad propia: forma parte de «Comunicación y análisis».
+</div>
 <h3>Factores de Éxito de las Revisiones</h3>
 <ul>
   <li>Objetivos claros y criterios de salida medibles (nunca evaluar a los participantes)</li>
@@ -1060,13 +1062,15 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 </ul>
 <h3>Review Process</h3>
 <ol>
-  <li><strong>Planning:</strong> Define scope, entry/exit criteria, assign roles</li>
-  <li><strong>Kick-off:</strong> Distribute materials, check entry criteria</li>
-  <li><strong>Individual review:</strong> Each reviewer examines the work product</li>
-  <li><strong>Communication and analysis:</strong> Meeting to discuss findings</li>
-  <li><strong>Fixing and reporting:</strong> The author fixes issues; a report is produced</li>
-  <li><strong>Follow-up:</strong> Verify that defects were fixed</li>
+  <li><strong>Planning:</strong> Define the review scope: purpose, work product, quality characteristics to evaluate, areas to focus on, exit criteria, effort and timeframes</li>
+  <li><strong>Review initiation:</strong> Make sure every participant has access to the work product, understands their role and receives everything needed</li>
+  <li><strong>Individual review:</strong> Each reviewer assesses the work product applying review techniques and logs anomalies, recommendations and questions</li>
+  <li><strong>Communication and analysis:</strong> Identified anomalies are not necessarily defects: they are analyzed and discussed, deciding their status, ownership and required actions (typically in a review meeting). A <strong>follow-up review</strong> may be required to complete actions</li>
+  <li><strong>Fixing and reporting:</strong> A defect report is created for every defect so corrective actions can be followed up; once exit criteria are reached, the work product is accepted and results are reported</li>
 </ol>
+<div class="example-box">
+📌 <strong>Watch out:</strong> the review process has exactly <strong>5 activities</strong>. Follow-up is NOT a separate activity: it is part of "Communication and analysis".
+</div>
 <h3>Review Success Factors</h3>
 <ul>
   <li>Clear objectives and measurable exit criteria (never evaluating participants)</li>
