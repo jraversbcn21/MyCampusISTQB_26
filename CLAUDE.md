@@ -676,6 +676,27 @@ basis for the correct answer ("functional correctness" is NOT non-functional). *
 source "Syllabus v4.0 §2.2.2".** Bank stays at 120, distribution intact; the other FL-2.2.2
 question (id 72, white-box) is untouched.
 
+**Second user-reported gap, CLOSED (2026-08-12).** A user reported 6 issues in chapter 3
+(static testing). Verified against the official EN syllabus v4.0.1 (§3.1.2/§3.2, pp. 33-37) and
+the official ES v4.0 translation: 4 were real gaps/errors, 1 a correct fidelity improvement, 1 a
+pedagogical extra. Fixed in lessons 3.1/3.2 only (`LESSONS` in `js/content.js`; `CHAPTERS`,
+questions, glossary and flashcards were verified correct and untouched): (a) the review process
+now lists the official **5 activities** of §3.2.2 (it taught 6, with "Seguimiento/Follow-up" as
+its own step; follow-up belongs INSIDE "Communication and analysis") — this also removed a
+contradiction with question id 78, whose explanation already enumerated the 5 correctly; (b) the
+review-types table gained a key-characteristics column and lost two errors of its own: "Certified
+moderator" (does not exist in v4.0) and the informal review's objective now reads "detecting
+anomalies" (not "find defects quickly"); (c) 9th review success factor added ("Facilitar las
+reuniones"/"Facilitating meetings", §3.2.5); (d) inspection now states the author cannot act as
+review leader or scribe (§3.2.4); (e) lesson 3.1 gained the two §3.1.2 benefits (requirements
+match real needs; shared understanding); (f) exam tip extended with the formality order, framed
+as a study aid (the syllabus only asserts the extremes). **Known EN/ES translation defect in
+§3.2.4, decision: follow the ENGLISH.** The official ES translation says the author cannot act as
+"revisor" (reviewer) where the EN original says "review leader" — not the same role. Same
+precedent as safety = "seguridad funcional": the exam is built from the EN LOs, so both languages
+say "líder de la revisión ni escriba" / "review leader or scribe". Spec:
+`docs/superpowers/specs/2026-08-12-chapter3-review-fidelity-fix-design.md`.
+
 **Real errors found and fixed during Phase 2** (precedent for how thorough the audit needs to be):
 Ch.2 lesson's false "4 test levels" (syllabus defines 5); Ch.3's two review roles (Gestor, Moderador)
 silently merged into one, split back out; Ch.4's non-syllabus "Prueba de Caso de Uso" (removed in
