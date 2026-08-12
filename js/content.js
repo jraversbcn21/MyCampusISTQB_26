@@ -913,6 +913,8 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Mejora la calidad del código y la documentación</li>
   <li>Facilita la comunicación entre el equipo</li>
   <li>Reduce el tiempo de testing dinámico posterior</li>
+  <li>Permite a los implicados verificar que los requisitos documentados describen sus <strong>necesidades reales</strong></li>
+  <li>Crea un <strong>entendimiento compartido</strong> entre los implicados, al poder realizarse en fases tempranas del ciclo de vida</li>
 </ul>
 <h3>Diferencias entre la Prueba Estática y la Prueba Dinámica</h3>
 <p>La prueba estática y la prueba dinámica son prácticas complementarias que persiguen objetivos similares (detectar defectos), pero presentan diferencias clave:</p>
@@ -964,6 +966,8 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
   <li>Improves code and documentation quality</li>
   <li>Facilitates communication within the team</li>
   <li>Reduces the time needed for later dynamic testing</li>
+  <li>Lets stakeholders verify that the documented requirements describe their <strong>actual needs</strong></li>
+  <li>Creates a <strong>shared understanding</strong> among stakeholders, since it can be performed early in the SDLC</li>
 </ul>
 <h3>Differences Between Static and Dynamic Testing</h3>
 <ul>
