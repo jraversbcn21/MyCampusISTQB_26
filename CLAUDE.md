@@ -29,6 +29,20 @@ Live in production at **https://mycampusistqb.vercel.app** (soft launch 2026-07-
   changed as a result.** Any SHA cited in this doc from before that date is illustrative only —
   to find the real current hash for a milestone, use `git log --oneline --grep="<message>"`
   rather than trusting a literal SHA.
+- **The 2026-07-02 purge was INCOMPLETE, discovered 2026-08-15.** A closing audit found the three
+  largest PDFs still present as **unreachable blobs** in the local `.git` (7.4 MB of 15 MB), held
+  alive by the orphaned pre-rewrite commit `ac572a66`. Worse, **GitHub was still serving them by
+  SHA to unauthenticated requests** on this public repo
+  (`GET /repos/.../git/blobs/<sha>` → 200 with the full file). The local side is fixed
+  (`git reflog expire --expire-unreachable=now --all` + `git gc --prune=now`; `.git` 15 MB → 1.1 MB,
+  0 dangling, verified). **The GitHub side needs a support ticket — a force-push and a local `gc`
+  cannot purge server-side unreachable objects.** Full write-up, the three blob SHAs and the
+  drafted ticket: `docs/2026-08-15-github-unreachable-pdf-blobs.md`.
+- **Lesson for any future audit: a clean `git status` and `local == origin/master` prove nothing
+  about a history purge.** The two checks that actually work are
+  `git cat-file --batch-all-objects --batch-check='%(objecttype) %(objectsize)' | awk '$1=="blob" && $2>1000000'`
+  (large blobs anywhere in the object DB, reachable or not) and curling the blob SHA against the
+  host's API. Neither was run in 2026-07-02.
 
 ## Running the Project
 
