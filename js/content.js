@@ -1780,6 +1780,8 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 
 <h3>1. Partición de Equivalencia (EP)</h3>
 <p>Divide los datos en particiones donde todos los valores se comportan de la misma manera (particiones válidas o inválidas, no solapadas y no vacías). Basta con un valor representativo de cada partición: si detecta un defecto, se asume que cualquier otro valor de esa partición también lo detectaría.</p>
+<p>Una partición que contiene valores válidos se llama <strong>partición válida</strong>; una que contiene valores inválidos, <strong>partición inválida</strong>. Las definiciones de válido e inválido pueden variar entre equipos y organizaciones: los valores válidos suelen entenderse como aquellos que el objeto de prueba <strong>debe procesar</strong>, o para los que la especificación define un procesamiento; los inválidos, como aquellos que <strong>debe rechazar o ignorar</strong>, o para los que la especificación no define ningún procesamiento.</p>
+<p>Pueden identificarse particiones para cualquier elemento de datos relacionado con el objeto de prueba: entradas, salidas, elementos de configuración, valores internos, valores temporales y parámetros de interfaz. Las particiones pueden ser continuas o discretas, <strong>ordenadas o desordenadas</strong>, finitas o infinitas.</p>
 <div class="example-box">
 📌 <strong>Ejemplo:</strong> Un campo acepta edades de 18 a 65 años.
 <br>• Partición válida: 18-65 (ej: probar con 30)
@@ -1787,9 +1789,19 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <br>• Partición inválida 2: mayor a 65 (ej: probar con 70)
 <br>Con <strong>cobertura de Cada Elección</strong>, si hay varios parámetros (varias particiones de entrada), cada partición de cada conjunto debe usarse al menos una vez en algún caso de prueba.
 </div>
+<div class="highlight-box">
+💡 <strong>Cobertura de la partición de equivalencia:</strong>
+<br>• Los <strong>elementos de cobertura</strong> son las propias particiones de equivalencia
+<br>• Para alcanzar el <strong>100% de cobertura</strong> los casos de prueba deben ejercitar todas las particiones identificadas —<strong>incluidas las inválidas</strong>—, cubriendo cada una al menos una vez
+<br>• La cobertura se mide como el <strong>número de particiones ejercitadas por al menos un caso de prueba, dividido entre el número total de particiones identificadas</strong>, y se expresa en porcentaje
+</div>
+<div class="warning-box">
+⚠️ <strong>Para el examen:</strong> las particiones <strong>inválidas</strong> deberían probarse <strong>en aislamiento</strong> —una sola por caso de prueba— para evitar el <strong>enmascaramiento de defectos</strong>, la situación en la que un defecto impide detectar otro. Es el mismo principio que se aplica a las transiciones inválidas en §4.2.4. <em>(Añadido por ISTQB en las notas de versión de v4.0.1 como cambio para §4.2.1.)</em>
+</div>
 
 <h3>2. Análisis de Valor Límite (BVA)</h3>
-<p>Practica las fronteras (valores mínimo y máximo) de las particiones, porque es donde los desarrolladores cometen más errores (p. ej. usar <code>&gt;</code> en vez de <code>&gt;=</code>).</p>
+<p>El BVA se basa en ejercitar las <strong>fronteras</strong> de las particiones de equivalencia; por tanto, <strong>solo puede usarse con particiones ordenadas</strong>. Los valores mínimo y máximo de una partición son sus valores frontera. En el BVA, si dos elementos pertenecen a la misma partición, todos los elementos intermedios deben pertenecer también a ella.</p>
+<p>Se centra en los valores frontera porque es donde los desarrolladores cometen más errores. Los defectos típicos que detecta están donde las fronteras implementadas se han desplazado por encima o por debajo de su posición prevista, o se han omitido por completo.</p>
 <div class="example-box">
 📌 <strong>Ejemplo (BVA de 2 valores):</strong> Para el rango 18-65, cada frontera aporta 2 elementos de cobertura (el valor frontera y su vecino más cercano de la partición adyacente):
 <br>• Límites: 17, 18, 65, 66
@@ -1798,7 +1810,9 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 </div>
 
 <h3>3. Prueba de Tabla de Decisión</h3>
-<p>Se utiliza para probar reglas de negocio: cómo distintas combinaciones de <strong>condiciones</strong> (filas superiores) producen distintas <strong>acciones</strong> (filas inferiores). Cada columna es una <strong>regla</strong> que combina un valor de cada condición con las acciones resultantes. El elemento de cobertura es la columna/regla; para 100% de cobertura hay que practicar todas las reglas factibles.</p>
+<p>Se utiliza para probar reglas de negocio: cómo distintas combinaciones de <strong>condiciones</strong> (filas superiores) producen distintas <strong>acciones</strong> (filas inferiores). Cada columna es una <strong>regla</strong> que combina un valor de cada condición con las acciones resultantes.</p>
+<p>En las tablas de <strong>entrada limitada</strong> (limited-entry) todos los valores de las condiciones y las acciones se muestran como valores booleanos —salvo los irrelevantes o inviables—. En las de <strong>entrada ampliada</strong> (extended-entry), algunas condiciones o acciones pueden tomar varios valores: rangos numéricos, particiones de equivalencia o valores discretos.</p>
+<p>Una tabla <strong>completa</strong> tiene tantas columnas como combinaciones de condiciones existan. Puede <strong>simplificarse</strong> eliminando las columnas con combinaciones inviables, y <strong>minimizarse</strong> fusionando en una sola columna aquellas en las que algunas condiciones no afectan al resultado. Los algoritmos de minimización quedan fuera del alcance del syllabus.</p>
 <div class="example-box">
 📌 <strong>Ejemplo — descuento de una tienda online</strong> (condiciones: ¿es cliente VIP? · ¿compra ≥ 100€?):
 <table>
@@ -1811,14 +1825,41 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 </table>
 Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 → cliente VIP con compra de 80€ → se espera 10% de descuento.
 </div>
+<div class="highlight-box">
+💡 <strong>Notación de una tabla de decisión:</strong>
+<br><strong>En las condiciones:</strong>
+<br>• <strong>«V»</strong> (verdadera): la condición se cumple
+<br>• <strong>«F»</strong> (falsa): la condición no se cumple
+<br>• <strong>«–»</strong>: el valor de la condición es <strong>irrelevante</strong> para el resultado de la acción
+<br>• <strong>«N/A»</strong>: la condición es <strong>inviable</strong> para esa regla
+<br><strong>En las acciones:</strong>
+<br>• <strong>«X»</strong>: la acción <u>debe</u> ocurrir
+<br>• <strong>casilla en blanco</strong>: la acción <u>no</u> debe ocurrir
+<br><em>Pueden usarse otras notaciones. En el syllabus en inglés, la «V» aparece como «T» (true).</em>
+</div>
+<div class="highlight-box">
+💡 <strong>Cobertura, fortaleza y debilidad:</strong>
+<br>• Los <strong>elementos de cobertura</strong> son las columnas con combinaciones de condiciones <strong>factibles</strong>. La cobertura se mide como el <strong>número de columnas ejercitadas dividido entre el total de columnas factibles</strong>, expresado en porcentaje
+<br>✅ <strong>Fortaleza:</strong> aporta un enfoque <strong>sistemático</strong> para identificar todas las combinaciones de condiciones, algunas de las cuales podrían pasarse por alto de otro modo; además ayuda a encontrar <strong>huecos y contradicciones en los requisitos</strong>
+<br>❌ <strong>Debilidad:</strong> el número de reglas crece <strong>exponencialmente</strong> con el número de condiciones, así que con muchas condiciones ejercitarlas todas puede ser muy costoso. Para reducirlas puede usarse una tabla minimizada o un enfoque basado en riesgos
+</div>
 
 <h3>4. Prueba de Transición de Estado</h3>
-<p>Se usa cuando el comportamiento del sistema depende del estado actual y del evento recibido (con una posible condición de guarda y acción resultante). Se modela como un diagrama o tabla de estados. Un caso de prueba se construye como una <strong>secuencia de eventos</strong> que recorre varios estados.</p>
+<p>Un <strong>diagrama de estados</strong> modela el comportamiento del sistema mostrando sus posibles <strong>estados</strong> y las <strong>transiciones válidas</strong> entre ellos. Una transición la inicia un <strong>evento</strong>, que además puede estar cualificado por una <strong>condición de guarda</strong>; se asume instantánea y a veces provoca que el software ejecute una <strong>acción</strong>.</p>
+<div class="example-box">
+📌 <strong>Notación de una transición:</strong> <code>evento [condición de guarda] / acción</code>
+<br>La condición de guarda y la acción pueden omitirse si no existen o si son irrelevantes para el probador.
+</div>
+<p>La <strong>tabla de estados</strong> es un modelo equivalente al diagrama: sus filas representan los estados y sus columnas los eventos (junto con sus condiciones de guarda, si las hay); cada celda representa una transición y contiene el estado destino y las acciones resultantes. A diferencia del diagrama, la tabla <strong>muestra explícitamente las transiciones inválidas</strong>, representadas como <strong>celdas vacías</strong>. Un caso de prueba se construye como una <strong>secuencia de eventos</strong> que produce una secuencia de cambios de estado, y normalmente cubre varias transiciones.</p>
 <ul>
   <li><strong>Cobertura de todos los estados:</strong> los casos de prueba visitan cada estado al menos una vez (criterio más débil)</li>
   <li><strong>Cobertura de transiciones válidas</strong> (también llamada <em>cobertura de conmutador 0</em>): se ejercita cada transición válida al menos una vez; alcanzarla al 100% garantiza también el 100% de cobertura de todos los estados. Es el criterio más usado</li>
   <li><strong>Cobertura de todas las transiciones:</strong> se ejercitan todas las transiciones válidas <u>y además</u> se intentan las transiciones inválidas (no definidas). Es el criterio más exigente y debería ser el mínimo exigible en sistemas críticos</li>
 </ul>
+<div class="highlight-box">
+💡 <strong>Orden de fuerza de los criterios:</strong> todos los estados &lt; transiciones válidas &lt; todas las transiciones.
+<br>La cobertura de <strong>todos los estados</strong> es la más débil, porque suele alcanzarse sin ejercitar todas las transiciones. Alcanzar el 100% de <strong>transiciones válidas garantiza</strong> el 100% de todos los estados, y alcanzar el 100% de <strong>todas las transiciones garantiza las dos anteriores</strong>.
+</div>
 <div class="example-box">
 📌 <strong>Ejemplo — cajero ATM</strong> (estados: Esperando tarjeta → Esperando PIN → Menú principal → Dispensando efectivo):
 <br>Transiciones válidas: "Esperando tarjeta" --insertar tarjeta--> "Esperando PIN"; "Esperando PIN" --PIN correcto--> "Menú principal"; "Menú principal" --retirar efectivo--> "Dispensando efectivo".
@@ -1840,6 +1881,8 @@ Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 �
 
 <h3>1. Equivalence Partitioning (EP)</h3>
 <p>Divide data into partitions (valid or invalid, non-overlapping, non-empty) where all values behave the same. One representative value per partition is enough: if it detects a defect, any other value in that partition is assumed to detect it too.</p>
+<p>A partition containing valid values is called a <strong>valid partition</strong>; one containing invalid values is an <strong>invalid partition</strong>. The definitions of valid and invalid may vary between teams and organizations: valid values are usually those the test item <strong>should process</strong>, or for which the specification defines processing; invalid values are those it <strong>should reject or ignore</strong>, or for which no processing is specified.</p>
+<p>Partitions can be identified for any data element related to the test object: inputs, outputs, configuration items, internal values, time-related values and interface parameters. Partitions may be continuous or discrete, <strong>ordered or unordered</strong>, finite or infinite.</p>
 <div class="example-box">
 📌 <strong>Example:</strong> A field accepts ages 18 to 65.
 <br>• Valid partition: 18-65 (test with 30)
@@ -1847,9 +1890,19 @@ Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 �
 <br>• Invalid partition 2: above 65 (test with 70)
 <br>With <strong>Each Choice coverage</strong>, when a test object has several parameters, each partition of each set must be used at least once across the test cases.
 </div>
+<div class="highlight-box">
+💡 <strong>Equivalence partitioning coverage:</strong>
+<br>• The <strong>coverage items</strong> are the equivalence partitions themselves
+<br>• To achieve <strong>100% coverage</strong>, test cases must exercise all identified partitions —<strong>including the invalid ones</strong>— by covering each partition at least once
+<br>• Coverage is measured as the <strong>number of partitions exercised by at least one test case, divided by the total number of identified partitions</strong>, expressed as a percentage
+</div>
+<div class="warning-box">
+⚠️ <strong>For the exam:</strong> <strong>invalid partitions</strong> should be tested <strong>in isolation</strong> —one per test case— to avoid <strong>defect masking</strong>, the situation in which one defect prevents the detection of another. It is the same principle applied to invalid transitions in §4.2.4. <em>(Added by ISTQB in the v4.0.1 release notes as a change to §4.2.1.)</em>
+</div>
 
 <h3>2. Boundary Value Analysis (BVA)</h3>
-<p>Practices the boundaries (min/max values) of partitions, since developers are most likely to make off-by-one errors there.</p>
+<p>BVA is based on exercising the <strong>boundaries</strong> of equivalence partitions; therefore, it <strong>can only be used for ordered partitions</strong>. The minimum and maximum values of a partition are its boundary values. In BVA, if two elements belong to the same partition, all elements between them must also belong to that partition.</p>
+<p>It focuses on boundary values because developers are more likely to make errors there. Typical defects it finds are located where implemented boundaries are misplaced above or below their intended positions, or are omitted altogether.</p>
 <div class="example-box">
 📌 <strong>2-value BVA:</strong> for the 18-65 range, each boundary gives 2 coverage items (the boundary value and its nearest neighbor in the adjacent partition): 17, 18, 65, 66.
 <br><strong>3-value BVA:</strong> each boundary gives 3 coverage items (the boundary and both neighbors): 17, 18, 19, 64, 65, 66.
@@ -1857,7 +1910,9 @@ Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 �
 </div>
 
 <h3>3. Decision Table Testing</h3>
-<p>Used for business rules: how combinations of <strong>conditions</strong> (top rows) produce different <strong>actions</strong> (bottom rows). Each column is a <strong>rule</strong> combining one value per condition with the resulting actions. The coverage item is the column/rule; 100% coverage means testing every feasible rule.</p>
+<p>Used for business rules: how combinations of <strong>conditions</strong> (top rows) produce different <strong>actions</strong> (bottom rows). Each column is a <strong>rule</strong> combining one value per condition with the resulting actions.</p>
+<p>In <strong>limited-entry</strong> decision tables, all condition and action values are shown as Boolean values —except irrelevant or infeasible ones—. In <strong>extended-entry</strong> tables, some conditions or actions may take multiple values: number ranges, equivalence partitions or discrete values.</p>
+<p>A <strong>full</strong> decision table has enough columns to cover every combination of conditions. It can be <strong>simplified</strong> by deleting columns with infeasible combinations, and <strong>minimized</strong> by merging columns in which some conditions do not affect the outcome. Minimization algorithms are out of scope of the syllabus.</p>
 <div class="example-box">
 📌 <strong>Example — online store discount</strong> (conditions: VIP customer? · purchase ≥ €100?):
 <table>
@@ -1870,14 +1925,41 @@ Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 �
 </table>
 Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer with an €80 purchase → expect 10% discount.
 </div>
+<div class="highlight-box">
+💡 <strong>Decision table notation:</strong>
+<br><strong>For conditions:</strong>
+<br>• <strong>"T"</strong> (true): the condition is satisfied
+<br>• <strong>"F"</strong> (false): the condition is not satisfied
+<br>• <strong>"–"</strong>: the value of the condition is <strong>irrelevant</strong> for the action outcome
+<br>• <strong>"N/A"</strong>: the condition is <strong>infeasible</strong> for that rule
+<br><strong>For actions:</strong>
+<br>• <strong>"X"</strong>: the action <u>should</u> occur
+<br>• <strong>blank</strong>: the action should <u>not</u> occur
+<br><em>Other notations may also be used.</em>
+</div>
+<div class="highlight-box">
+💡 <strong>Coverage, strength and weakness:</strong>
+<br>• The <strong>coverage items</strong> are the columns containing <strong>feasible</strong> combinations of conditions. Coverage is measured as the <strong>number of exercised columns divided by the total number of feasible columns</strong>, expressed as a percentage
+<br>✅ <strong>Strength:</strong> it provides a <strong>systematic</strong> approach to identify all combinations of conditions, some of which might otherwise be overlooked; it also helps find <strong>gaps and contradictions in the requirements</strong>
+<br>❌ <strong>Weakness:</strong> the number of rules grows <strong>exponentially</strong> with the number of conditions, so with many conditions exercising them all can be time consuming. A minimized decision table or a risk-based approach can reduce them
+</div>
 
 <h3>4. State Transition Testing</h3>
-<p>Used when behavior depends on the current state and the received event (with an optional guard condition and resulting action). Modeled as a state diagram or state table. A test case is built as a <strong>sequence of events</strong> traversing several states.</p>
+<p>A <strong>state diagram</strong> models the behavior of a system by showing its possible <strong>states</strong> and the <strong>valid transitions</strong> between them. A transition is initiated by an <strong>event</strong>, which may additionally be qualified by a <strong>guard condition</strong>; transitions are assumed to be instantaneous and may sometimes result in the software taking an <strong>action</strong>.</p>
+<div class="example-box">
+📌 <strong>Transition labeling syntax:</strong> <code>event [guard condition] / action</code>
+<br>Guard conditions and actions can be omitted if they do not exist or are irrelevant for the tester.
+</div>
+<p>A <strong>state table</strong> is a model equivalent to the state diagram: its rows represent states and its columns represent events (together with guard conditions, if any); each cell represents a transition and contains the target state and the resulting actions. In contrast to the diagram, the state table <strong>explicitly shows invalid transitions</strong>, represented by <strong>empty cells</strong>. A test case is built as a <strong>sequence of events</strong> producing a sequence of state changes, and usually covers several transitions.</p>
 <ul>
   <li><strong>All states coverage:</strong> every state is visited at least once (weakest criterion)</li>
   <li><strong>Valid transitions coverage</strong> (also called <em>0-switch coverage</em>): every valid transition is exercised at least once; achieving 100% also guarantees 100% all-states coverage. The most commonly used criterion</li>
   <li><strong>All transitions coverage:</strong> all valid transitions are exercised <u>and</u> invalid (undefined) transitions are also attempted. The strictest criterion, recommended as a minimum for safety/mission-critical systems</li>
 </ul>
+<div class="highlight-box">
+💡 <strong>Coverage strength order:</strong> all states &lt; valid transitions &lt; all transitions.
+<br><strong>All states</strong> coverage is the weakest, since it can typically be achieved without exercising all transitions. Achieving 100% <strong>valid transitions</strong> coverage <strong>guarantees</strong> 100% all states coverage, and achieving 100% <strong>all transitions</strong> coverage <strong>guarantees both of the previous ones</strong>.
+</div>
 <div class="example-box">
 📌 <strong>Example — ATM machine</strong> (states: Waiting for card → Waiting for PIN → Main menu → Dispensing cash):
 <br>A valid-transitions test case walks the full sequence. An invalid-transition test case would attempt, e.g., "withdraw cash" while still in "Waiting for PIN" — testing only one invalid transition per test case avoids defect masking.
