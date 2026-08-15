@@ -1263,7 +1263,11 @@ Testing only x=5 executes both statements → 100% statement coverage. Testing o
 <h3>Técnicas Basadas en Experiencia</h3>
 <p>Estas técnicas se basan en el conocimiento, intuición y experiencia previa del tester. Son complementarias a las técnicas sistemáticas.</p>
 <h3>Error Guessing (Adivinanza de Errores)</h3>
-<p>El tester anticipa tipos de errores, defectos y fallos basándose en su experiencia previa. Crea una <strong>lista de errores</strong> y diseña pruebas para detectarlos.</p>
+<p>El probador anticipa la aparición de errores, defectos y fallos basándose en su conocimiento: cómo ha funcionado la aplicación en el pasado, qué tipos de errores tienden a cometer los desarrolladores y qué defectos resultan de ellos, y qué tipos de fallos se han producido en otras aplicaciones similares.</p>
+<p>En general, los errores, defectos y fallos pueden estar relacionados con: <strong>entrada</strong> (una entrada correcta no se acepta, parámetros erróneos o ausentes), <strong>salida</strong> (formato o resultado erróneo), <strong>lógica</strong> (casos ausentes, operador equivocado), <strong>cálculo</strong> (operando incorrecto, cálculo erróneo), <strong>interfaces</strong> (parámetros que no encajan, tipos incompatibles) o <strong>datos</strong> (inicialización incorrecta, tipo equivocado).</p>
+<div class="highlight-box">
+💡 <strong>Ataques de defecto (fault attacks):</strong> son la forma de implementar la predicción de errores. Exigen que el probador <strong>cree o adquiera una lista</strong> de posibles errores, defectos y fallos, y diseñe pruebas que identifiquen los defectos asociados, los expongan o provoquen los fallos. Las listas pueden construirse a partir de la <strong>experiencia</strong>, de <strong>datos de defectos y fallos</strong>, o del <strong>conocimiento común sobre por qué falla el software</strong>.
+</div>
 <div class="example-box">
 📌 <strong>Errores típicos a "adivinar":</strong>
 <ul>
@@ -1295,7 +1299,8 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <ul>
   <li>Cada elemento se suele formular como una pregunta, comprobable de forma individual y directa</li>
   <li>No debe incluir elementos automatizables ni demasiado generales</li>
-  <li>Debe actualizarse periódicamente (nuevos defectos hallados) sin dejar que crezca en exceso; listas muy detalladas dan más repetibilidad, listas más generales dan más cobertura pero menos repetibilidad</li>
+  <li>Debe actualizarse periódicamente <strong>a partir del análisis de defectos</strong>: algunas entradas pierden eficacia con el tiempo, porque los desarrolladores aprenden a no cometer esos errores, y hay que añadir otras nuevas que reflejen defectos de alta severidad recién encontrados — cuidando siempre que la lista no se vuelva demasiado larga</li>
+  <li>A falta de casos de prueba detallados aporta <strong>guías y cierto grado de consistencia</strong> a las pruebas. Si la lista es de alto nivel, es probable que aparezca <strong>variabilidad</strong> en las pruebas reales: potencialmente <strong>más cobertura, pero menos repetibilidad</strong></li>
 </ul>
 <div class="highlight-box">
 💡 <strong>Cuándo usar cada técnica:</strong>
@@ -1311,7 +1316,11 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
       content: `
 <h3>Experience-Based Techniques</h3>
 <h3>Error Guessing</h3>
-<p>The tester anticipates likely errors, defects and failures based on experience: how the application behaved in the past, typical developer mistakes, and failure types seen in similar applications. <strong>Defect attacks</strong> use a list of possible errors/defects to design targeted tests.</p>
+<p>The tester anticipates the occurrence of errors, defects and failures based on their knowledge: how the application has worked in the past, the types of errors developers tend to make and the defects that result from them, and the types of failures that have occurred in other, similar applications.</p>
+<p>In general, errors, defects and failures may be related to: <strong>input</strong> (correct input not accepted, parameters wrong or missing), <strong>output</strong> (wrong format, wrong result), <strong>logic</strong> (missing cases, wrong operator), <strong>computation</strong> (incorrect operand, wrong computation), <strong>interfaces</strong> (parameter mismatch, incompatible types) or <strong>data</strong> (incorrect initialization, wrong type).</p>
+<div class="highlight-box">
+💡 <strong>Fault attacks:</strong> a way to implement error guessing. They require the tester to <strong>create or acquire a list</strong> of possible errors, defects and failures, and to design tests that will identify the defects associated with those errors, expose them, or cause the failures. These lists can be built from <strong>experience</strong>, from <strong>defect and failure data</strong>, or from <strong>common knowledge about why software fails</strong>.
+</div>
 <h3>Exploratory Testing</h3>
 <p>Simultaneous learning, test design and execution while the tester learns about the test object. Especially useful with scarce specifications or high time pressure, and complements more formal techniques.</p>
 <ul>
@@ -1331,8 +1340,15 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <ul>
   <li>Items are usually phrased as questions, individually and directly checkable</li>
   <li>Should not include automatable or overly general items</li>
-  <li>Should be updated periodically without growing excessively long</li>
+  <li>Should be regularly updated <strong>based on defect analysis</strong>: some entries gradually become less effective as developers learn to avoid those errors, and new entries need to be added to reflect newly found high severity defects — always taking care that the checklist does not become too long</li>
+  <li>In the absence of detailed test cases it provides <strong>guidelines and some degree of consistency</strong> for the testing. If the checklist is high-level, some <strong>variability</strong> in the actual testing is likely: potentially <strong>greater coverage, but less repeatability</strong></li>
 </ul>
+<div class="highlight-box">
+💡 <strong>When to use each technique:</strong>
+<br>• Error guessing: expected defects in known areas
+<br>• Exploratory: discover the unknown, test without specifications
+<br>• Checklist: ensure coverage of known risk areas
+</div>
 <p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.4</p>`
     }
   },
