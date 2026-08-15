@@ -383,8 +383,16 @@ EN:
 
 Replicar en EN los dos bloques que hoy solo existen en ES, **traduciendo el contenido ya
 existente, sin añadir material nuevo**:
-- el `example-box` de branch coverage con el `if (x > 0)` aplicado a ramas,
+- el `highlight-box` «Branch Coverage ⊃ Statement Coverage» (en EN esa idea vive hoy suelta
+  dentro de un párrafo, sin recuadro propio),
 - el `warning-box` «Para el examen» con los tres puntos (statement, branch, implicación).
+
+> **Corrección del spec (2026-08-15, durante la ejecución de la Tarea 2).** La redacción
+> original de C12 nombraba «el `example-box` de branch coverage con el `if (x > 0)` aplicado a
+> ramas». **Ese bloque no existe en ES**: el único `example-box` con `if (x > 0)` está bajo
+> cobertura de sentencia y ya estaba en los dos idiomas. El ejecutor lo detectó y, correctamente,
+> **no inventó un ejemplo numérico nuevo** (habría sido contenido de examen sin fuente). C12
+> queda como está redactado arriba: los dos bloques que de verdad faltaban en EN.
 
 ---
 
