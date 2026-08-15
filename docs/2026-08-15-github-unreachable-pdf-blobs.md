@@ -65,6 +65,19 @@ Resultado verificado:
 - `git fsck --full` limpio, 252 commits alcanzables, árbol limpio, 0/0 frente a `origin/master`,
   los tres gates en verde tras el `gc`.
 
+### Incidente durante la propia auditoría (2026-08-15)
+
+La primera versión de este documento **incluía los tres SHAs completos** y se pusheó a este
+repositorio, que es público. Dado que el SHA es precisamente la pieza que falta para descargar los
+blobs, publicarlo aquí anulaba la única barrera que quedaba. Se detectó a los pocos minutos y se
+corrigió reescribiendo el commit (`reset --soft` + `push --force-with-lease`), verificando después
+que el fichero servido por `raw.githubusercontent.com` ya no contiene ningún SHA.
+
+Efecto secundario: ese force-push deja **dos commits huérfanos más** en GitHub que sí contienen los
+SHAs. Quedan cubiertos por el mismo ticket de abajo, que pide un `gc` del repositorio completo, no
+de objetos concretos. **Regla que se deriva de esto: en un repositorio público, un documento de
+seguridad no lleva las coordenadas exactas de lo que describe** — se explica cómo regenerarlas.
+
 ## Qué queda pendiente: solo lo puede hacer GitHub
 
 Los objetos inalcanzables del lado servidor **no se pueden purgar desde el cliente**: ni un
