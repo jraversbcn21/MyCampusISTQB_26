@@ -1152,7 +1152,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
       chapterTag: "Cap. 4 · Técnicas",
       content: `
 <h3>Técnicas de Caja Blanca</h3>
-<p>Las técnicas de caja blanca (white-box o estructura-based) se basan en el análisis de la <strong>estructura interna</strong> del código. Requieren acceso al código fuente.</p>
+<p>Las técnicas de caja blanca (white-box o basadas en la estructura) se basan en el análisis de la <strong>estructura interna</strong> del código. Requieren acceso al código fuente.</p>
 <h3>Cobertura de Sentencia (Statement Coverage)</h3>
 <p>En la prueba de sentencia los <strong>elementos de cobertura</strong> son las <strong>sentencias ejecutables</strong>. La cobertura se mide como el <strong>número de sentencias ejercitadas por los casos de prueba dividido entre el número total de sentencias ejecutables</strong> del código, y se expresa en porcentaje.</p>
 <div class="example-box">
@@ -1167,7 +1167,7 @@ Si solo probamos con x=5, ejecutamos ambas sentencias → 100% statement coverag
 Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement coverage.
 </div>
 <div class="warning-box">
-⚠️ <strong>Límites del 100% de cobertura de sentencia:</strong> asegura que todas las sentencias ejecutables se han ejercitado al menos una vez —y por tanto que toda sentencia con un defecto se ejecutará, lo que puede provocar un fallo que revele su presencia—. Pero ejercitar una sentencia no detecta defectos en todos los casos:
+⚠️ <strong>Límites del 100% de cobertura de sentencia:</strong> asegura que todas las sentencias ejecutables se han ejercitado al menos una vez (y por tanto toda sentencia con un defecto se ejecutará, lo que puede provocar un fallo que revele su presencia). Pero ejercitar una sentencia no detecta defectos en todos los casos:
 <br>• <strong>No garantiza que se haya probado toda la lógica de decisión</strong>, porque puede no ejercitar todas las ramas del código
 <br>• <strong>No detecta defectos dependientes de los datos</strong>, como una división por cero que solo falla cuando el denominador vale cero
 </div>
@@ -1220,7 +1220,7 @@ z = y + 1;    // Statement 2
 Testing only x=5 executes both statements → 100% statement coverage. Testing only x=-1 executes only statement 2 → 50% statement coverage.
 </div>
 <div class="warning-box">
-⚠️ <strong>Limits of 100% statement coverage:</strong> it ensures all executable statements have been exercised at least once —so every statement containing a defect will be executed, which may cause a failure revealing it—. But exercising a statement will not detect defects in all cases:
+⚠️ <strong>Limits of 100% statement coverage:</strong> it ensures all executable statements have been exercised at least once (so every statement containing a defect will be executed, which may cause a failure revealing it). But exercising a statement will not detect defects in all cases:
 <br>• It <strong>does not ensure that all the decision logic has been tested</strong>, as it may not exercise all the branches in the code
 <br>• It <strong>does not detect data-dependent defects</strong>, such as a division by zero that only fails when the denominator is set to zero
 </div>
@@ -1261,12 +1261,12 @@ Testing only x=5 executes both statements → 100% statement coverage. Testing o
       chapterTag: "Cap. 4 · Técnicas",
       content: `
 <h3>Técnicas Basadas en Experiencia</h3>
-<p>Estas técnicas se basan en el conocimiento, intuición y experiencia previa del tester. Son complementarias a las técnicas sistemáticas.</p>
-<h3>Error Guessing (Adivinanza de Errores)</h3>
+<p>Estas técnicas se basan en el conocimiento, intuición y experiencia previa del probador. Son complementarias a las técnicas sistemáticas.</p>
+<h3>Error Guessing (Predicción de Errores)</h3>
 <p>El probador anticipa la aparición de errores, defectos y fallos basándose en su conocimiento: cómo ha funcionado la aplicación en el pasado, qué tipos de errores tienden a cometer los desarrolladores y qué defectos resultan de ellos, y qué tipos de fallos se han producido en otras aplicaciones similares.</p>
 <p>En general, los errores, defectos y fallos pueden estar relacionados con: <strong>entrada</strong> (una entrada correcta no se acepta, parámetros erróneos o ausentes), <strong>salida</strong> (formato o resultado erróneo), <strong>lógica</strong> (casos ausentes, operador equivocado), <strong>cálculo</strong> (operando incorrecto, cálculo erróneo), <strong>interfaces</strong> (parámetros que no encajan, tipos incompatibles) o <strong>datos</strong> (inicialización incorrecta, tipo equivocado).</p>
 <div class="highlight-box">
-💡 <strong>Ataques de defecto (fault attacks):</strong> son la forma de implementar la predicción de errores. Exigen que el probador <strong>cree o adquiera una lista</strong> de posibles errores, defectos y fallos, y diseñe pruebas que identifiquen los defectos asociados, los expongan o provoquen los fallos. Las listas pueden construirse a partir de la <strong>experiencia</strong>, de <strong>datos de defectos y fallos</strong>, o del <strong>conocimiento común sobre por qué falla el software</strong>.
+💡 <strong>Ataques de defecto (fault attacks):</strong> son una forma de implementar la predicción de errores. Exigen que el probador <strong>cree o adquiera una lista</strong> de posibles errores, defectos y fallos, y diseñe pruebas que identifiquen los defectos asociados, los expongan o provoquen los fallos. Las listas pueden construirse a partir de la <strong>experiencia</strong>, de <strong>datos de defectos y fallos</strong>, o del <strong>conocimiento común sobre por qué falla el software</strong>.
 </div>
 <div class="example-box">
 📌 <strong>Errores típicos a "adivinar":</strong>
@@ -1281,25 +1281,25 @@ Testing only x=5 executes both statements → 100% statement coverage. Testing o
 <h3>Testing Exploratorio</h3>
 <p>Técnica simultánea donde el aprendizaje, diseño y ejecución ocurren al mismo tiempo, mientras el probador aprende sobre el objeto de prueba. Es especialmente útil cuando las especificaciones son escasas o hay mucha presión de tiempo, y complementa a las técnicas más formales.</p>
 <ul>
-  <li>No sigue scripts predefinidos; el tester adapta su enfoque en tiempo real</li>
+  <li>No sigue scripts predefinidos; el probador adapta su enfoque en tiempo real</li>
   <li>Útil para descubrir defectos inesperados y para explorar en profundidad áreas no cubiertas</li>
   <li>Es más eficaz cuanta más experiencia, conocimiento del dominio y competencias clave (análisis, curiosidad, creatividad) tenga el probador</li>
 </ul>
 <div class="example-box">
 📌 <strong>Prueba exploratoria basada en sesiones (session-based):</strong> forma estructurada de aplicar la técnica dentro de un <strong>marco de tiempo definido</strong> (p. ej. 60-90 min).
 <ol>
-  <li>El tester usa un <strong>charter</strong> (objetivo de prueba de alto nivel) para guiar la sesión</li>
+  <li>El probador usa un <strong>charter</strong> (objetivo de prueba de alto nivel) para guiar la sesión</li>
   <li>Durante la sesión identifica y practica elementos de cobertura, documentando pasos y hallazgos en una <strong>hoja de sesión</strong></li>
   <li>Al terminar, hay una <strong>recapitulación (debrief)</strong>: el probador discute con los implicados los resultados de la sesión</li>
 </ol>
 La prueba exploratoria puede además incorporar otras técnicas ya vistas, como la partición de equivalencia.
 </div>
 <h3>Testing Basado en Checklists</h3>
-<p>El tester diseña, implementa y ejecuta pruebas para cubrir las condiciones de una lista de comprobación, construida a partir de la experiencia, del conocimiento de lo importante para el usuario o de por qué y cómo falla el software.</p>
+<p>El probador diseña, implementa y ejecuta pruebas para cubrir las condiciones de una lista de comprobación, construida a partir de la experiencia, del conocimiento de lo importante para el usuario o de por qué y cómo falla el software.</p>
 <ul>
   <li>Cada elemento se suele formular como una pregunta, comprobable de forma individual y directa</li>
   <li>No debe incluir elementos automatizables ni demasiado generales</li>
-  <li>Debe actualizarse periódicamente <strong>a partir del análisis de defectos</strong>: algunas entradas pierden eficacia con el tiempo, porque los desarrolladores aprenden a no cometer esos errores, y hay que añadir otras nuevas que reflejen defectos de alta severidad recién encontrados — cuidando siempre que la lista no se vuelva demasiado larga</li>
+  <li>Debe actualizarse periódicamente <strong>a partir del análisis de defectos</strong>: algunas entradas pierden eficacia con el tiempo, porque los desarrolladores aprenden a no cometer esos errores, y hay que añadir otras nuevas que reflejen defectos de alta severidad recién encontrados, cuidando siempre que la lista no se vuelva demasiado larga</li>
   <li>A falta de casos de prueba detallados aporta <strong>guías y cierto grado de consistencia</strong> a las pruebas. Si la lista es de alto nivel, es probable que aparezca <strong>variabilidad</strong> en las pruebas reales: potencialmente <strong>más cobertura, pero menos repetibilidad</strong></li>
 </ul>
 <div class="highlight-box">
@@ -1340,7 +1340,7 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <ul>
   <li>Items are usually phrased as questions, individually and directly checkable</li>
   <li>Should not include automatable or overly general items</li>
-  <li>Should be regularly updated <strong>based on defect analysis</strong>: some entries gradually become less effective as developers learn to avoid those errors, and new entries need to be added to reflect newly found high severity defects — always taking care that the checklist does not become too long</li>
+  <li>Should be regularly updated <strong>based on defect analysis</strong>: some entries gradually become less effective as developers learn to avoid those errors, and new entries need to be added to reflect newly found high severity defects, always taking care that the checklist does not become too long</li>
   <li>In the absence of detailed test cases it provides <strong>guidelines and some degree of consistency</strong> for the testing. If the checklist is high-level, some <strong>variability</strong> in the actual testing is likely: potentially <strong>greater coverage, but less repeatability</strong></li>
 </ul>
 <div class="highlight-box">
@@ -1370,7 +1370,7 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 💡 <strong>INVEST:</strong> una buena historia de usuario debe ser <strong>I</strong>ndependiente, <strong>N</strong>egociable, <strong>V</strong>aliosa, <strong>E</strong>stimable, pequeña (<strong>S</strong>mall) y comprobable (<strong>T</strong>estable). Si un <strong>implicado</strong> no sabe cómo probar una historia de usuario, puede indicar que la historia <strong>no está lo bastante clara</strong>, que <strong>no refleja algo valioso</strong> para él, o simplemente que <strong>necesita ayuda para probarla</strong>.
 </div>
 <h3>Criterios de Aceptación</h3>
-<p>Son las condiciones que debe cumplir la implementación de una historia de usuario para ser aceptada por los implicados; desde esa perspectiva, equivalen a las condiciones de prueba que los tests deben ejercitar. Suelen ser resultado de la <em>Conversación</em>. Se usan para:</p>
+<p>Son las condiciones que debe cumplir la implementación de una historia de usuario para ser aceptada por los implicados; desde esa perspectiva, equivalen a las condiciones de prueba que los tests deben ejercitar. Suelen ser resultado de la <em>Conversation</em>. Se usan para:</p>
 <ul>
   <li>Definir el <strong>alcance</strong> de la historia de usuario</li>
   <li>Alcanzar <strong>consenso</strong> entre los implicados</li>
@@ -1393,8 +1393,8 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
   <li>Taller de especificación: se analiza, discute y redacta la historia de usuario y, si aún no existen, sus criterios de aceptación. Participan miembros del equipo con <strong>perspectivas distintas: clientes, desarrolladores y probadores</strong>, resolviendo incompletitudes, ambigüedades y defectos de la historia</li>
   <li>Se crean los casos de prueba de aceptación a partir de esos criterios (pueden verse como ejemplos de cómo funciona el software)</li>
   <li>Primero se cubren casos positivos, luego negativos y por último características de calidad no funcionales</li>
-  <li>El desarrollador implementa la funcionalidad para pasar esas pruebas; si están en un formato compatible con un framework de automatización, se convierten en requisitos ejecutables</li>
   <li>Los casos de prueba deben expresarse de forma <strong>comprensible para los implicados</strong>: normalmente frases en <strong>lenguaje natural</strong> con las precondiciones necesarias (si las hay), las entradas y las postcondiciones</li>
+  <li>El desarrollador implementa la funcionalidad para pasar esas pruebas; si están en un formato compatible con un framework de automatización, se convierten en requisitos ejecutables</li>
 </ol>
 <div class="highlight-box">
 💡 <strong>Diferencia ATDD vs TDD:</strong>
@@ -1413,7 +1413,7 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <p>A user story represents a feature of value to a user. It has three key aspects, the <strong>3 C's</strong>: <strong>Card</strong> (the medium describing it), <strong>Conversation</strong> (how the software will be used) and <strong>Confirmation</strong> (the acceptance criteria). Written collaboratively (brainstorming, mind maps) across business, development and testing, using the format: "As a [role], I want [goal to be accomplished], so that I can [resulting business value for the role]", followed by the acceptance criteria.</p>
 <div class="highlight-box">💡 <strong>INVEST:</strong> a good user story should be Independent, Negotiable, Valuable, Estimable, Small and Testable. If a <strong>stakeholder</strong> does not know how to test a user story, this may indicate that the story is <strong>not clear enough</strong>, that it <strong>does not reflect something valuable</strong> to them, or that the stakeholder simply <strong>needs help in testing</strong>.</div>
 <h3>Acceptance Criteria</h3>
-<p>Conditions that an implementation of a user story must meet to be accepted by stakeholders — from that perspective, they are the test conditions the tests should exercise. They are usually a result of the <em>Conversation</em>. They are used to:</p>
+<p>Conditions that an implementation of a user story must meet to be accepted by stakeholders; from that perspective, they are the test conditions the tests should exercise. They are usually a result of the <em>Conversation</em>. They are used to:</p>
 <ul>
   <li>Define the <strong>scope</strong> of the user story</li>
   <li>Reach <strong>consensus</strong> among the stakeholders</li>
@@ -1432,8 +1432,8 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
   <li>Specification workshop: the user story and, if not yet defined, its acceptance criteria are analyzed, discussed and written. Team members with <strong>different perspectives take part: customers, developers and testers</strong>, resolving incompleteness, ambiguities and defects in the story</li>
   <li>Acceptance test cases are created from those criteria (they can be seen as examples of how the software should behave)</li>
   <li>Positive cases are covered first, then negative, then non-functional quality characteristics</li>
-  <li>The developer implements the feature to pass those tests; in an automation-compatible format they become executable requirements</li>
   <li>Test cases should be expressed in a way that is <strong>understandable for the stakeholders</strong>: typically sentences in <strong>natural language</strong> involving the necessary preconditions (if any), the inputs and the postconditions</li>
+  <li>The developer implements the feature to pass those tests; in an automation-compatible format they become executable requirements</li>
 </ol>
 <div class="highlight-box">💡 <strong>ATDD vs TDD:</strong> TDD = developer writes unit tests before code. ATDD = whole team writes acceptance tests (from acceptance criteria) before development.</div>
 <p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.5</p>`
@@ -1859,11 +1859,11 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <div class="highlight-box">
 💡 <strong>Cobertura de la partición de equivalencia:</strong>
 <br>• Los <strong>elementos de cobertura</strong> son las propias particiones de equivalencia
-<br>• Para alcanzar el <strong>100% de cobertura</strong> los casos de prueba deben ejercitar todas las particiones identificadas —<strong>incluidas las inválidas</strong>—, cubriendo cada una al menos una vez
+<br>• Para alcanzar el <strong>100% de cobertura</strong> los casos de prueba deben ejercitar todas las particiones identificadas, <strong>incluidas las inválidas</strong>, cubriendo cada una al menos una vez
 <br>• La cobertura se mide como el <strong>número de particiones ejercitadas por al menos un caso de prueba, dividido entre el número total de particiones identificadas</strong>, y se expresa en porcentaje
 </div>
 <div class="warning-box">
-⚠️ <strong>Para el examen:</strong> las particiones <strong>inválidas</strong> deberían probarse <strong>en aislamiento</strong> —una sola por caso de prueba— para evitar el <strong>enmascaramiento de defectos</strong>, la situación en la que un defecto impide detectar otro. Es el mismo principio que se aplica a las transiciones inválidas en §4.2.4. <em>(Añadido por ISTQB en las notas de versión de v4.0.1 como cambio para §4.2.1.)</em>
+⚠️ <strong>Para el examen:</strong> las particiones <strong>inválidas</strong> deberían probarse <strong>en aislamiento</strong> (una sola por caso de prueba) para evitar el <strong>enmascaramiento de defectos</strong>, la situación en la que un defecto impide detectar otro. Es el mismo principio que se aplica a las transiciones inválidas en §4.2.4. <em>(Añadido por ISTQB en las notas de versión de v4.0.1 como cambio para §4.2.1.)</em>
 </div>
 
 <h3>2. Análisis de Valor Límite (BVA)</h3>
@@ -1878,7 +1878,7 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 
 <h3>3. Prueba de Tabla de Decisión</h3>
 <p>Se utiliza para probar reglas de negocio: cómo distintas combinaciones de <strong>condiciones</strong> (filas superiores) producen distintas <strong>acciones</strong> (filas inferiores). Cada columna es una <strong>regla</strong> que combina un valor de cada condición con las acciones resultantes.</p>
-<p>En las tablas de <strong>entrada limitada</strong> (limited-entry) todos los valores de las condiciones y las acciones se muestran como valores booleanos —salvo los irrelevantes o inviables—. En las de <strong>entrada ampliada</strong> (extended-entry), algunas condiciones o acciones pueden tomar varios valores: rangos numéricos, particiones de equivalencia o valores discretos.</p>
+<p>En las tablas de <strong>entrada limitada</strong> (limited-entry) todos los valores de las condiciones y las acciones se muestran como valores booleanos, salvo los irrelevantes o inviables. En las de <strong>entrada ampliada</strong> (extended-entry), algunas condiciones o acciones pueden tomar varios valores: rangos numéricos, particiones de equivalencia o valores discretos.</p>
 <p>Una tabla <strong>completa</strong> tiene tantas columnas como combinaciones de condiciones existan. Puede <strong>simplificarse</strong> eliminando las columnas con combinaciones inviables, y <strong>minimizarse</strong> fusionando en una sola columna aquellas en las que algunas condiciones no afectan al resultado. Los algoritmos de minimización quedan fuera del alcance del syllabus.</p>
 <div class="example-box">
 📌 <strong>Ejemplo — descuento de una tienda online</strong> (condiciones: ¿es cliente VIP? · ¿compra ≥ 100€?):
@@ -1920,7 +1920,7 @@ Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 �
 <p>La <strong>tabla de estados</strong> es un modelo equivalente al diagrama: sus filas representan los estados y sus columnas los eventos (junto con sus condiciones de guarda, si las hay); cada celda representa una transición y contiene el estado destino y las acciones resultantes. A diferencia del diagrama, la tabla <strong>muestra explícitamente las transiciones inválidas</strong>, representadas como <strong>celdas vacías</strong>. Un caso de prueba se construye como una <strong>secuencia de eventos</strong> que produce una secuencia de cambios de estado, y normalmente cubre varias transiciones.</p>
 <ul>
   <li><strong>Cobertura de todos los estados:</strong> los casos de prueba visitan cada estado al menos una vez (criterio más débil)</li>
-  <li><strong>Cobertura de transiciones válidas</strong> (también llamada <em>cobertura de conmutador 0</em>): se ejercita cada transición válida al menos una vez; alcanzarla al 100% garantiza también el 100% de cobertura de todos los estados. Es el criterio más usado</li>
+  <li><strong>Cobertura de transiciones válidas</strong> (también llamada <em>cobertura de conmutador 0</em>): se ejercita cada transición válida al menos una vez. Es el criterio más usado</li>
   <li><strong>Cobertura de todas las transiciones:</strong> se ejercitan todas las transiciones válidas <u>y además</u> se intentan las transiciones inválidas (no definidas). Es el criterio más exigente y debería ser el mínimo exigible en sistemas críticos</li>
 </ul>
 <div class="highlight-box">
@@ -1960,11 +1960,11 @@ Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 �
 <div class="highlight-box">
 💡 <strong>Equivalence partitioning coverage:</strong>
 <br>• The <strong>coverage items</strong> are the equivalence partitions themselves
-<br>• To achieve <strong>100% coverage</strong>, test cases must exercise all identified partitions —<strong>including the invalid ones</strong>— by covering each partition at least once
+<br>• To achieve <strong>100% coverage</strong>, test cases must exercise all identified partitions, <strong>including the invalid ones</strong>, by covering each partition at least once
 <br>• Coverage is measured as the <strong>number of partitions exercised by at least one test case, divided by the total number of identified partitions</strong>, expressed as a percentage
 </div>
 <div class="warning-box">
-⚠️ <strong>For the exam:</strong> <strong>invalid partitions</strong> should be tested <strong>in isolation</strong> —one per test case— to avoid <strong>defect masking</strong>, the situation in which one defect prevents the detection of another. It is the same principle applied to invalid transitions in §4.2.4. <em>(Added by ISTQB in the v4.0.1 release notes as a change to §4.2.1.)</em>
+⚠️ <strong>For the exam:</strong> <strong>invalid partitions</strong> should be tested <strong>in isolation</strong> (one per test case) to avoid <strong>defect masking</strong>, the situation in which one defect prevents the detection of another. It is the same principle applied to invalid transitions in §4.2.4. <em>(Added by ISTQB in the v4.0.1 release notes as a change to §4.2.1.)</em>
 </div>
 
 <h3>2. Boundary Value Analysis (BVA)</h3>
@@ -1978,7 +1978,7 @@ Cada columna (R1-R4) se convierte directamente en un caso de prueba: p. ej. R2 �
 
 <h3>3. Decision Table Testing</h3>
 <p>Used for business rules: how combinations of <strong>conditions</strong> (top rows) produce different <strong>actions</strong> (bottom rows). Each column is a <strong>rule</strong> combining one value per condition with the resulting actions.</p>
-<p>In <strong>limited-entry</strong> decision tables, all condition and action values are shown as Boolean values —except irrelevant or infeasible ones—. In <strong>extended-entry</strong> tables, some conditions or actions may take multiple values: number ranges, equivalence partitions or discrete values.</p>
+<p>In <strong>limited-entry</strong> decision tables, all condition and action values are shown as Boolean values, except irrelevant or infeasible ones. In <strong>extended-entry</strong> tables, some conditions or actions may take multiple values: number ranges, equivalence partitions or discrete values.</p>
 <p>A <strong>full</strong> decision table has enough columns to cover every combination of conditions. It can be <strong>simplified</strong> by deleting columns with infeasible combinations, and <strong>minimized</strong> by merging columns in which some conditions do not affect the outcome. Minimization algorithms are out of scope of the syllabus.</p>
 <div class="example-box">
 📌 <strong>Example — online store discount</strong> (conditions: VIP customer? · purchase ≥ €100?):
@@ -2020,7 +2020,7 @@ Each column (R1-R4) becomes one test case directly: e.g. R2 → VIP customer wit
 <p>A <strong>state table</strong> is a model equivalent to the state diagram: its rows represent states and its columns represent events (together with guard conditions, if any); each cell represents a transition and contains the target state and the resulting actions. In contrast to the diagram, the state table <strong>explicitly shows invalid transitions</strong>, represented by <strong>empty cells</strong>. A test case is built as a <strong>sequence of events</strong> producing a sequence of state changes, and usually covers several transitions.</p>
 <ul>
   <li><strong>All states coverage:</strong> every state is visited at least once (weakest criterion)</li>
-  <li><strong>Valid transitions coverage</strong> (also called <em>0-switch coverage</em>): every valid transition is exercised at least once; achieving 100% also guarantees 100% all-states coverage. The most commonly used criterion</li>
+  <li><strong>Valid transitions coverage</strong> (also called <em>0-switch coverage</em>): every valid transition is exercised at least once. The most commonly used criterion</li>
   <li><strong>All transitions coverage:</strong> all valid transitions are exercised <u>and</u> invalid (undefined) transitions are also attempted. The strictest criterion, recommended as a minimum for safety/mission-critical systems</li>
 </ul>
 <div class="highlight-box">
@@ -2483,7 +2483,7 @@ const FLASHCARDS = [
   },
   { id: 18, chapter: 3, chapterTag: { es: "Cap. 4 · Técnicas", en: "Ch. 4 · Techniques" },
     q: { es: "¿Para qué se usan las Tablas de Decisión?", en: "When are Decision Tables used?" },
-    a: { es: "Para probar combinaciones de condiciones (lógica de negocio compleja). Cada columna es una 'regla' que combina condiciones con resultados. En una tabla de decisión COMPLETA (full), el número de reglas = 2^n (n = número de condiciones); las tablas simplificadas o minimizadas tienen menos columnas.", en: "For testing combinations of conditions (complex business logic). Each column is a 'rule' combining conditions with outcomes. In a FULL decision table, the number of rules = 2^n (n = number of conditions); simplified or minimized tables have fewer columns." }
+    a: { es: "Para probar combinaciones de condiciones (lógica de negocio compleja). Cada columna es una 'regla' que combina condiciones con resultados. En una tabla de decisión COMPLETA (full) de entrada limitada (condiciones booleanas), el número de reglas = 2^n (n = número de condiciones); en una de entrada ampliada es el producto del número de valores posibles de cada condición. Las tablas simplificadas o minimizadas tienen menos columnas.", en: "For testing combinations of conditions (complex business logic). Each column is a 'rule' combining conditions with outcomes. In a FULL limited-entry decision table (Boolean conditions), the number of rules = 2^n (n = number of conditions); in an extended-entry table it is the product of the number of possible values of each condition. Simplified or minimized tables have fewer columns." }
   },
   { id: 19, chapter: 3, chapterTag: { es: "Cap. 4 · Técnicas", en: "Ch. 4 · Techniques" },
     q: { es: "¿Qué es la prueba de Transición de Estado?", en: "What is State Transition Testing?" },
