@@ -1154,7 +1154,7 @@ A human <em>error</em> introduces a <em>defect</em> in the code. If that code is
 <h3>Técnicas de Caja Blanca</h3>
 <p>Las técnicas de caja blanca (white-box o estructura-based) se basan en el análisis de la <strong>estructura interna</strong> del código. Requieren acceso al código fuente.</p>
 <h3>Cobertura de Sentencia (Statement Coverage)</h3>
-<p>Mide el porcentaje de <strong>sentencias ejecutables</strong> que han sido ejecutadas por los casos de prueba.</p>
+<p>En la prueba de sentencia los <strong>elementos de cobertura</strong> son las <strong>sentencias ejecutables</strong>. La cobertura se mide como el <strong>número de sentencias ejercitadas por los casos de prueba dividido entre el número total de sentencias ejecutables</strong> del código, y se expresa en porcentaje.</p>
 <div class="example-box">
 📌 <strong>Ejemplo:</strong>
 <code>
@@ -1166,8 +1166,19 @@ z = y + 1;    // Sentencia 2
 Si solo probamos con x=5, ejecutamos ambas sentencias → 100% statement coverage.
 Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement coverage.
 </div>
+<div class="warning-box">
+⚠️ <strong>Límites del 100% de cobertura de sentencia:</strong> asegura que todas las sentencias ejecutables se han ejercitado al menos una vez —y por tanto que toda sentencia con un defecto se ejecutará, lo que puede provocar un fallo que revele su presencia—. Pero ejercitar una sentencia no detecta defectos en todos los casos:
+<br>• <strong>No garantiza que se haya probado toda la lógica de decisión</strong>, porque puede no ejercitar todas las ramas del código
+<br>• <strong>No detecta defectos dependientes de los datos</strong>, como una división por cero que solo falla cuando el denominador vale cero
+</div>
 <h3>Cobertura de Rama (Branch Coverage)</h3>
-<p>Mide el porcentaje de <strong>ramas del flujo de control</strong> ejecutadas. Para cada decisión (IF/SWITCH), tanto el camino verdadero como el falso deben ser probados.</p>
+<p>Una <strong>rama</strong> es una transferencia de control entre dos nodos del <strong>grafo de flujo de control</strong>, que muestra las posibles secuencias en las que se ejecutan las sentencias del código. Cada transferencia de control puede ser:</p>
+<ul>
+  <li><strong>Incondicional:</strong> código en línea recta (<em>straight-line code</em>)</li>
+  <li><strong>Condicional:</strong> el resultado de una decisión</li>
+</ul>
+<p>Los <strong>elementos de cobertura</strong> son las ramas. La cobertura se mide como el <strong>número de ramas ejercitadas dividido entre el número total de ramas</strong>, expresado en porcentaje. Con el <strong>100% de cobertura de rama</strong> se ejercitan todas las ramas del código, <strong>tanto las incondicionales como las condicionales</strong>. Las ramas condicionales suelen corresponder al resultado verdadero o falso de un «if…then», a una salida de una sentencia «switch/case», o a la decisión de salir o continuar en un bucle.</p>
+<p>Ejercitar una rama tampoco detecta defectos en todos los casos: por ejemplo, puede no detectar los que requieren ejecutar un camino concreto del código.</p>
 <div class="highlight-box">
 💡 <strong>Branch Coverage ⊃ Statement Coverage:</strong>
 <br>Si alcanzamos 100% de branch coverage, también tenemos 100% de statement coverage.
@@ -1197,7 +1208,7 @@ Si solo probamos con x=-1, solo ejecutamos la sentencia 2 → 50% statement cove
 <h3>White-Box Techniques</h3>
 <p>Based on the internal structure of the code. Require access to source code.</p>
 <h3>Statement Coverage</h3>
-<p>Measures the percentage of executable statements executed by test cases.</p>
+<p>In statement testing the <strong>coverage items</strong> are the <strong>executable statements</strong>. Coverage is measured as the <strong>number of statements exercised by the test cases divided by the total number of executable statements</strong> in the code, expressed as a percentage.</p>
 <div class="example-box">
 📌 <strong>Example:</strong>
 <code>
@@ -1208,8 +1219,30 @@ z = y + 1;    // Statement 2
 </code>
 Testing only x=5 executes both statements → 100% statement coverage. Testing only x=-1 executes only statement 2 → 50% statement coverage.
 </div>
+<div class="warning-box">
+⚠️ <strong>Limits of 100% statement coverage:</strong> it ensures all executable statements have been exercised at least once —so every statement containing a defect will be executed, which may cause a failure revealing it—. But exercising a statement will not detect defects in all cases:
+<br>• It <strong>does not ensure that all the decision logic has been tested</strong>, as it may not exercise all the branches in the code
+<br>• It <strong>does not detect data-dependent defects</strong>, such as a division by zero that only fails when the denominator is set to zero
+</div>
 <h3>Branch Coverage</h3>
-<p>Measures the percentage of control flow branches executed. Stronger than statement coverage: 100% branch coverage implies 100% statement coverage (but not vice versa).</p>
+<p>A <strong>branch</strong> is a transfer of control between two nodes in the <strong>control flow graph</strong>, which shows the possible sequences in which source code statements are executed. Each transfer of control can be:</p>
+<ul>
+  <li><strong>Unconditional:</strong> straight-line code</li>
+  <li><strong>Conditional:</strong> a decision outcome</li>
+</ul>
+<p>The <strong>coverage items</strong> are branches. Coverage is measured as the <strong>number of branches exercised by the test cases divided by the total number of branches</strong>, expressed as a percentage. With <strong>100% branch coverage</strong>, all branches in the code are exercised, <strong>both unconditional and conditional</strong>. Conditional branches typically correspond to a true or false outcome from an "if…then" decision, an outcome from a switch/case statement, or a decision to exit or continue in a loop.</p>
+<p>Exercising a branch will not detect defects in all cases either: for example, it may not detect defects requiring the execution of a specific path in the code.</p>
+<div class="highlight-box">
+💡 <strong>Branch Coverage ⊃ Statement Coverage:</strong>
+<br>If we achieve 100% branch coverage, we also have 100% statement coverage.
+<br>But 100% statement coverage does NOT guarantee 100% branch coverage.
+</div>
+<div class="warning-box">
+⚠️ <strong>For the exam:</strong>
+<br>• Statement coverage = % of statements executed
+<br>• Branch coverage = % of branches executed (stronger)
+<br>• 100% branch coverage implies 100% statement coverage (not vice versa)
+</div>
 <h3>The Value of White-Box Testing</h3>
 <p>All white-box techniques share a key strength: they account for the actual software implementation, making it easier to find defects even when the specification is vague, outdated or incomplete.</p>
 <div class="highlight-box">
