@@ -697,6 +697,54 @@ precedent as safety = "seguridad funcional": the exam is built from the EN LOs, 
 say "líder de la revisión ni escriba" / "review leader or scribe". Spec:
 `docs/superpowers/specs/2026-08-12-chapter3-review-fidelity-fix-design.md`.
 
+**Third user-reported gap, CLOSED (2026-08-15).** A Reddit commenter listed 27 points on chapter 4
+(test techniques). Each was checked against the official EN syllabus v4.0.1 (§4.1-4.5, pp. 38-46)
+**and** against the 36 chapter-4 questions: 18 were real gaps, 7 partial, 2 already covered. Fixed
+in lessons **4.2-4.5 only** (ES+EN) plus one flashcard (below); `CHAPTERS`, questions and glossary
+were verified correct and untouched. Spec:
+`docs/superpowers/specs/2026-08-15-chapter4-techniques-fidelity-fix-design.md`.
+
+- **§4.2.1 anomaly — read this before "correcting" the EP exam tip.** The v4.0.1 **release notes**
+  (p. 73) state: *"in 4.2.1 added that invalid equivalence partitions should be tested in isolation
+  to avoid defect masking"*. A full-text search of the 78 pages confirms **that sentence is NOT in
+  the body of §4.2.1** — ISTQB announced the change and never applied it (the concept is only
+  defined in §4.2.4, for invalid *transitions*). The lesson therefore carries the tip attributed to
+  the **release notes**, not to §4.2.1. **Do not delete it as "unsourced"** and do not re-cite it as
+  a plain §4.2.1 claim. Note the citation gate (`checkSyllabusRefs()`) only scans `topic.source`,
+  the `.lesson-source` footer and `GLOSSARY.source` — never the lesson body — so inline citations
+  are on the honor system.
+- **The source comment contained an error; it was not copied.** It claimed *"X means that the
+  actions should not occur"*. §4.2.3 says the opposite: **"X" = the action SHOULD occur, blank =
+  should NOT**. The lesson implements the official version.
+- **Real error fixed in EN:** lesson 4.4 said **"Defect attacks"**; the official §4.4.1 term is
+  **"fault attacks"** — which question id 97 already spelled correctly in EN, so the app was
+  contradicting itself. ES uses **"ataques de defecto (fault attacks)"**, taken from that same
+  question rather than coined.
+- **The 2^n imprecision came back, in flashcard id 18** (found by the final whole-branch review,
+  not by the comment). Phase 3 had qualified it to "in a FULL decision table" — enough at the time,
+  **not enough once this fix introduced extended-entry tables**, where a full table has the product
+  of each condition's value count, not 2^n. It contradicted both the new lesson and **question id
+  89**, which examines exactly that 3x2 = 6 case. Now qualified as limited-entry vs extended-entry.
+  Lesson: qualifying 2^n by "full" alone is insufficient — the axis that matters is
+  limited-entry vs extended-entry.
+- **Four teach/test mismatches closed** — the lesson did not teach vocabulary our own simulator
+  examines: N/A "infeasible" and extended-entry tables (questions id 88 / id 89), the state table
+  showing invalid transitions as empty cells (id 93), and ordered/discrete partition properties
+  (id 85, and without them "BVA only works on ordered partitions" has nothing to attach to).
+- **Translation decisions, all sourced, none coined:** decision-table notation in ES is
+  **V / F / – / N/A / X / blank**, which is what the **official ES Sample Exam A (question #22)**
+  uses; "elemento de cobertura", "subsume", "condición de guarda", "enmascaramiento de defectos"
+  and "entrada limitada/ampliada" all reuse wording already present in the glossary or the bank.
+- **Em-dashes:** the new content initially reintroduced them; they were stripped in the same wave,
+  per the convention commit `15c5c61` (em-dashes are removed from *content*, replaced by commas or
+  parentheses). The `«–»` of the decision-table notation is **official notation, not punctuation** —
+  never convert it.
+- **Deliberately deferred** (documented, not forgotten): the pre-existing ES/EN structural asymmetry
+  in lessons 4.4 and 4.5 (EN has fewer `example-box`/`<li>` than ES) deserves its own spec; and the
+  global terminology unification between lesson headings and the glossary ("Análisis de Valor
+  Límite" vs "Análisis del valor frontera") — this fix aligned "Predicción de Errores" **inside
+  lesson 4.4 only**, so lesson 4.1 ES still says "Adivinanza de Errores".
+
 **Real errors found and fixed during Phase 2** (precedent for how thorough the audit needs to be):
 Ch.2 lesson's false "4 test levels" (syllabus defines 5); Ch.3's two review roles (Gestor, Moderador)
 silently merged into one, split back out; Ch.4's non-syllabus "Prueba de Caso de Uso" (removed in
