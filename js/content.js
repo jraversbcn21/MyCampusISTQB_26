@@ -1363,14 +1363,22 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <p>Una historia de usuario representa una prestación de valor para un usuario. Tiene tres aspectos clave, las <strong>3 C</strong>: <strong>Card</strong> (cuartilla/ficha que la describe), <strong>Conversation</strong> (conversación sobre cómo se usará el software) y <strong>Confirmation</strong> (los criterios de aceptación). Se redacta en colaboración (lluvia de ideas, mapas mentales) entre negocio, desarrollo y prueba. El formato típico es:</p>
 <div class="example-box">
 📌 <strong>Formato:</strong>
-<br><em>Como [tipo de usuario], quiero [acción/objetivo] para que [beneficio/valor]</em>, seguido de los criterios de aceptación.
+<br><em>Como [rol], quiero [objetivo a lograr], para poder [valor de negocio resultante para el rol]</em>, seguido de los criterios de aceptación.
 <br><br><strong>Ejemplo:</strong> Como cliente registrado, quiero restablecer mi contraseña por email, para que pueda recuperar mi acceso si la olvido.
 </div>
 <div class="highlight-box">
-💡 <strong>INVEST:</strong> una buena historia de usuario debe ser <strong>I</strong>ndependiente, <strong>N</strong>egociable, <strong>V</strong>aliosa, <strong>E</strong>stimable, pequeña (<strong>S</strong>mall) y comprobable (<strong>T</strong>estable). Si nadie sabe cómo probarla, probablemente no está lo bastante clara.
+💡 <strong>INVEST:</strong> una buena historia de usuario debe ser <strong>I</strong>ndependiente, <strong>N</strong>egociable, <strong>V</strong>aliosa, <strong>E</strong>stimable, pequeña (<strong>S</strong>mall) y comprobable (<strong>T</strong>estable). Si un <strong>implicado</strong> no sabe cómo probar una historia de usuario, puede indicar que la historia <strong>no está lo bastante clara</strong>, que <strong>no refleja algo valioso</strong> para él, o simplemente que <strong>necesita ayuda para probarla</strong>.
 </div>
 <h3>Criterios de Aceptación</h3>
-<p>Son las condiciones que debe cumplir la historia para ser aceptada; equivalen a las condiciones de prueba de la historia. Sirven para acotar su alcance, alcanzar consenso, describir escenarios positivos y negativos, y son la base de la prueba de aceptación (ver DGPA más abajo). Existen dos formatos habituales para escribirlos:</p>
+<p>Son las condiciones que debe cumplir la implementación de una historia de usuario para ser aceptada por los implicados; desde esa perspectiva, equivalen a las condiciones de prueba que los tests deben ejercitar. Suelen ser resultado de la <em>Conversación</em>. Se usan para:</p>
+<ul>
+  <li>Definir el <strong>alcance</strong> de la historia de usuario</li>
+  <li>Alcanzar <strong>consenso</strong> entre los implicados</li>
+  <li>Describir tanto <strong>escenarios positivos como negativos</strong></li>
+  <li>Servir de <strong>base para la prueba de aceptación</strong> de la historia (ver DGPA más abajo)</li>
+  <li>Permitir una <strong>planificación y una estimación precisas</strong></li>
+</ul>
+<p>Existen dos formatos habituales para escribirlos:</p>
 <ul>
   <li><strong>Orientado a escenario:</strong> formato Dado/Cuando/Entonces (Given/When/Then) usado en desarrollo guiado por comportamiento (BDD)</li>
   <li><strong>Orientado a reglas:</strong> lista de verificación con viñetas, o una tabla de mapeo entrada→salida</li>
@@ -1382,10 +1390,11 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <h3>Desarrollo Guiado por Prueba de Aceptación (DGPA / ATDD)</h3>
 <p>En ATDD, los casos de prueba se crean <strong>antes</strong> de implementar la historia, a partir de sus criterios de aceptación:</p>
 <ol>
-  <li>Taller de especificación: el equipo (negocio + dev + tester) redacta/depura la historia y sus criterios de aceptación, resolviendo ambigüedades</li>
+  <li>Taller de especificación: se analiza, discute y redacta la historia de usuario y, si aún no existen, sus criterios de aceptación. Participan miembros del equipo con <strong>perspectivas distintas: clientes, desarrolladores y probadores</strong>, resolviendo incompletitudes, ambigüedades y defectos de la historia</li>
   <li>Se crean los casos de prueba de aceptación a partir de esos criterios (pueden verse como ejemplos de cómo funciona el software)</li>
   <li>Primero se cubren casos positivos, luego negativos y por último características de calidad no funcionales</li>
   <li>El desarrollador implementa la funcionalidad para pasar esas pruebas; si están en un formato compatible con un framework de automatización, se convierten en requisitos ejecutables</li>
+  <li>Los casos de prueba deben expresarse de forma <strong>comprensible para los implicados</strong>: normalmente frases en <strong>lenguaje natural</strong> con las precondiciones necesarias (si las hay), las entradas y las postcondiciones</li>
 </ol>
 <div class="highlight-box">
 💡 <strong>Diferencia ATDD vs TDD:</strong>
@@ -1401,10 +1410,18 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <h3>Collaboration-Based Techniques (CTFL v4.0)</h3>
 <p>Added in ISTQB v4.0, these approaches rely on collaboration between developers, testers and business representatives. Unlike the techniques in topics 4.2-4.4, they aim to <strong>prevent</strong> defects through early communication and consensus rather than systematically detecting them.</p>
 <h3>Collaborative User Story Writing</h3>
-<p>A user story represents a feature of value to a user. It has three key aspects, the <strong>3 C's</strong>: <strong>Card</strong> (the medium describing it), <strong>Conversation</strong> (how the software will be used) and <strong>Confirmation</strong> (the acceptance criteria). Written collaboratively (brainstorming, mind maps) across business, development and testing, using the format: "As a [user], I want [action] so that [benefit]", followed by acceptance criteria.</p>
-<div class="highlight-box">💡 <strong>INVEST:</strong> a good user story should be Independent, Negotiable, Valuable, Estimable, Small and Testable. If nobody knows how to test it, it's probably not clear enough.</div>
+<p>A user story represents a feature of value to a user. It has three key aspects, the <strong>3 C's</strong>: <strong>Card</strong> (the medium describing it), <strong>Conversation</strong> (how the software will be used) and <strong>Confirmation</strong> (the acceptance criteria). Written collaboratively (brainstorming, mind maps) across business, development and testing, using the format: "As a [role], I want [goal to be accomplished], so that I can [resulting business value for the role]", followed by the acceptance criteria.</p>
+<div class="highlight-box">💡 <strong>INVEST:</strong> a good user story should be Independent, Negotiable, Valuable, Estimable, Small and Testable. If a <strong>stakeholder</strong> does not know how to test a user story, this may indicate that the story is <strong>not clear enough</strong>, that it <strong>does not reflect something valuable</strong> to them, or that the stakeholder simply <strong>needs help in testing</strong>.</div>
 <h3>Acceptance Criteria</h3>
-<p>Conditions the story must satisfy to be accepted — effectively its test conditions. Used to bound scope, reach consensus, describe positive/negative scenarios, and as the basis for acceptance testing. Two common formats:</p>
+<p>Conditions that an implementation of a user story must meet to be accepted by stakeholders — from that perspective, they are the test conditions the tests should exercise. They are usually a result of the <em>Conversation</em>. They are used to:</p>
+<ul>
+  <li>Define the <strong>scope</strong> of the user story</li>
+  <li>Reach <strong>consensus</strong> among the stakeholders</li>
+  <li>Describe both <strong>positive and negative scenarios</strong></li>
+  <li>Serve as a <strong>basis for the user story acceptance testing</strong> (see ATDD below)</li>
+  <li>Allow <strong>accurate planning and estimation</strong></li>
+</ul>
+<p>Two common formats:</p>
 <ul>
   <li><strong>Scenario-oriented:</strong> Given/When/Then, used in Behavior-Driven Development (BDD)</li>
   <li><strong>Rule-oriented:</strong> a bulleted checklist, or an input→output mapping table</li>
@@ -1412,10 +1429,11 @@ La prueba exploratoria puede además incorporar otras técnicas ya vistas, como 
 <h3>Acceptance Test-Driven Development (ATDD)</h3>
 <p>Acceptance test cases are created <strong>before</strong> implementation, derived from the acceptance criteria:</p>
 <ol>
-  <li>Specification workshop: the whole team writes/refines the story and its acceptance criteria, resolving ambiguities</li>
+  <li>Specification workshop: the user story and, if not yet defined, its acceptance criteria are analyzed, discussed and written. Team members with <strong>different perspectives take part: customers, developers and testers</strong>, resolving incompleteness, ambiguities and defects in the story</li>
   <li>Acceptance test cases are created from those criteria (they can be seen as examples of how the software should behave)</li>
   <li>Positive cases are covered first, then negative, then non-functional quality characteristics</li>
   <li>The developer implements the feature to pass those tests; in an automation-compatible format they become executable requirements</li>
+  <li>Test cases should be expressed in a way that is <strong>understandable for the stakeholders</strong>: typically sentences in <strong>natural language</strong> involving the necessary preconditions (if any), the inputs and the postconditions</li>
 </ol>
 <div class="highlight-box">💡 <strong>ATDD vs TDD:</strong> TDD = developer writes unit tests before code. ATDD = whole team writes acceptance tests (from acceptance criteria) before development.</div>
 <p class="lesson-source">Source: ISTQB CTFL Syllabus v4.0 §4.5</p>`
