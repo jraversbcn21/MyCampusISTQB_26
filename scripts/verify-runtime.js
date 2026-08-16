@@ -2110,6 +2110,22 @@ const SAMPLE_Q = {
     check('N29 css: .btn-backup usa --primary-dark (AA), nunca --primary a secas',
       /\.btn-backup \{[^}]*var\(--primary-dark\)/.test(cssSrc) &&
       !/\.btn-backup \{[^}]*var\(--primary\)[;\s]/.test(cssSrc));
+
+    // Behavioral checks for _buildBackup and exportProgress
+    {
+      const ctx = loadApp();
+      ctx.App.state = { xp: 123 };
+      const bk = ctx.App._buildBackup();
+      check('N29 export: _buildBackup produce el envoltorio {app, version:1, exportedAt, state}',
+        bk.app === 'mycampus-istqb' && bk.version === 1 &&
+        typeof bk.exportedAt === 'string' && bk.state === ctx.App.state && bk.state.xp === 123);
+      const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
+      check('N29 export: exportProgress con guard de Blob/URL y nombre mycampus-backup-',
+        /exportProgress\(\)/.test(appSrc) &&
+        /typeof Blob === 'undefined'/.test(appSrc) &&
+        /mycampus-backup-/.test(appSrc) &&
+        /revokeObjectURL/.test(appSrc));
+    }
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */

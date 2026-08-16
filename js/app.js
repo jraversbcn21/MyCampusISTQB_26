@@ -2038,6 +2038,32 @@ const App = {
     } catch (e) {
       return null;
     }
+  },
+
+  /* ===== BACKUP EXPORT/IMPORT (2026-08-16) ===== */
+
+  _buildBackup() {
+    return {
+      app: 'mycampus-istqb',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      state: this.state,
+    };
+  },
+
+  exportProgress() {
+    // Guard para el arnés y navegadores sin soporte: sin APIs de descarga, no-op limpio.
+    if (typeof Blob === 'undefined' || typeof URL === 'undefined' || !URL.createObjectURL) return;
+    const json = JSON.stringify(this._buildBackup(), null, 2);
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    const a = document.createElement('a');
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    a.href = url;
+    a.download = `mycampus-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.showToast(i18n.t('bk_export_ok'), 'success');
   }
 };
 
