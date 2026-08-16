@@ -629,7 +629,18 @@ node scripts/validate-content.js
 node scripts/verify-runtime.js
 node scripts/validate-contrast.js
 node scripts/validate-responsive.js   # manual pre-release step, not in pre-commit
+bash scripts/verify-prod.sh           # post-deploy: prod serving, sensitive 404s, GitHub blob status
 ```
+
+**`scripts/verify-prod.sh`** (2026-08-16) — post-deploy verification against the live production
+URL: app assets return 200, sensitive paths (`ISTQB 2026/`, `docs/`, `CLAUDE.md`, `scripts/`,
+`.githooks/`) return 404, and the three unreachable PDF blobs' status on GitHub's API (WARN while
+they still return 200 — the pending Support ticket; OK once purged). It hardcodes **no blob SHAs**
+(public repo) — it recomputes them via `git hash-object` from the local `ISTQB 2026/` folder and
+SKIPs that section on clones without it. Auto-detects the corporate network (uses the
+`~/.certs/corporate-ca.pem` bundle + `--ssl-revoke-best-effort` when present). Exit 1 only on real
+production failures; the GitHub-blob WARN does not fail the run. `.gitattributes` forces LF on
+`*.sh` so Git Bash on Windows can execute it.
 
 **Pre-commit gate** version-controlled at `.githooks/pre-commit` — activate once per clone with
 `git config core.hooksPath .githooks` (the only per-clone setup this repo has). It validates the

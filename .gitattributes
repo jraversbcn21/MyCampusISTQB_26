@@ -1,3 +1,5 @@
 # Los hooks de .githooks/ los ejecuta sh: deben salir del checkout con LF
 # incluso en Windows (un shebang con \r rompe el intérprete en Linux/macOS).
 .githooks/* text eol=lf
+# Mismo motivo para cualquier script de shell (scripts/verify-prod.sh).
+*.sh text eol=lf
