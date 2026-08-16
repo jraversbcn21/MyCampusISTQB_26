@@ -304,6 +304,30 @@ an authenticated empty session.
   check now sets `Sync._reconciled = true` because it tests the already-reconciled flush. `N1`
   (multi-device) is intact.
 
+## Export/import de progreso (2026-08-16)
+
+Follow-up deliberadamente diferido del fix de persistencia del 2026-07-22 (arriba): backup manual
+como red de seguridad complementaria a la reconciliación automática, no un sustituto. Spec:
+`docs/superpowers/specs/2026-08-16-progress-export-import-design.md`.
+
+- Card "Copia de seguridad" al final de la vista Progreso. **Export** (`App.exportProgress`) es
+  nativo: `_buildBackup()` envuelve el estado en `{app: 'mycampus-istqb', version: 1, exportedAt,
+  state}` y lo descarga vía `Blob` + `<a download>` como `mycampus-backup-YYYY-MM-DD.json`. El
+  marcador `app`/`version` es lo que permite rechazar JSONs ajenos en el import.
+- **Import (`App.importProgress`) es reemplazo total**, no fusión, tras `confirm()`. Validación
+  estructural mínima antes de aceptar: marcador `app`/`version` correcto, `state.xp` numérico,
+  `state.completedLessons` array. Cualquier fallo (JSON roto, marcador ajeno, `version` distinta,
+  `state` malformado, o `confirm()` cancelado) deja el estado intacto — nunca un reemplazo parcial.
+- **Lo crítico: no se tocó `sync.js`.** Tras el reemplazo, `saveState()` estampa `_updatedAt`
+  fresco como cualquier cambio normal, así que el estado importado gana en toda la maquinaria de
+  sync existente (freshness stamps, `_reconciled`, etc. — ver sección de arriba) sin mecanismo
+  nuevo. Sin migración en el import: los guards en punto de uso ya existentes
+  (`_rankingEnsureState` y equivalentes) cubren backups antiguos, misma lección de siempre.
+- Arnés: el `confirm()` de `loadApp()` en `verify-runtime.js` ahora es inyectable
+  (`opts.confirm`), retrocompatible (sin `opts.confirm` se comporta como antes).
+- Gate: familia **N29** (i18n `bk_*`, markup/CSS anclados a regla real, reemplazo+sello de
+  frescura, los 6 casos inválidos, cancelación, XSS vía `escapeHtml` en el render post-import).
+
 ### i18n
 
 - `i18n.t(key)` in JS code
