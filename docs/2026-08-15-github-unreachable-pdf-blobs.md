@@ -1,6 +1,14 @@
 # Blobs inalcanzables con PDFs de terceros todavía servidos por GitHub (2026-08-15)
 
-**Estado:** local RESUELTO · lado GitHub PENDIENTE de ticket a soporte.
+**Estado:** local RESUELTO · **ticket ENVIADO a GitHub Support el 2026-08-16** (vía
+support.github.com → Repositories → "Funciones del repositorio"/Datos; la propia pantalla de
+solución del asistente de soporte confirmó que la petición encaja en el proceso documentado de
+purga server-side). A la espera de respuesta; cuando confirmen, verificar los 404 con
+`bash scripts/verify-prod.sh` (su sección de blobs pasará de WARN a OK) y actualizar este estado.
+
+Nota del propio asistente de GitHub al crear el ticket: la doc de "sensitive data removal" no
+garantiza que material con copyright sea elegible por esa vía — si Support lo desestima, la
+alternativa es el proceso DMCA de takedown (en este caso como autopeticion del dueño del repo).
 
 ## Qué se encontró
 

@@ -35,9 +35,12 @@ Live in production at **https://mycampusistqb.vercel.app** (soft launch 2026-07-
   SHA to unauthenticated requests** on this public repo
   (`GET /repos/.../git/blobs/<sha>` → 200 with the full file). The local side is fixed
   (`git reflog expire --expire-unreachable=now --all` + `git gc --prune=now`; `.git` 15 MB → 1.1 MB,
-  0 dangling, verified). **The GitHub side needs a support ticket — a force-push and a local `gc`
-  cannot purge server-side unreachable objects.** Full write-up, the three blob SHAs and the
-  drafted ticket: `docs/2026-08-15-github-unreachable-pdf-blobs.md`.
+  0 dangling, verified). A force-push and a local `gc` cannot purge server-side unreachable
+  objects — only GitHub Support can. **The Support ticket was SENT on 2026-08-16** (Repositories →
+  repository functions/Data); awaiting their response. When they confirm, run
+  `bash scripts/verify-prod.sh` (its GitHub-blob section flips from WARN to OK) and update this
+  entry plus `docs/2026-08-15-github-unreachable-pdf-blobs.md` (the full write-up, which never
+  contains the SHAs — they are recomputed with `git hash-object`).
 - **Lesson for any future audit: a clean `git status` and `local == origin/master` prove nothing
   about a history purge.** The two checks that actually work are
   `git cat-file --batch-all-objects --batch-check='%(objecttype) %(objectsize)' | awk '$1=="blob" && $2>1000000'`
