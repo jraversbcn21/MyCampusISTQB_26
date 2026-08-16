@@ -1,0 +1,19 @@
+name: gates
+
+# Los 4 gates rapidos (Node puro, sin npm install) en cada push.
+# validate-responsive.js queda fuera a proposito: necesita Playwright/Chromium
+# y es un paso manual pre-release (ver CLAUDE.md).
+on: [push]
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/validate-questions.js
+      - run: node scripts/validate-content.js
+      - run: node scripts/verify-runtime.js
+      - run: node scripts/validate-contrast.js

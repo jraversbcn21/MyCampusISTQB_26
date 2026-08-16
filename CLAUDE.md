@@ -21,8 +21,12 @@ Live in production at **https://mycampusistqb.vercel.app** (soft launch 2026-07-
 - **`LICENSE`: MIT, copyright Sid Maier (2026-08-05)** — added after the repo link was shared on
   Reddit and a commenter asked about reuse terms; before this the repo was public but had no
   explicit license (default all-rights-reserved).
-- **No CI/CD, no PR review workflow** — work happens as direct commits to `master` (the repo's
-  actual practice; tracked here so an agent doesn't assume a branch/PR process that isn't there).
+- **No PR review workflow** — work happens as direct commits to `master` (the repo's actual
+  practice; tracked here so an agent doesn't assume a branch/PR process that isn't there). Since
+  2026-08-16 a minimal CI exists: `.github/workflows/gates.yml` runs the 4 fast Node gates
+  (questions/content/runtime/contrast) on every push — a safety net for clones without the
+  pre-commit hook, NOT a deploy pipeline (deploys stay manual via Vercel CLI, push ≠ deploy).
+  `validate-responsive.js` is deliberately not in CI (Playwright, manual pre-release step).
 - **Git history was rewritten on 2026-07-02** (`git filter-repo` + force-push) to purge the
   `ISTQB 2026/` folder — copyrighted third-party PDFs (official syllabus, sample exam, reference
   book) accidentally tracked since the repo's initial commit. **Every commit hash in the repo
