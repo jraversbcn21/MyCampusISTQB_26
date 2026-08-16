@@ -141,6 +141,25 @@ curl --ssl-revoke-best-effort --cacert "$USERPROFILE/.certs/corporate-ca.pem" <u
 verification.) Used to verify deployed CSS and the `ISTQB 2026/`/`.superpowers/` 404s directly
 from the corporate network.
 
+### Windows shell traps on this workstation (2026-08-16 session audit)
+
+Recurring, verified failure modes from real sessions — agents and subagents must avoid them:
+
+- **`/tmp` does not exist for Git Bash here** — paths like `/tmp/x.txt` or `/out.txt` resolve to
+  the C: drive root and die with `Permission denied`/`ENOENT`. Write ALL temporary files to the
+  session scratchpad directory, never `/tmp` or drive-root paths.
+- **Inline `node -e` with quotes/regex breaks systematically on Windows** (quoting mangles into
+  `SyntaxError`/`ERR_INVALID_ARG_TYPE`). Write the snippet as a `.js` file in the scratchpad and
+  run `node <file>` instead — this is the pattern that always ends up working anyway.
+- **Windows backslash paths get eaten by bash** (`C:repositorioMyCampus...`) — use forward
+  slashes in Bash-tool commands, and absolute paths for git (subagent cwd is often NOT the repo,
+  producing `fatal: not a git repository`).
+- **Never `git add` sdd/review artifacts** (`.superpowers/`, `review-package`, `sdd-workspace`,
+  `review-fixes-report.md`) — they are gitignored and the add fails; they are workflow scratch,
+  not repo content.
+- **PDF tooling:** `pdftoppm` is NOT installed; PyMuPDF (Python) IS — read/render PDFs via Python
+  + PyMuPDF when the Read tool's page mode isn't enough.
+
 ## Architecture
 
 ### Script Load Order (Critical)
@@ -869,11 +888,12 @@ commits `2df5af2..4879e14`:
 
 **Editing constraints an agent must know (load-bearing):**
 
-- **The tail of `css/styles.css` is ordered on purpose.** Today: the `≤480px` tier (~1453) →
-  `@media (pointer: coarse)` (~2199) → **the `.bmc-fab` `≤768px` override block** (~2281) →
-  reduced-motion (~2292) → `:focus-visible` **literally last** (~2309 — it must win the `outline`
-  property over earlier equal-specificity `outline: none` input rules). The `.bmc-fab` override sits
-  there — *after* the pill's base rule (~2238), not back in the main `≤768px` tier — because media
+- **The tail of `css/styles.css` is ordered on purpose.** Today (line numbers re-measured
+  2026-08-16): the `≤480px` tier (~1463) → `@media (pointer: coarse)` (~2771) → **the `.bmc-fab`
+  `≤768px` override block** (~2846) → reduced-motion (~2864) → `:focus-visible` **literally last**
+  (~2881 — it must win the `outline` property over earlier equal-specificity `outline: none` input
+  rules). The `.bmc-fab` override sits
+  there — *after* the pill's base rule (~2810), not back in the main `≤768px` tier — because media
   queries add no specificity: two rules at the same specificity resolve by source order, so a
   same-specificity override placed *before* its target silently loses. That was a real bug (found in
   the 2026-07-21 final review): the override lived ~800 lines before the base rule, so
