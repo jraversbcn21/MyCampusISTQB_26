@@ -283,6 +283,16 @@ const TRANSLATIONS = {
     rk_you: "Tú",
     rk_name_invalid: "El nombre debe tener entre 1 y 30 caracteres.",
     rk_left_toast: "Has salido del ranking. Tu entrada se ha borrado.",
+
+    // Backup export/import (2026-08-16)
+    bk_title: "Copia de seguridad",
+    bk_desc: "Guarda tu progreso en un fichero o restauralo en cualquier dispositivo.",
+    bk_export: "Exportar progreso",
+    bk_import: "Importar progreso",
+    bk_export_ok: "Copia exportada",
+    bk_import_ok: "Progreso restaurado",
+    bk_import_invalid: "El fichero no es una copia de seguridad valida de MyCampus",
+    bk_import_confirm: "Esto reemplazara tu progreso actual por el del fichero. ¿Continuar?",
   },
 
   en: {
@@ -565,6 +575,16 @@ const TRANSLATIONS = {
     rk_you: "You",
     rk_name_invalid: "The name must be between 1 and 30 characters.",
     rk_left_toast: "You have left the ranking. Your entry has been deleted.",
+
+    // Backup export/import (2026-08-16)
+    bk_title: "Backup",
+    bk_desc: "Save your progress to a file or restore it on any device.",
+    bk_export: "Export progress",
+    bk_import: "Import progress",
+    bk_export_ok: "Backup exported",
+    bk_import_ok: "Progress restored",
+    bk_import_invalid: "The file is not a valid MyCampus backup",
+    bk_import_confirm: "This will replace your current progress with the file's. Continue?",
   }
 };
 

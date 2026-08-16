@@ -2091,6 +2091,15 @@ const SAMPLE_Q = {
       })());
   }
 
+  /* ---- N29: export/import de progreso (2026-08-16) ---- */
+  {
+    const { TRANSLATIONS } = loadApp();
+    const bkKeys = ['bk_title', 'bk_desc', 'bk_export', 'bk_import',
+      'bk_export_ok', 'bk_import_ok', 'bk_import_invalid', 'bk_import_confirm'];
+    check('N29 i18n: claves bk_* definidas en ES y EN',
+      bkKeys.every(k => typeof TRANSLATIONS.es[k] === 'string' && typeof TRANSLATIONS.en[k] === 'string'));
+  }
+
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
   {
     const ctx = loadApp();
