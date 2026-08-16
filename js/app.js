@@ -2064,7 +2064,43 @@ const App = {
     a.click();
     URL.revokeObjectURL(url);
     this.showToast(i18n.t('bk_export_ok'), 'success');
-  }
+  },
+
+  _applyBackup(text) {
+    let obj;
+    try { obj = JSON.parse(text); } catch (e) {
+      this.showToast(i18n.t('bk_import_invalid'), 'error');
+      return false;
+    }
+    const st = obj && obj.state;
+    const valid = obj && obj.app === 'mycampus-istqb' && obj.version === 1 &&
+      st && typeof st === 'object' &&
+      typeof st.xp === 'number' && Array.isArray(st.completedLessons);
+    if (!valid) {
+      this.showToast(i18n.t('bk_import_invalid'), 'error');
+      return false;
+    }
+    if (!confirm(i18n.t('bk_import_confirm'))) return false;
+    this.state = st;
+    // saveState estampa _updatedAt fresco: el import gana en toda la maquinaria de sync
+    // (debounce, conflict resolution, _shouldApplyCloud). No tocar sync.js.
+    this.saveState();
+    this.updateSidebar();
+    this.navigate(this.currentView || 'progress');
+    this.showToast(i18n.t('bk_import_ok'), 'success');
+    return true;
+  },
+
+  importProgress(file) {
+    if (!file || typeof FileReader === 'undefined') return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this._applyBackup(String(reader.result));
+      const input = document.getElementById('backupImportInput');
+      if (input) input.value = ''; // permite re-importar el mismo fichero
+    };
+    reader.readAsText(file);
+  },
 };
 
 // Utility

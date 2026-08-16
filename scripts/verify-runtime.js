@@ -151,7 +151,7 @@ function loadApp(opts = {}) {
   };`;
   const fn = new Function('window', 'document', 'localStorage', 'history', 'fetch', 'confirm', 'navigator',
     `${src}\n;${ret}`);
-  const globals = fn(win, doc, ls, { replaceState() {} }, fetchMock, () => true, nav);
+  const globals = fn(win, doc, ls, { replaceState() {} }, fetchMock, opts.confirm || (() => true), nav);
   return { ...globals, document: doc, localStorage: ls, window: win, supabase: sb, calls };
 }
 
@@ -2125,6 +2125,53 @@ const SAMPLE_Q = {
         /typeof Blob === 'undefined'/.test(appSrc) &&
         /mycampus-backup-/.test(appSrc) &&
         /revokeObjectURL/.test(appSrc));
+    }
+
+    // Behavioral checks for _applyBackup / importProgress. Nota: la clave real
+    // de localStorage es `mycampus_istqb_v1_${userId}` (no 'mycampus_state').
+    // App.saveState() solo estampa _updatedAt cuando pasa por Sync.saveState,
+    // lo que exige window.CAMPUS_USER_ID definido (mismo patrón que N22/N27) —
+    // sin él cae en la rama localStorage.setItem directa, que no estampa nada.
+    {
+      const mkBackup = (over) => JSON.stringify(Object.assign({
+        app: 'mycampus-istqb', version: 1, exportedAt: 'x',
+        state: { xp: 500, completedLessons: ['1-1'], activityLog: [], examHistory: [] },
+      }, over));
+
+      const ctx1 = loadApp();
+      ctx1.window.CAMPUS_USER_ID = 'u1';
+      ctx1.App.state = { xp: 1 };
+      check('N29 import: backup valido reemplaza el estado y estampa frescura via saveState',
+        ctx1.App._applyBackup(mkBackup()) === true &&
+        ctx1.App.state.xp === 500 &&
+        typeof JSON.parse(ctx1.localStorage.getItem('mycampus_istqb_v1_u1') || '{}')._updatedAt === 'number');
+
+      const ctx2 = loadApp();
+      ctx2.App.state = { xp: 1 };
+      const badOnes = [
+        'no-es-json{{{',
+        mkBackup({ app: 'otra-app' }),
+        mkBackup({ version: 2 }),
+        mkBackup({ state: null }),
+        mkBackup({ state: { xp: 'no-numero', completedLessons: [] } }),
+        mkBackup({ state: { xp: 5, completedLessons: 'no-array' } }),
+      ];
+      check('N29 import: JSON roto / marcador ajeno / version 2 / state malformado no tocan el estado',
+        badOnes.every(t => ctx2.App._applyBackup(t) === false) && ctx2.App.state.xp === 1);
+
+      const ctx3 = loadApp({ confirm: () => false });
+      ctx3.App.state = { xp: 1 };
+      check('N29 import: confirmacion cancelada deja el estado intacto',
+        ctx3.App._applyBackup(mkBackup()) === false && ctx3.App.state.xp === 1);
+
+      const ctx4 = loadApp();
+      const evil = mkBackup({ state: { xp: 5, completedLessons: [],
+        activityLog: [{ text: '<img src=x onerror="window.__pwn=1">', xp: 0, time: 't' }], examHistory: [] } });
+      ctx4.App._applyBackup(evil);
+      ctx4.App.renderProgress();
+      const actHtml = ctx4.document.getElementById('activityLog').innerHTML;
+      check('N29 xss: activityLog de un backup malicioso llega escapado al innerHTML',
+        actHtml.includes('&lt;img') && !actHtml.includes('<img src=x'));
     }
   }
 
