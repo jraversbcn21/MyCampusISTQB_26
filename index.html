@@ -593,6 +593,15 @@
             <h3 data-i18n="activity_log">Actividad reciente</h3>
             <div id="activityLog" class="activity-list"></div>
           </div>
+          <div class="card backup-card">
+            <h3 data-i18n="bk_title">Copia de seguridad</h3>
+            <p class="backup-desc" data-i18n="bk_desc">Guarda tu progreso en un fichero o restauralo en cualquier dispositivo.</p>
+            <div class="backup-actions">
+              <button type="button" class="btn-backup" id="backupExportBtn" onclick="App.exportProgress()" data-i18n="bk_export">Exportar progreso</button>
+              <button type="button" class="btn-backup" id="backupImportBtn" onclick="document.getElementById('backupImportInput').click()" data-i18n="bk_import">Importar progreso</button>
+              <input type="file" id="backupImportInput" accept=".json,application/json" style="display:none" onchange="App.importProgress(this.files[0])">
+            </div>
+          </div>
         </div>
       </div>
 

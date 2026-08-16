@@ -2093,11 +2093,23 @@ const SAMPLE_Q = {
 
   /* ---- N29: export/import de progreso (2026-08-16) ---- */
   {
+    const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const cssSrc = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
     const { TRANSLATIONS } = loadApp();
     const bkKeys = ['bk_title', 'bk_desc', 'bk_export', 'bk_import',
       'bk_export_ok', 'bk_import_ok', 'bk_import_invalid', 'bk_import_confirm'];
     check('N29 i18n: claves bk_* definidas en ES y EN',
       bkKeys.every(k => typeof TRANSLATIONS.es[k] === 'string' && typeof TRANSLATIONS.en[k] === 'string'));
+    check('N29 markup: card de backup dentro de #view-progress con los 3 controles',
+      /id="backupExportBtn"[^>]*data-i18n="bk_export"/.test(html) &&
+      /id="backupImportBtn"[^>]*data-i18n="bk_import"/.test(html) &&
+      /<input type="file" id="backupImportInput" accept="\.json[^"]*" style="display:none"/.test(html));
+    check('N29 css: regla real .backup-actions antes del bloque pointer:coarse',
+      /\.backup-actions \{/.test(cssSrc) &&
+      cssSrc.search(/\.backup-actions \{/) < cssSrc.indexOf('@media (pointer: coarse)'));
+    check('N29 css: .btn-backup usa --primary-dark (AA), nunca --primary a secas',
+      /\.btn-backup \{[^}]*var\(--primary-dark\)/.test(cssSrc) &&
+      !/\.btn-backup \{[^}]*var\(--primary\)[;\s]/.test(cssSrc));
   }
 
   /* ---- N5 + P5: chequeos estáticos de i18n ---- */
