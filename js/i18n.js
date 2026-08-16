@@ -286,13 +286,13 @@ const TRANSLATIONS = {
 
     // Backup export/import (2026-08-16)
     bk_title: "Copia de seguridad",
-    bk_desc: "Guarda tu progreso en un fichero o restauralo en cualquier dispositivo.",
+    bk_desc: "Guarda tu progreso en un fichero o restáuralo en cualquier dispositivo.",
     bk_export: "Exportar progreso",
     bk_import: "Importar progreso",
     bk_export_ok: "Copia exportada",
     bk_import_ok: "Progreso restaurado",
-    bk_import_invalid: "El fichero no es una copia de seguridad valida de MyCampus",
-    bk_import_confirm: "Esto reemplazara tu progreso actual por el del fichero. ¿Continuar?",
+    bk_import_invalid: "El fichero no es una copia de seguridad válida de MyCampus",
+    bk_import_confirm: "Esto reemplazará tu progreso actual por el del fichero. ¿Continuar?",
   },
 
   en: {

@@ -316,17 +316,34 @@ como red de seguridad complementaria a la reconciliación automática, no un sus
   marcador `app`/`version` es lo que permite rechazar JSONs ajenos en el import.
 - **Import (`App.importProgress`) es reemplazo total**, no fusión, tras `confirm()`. Validación
   estructural mínima antes de aceptar: marcador `app`/`version` correcto, `state.xp` numérico,
-  `state.completedLessons` array. Cualquier fallo (JSON roto, marcador ajeno, `version` distinta,
-  `state` malformado, o `confirm()` cancelado) deja el estado intacto — nunca un reemplazo parcial.
+  `state.completedLessons`/`state.examHistory`/`state.activityLog` arrays. Cualquier fallo (JSON
+  roto, marcador ajeno, `version` distinta, `state` malformado, `confirm()` cancelado, o un
+  `FileReader` que no puede leer el fichero — `reader.onerror`) deja el estado intacto — nunca un
+  reemplazo parcial. `URL.revokeObjectURL` en `exportProgress` se difiere con `setTimeout(…, 0)`
+  (revocar en el mismo tick puede cancelar la descarga en WebKit).
 - **Lo crítico: no se tocó `sync.js`.** Tras el reemplazo, `saveState()` estampa `_updatedAt`
   fresco como cualquier cambio normal, así que el estado importado gana en toda la maquinaria de
   sync existente (freshness stamps, `_reconciled`, etc. — ver sección de arriba) sin mecanismo
   nuevo. Sin migración en el import: los guards en punto de uso ya existentes
   (`_rankingEnsureState` y equivalentes) cubren backups antiguos, misma lección de siempre.
+- **Ventana de reconciliación de login (hallazgo del review final, cerrado el mismo día):** un
+  import ejecutado durante la reconciliación de un login (arranque limpio, `hadLocalBase===false`)
+  podía ser pisado por la copia de la nube en el `.then` de `Auth._onAuthSuccess`. `_applyBackup`
+  marca `Auth._importedInWindow = true` justo después de `saveState()`;
+  `Auth._shouldApplyCloud` la comprueba como primera condición (antes de cualquier regla N22) y
+  devuelve `false` si está marcada — un import explícito del usuario gana siempre.
+- **Lección de seguridad de este mismo fix:** el import amplía la frontera de confianza de
+  `App.state` de "la propia fila del usuario en Supabase" a "cualquier fichero que le hayan
+  pasado" — un backup ajeno puede traer `streak`/`examsCompleted`/`xp` con markup. Esos tres
+  campos numéricos se interpolaban crudos en `progressStatsBig` y en el toast de racha; ahora
+  pasan por `escapeHtml()` como el resto de campos de `App.state` (regla ya vigente desde
+  2026-07-04, cerrada aquí para los campos numéricos que antes se asumían "seguros por ser
+  números").
 - Arnés: el `confirm()` de `loadApp()` en `verify-runtime.js` ahora es inyectable
   (`opts.confirm`), retrocompatible (sin `opts.confirm` se comporta como antes).
 - Gate: familia **N29** (i18n `bk_*`, markup/CSS anclados a regla real, reemplazo+sello de
-  frescura, los 6 casos inválidos, cancelación, XSS vía `escapeHtml` en el render post-import).
+  frescura, los 7 casos inválidos, cancelación, XSS vía `escapeHtml` en el render post-import
+  incl. los campos numéricos, la marca `_importedInWindow` y su efecto en `_shouldApplyCloud`).
 
 ### i18n
 
@@ -339,7 +356,7 @@ como red de seguridad complementaria a la reconciliación automática, no un sus
 - Default language is Spanish (`i18n.lang = 'es'`) — but since the 2026-07-25 landing,
   **first visit with no saved preference follows `navigator.language`** (non-`es*` browser →
   EN); a saved preference always wins. `privacy.html` replicates the same fallback inline.
-- Translations live in `TRANSLATIONS` in `js/i18n.js` — **250 keys**, all ES/EN paired, enforced by
+- Translations live in `TRANSLATIONS` in `js/i18n.js` — **258 keys**, all ES/EN paired, enforced by
   `scripts/verify-runtime.js` (parity, no used-but-undefined keys, no known hardcoded-language
   residues). The count grew over time: 160 after the 2026-07-04 remediation → 165 (2026-07-08 global
   search `gs_*`) → 170 (2026-07-14 a11y `data-i18n-aria` keys + `goto_question_aria`) → 174/175
@@ -347,7 +364,7 @@ como red de seguridad complementaria a la reconciliación automática, no un sus
   (2026-07-21 `lesson_next`/`lesson_finish_chapter`/`lesson_next_locked_toast`) → 196 (2026-07-25
   celebración de módulo/diploma) → 231 (2026-07-25 landing pública, claves `lp_*` + the public-landing
   section further below) → 250 (2026-08-06 ranking global por XP, `nav_ranking` + claves `rk_*` — see
-  the Ranking section further below).
+  the Ranking section further below) → 258 (2026-08-16 backup, claves `bk_*`).
 - `i18n.restore()` reads the saved language from localStorage (falling back to
   `navigator.language` on first visit, see above) and applies it; `i18n.setLang(lang)`
   sets + persists + applies. `Auth.init()` calls `restore()` before the login screen ever paints

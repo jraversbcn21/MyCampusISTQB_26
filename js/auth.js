@@ -18,6 +18,9 @@ const Auth = {
   user: null,
   _mode: 'register', // 'login' | 'register' — la landing abre en registro (visitante nuevo)
   _authInProgress: false,
+  // Marcada por App._applyBackup tras un import (2026-08-16): un import explícito
+  // durante la ventana de reconciliación de login no debe ser pisado por la nube.
+  _importedInWindow: false,
 
   /* ===== INIT ===== */
   async init() {
@@ -246,6 +249,7 @@ const Auth = {
   //   - Con base local real: aplicar la nube salvo que el usuario haya hecho un cambio
   //     genuino en la ventana (su sello supera al de justo-después-de-init).
   _shouldApplyCloud(cloudState, hadLocalBase, appStateTs, postInitTs) {
+    if (this._importedInWindow) return false;
     if (!cloudState) return false;
     if (!hadLocalBase) return true;
     const changedInWindow = (appStateTs || 0) > (postInitTs || 0);

@@ -2100,7 +2100,7 @@ const SAMPLE_Q = {
       'bk_export_ok', 'bk_import_ok', 'bk_import_invalid', 'bk_import_confirm'];
     check('N29 i18n: claves bk_* definidas en ES y EN',
       bkKeys.every(k => typeof TRANSLATIONS.es[k] === 'string' && typeof TRANSLATIONS.en[k] === 'string'));
-    check('N29 markup: card de backup dentro de #view-progress con los 3 controles',
+    check('N29 markup: card de backup con los 3 controles',
       /id="backupExportBtn"[^>]*data-i18n="bk_export"/.test(html) &&
       /id="backupImportBtn"[^>]*data-i18n="bk_import"/.test(html) &&
       /<input type="file" id="backupImportInput" accept="\.json[^"]*" style="display:none"/.test(html));
@@ -2155,6 +2155,7 @@ const SAMPLE_Q = {
         mkBackup({ state: null }),
         mkBackup({ state: { xp: 'no-numero', completedLessons: [] } }),
         mkBackup({ state: { xp: 5, completedLessons: 'no-array' } }),
+        mkBackup({ state: { xp: 5, completedLessons: [], examHistory: [], activityLog: 'no-array' } }),
       ];
       check('N29 import: JSON roto / marcador ajeno / version 2 / state malformado no tocan el estado',
         badOnes.every(t => ctx2.App._applyBackup(t) === false) && ctx2.App.state.xp === 1);
@@ -2172,6 +2173,34 @@ const SAMPLE_Q = {
       const actHtml = ctx4.document.getElementById('activityLog').innerHTML;
       check('N29 xss: activityLog de un backup malicioso llega escapado al innerHTML',
         actHtml.includes('&lt;img') && !actHtml.includes('<img src=x'));
+
+      // Los campos numéricos (streak/examsCompleted/xp) también se interpolan en
+      // progressStatsBig — un backup puede traerlos como string con markup.
+      const ctx5 = loadApp();
+      const evilNum = mkBackup({ state: { xp: 5, completedLessons: [], activityLog: [], examHistory: [],
+        streak: '<img src=x onerror="window.__pwn2=1">', examsCompleted: 3 } });
+      ctx5.App._applyBackup(evilNum);
+      ctx5.App.renderProgress();
+      const statsHtml = ctx5.document.getElementById('progressStatsBig').innerHTML;
+      check('N29 xss: streak/examsCompleted/xp de un backup malicioso llegan escapados a progressStatsBig',
+        statsHtml.includes('&lt;img') && !statsHtml.includes('<img src=x'));
+
+      // Ventana de reconciliación de login (2026-08-16, fix del review final):
+      // un import explícito durante la reconciliación no debe ser pisado por la
+      // nube. _applyBackup marca Auth._importedInWindow; _shouldApplyCloud lo
+      // respeta como primera condición, antes de cualquier otra regla N22.
+      const ctx6 = loadApp();
+      ctx6.window.CAMPUS_USER_ID = 'u1';
+      ctx6.App.state = { xp: 1 };
+      ctx6.App._applyBackup(mkBackup());
+      check('N29 race: _applyBackup marca Auth._importedInWindow',
+        ctx6.Auth._importedInWindow === true);
+      check('N29 race: con la marca, _shouldApplyCloud rechaza la nube pese a un arranque limpio',
+        ctx6.Auth._shouldApplyCloud({ _updatedAt: 999 }, false, 0, 0) === false);
+
+      const ctx7 = loadApp();
+      check('N29 race: sin import, _shouldApplyCloud conserva el comportamiento N22 (arranque limpio aplica la nube)',
+        ctx7.Auth._shouldApplyCloud({ _updatedAt: 999 }, false, 0, 0) === true);
     }
   }
 

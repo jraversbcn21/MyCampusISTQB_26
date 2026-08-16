@@ -87,14 +87,25 @@ se rechaza con el mismo error genérico (no hay migración de formatos que hacer
   fusionan ahí).
 - Si el backup trae `rankingOptIn: true`, el siguiente push re-upserta la fila vía
   `_pushRanking` — coherente con la semántica de resurrección documentada del ranking.
+- **Ventana de reconciliación de login (fix del review final, 2026-08-16):** un import puede
+  llegar antes de que termine la reconciliación de un login recién arrancado
+  (`hadLocalBase===false`). En ese caso `Sync.loadState`/el `.then` de `_onAuthSuccess` podían
+  aplicar la copia de la nube por encima del import recién hecho. `_applyBackup` marca
+  `Auth._importedInWindow = true` justo tras `saveState()`; `Auth._shouldApplyCloud` lo
+  comprueba como primera condición y devuelve `false` si está marcada, ganando siempre sobre
+  la nube — no es una regla nueva de frescura, es una excepción explícita a `_shouldApplyCloud`.
 
 ## Seguridad
 
 - Ningún dato del fichero se interpola en `innerHTML` durante el import (no se muestra ni el
   nombre del fichero). Los campos del estado que llegan a `innerHTML` en renders posteriores
-  (nombre, activityLog, examHistory, ranking) **ya pasan por `escapeHtml()`** en esos renders
-  — el import no abre sink nuevo, pero el gate N29 lo verifica explícitamente con un backup
-  malicioso.
+  (nombre, activityLog, examHistory, ranking) pasan por `escapeHtml()` en esos renders.
+  **Corrección del review final:** esto NO era cierto para los campos numéricos `streak`,
+  `examsCompleted` y `xp`, interpolados crudos en `progressStatsBig` y en el toast de racha —
+  se asumían "seguros por ser números", pero un backup importado los trae como cualquier otro
+  valor de JSON, incluido un string con markup. Se cerraron como parte de este fix (mismos
+  tres sitios, envueltos en `escapeHtml()`); el gate N29 lo verifica con un backup malicioso
+  que trae `streak` como `<img onerror=…>`.
 - `JSON.parse` sobre contenido arbitrario es seguro (no ejecuta); los límites de tamaño los
   impone el propio `JSON.parse`/memoria del navegador — sin límite artificial propio.
 

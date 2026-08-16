@@ -1208,11 +1208,11 @@ const App = {
       : 0;
 
     document.getElementById('progressStatsBig').innerHTML = `
-      <div class="progress-stat-big"><div class="progress-stat-big-val text-primary">${this.state.xp}</div><div class="progress-stat-big-label">XP ${i18n.t('total_label')}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val text-primary">${escapeHtml(this.state.xp)}</div><div class="progress-stat-big-label">XP ${i18n.t('total_label')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val text-warning">${lvl.icon} ${i18n.t('level_label')} ${lvl.level}</div><div class="progress-stat-big-label">${lvl.name[lang]}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val text-success">${done}/${totalLessons}</div><div class="progress-stat-big-label">${i18n.t('lessons_label')}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--secondary-text)">${this.state.examsCompleted}</div><div class="progress-stat-big-label">${i18n.t('nav_simulator')}</div></div>
-      <div class="progress-stat-big"><div class="progress-stat-big-val text-warning">🔥 ${this.state.streak}</div><div class="progress-stat-big-label">${i18n.t('streak_label')}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val" style="color:var(--secondary-text)">${escapeHtml(this.state.examsCompleted)}</div><div class="progress-stat-big-label">${i18n.t('nav_simulator')}</div></div>
+      <div class="progress-stat-big"><div class="progress-stat-big-val text-warning">🔥 ${escapeHtml(this.state.streak)}</div><div class="progress-stat-big-label">${i18n.t('streak_label')}</div></div>
       <div class="progress-stat-big"><div class="progress-stat-big-val">${avgScore}%</div><div class="progress-stat-big-label">${i18n.t('avg_exam_score_label')}</div></div>
     `;
 
@@ -1882,7 +1882,7 @@ const App = {
     // Welcome streak
     this.updateStreakAndDate();
     if (this.state.streak > 1) {
-      setTimeout(() => this.showToast(`🔥 ${this.state.streak} ${i18n.t('streak_label')} — ${i18n.t('streak_keep_going')}`, 'success'), 1000);
+      setTimeout(() => this.showToast(`🔥 ${escapeHtml(this.state.streak)} ${i18n.t('streak_label')} — ${i18n.t('streak_keep_going')}`, 'success'), 1000);
     }
 
     // Drawer móvil (2026-07-21): en móvil el sidebar arranca cerrado (fuera de
@@ -2062,8 +2062,14 @@ const App = {
     a.href = url;
     a.download = `mycampus-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
     a.click();
-    URL.revokeObjectURL(url);
+    // Revocar en el mismo tick puede cancelar la descarga en WebKit.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
     this.showToast(i18n.t('bk_export_ok'), 'success');
+  },
+
+  _pickBackupFile() {
+    const input = document.getElementById('backupImportInput');
+    if (input) input.click();
   },
 
   _applyBackup(text) {
@@ -2075,7 +2081,8 @@ const App = {
     const st = obj && obj.state;
     const valid = obj && obj.app === 'mycampus-istqb' && obj.version === 1 &&
       st && typeof st === 'object' &&
-      typeof st.xp === 'number' && Array.isArray(st.completedLessons);
+      typeof st.xp === 'number' && Array.isArray(st.completedLessons) &&
+      Array.isArray(st.examHistory) && Array.isArray(st.activityLog);
     if (!valid) {
       this.showToast(i18n.t('bk_import_invalid'), 'error');
       return false;
@@ -2085,6 +2092,11 @@ const App = {
     // saveState estampa _updatedAt fresco: el import gana en toda la maquinaria de sync
     // (debounce, conflict resolution, _shouldApplyCloud). No tocar sync.js.
     this.saveState();
+    // Ventana de reconciliación de login (arranque limpio): sin esta marca, la
+    // nube del .then de Auth podía pisar el import recién aplicado. No es un caso
+    // de "cambio in-window" normal (_shouldApplyCloud ya cubre ese), es un import
+    // explícito del usuario que debe ganar siempre mientras esté en curso.
+    if (typeof Auth !== 'undefined') Auth._importedInWindow = true;
     this.updateSidebar();
     this.navigate(this.currentView || 'progress');
     this.showToast(i18n.t('bk_import_ok'), 'success');
@@ -2098,6 +2110,11 @@ const App = {
       this._applyBackup(String(reader.result));
       const input = document.getElementById('backupImportInput');
       if (input) input.value = ''; // permite re-importar el mismo fichero
+    };
+    reader.onerror = () => {
+      this.showToast(i18n.t('bk_import_invalid'), 'error');
+      const input = document.getElementById('backupImportInput');
+      if (input) input.value = '';
     };
     reader.readAsText(file);
   },
